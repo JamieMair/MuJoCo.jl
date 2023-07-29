@@ -7,3 +7,26 @@
 
 
 This work is based on an older [repository](https://github.com/Lyceum/MuJoCo.jl) from Lyceum. Many thanks to the authors for providing this repository as a base for our work.
+
+## Development
+
+You need to add the newer JLL to use this library.
+```julia
+pkg] rm MuJoCo_jll
+pkg] add https://github.com/JamieMair/MuJoCo_jll
+```
+You will need to do this in the `gen` folder's project as well. To re-generate the bindings, `cd` into the `gen` folder and run 
+```julia
+julia --project generator.jl
+```
+
+### Running binaries
+
+To run the binaries, load the JLL and run:
+```julia
+using MuJoCo_jll
+
+mujoco_simulate() do bin
+    run(`$bin /path/to/model.xml`)
+end
+```
