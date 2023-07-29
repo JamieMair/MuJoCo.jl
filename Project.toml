@@ -1,0 +1,13 @@
+name = "MuJoCo"
+uuid = "1c101251-5e0f-4746-b44c-0728d433b68a"
+authors = ["Jamie Mair <JamieMair@users.noreply.github.com>", "Nicholas Barbara <nic-barbara@users.noreply.github.com>"]
+version = "0.1.0"
+
+[compat]
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
