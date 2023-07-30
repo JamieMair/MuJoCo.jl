@@ -3836,7 +3836,7 @@ const mju_floor = floor
 const mju_ceil = ceil
 
 # exports
-const PREFIXES = ["MJ", "mj_"]
+const PREFIXES = ["mj"] #["MJ", "mj_"]
 for name in names(@__MODULE__; all=true), prefix in PREFIXES
     if startswith(string(name), prefix)
         @eval export $name
