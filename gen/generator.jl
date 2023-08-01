@@ -29,6 +29,7 @@ end
 using PyCall
 using JuliaFormatter
 include("ast_nodes.jl")
+include("codegen.jl")
 
 path_vector = pyimport("sys")."path"
 module_path = normpath(mujoco_dir)
@@ -47,7 +48,7 @@ const type_mappings = Dict(
     ast_module.StructFieldDecl => StructFieldDecl,
     ast_module.AnonymousStructDecl => AnonymousStructDecl,
     ast_module.AnonymousUnionDecl => AnonymousUnionDecl,
-    ast_module.StructFieldDecl => StructFieldDecl,
+    ast_module.StructDecl => StructDecl,
 )
 
 function recursive_convert(obj)
@@ -73,10 +74,13 @@ function recursive_convert(obj::PyCall.PyObject)
 
     error("Could not find mapping for $obj")
 end
+function recursive_convert(obj::Tuple)
+    return Tuple(recursive_convert(t) for t in obj)
+end
 
-enum_mapping = recursive_convert(pyimport("introspect.enums").ENUMS)
-function_mapping = recursive_convert(pyimport("introspect.functions").FUNCTIONS)
-struct_mapping = recursive_convert(pyimport("introspect.structs").STRUCTS)
+enum_mapping = recursive_convert(pyimport("introspect.enums").ENUMS);
+struct_mapping = recursive_convert(pyimport("introspect.structs").STRUCTS);
+function_mapping = recursive_convert(pyimport("introspect.functions").FUNCTIONS);
 
 cd(@__DIR__)
 module_path = normpath(abspath("./Core"))
@@ -92,8 +96,11 @@ module_file = joinpath(module_path, "core.jl")
 open(module_file, "w") do io
     println(io, "module Core")
     println(io)
+    println(io, "const mjtNum = Cdouble")
+    println(io, "const mjtByte = Cuchar")
     println(io, "# Wrappers")
     println(io, raw"""include("wrappers/enums.jl")""")
+    println(io, raw"""include("wrappers/structs.jl")""")
     println(io)
     println(io, "end")
 end
@@ -101,5 +108,8 @@ end
 enum_file = joinpath(wrapper_folder, "enums.jl")
 declare_file(enum_file, values(enum_mapping); exports = keys(enum_mapping), packages=["CEnum"])
 format_file(enum_file)
+struct_file = joinpath(wrapper_folder, "structs.jl")
+declare_file(struct_file, values(struct_mapping); exports = keys(struct_mapping))
+format_file(struct_file)
 
 
