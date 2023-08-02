@@ -82,6 +82,8 @@ enum_mapping = recursive_convert(pyimport("introspect.enums").ENUMS);
 struct_mapping = recursive_convert(pyimport("introspect.structs").STRUCTS);
 function_mapping = recursive_convert(pyimport("introspect.functions").FUNCTIONS);
 
+sorted_structs = sort_structs(collect(values(struct_mapping)));
+
 cd(@__DIR__)
 module_path = normpath(abspath("./Core"))
 wrapper_folder = joinpath(module_path, "wrappers")
@@ -98,6 +100,7 @@ open(module_file, "w") do io
     println(io)
     println(io, "const mjtNum = Cdouble")
     println(io, "const mjtByte = Cuchar")
+    println(io, "const mjfItemEnable = Ptr{Cvoid}")
     println(io, "# Wrappers")
     println(io, raw"""include("wrappers/enums.jl")""")
     println(io, raw"""include("wrappers/structs.jl")""")
@@ -109,7 +112,7 @@ enum_file = joinpath(wrapper_folder, "enums.jl")
 declare_file(enum_file, values(enum_mapping); exports = keys(enum_mapping), packages=["CEnum"])
 format_file(enum_file)
 struct_file = joinpath(wrapper_folder, "structs.jl")
-declare_file(struct_file, values(struct_mapping); exports = keys(struct_mapping))
+declare_file(struct_file, sorted_structs; exports = [s.name for s in sorted_structs])
 format_file(struct_file)
 
 

@@ -1,3 +1,6 @@
+import Graphs
+
+
 const value_type_mapping = Dict{String, Symbol}(
     "char"=>:Cchar,
     "int"=>:Cint,
@@ -9,6 +12,44 @@ const value_type_mapping = Dict{String, Symbol}(
     "uintptr_t"=>:Csize_t,
     "size_t"=>:Csize_t
 )
+
+parse_type(f::ValueType) = f.name
+parse_type(f::PointerType) = parse_type(f.inner_type)
+parse_type(f::ArrayType) = parse_type(f.inner_type)
+parse_type(f::StructFieldDecl) = parse_type(f.type)
+parse_type(f) = nothing
+
+
+function sort_structs(structs::AbstractArray{StructDecl})
+    graph = Graphs.DiGraph(length(structs), 0)
+    struct_map = Dict(
+        (s.name=>i for (i, s) in enumerate(structs))...
+    )
+    skipped_lookups = Set{String}()
+    for (i, s) in enumerate(structs)
+        for f in s.fields
+            p = parse_type(f)
+            if !isnothing(p) && !haskey(value_type_mapping, p)
+                # Name of struct
+                if haskey(struct_map, p)
+                    j = struct_map[p]
+                    Graphs.add_edge!(graph, i, j)
+                else
+                    push!(skipped_lookups, p)
+                end
+            end
+        end
+    end
+
+    for skipped in skipped_lookups
+        @info "Skipped $skipped in struct lookup. Must be defined elsewhere."
+    end
+
+    sorted_ids = Graphs.topological_sort(graph)
+    
+    return reverse(structs[sorted_ids])
+end
+
 
 function declare(enum::EnumDecl)
     pair_values = [(k, v) for (k, v) in enum.values]
@@ -42,7 +83,15 @@ function equivalent_type(type::ArrayType)
     return Expr(:curly, :NTuple, reduce(*, type.extents), equivalent_type(type.inner_type))
 end
 function declare(struct_field::StructFieldDecl)
-    return Expr(:(::), Symbol(struct_field.name), equivalent_type(struct_field.type))
+    # Disallow reserved names
+    disallowed_names = Set(("global",))
+    name = if struct_field.name in disallowed_names
+        "_$(struct_field.name)"
+    else
+        struct_field.name
+    end
+
+    return Expr(:(::), Symbol(name), equivalent_type(struct_field.type))
 end
 
 function declare(s::StructDecl)

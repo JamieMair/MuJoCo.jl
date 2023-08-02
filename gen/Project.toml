@@ -1,6 +1,7 @@
 [deps]
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 Git = "d7ba0133-e1db-5d97-8f8c-041e4b3a1eb2"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
 MuJoCo_jll = "32af7c3b-80ec-5621-8194-2f6cb2280831"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
