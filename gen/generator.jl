@@ -50,6 +50,11 @@ const type_mappings = Dict(
     ast_module.AnonymousUnionDecl => AnonymousUnionDecl,
     ast_module.StructDecl => StructDecl,
 )
+py"""
+def checktype(obj, type_class):
+    return type(obj) is type_class
+"""
+const pychecktype = py"checktype"
 
 function recursive_convert(obj)
     return obj # By default return itself
@@ -64,7 +69,7 @@ function recursive_convert(obj::Dict)
 end
 function recursive_convert(obj::PyCall.PyObject)
     for (k, v) in type_mappings
-        if py"isinstance"(obj, k)
+        if pychecktype(obj, k)
             prop_values = map(fieldnames(v)) do p
                 return recursive_convert(getproperty(obj, p))
             end
