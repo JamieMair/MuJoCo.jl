@@ -238,8 +238,9 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol)
 
     get_property_lines = Expr[]
     offset = 0
-    push!(get_property_lines, Expr(:(=), :internal_pointer, Expr(:., :x, QuoteNode(:internal_pointer))))
 
+    push!(get_property_lines, Expr(:(=), :internal_pointer, Expr(:call, :getfield, :x, QuoteNode(:internal_pointer))))
+    prop_names = Expr(:tuple, QuoteNode.(Symbol.(fieldnames(mj_struct)))...)
     for (fname, ftype) in zip(fieldnames(mj_struct), fieldtypes(mj_struct))
         cmp_expr = Expr(:call, :(===), :f, QuoteNode(fname))
         
@@ -258,8 +259,8 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol)
     fn_block = Expr(:block, get_property_lines...)
     fn_expr = Expr(:function, Expr(:call, :(Base.getproperty), Expr(:(::), :x, new_name), Expr(:(::), :f, :Symbol)), fn_block)
 
-
-    return (wrapped_struct, fn_expr)
+    propnames_expr = Expr(:function, Expr(:call, :(Base.propertynames), Expr(:(::), :x, new_name)), Expr(:block, prop_names))
+    return (wrapped_struct, fn_expr, propnames_expr)
 end
 
 begin
@@ -271,9 +272,10 @@ begin
 
     exprs = Expr[]
     for (k, v) in struct_wrappers
-        ws, fe = build_struct_wrapper(k, v)
+        ws, fe, pn = build_struct_wrapper(k, v)
         push!(exprs, ws)
         push!(exprs, fe)
+        push!(exprs, pn)
     end
 
     create_file_from_expr(joinpath(staging_dir, "wrappers.jl"), exprs)
