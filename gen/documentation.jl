@@ -1,6 +1,6 @@
 # This script tries to add in docstrings for the underlying library
-
 using Git
+using MuJoCo_jll
 cd(@__DIR__)
 # Clone the mujoco directory here
 if !isdir("./mujoco")

@@ -40,15 +40,15 @@ address in efc; -1: not included
 """
 struct mjContact_
     dist::mjtNum
-    pos::NTuple{3,mjtNum}
-    frame::NTuple{9,mjtNum}
+    pos::NTuple{3, mjtNum}
+    frame::NTuple{9, mjtNum}
     includemargin::mjtNum
-    friction::NTuple{5,mjtNum}
-    solref::NTuple{2,mjtNum}
-    solreffriction::NTuple{2,mjtNum}
-    solimp::NTuple{5,mjtNum}
+    friction::NTuple{5, mjtNum}
+    solref::NTuple{2, mjtNum}
+    solreffriction::NTuple{2, mjtNum}
+    solimp::NTuple{5, mjtNum}
     mu::mjtNum
-    H::NTuple{36,mjtNum}
+    H::NTuple{36, mjtNum}
     dim::Cint
     geom1::Cint
     geom2::Cint
@@ -406,12 +406,12 @@ struct mjData_
     maxuse_arena::Csize_t
     maxuse_con::Cint
     maxuse_efc::Cint
-    warning::NTuple{8,mjWarningStat}
-    timer::NTuple{13,mjTimerStat}
-    solver::NTuple{1000,mjSolverStat}
+    warning::NTuple{8, mjWarningStat}
+    timer::NTuple{13, mjTimerStat}
+    solver::NTuple{1000, mjSolverStat}
     solver_iter::Cint
     solver_nnz::Cint
-    solver_fwdinv::NTuple{2,mjtNum}
+    solver_fwdinv::NTuple{2, mjtNum}
     nbodypair_broad::Cint
     nbodypair_narrow::Cint
     ngeompair_mid::Cint
@@ -422,7 +422,7 @@ struct mjData_
     nnzJ::Cint
     ncon::Cint
     time::mjtNum
-    energy::NTuple{2,mjtNum}
+    energy::NTuple{2, mjtNum}
     buffer::Ptr{Cvoid}
     arena::Ptr{Cvoid}
     qpos::Ptr{mjtNum}
@@ -615,9 +615,9 @@ buffer with file data
 """
 struct mjVFS_
     nfile::Cint
-    filename::NTuple{2000,NTuple{1000,Cchar}}
-    filesize::NTuple{2000,Cint}
-    filedata::NTuple{2000,Ptr{Cvoid}}
+    filename::NTuple{2000, NTuple{1000, Cchar}}
+    filesize::NTuple{2000, Cint}
+    filedata::NTuple{2000, Ptr{Cvoid}}
 end
 const mjVFS = mjVFS_
 struct mjResource_
@@ -691,14 +691,14 @@ struct mjOption_
     tolerance::mjtNum
     noslip_tolerance::mjtNum
     mpr_tolerance::mjtNum
-    gravity::NTuple{3,mjtNum}
-    wind::NTuple{3,mjtNum}
-    magnetic::NTuple{3,mjtNum}
+    gravity::NTuple{3, mjtNum}
+    wind::NTuple{3, mjtNum}
+    magnetic::NTuple{3, mjtNum}
     density::mjtNum
     viscosity::mjtNum
     o_margin::mjtNum
-    o_solref::NTuple{2,mjtNum}
-    o_solimp::NTuple{5,mjtNum}
+    o_solref::NTuple{2, mjtNum}
+    o_solimp::NTuple{5, mjtNum}
     integrator::Cint
     collision::Cint
     cone::Cint
@@ -731,9 +731,9 @@ struct var"##Ctag#315"
     numquads::Cint
 end
 struct var"##Ctag#316"
-    ambient::NTuple{3,Cfloat}
-    diffuse::NTuple{3,Cfloat}
-    specular::NTuple{3,Cfloat}
+    ambient::NTuple{3, Cfloat}
+    diffuse::NTuple{3, Cfloat}
+    specular::NTuple{3, Cfloat}
     active::Cint
 end
 struct var"##Ctag#317"
@@ -770,28 +770,28 @@ struct var"##Ctag#318"
     slidercrank::Cfloat
 end
 struct var"##Ctag#319"
-    fog::NTuple{4,Cfloat}
-    haze::NTuple{4,Cfloat}
-    force::NTuple{4,Cfloat}
-    inertia::NTuple{4,Cfloat}
-    joint::NTuple{4,Cfloat}
-    actuator::NTuple{4,Cfloat}
-    actuatornegative::NTuple{4,Cfloat}
-    actuatorpositive::NTuple{4,Cfloat}
-    com::NTuple{4,Cfloat}
-    camera::NTuple{4,Cfloat}
-    light::NTuple{4,Cfloat}
-    selectpoint::NTuple{4,Cfloat}
-    connect::NTuple{4,Cfloat}
-    contactpoint::NTuple{4,Cfloat}
-    contactforce::NTuple{4,Cfloat}
-    contactfriction::NTuple{4,Cfloat}
-    contacttorque::NTuple{4,Cfloat}
-    contactgap::NTuple{4,Cfloat}
-    rangefinder::NTuple{4,Cfloat}
-    constraint::NTuple{4,Cfloat}
-    slidercrank::NTuple{4,Cfloat}
-    crankbroken::NTuple{4,Cfloat}
+    fog::NTuple{4, Cfloat}
+    haze::NTuple{4, Cfloat}
+    force::NTuple{4, Cfloat}
+    inertia::NTuple{4, Cfloat}
+    joint::NTuple{4, Cfloat}
+    actuator::NTuple{4, Cfloat}
+    actuatornegative::NTuple{4, Cfloat}
+    actuatorpositive::NTuple{4, Cfloat}
+    com::NTuple{4, Cfloat}
+    camera::NTuple{4, Cfloat}
+    light::NTuple{4, Cfloat}
+    selectpoint::NTuple{4, Cfloat}
+    connect::NTuple{4, Cfloat}
+    contactpoint::NTuple{4, Cfloat}
+    contactforce::NTuple{4, Cfloat}
+    contactfriction::NTuple{4, Cfloat}
+    contacttorque::NTuple{4, Cfloat}
+    contactgap::NTuple{4, Cfloat}
+    rangefinder::NTuple{4, Cfloat}
+    constraint::NTuple{4, Cfloat}
+    slidercrank::NTuple{4, Cfloat}
+    crankbroken::NTuple{4, Cfloat}
 end
 """
 	mjVisual
@@ -801,7 +801,7 @@ end
 
 """
 struct mjVisual_
-    data::NTuple{568,UInt8}
+    data::NTuple{568, UInt8}
 end
 const mjVisual = mjVisual_
 """
@@ -826,7 +826,7 @@ struct mjStatistic_
     meanmass::mjtNum
     meansize::mjtNum
     extent::mjtNum
-    center::NTuple{3,mjtNum}
+    center::NTuple{3, mjtNum}
 end
 const mjStatistic = mjStatistic_
 """
@@ -2135,15 +2135,15 @@ struct mjrContext_
     shadowScale::Cfloat
     fogStart::Cfloat
     fogEnd::Cfloat
-    fogRGBA::NTuple{4,Cfloat}
+    fogRGBA::NTuple{4, Cfloat}
     shadowSize::Cint
     offWidth::Cint
     offHeight::Cint
     offSamples::Cint
     fontScale::Cint
-    auxWidth::NTuple{10,Cint}
-    auxHeight::NTuple{10,Cint}
-    auxSamples::NTuple{10,Cint}
+    auxWidth::NTuple{10, Cint}
+    auxHeight::NTuple{10, Cint}
+    auxSamples::NTuple{10, Cint}
     offFBO::Cuint
     offFBO_r::Cuint
     offColor::Cuint
@@ -2152,13 +2152,13 @@ struct mjrContext_
     offDepthStencil_r::Cuint
     shadowFBO::Cuint
     shadowTex::Cuint
-    auxFBO::NTuple{10,Cuint}
-    auxFBO_r::NTuple{10,Cuint}
-    auxColor::NTuple{10,Cuint}
-    auxColor_r::NTuple{10,Cuint}
+    auxFBO::NTuple{10, Cuint}
+    auxFBO_r::NTuple{10, Cuint}
+    auxColor::NTuple{10, Cuint}
+    auxColor_r::NTuple{10, Cuint}
     ntexture::Cint
-    textureType::NTuple{100,Cint}
-    texture::NTuple{100,Cuint}
+    textureType::NTuple{100, Cint}
+    texture::NTuple{100, Cuint}
     basePlane::Cuint
     baseMesh::Cuint
     baseHField::Cuint
@@ -2176,8 +2176,8 @@ struct mjrContext_
     skinnormalVBO::Ptr{Cuint}
     skintexcoordVBO::Ptr{Cuint}
     skinfaceVBO::Ptr{Cuint}
-    charWidth::NTuple{127,Cint}
-    charWidthBig::NTuple{127,Cint}
+    charWidth::NTuple{127, Cint}
+    charWidthBig::NTuple{127, Cint}
     charHeight::Cint
     charHeightBig::Cint
     glInitialized::Cint
@@ -2253,7 +2253,7 @@ paths to files dropped
 """
 struct mjuiState_
     nrect::Cint
-    rect::NTuple{25,mjrRect}
+    rect::NTuple{25, mjrRect}
     userdata::Ptr{Cvoid}
     type::Cint
     left::Cint
@@ -2373,27 +2373,27 @@ edit cursor
 
 """
 struct mjuiThemeColor_
-    master::NTuple{3,Cfloat}
-    thumb::NTuple{3,Cfloat}
-    secttitle::NTuple{3,Cfloat}
-    sectfont::NTuple{3,Cfloat}
-    sectsymbol::NTuple{3,Cfloat}
-    sectpane::NTuple{3,Cfloat}
-    shortcut::NTuple{3,Cfloat}
-    fontactive::NTuple{3,Cfloat}
-    fontinactive::NTuple{3,Cfloat}
-    decorinactive::NTuple{3,Cfloat}
-    decorinactive2::NTuple{3,Cfloat}
-    button::NTuple{3,Cfloat}
-    check::NTuple{3,Cfloat}
-    radio::NTuple{3,Cfloat}
-    select::NTuple{3,Cfloat}
-    select2::NTuple{3,Cfloat}
-    slider::NTuple{3,Cfloat}
-    slider2::NTuple{3,Cfloat}
-    edit::NTuple{3,Cfloat}
-    edit2::NTuple{3,Cfloat}
-    cursor::NTuple{3,Cfloat}
+    master::NTuple{3, Cfloat}
+    thumb::NTuple{3, Cfloat}
+    secttitle::NTuple{3, Cfloat}
+    sectfont::NTuple{3, Cfloat}
+    sectsymbol::NTuple{3, Cfloat}
+    sectpane::NTuple{3, Cfloat}
+    shortcut::NTuple{3, Cfloat}
+    fontactive::NTuple{3, Cfloat}
+    fontinactive::NTuple{3, Cfloat}
+    decorinactive::NTuple{3, Cfloat}
+    decorinactive2::NTuple{3, Cfloat}
+    button::NTuple{3, Cfloat}
+    check::NTuple{3, Cfloat}
+    radio::NTuple{3, Cfloat}
+    select::NTuple{3, Cfloat}
+    select2::NTuple{3, Cfloat}
+    slider::NTuple{3, Cfloat}
+    slider2::NTuple{3, Cfloat}
+    edit::NTuple{3, Cfloat}
+    edit2::NTuple{3, Cfloat}
+    cursor::NTuple{3, Cfloat}
 end
 const mjuiThemeColor = mjuiThemeColor_
 struct mjuiItemSingle_
@@ -2402,15 +2402,15 @@ struct mjuiItemSingle_
 end
 struct mjuiItemMulti_
     nelem::Cint
-    name::NTuple{35,NTuple{40,Cchar}}
+    name::NTuple{35, NTuple{40, Cchar}}
 end
 struct mjuiItemSlider_
-    range::NTuple{2,Cdouble}
+    range::NTuple{2, Cdouble}
     divisions::Cdouble
 end
 struct mjuiItemEdit_
     nelem::Cint
-    range::NTuple{7,NTuple{2,Cdouble}}
+    range::NTuple{7, NTuple{2, Cdouble}}
 end
 """
 	mjuiItem
@@ -2434,7 +2434,7 @@ rectangle occupied by item
 
 """
 struct mjuiItem_
-    data::NTuple{1488,UInt8}
+    data::NTuple{1488, UInt8}
 end
 const mjuiItem = mjuiItem_
 """
@@ -2461,12 +2461,12 @@ rectangle occupied by content
 
 """
 struct mjuiSection_
-    name::NTuple{40,Cchar}
+    name::NTuple{40, Cchar}
     state::Cint
     modifier::Cint
     shortcut::Cint
     nitem::Cint
-    item::NTuple{100,mjuiItem}
+    item::NTuple{100, mjuiItem}
     rtitle::mjrRect
     rcontent::mjrRect
 end
@@ -2541,10 +2541,10 @@ struct mjUI_
     edititem::Cint
     editcursor::Cint
     editscroll::Cint
-    edittext::NTuple{300,Cchar}
+    edittext::NTuple{300, Cchar}
     editchanged::Ptr{mjuiItem}
     nsect::Cint
-    sect::NTuple{10,mjuiSection}
+    sect::NTuple{10, mjuiSection}
 end
 const mjUI = mjUI_
 """
@@ -2566,10 +2566,10 @@ string with type-specific properties
 """
 struct mjuiDef_
     type::Cint
-    name::NTuple{40,Cchar}
+    name::NTuple{40, Cchar}
     state::Cint
     pdata::Ptr{Cvoid}
-    other::NTuple{300,Cchar}
+    other::NTuple{300, Cchar}
 end
 const mjuiDef = mjuiDef_
 const mjtCatBit = mjtCatBit_
@@ -2613,10 +2613,10 @@ struct mjvPerturb_
     skinselect::Cint
     active::Cint
     active2::Cint
-    refpos::NTuple{3,mjtNum}
-    refquat::NTuple{4,mjtNum}
-    refselpos::NTuple{3,mjtNum}
-    localpos::NTuple{3,mjtNum}
+    refpos::NTuple{3, mjtNum}
+    refquat::NTuple{4, mjtNum}
+    refselpos::NTuple{3, mjtNum}
+    localpos::NTuple{3, mjtNum}
     localmass::mjtNum
     scale::mjtNum
 end
@@ -2646,7 +2646,7 @@ struct mjvCamera_
     type::Cint
     fixedcamid::Cint
     trackbodyid::Cint
-    lookat::NTuple{3,mjtNum}
+    lookat::NTuple{3, mjtNum}
     distance::mjtNum
     azimuth::mjtNum
     elevation::mjtNum
@@ -2676,9 +2676,9 @@ far
 
 """
 struct mjvGLCamera_
-    pos::NTuple{3,Cfloat}
-    forward::NTuple{3,Cfloat}
-    up::NTuple{3,Cfloat}
+    pos::NTuple{3, Cfloat}
+    forward::NTuple{3, Cfloat}
+    up::NTuple{3, Cfloat}
     frustum_center::Cfloat
     frustum_bottom::Cfloat
     frustum_top::Cfloat
@@ -2747,16 +2747,16 @@ struct mjvGeom_
     texuniform::Cint
     texcoord::Cint
     segid::Cint
-    texrepeat::NTuple{2,Cfloat}
-    size::NTuple{3,Cfloat}
-    pos::NTuple{3,Cfloat}
-    mat::NTuple{9,Cfloat}
-    rgba::NTuple{4,Cfloat}
+    texrepeat::NTuple{2, Cfloat}
+    size::NTuple{3, Cfloat}
+    pos::NTuple{3, Cfloat}
+    mat::NTuple{9, Cfloat}
+    rgba::NTuple{4, Cfloat}
     emission::Cfloat
     specular::Cfloat
     shininess::Cfloat
     reflectance::Cfloat
-    label::NTuple{100,Cchar}
+    label::NTuple{100, Cchar}
     camdist::Cfloat
     modelrbound::Cfloat
     transparent::mjtByte
@@ -2792,14 +2792,14 @@ does light cast shadows
 
 """
 struct mjvLight_
-    pos::NTuple{3,Cfloat}
-    dir::NTuple{3,Cfloat}
-    attenuation::NTuple{3,Cfloat}
+    pos::NTuple{3, Cfloat}
+    dir::NTuple{3, Cfloat}
+    attenuation::NTuple{3, Cfloat}
     cutoff::Cfloat
     exponent::Cfloat
-    ambient::NTuple{3,Cfloat}
-    diffuse::NTuple{3,Cfloat}
-    specular::NTuple{3,Cfloat}
+    ambient::NTuple{3, Cfloat}
+    diffuse::NTuple{3, Cfloat}
+    specular::NTuple{3, Cfloat}
     headlight::mjtByte
     directional::mjtByte
     castshadow::mjtByte
@@ -2835,13 +2835,13 @@ depth of the bounding volume hierarchy to be visualized
 struct mjvOption_
     label::Cint
     frame::Cint
-    geomgroup::NTuple{6,mjtByte}
-    sitegroup::NTuple{6,mjtByte}
-    jointgroup::NTuple{6,mjtByte}
-    tendongroup::NTuple{6,mjtByte}
-    actuatorgroup::NTuple{6,mjtByte}
-    skingroup::NTuple{6,mjtByte}
-    flags::NTuple{25,mjtByte}
+    geomgroup::NTuple{6, mjtByte}
+    sitegroup::NTuple{6, mjtByte}
+    jointgroup::NTuple{6, mjtByte}
+    tendongroup::NTuple{6, mjtByte}
+    actuatorgroup::NTuple{6, mjtByte}
+    skingroup::NTuple{6, mjtByte}
+    flags::NTuple{25, mjtByte}
     bvh_depth::Cint
 end
 const mjvOption = mjvOption_
@@ -2906,16 +2906,16 @@ struct mjvScene_
     skinvert::Ptr{Cfloat}
     skinnormal::Ptr{Cfloat}
     nlight::Cint
-    lights::NTuple{100,mjvLight}
-    camera::NTuple{2,mjvGLCamera}
+    lights::NTuple{100, mjvLight}
+    camera::NTuple{2, mjvGLCamera}
     enabletransform::mjtByte
-    translate::NTuple{3,Cfloat}
-    rotate::NTuple{4,Cfloat}
+    translate::NTuple{3, Cfloat}
+    rotate::NTuple{4, Cfloat}
     scale::Cfloat
     stereo::Cint
-    flags::NTuple{10,mjtByte}
+    flags::NTuple{10, mjtByte}
     framewidth::Cint
-    framergb::NTuple{3,Cfloat}
+    framergb::NTuple{3, Cfloat}
 end
 const mjvScene = mjvScene_
 """
@@ -2993,38 +2993,38 @@ range of y-axis in data units
 """
 struct mjvFigure_
     flg_legend::Cint
-    flg_ticklabel::NTuple{2,Cint}
+    flg_ticklabel::NTuple{2, Cint}
     flg_extend::Cint
     flg_barplot::Cint
     flg_selection::Cint
     flg_symmetric::Cint
     linewidth::Cfloat
     gridwidth::Cfloat
-    gridsize::NTuple{2,Cint}
-    gridrgb::NTuple{3,Cfloat}
-    figurergba::NTuple{4,Cfloat}
-    panergba::NTuple{4,Cfloat}
-    legendrgba::NTuple{4,Cfloat}
-    textrgb::NTuple{3,Cfloat}
-    linergb::NTuple{100,NTuple{3,Cfloat}}
-    range::NTuple{2,NTuple{2,Cfloat}}
-    xformat::NTuple{20,Cchar}
-    yformat::NTuple{20,Cchar}
-    minwidth::NTuple{20,Cchar}
-    title::NTuple{1000,Cchar}
-    xlabel::NTuple{100,Cchar}
-    linename::NTuple{100,NTuple{100,Cchar}}
+    gridsize::NTuple{2, Cint}
+    gridrgb::NTuple{3, Cfloat}
+    figurergba::NTuple{4, Cfloat}
+    panergba::NTuple{4, Cfloat}
+    legendrgba::NTuple{4, Cfloat}
+    textrgb::NTuple{3, Cfloat}
+    linergb::NTuple{100, NTuple{3, Cfloat}}
+    range::NTuple{2, NTuple{2, Cfloat}}
+    xformat::NTuple{20, Cchar}
+    yformat::NTuple{20, Cchar}
+    minwidth::NTuple{20, Cchar}
+    title::NTuple{1000, Cchar}
+    xlabel::NTuple{100, Cchar}
+    linename::NTuple{100, NTuple{100, Cchar}}
     legendoffset::Cint
     subplot::Cint
-    highlight::NTuple{2,Cint}
+    highlight::NTuple{2, Cint}
     highlightid::Cint
     selection::Cfloat
-    linepnt::NTuple{100,Cint}
-    linedata::NTuple{100,NTuple{2000,Cfloat}}
-    xaxispixel::NTuple{2,Cint}
-    yaxispixel::NTuple{2,Cint}
-    xaxisdata::NTuple{2,Cfloat}
-    yaxisdata::NTuple{2,Cfloat}
+    linepnt::NTuple{100, Cint}
+    linedata::NTuple{100, NTuple{2000, Cfloat}}
+    xaxispixel::NTuple{2, Cint}
+    yaxispixel::NTuple{2, Cint}
+    xaxisdata::NTuple{2, Cfloat}
+    yaxisdata::NTuple{2, Cfloat}
 end
 const mjvFigure = mjvFigure_
 struct var"##Ctag#320"
@@ -3171,7 +3171,7 @@ struct var"##Ctag#320"
     names::Ptr{Cchar}
 end
 struct var"##Ctag#321"
-    warning::NTuple{8,mjWarningStat}
+    warning::NTuple{8, mjWarningStat}
     nefc::Cint
     ncon::Cint
     time::mjtNum
@@ -3219,6 +3219,6 @@ scratch space for vis geoms inserted by plugins
 
 """
 struct mjvSceneState_
-    data::NTuple{10856,UInt8}
+    data::NTuple{10856, UInt8}
 end
 const mjvSceneState = mjvSceneState_
