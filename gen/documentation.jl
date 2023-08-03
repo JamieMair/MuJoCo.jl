@@ -85,3 +85,34 @@ end
 const enum_mapping = recursive_convert(pyimport("introspect.enums").ENUMS);
 const struct_mapping = recursive_convert(pyimport("introspect.structs").STRUCTS);
 const function_mapping = recursive_convert(pyimport("introspect.functions").FUNCTIONS);
+
+function construct_struct_docs(expr)
+    @assert expr.head == :struct
+    struct_name = string(expr.args[2])
+    if endswith(struct_name, "_")
+        struct_name = struct_name[begin:end-1]
+    end
+
+    if haskey(struct_mapping, struct_name)
+        s = struct_mapping[struct_name]
+        io = IOBuffer()
+        println(io, "\t$struct_name")
+        println(io, "")
+        println(io, "# Fields")
+        println(io, "")
+        for f in s.fields
+            if f isa StructFieldDecl
+                if !isempty(f.doc)
+                    println(io, "## $(f.name)")
+                    println(io, f.doc)
+                end 
+            end
+        end
+        docs = String(take!(io))
+        return Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), docs, expr)
+    else
+        return expr
+    end
+
+
+end

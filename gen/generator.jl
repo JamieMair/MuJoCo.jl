@@ -166,7 +166,7 @@ function write_content_files(destination_dir, module_content)
         if def.head == :macrocall
             push!(enum_block_args, def)
         elseif def.head == :struct
-            push!(struct_block_args, def)
+            push!(struct_block_args, construct_struct_docs(def))
         elseif def.head == :function
             fn_sig = def.args[1]
             fn_name = string(fn_sig.args[1])
