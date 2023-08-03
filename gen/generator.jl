@@ -222,6 +222,7 @@ using JuliaFormatter
 format_file(joinpath(staging_dir, "enums.jl"))
 format_file(joinpath(staging_dir, "consts.jl"))
 format_file(joinpath(staging_dir, "structs.jl"))
+format_file(joinpath(staging_dir, "LibMuJoCo.jl"))
 
 @info "Copying into src directory..."
 for file in readdir(staging_dir)
