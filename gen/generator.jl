@@ -1,3 +1,6 @@
+@info "Scraping documentation"
+include("documentation.jl")
+
 using Clang.Generators
 using MuJoCo_jll
 
@@ -108,18 +111,38 @@ end
 
 libmujoco_text_content = remove_multilines(file_lines, multiline_remove);
 
+function print_expr(io, expr)
+    if expr isa LineNumberNode
+        println(io, expr)
+        return
+    end
+
+    if expr.head == :macrocall && expr.args[begin] == :(Core.var"@doc")
+        # Documentation!
+        println(io, "\"\"\"")
+        println(io, expr.args[3])
+        println(io, "\"\"\"")
+        println(io, expr.args[end])
+    else
+        println(io, expr)
+    end
+end
 function create_file_from_expr(filepath, expr)
     remove_line_comments = r"#=.*=#\s*"
+    b = IOBuffer()
+    print_expr(b, expr)
     open(filepath, "w") do io
-        print(io, replace(string(expr), remove_line_comments=>""))
+        print(io, replace(String(take!(b)), remove_line_comments=>""))
     end
 end
 function create_file_from_expr(filepath, exprs::AbstractArray)
     remove_line_comments = r"#=.*=#\s*"
+    b = IOBuffer()
+    for expr in exprs
+        print_expr(b, expr)
+    end
     open(filepath, "w") do io
-        for expr in exprs
-            println(io, replace(string(expr), remove_line_comments=>""))
-        end
+        print(io, replace(String(take!(b)), remove_line_comments=>""))
     end
 end
 
@@ -145,7 +168,14 @@ function write_content_files(destination_dir, module_content)
         elseif def.head == :struct
             push!(struct_block_args, def)
         elseif def.head == :function
-            push!(function_block_args, def)
+            fn_sig = def.args[1]
+            fn_name = string(fn_sig.args[1])
+            if haskey(function_mapping, fn_name)
+                documented_fn = Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), function_mapping[fn_name].doc, def)
+                push!(function_block_args, documented_fn) 
+            else
+                push!(function_block_args, def)
+            end
         elseif def.head == :const 
             target_def = string(def.args[begin].args[end])
             if endswith(target_def, "_")
