@@ -79,3 +79,15 @@ struct StructDecl{FT<:Tuple}
     declname::String
     fields::FT
 end
+
+struct AnonymousUnionDeclInfo{A<:AnonymousUnionDecl}
+    anon::A
+    struct_id::Int
+    union_id::Int
+end
+
+struct UnionType{N, T<:NTuple{N, String}}
+    name::String
+    field_names::T
+    struct_names::T
+end

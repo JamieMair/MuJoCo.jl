@@ -50,6 +50,77 @@ function sort_structs(structs::AbstractArray{StructDecl})
     return reverse(structs[sorted_ids])
 end
 
+const anon_struct_count = Ref(0)
+function replace_anon!(new_structs, item::PointerType)
+    return PointerType(replace_anon(item.inner_type), item.is_const, item.is_volatile, item.is_restrict)
+end
+function replace_anon!(new_structs, item::ArrayType)
+    return ArrayType(replace_anon(item.inner_type), item.extents)
+end
+function replace_anon!(new_structs, item::AnonymousStructDecl)
+    new_count = anon_struct_count[] + 1
+    anon_struct_count[] = new_count
+    new_struct_name = "AnonymousStruct$new_count"
+    new_fields = map(item.fields) do f
+        replace_anon!(new_structs, f)
+    end
+    new_struct = StructDecl(new_struct_name, "struct $(new_struct_name)", new_fields)
+    push!(new_structs, new_struct)
+    return new_struct
+end
+function replace_anon!(new_structs, item::AnonymousUnionDecl)
+    new_count = anon_struct_count[] + 1
+    anon_struct_count[] = new_count
+    new_struct_name = "AnonymousUnionStruct$new_count"
+    field_names = map(item.fields) do f
+        if !(typeof(f) <: StructFieldDecl)
+            error("Unsupported union structure.")
+        end
+
+        f.name
+    end
+    field_types = map(item.fields) do f
+        if !(typeof(f) <: StructFieldDecl)
+            error("Unsupported union structure.")
+        end
+
+        f.type
+    end
+    new_union_type= UnionType(new_struct_name, field_names, field_types)
+    new_fields = map(item.fields) do f
+        replace_anon!(new_structs, f)
+    end
+    new_struct = StructDecl(new_struct_name, "struct $(new_struct_name)", new_fields)
+    push!(new_structs, new_struct)
+    return new_struct
+end
+
+function fix_anonymous_types(structs::AbstractArray{StructDecl})
+    structs_with_unions = 0
+    additional_structs = StructDecl[]
+    map(structs) do s
+        prev_struct_with_unions = structs_with_unions
+        if any(typeof(f) isa CAnonymousType for f in s.fields)
+            num_unions = 0
+            new_fields = map(s.fields) do f
+                if typeof(f) isa AnonymousUnionDecl
+                    num_unions += 1
+                    structs_with_unions = prev_struct_with_unions + 1
+                    AnonymousUnionDeclInfo(f, structs_with_unions, num_unions)
+
+                elseif typeof(f) isa AnonymousStructDecl
+                    error("Not designed to handle this case.")
+                else
+                    f
+                end
+            end
+            return StructDecl(s.name, s.declname, new_fields)
+        else
+            s
+        end
+    end
+end
+
 
 function declare(enum::EnumDecl)
     pair_values = [(k, v) for (k, v) in enum.values]
@@ -80,6 +151,7 @@ function equivalent_type(type::PointerType)
     return Expr(:curly, :Ptr, equivalent_type(type.inner_type))
 end
 function equivalent_type(type::ArrayType)
+    # ToDo use the extents for reshaping arrays
     return Expr(:curly, :NTuple, reduce(*, type.extents), equivalent_type(type.inner_type))
 end
 function declare(struct_field::StructFieldDecl)
@@ -99,17 +171,9 @@ function declare(s::StructDecl)
     Expr(:struct, false, Symbol(s.name), body)
 end
 
-const anon_struct_number = Ref(0)
-function declare(s::AnonymousStructDecl)
-    struct_num = anon_struct_number[] + 1
-    anon_struct_number[] = struct_num
-    body = Expr(:block, (declare(f) for f in s.fields)...)
-    return Expr(:struct, Symbol("AnonStruct$(struct_num)"), body)
+function declare(s::CAnonymousType)
+    error("Should be handled before creating declaration.")
 end
-function declare(s::AnonymousUnionDecl)
-    return :UNKNOWNANONDECL
-end
-
 
 function declare_file(filepath, contents; exports = String[], packages = String[])
     remove_line_comments = r"#=.*=#\s*"
