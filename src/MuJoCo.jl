@@ -2,9 +2,9 @@ module MuJoCo
 
 include("LibMuJoCo/LibMuJoCo.jl")
 using .LibMuJoCo
-import .LibMuJoCo: Model, Data
+import .LibMuJoCo: jlModel, jlData
 
-export Model, Data, load_xml, init_data, step!, sample_xml_filepath
+export jlModel, jlData, load_xml, init_data, step!, sample_xml_filepath
 
 function sample_xml_filepath()
     return abspath(joinpath(abspath(@__DIR__), "..", "models", "humanoid.xml"))
@@ -13,13 +13,13 @@ end
 function load_xml(path)
     error_msg = "Could not load XML model from $path"
     model_ptr = mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))#
-    return Model(model_ptr)
+    return jlModel(model_ptr)
 end
-function init_data(model::Model)
+function init_data(model::jlModel)
     data_ptr = mj_makeData(model.internal_pointer)
-    return Data(data_ptr)
+    return jlData(data_ptr)
 end
-function step!(data::Data, model::Model)
+function step!(data::jlData, model::jlModel)
     mj_step(model.internal_pointer, data.internal_pointer)
 end
 
