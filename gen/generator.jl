@@ -225,6 +225,11 @@ format_file(joinpath(staging_dir, "consts.jl"))
 format_file(joinpath(staging_dir, "structs.jl"))
 format_file(joinpath(staging_dir, "LibMuJoCo.jl"))
 
+# Create a wrapper file as a placeholder
+open(joinpath(staging_dir, "wrappers.jl"), "w") do io
+    println(io, "# Temporary file, should be overwritten.")
+end
+
 
 # A script for generating the API from the existing LibMuJoCo files
 include("LibMuJoCo/LibMuJoCo.jl")
