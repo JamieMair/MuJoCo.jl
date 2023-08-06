@@ -16,9 +16,23 @@ function ntuple_type(::Type{T}) where {T}
     return T
 end
 
+function inner_type(::Type{Ptr{T}}) where {T}
+    return T
+end
 
-function generate_getproperty_fn(mj_struct, new_name::Symbol)
+function try_wrap_pointer(::Type{T}, expr, mapping) where {T}
+    if haskey(mapping, T)
+        Expr(:call, mapping[T], expr)
+    else
+        expr
+    end
+end
+function try_wrap_pointer(::Type{Ptr{T}}, expr, mapping) where {T}
+    try_wrap_pointer(T, expr, mapping)
+end
 
+function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
+    struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn)=>s for (sn, s) in all_wrappers)
     get_property_lines = Expr[]
     offset = 0
 
@@ -34,9 +48,10 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol)
         
 
         rtn_expr = if ftype <: Ptr
-            # TODO: Wrap in other struct types if possible
-            # Extract inner type
-            Expr(:return, Expr(:call, ftype, Expr(:call, :+, :internal_pointer, offset)))
+            # TODO: Check the struct_mapping to see if this is an array
+            convert_to_ptr_expr = Expr(:call, ftype, Expr(:call, :+, :internal_pointer, offset))
+            expr = Expr(:return, try_wrap_pointer(ftype, convert_to_ptr_expr, struct_to_new_symbol_mapping))
+            expr
         elseif ftype <: NTuple # Specially wrap array type
             # Get the extents from the type
             array_type = ntuple_type(ftype)
@@ -47,7 +62,12 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol)
             dims_expr = Expr(:tuple, extents...)
             Expr(:return, Expr(:call, :UnsafeArray, Expr(:call, Expr(:curly, :Ptr, nameof(array_type)), Expr(:call, :+, :internal_pointer, offset)), dims_expr))
         else
-            Expr(:return, Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, nameof(ftype)), Expr(:call, :+, :internal_pointer, offset))))
+            ptr_expr = Expr(:call, Expr(:curly, :Ptr, nameof(ftype)), Expr(:call, :+, :internal_pointer, offset))
+            if haskey(struct_to_new_symbol_mapping, ftype)
+                Expr(:return, try_wrap_pointer(ftype, ptr_expr, struct_to_new_symbol_mapping))
+            else
+                Expr(:return, Expr(:call, :unsafe_load, ptr_expr))
+            end
         end
         return_expr = Expr(:(&&), cmp_expr, rtn_expr)
         push!(get_property_lines, return_expr)
@@ -70,12 +90,12 @@ function generate_propertynames_fn(mj_struct, new_name::Symbol)
 end
 
 
-function build_struct_wrapper(struct_name::Symbol, new_name::Symbol)
+function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrappers::Dict{Symbol, Symbol})
     mj_struct = Base.getglobal(LibMuJoCo, struct_name)
 
     wrapped_struct = Expr(:struct, false, new_name, Expr(:block, Expr(:(::), :internal_pointer, Expr(:curly, :Ptr, struct_name))))
 
-    fn_expr = generate_getproperty_fn(mj_struct, new_name)
+    fn_expr = generate_getproperty_fn(mj_struct, new_name, all_wrappers)
     propnames_expr = generate_propertynames_fn(mj_struct, new_name)
 
     return (wrapped_struct, fn_expr, propnames_expr)
@@ -85,12 +105,14 @@ begin
     struct_wrappers = Dict{Symbol, Symbol}(
         :mjData => :Data,
         :mjModel => :Model,
+        :mjStatistic => :Statistics,
+        :mjOption => :Options,
     )
 
     exprs = Expr[]
     push!(exprs, :(using UnsafeArrays))
     for (k, v) in struct_wrappers
-        ws, fe, pn = build_struct_wrapper(k, v)
+        ws, fe, pn = build_struct_wrapper(k, v, struct_wrappers)
         push!(exprs, ws)
         push!(exprs, fe)
         push!(exprs, pn)

@@ -235,7 +235,6 @@ format_file(joinpath(staging_dir, "LibMuJoCo.jl"))
 open(joinpath(staging_dir, "wrappers.jl"), "w") do io
     println(io, "# Temporary file, should be overwritten.")
 end
-
 include("gen_api.jl")
 
 @info "Copying into src directory..."

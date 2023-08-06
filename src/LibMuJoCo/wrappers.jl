@@ -1,4 +1,55 @@
 using UnsafeArrays
+struct Options
+    internal_pointer::Ptr{mjOption}
+end
+function Base.getproperty(x::Options, f::Symbol)
+    internal_pointer = getfield(x, :internal_pointer)
+    f === :internal_pointer && return internal_pointer
+    f === :timestep && return unsafe_load(Ptr{Float64}(internal_pointer + 0))
+    f === :apirate && return unsafe_load(Ptr{Float64}(internal_pointer + 8))
+    f === :impratio && return unsafe_load(Ptr{Float64}(internal_pointer + 16))
+    f === :tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 24))
+    f === :noslip_tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 32))
+    f === :mpr_tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 40))
+    f === :gravity && return UnsafeArray(Ptr{Float64}(internal_pointer + 48), (3,))
+    f === :wind && return UnsafeArray(Ptr{Float64}(internal_pointer + 72), (3,))
+    f === :magnetic && return UnsafeArray(Ptr{Float64}(internal_pointer + 96), (3,))
+    f === :density && return unsafe_load(Ptr{Float64}(internal_pointer + 120))
+    f === :viscosity && return unsafe_load(Ptr{Float64}(internal_pointer + 128))
+    f === :o_margin && return unsafe_load(Ptr{Float64}(internal_pointer + 136))
+    f === :o_solref && return UnsafeArray(Ptr{Float64}(internal_pointer + 144), (2,))
+    f === :o_solimp && return UnsafeArray(Ptr{Float64}(internal_pointer + 160), (5,))
+    f === :integrator && return unsafe_load(Ptr{Int32}(internal_pointer + 200))
+    f === :collision && return unsafe_load(Ptr{Int32}(internal_pointer + 204))
+    f === :cone && return unsafe_load(Ptr{Int32}(internal_pointer + 208))
+    f === :jacobian && return unsafe_load(Ptr{Int32}(internal_pointer + 212))
+    f === :solver && return unsafe_load(Ptr{Int32}(internal_pointer + 216))
+    f === :iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 220))
+    f === :noslip_iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 224))
+    f === :mpr_iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 228))
+    f === :disableflags && return unsafe_load(Ptr{Int32}(internal_pointer + 232))
+    f === :enableflags && return unsafe_load(Ptr{Int32}(internal_pointer + 236))
+    error("Could not find property $(f)")
+end
+function Base.propertynames(x::Options)
+    (:timestep, :apirate, :impratio, :tolerance, :noslip_tolerance, :mpr_tolerance, :gravity, :wind, :magnetic, :density, :viscosity, :o_margin, :o_solref, :o_solimp, :integrator, :collision, :cone, :jacobian, :solver, :iterations, :noslip_iterations, :mpr_iterations, :disableflags, :enableflags)
+end
+struct Statistics
+    internal_pointer::Ptr{mjStatistic}
+end
+function Base.getproperty(x::Statistics, f::Symbol)
+    internal_pointer = getfield(x, :internal_pointer)
+    f === :internal_pointer && return internal_pointer
+    f === :meaninertia && return unsafe_load(Ptr{Float64}(internal_pointer + 0))
+    f === :meanmass && return unsafe_load(Ptr{Float64}(internal_pointer + 8))
+    f === :meansize && return unsafe_load(Ptr{Float64}(internal_pointer + 16))
+    f === :extent && return unsafe_load(Ptr{Float64}(internal_pointer + 24))
+    f === :center && return UnsafeArray(Ptr{Float64}(internal_pointer + 32), (3,))
+    error("Could not find property $(f)")
+end
+function Base.propertynames(x::Statistics)
+    (:meaninertia, :meanmass, :meansize, :extent, :center)
+end
 struct Model
     internal_pointer::Ptr{mjModel}
 end
@@ -70,9 +121,9 @@ function Base.getproperty(x::Model, f::Symbol)
     f === :nsensordata && return unsafe_load(Ptr{Int32}(internal_pointer + 248))
     f === :npluginstate && return unsafe_load(Ptr{Int32}(internal_pointer + 252))
     f === :nbuffer && return unsafe_load(Ptr{Int32}(internal_pointer + 256))
-    f === :opt && return unsafe_load(Ptr{mjOption_}(internal_pointer + 260))
+    f === :opt && return Options(Ptr{mjOption_}(internal_pointer + 260))
     f === :vis && return unsafe_load(Ptr{mjVisual_}(internal_pointer + 500))
-    f === :stat && return unsafe_load(Ptr{mjStatistic_}(internal_pointer + 1068))
+    f === :stat && return Statistics(Ptr{mjStatistic_}(internal_pointer + 1068))
     f === :buffer && return (Ptr{Nothing})(internal_pointer + 1124)
     f === :qpos0 && return (Ptr{Float64})(internal_pointer + 1132)
     f === :qpos_spring && return (Ptr{Float64})(internal_pointer + 1140)
