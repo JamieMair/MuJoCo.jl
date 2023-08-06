@@ -1,6 +1,3 @@
-using MuJoCo
-using Test
+using TestItemRunner
 
-@testset "MuJoCo.jl" begin
-    # Write your tests here.
-end
+@run_package_tests

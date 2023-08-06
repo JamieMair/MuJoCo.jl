@@ -31,6 +31,13 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+      - name: Temporarily use custom JLL
+        run: |
+          julia --project=. -e '
+            using Pkg
+            try Pkg.rm("MuJoCo_jll") catch end
+            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
+            Pkg.instantiate()'
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
@@ -49,10 +56,18 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
+      - name: Configure MuJoCo env
+        run: |
+          julia --project=. -e '
+            using Pkg
+            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
+            Pkg.instantiate()'
       - name: Configure doc environment
         run: |
-          julia --project=docs/ -e '
+          julia --project=docs -e '
             using Pkg
+            try Pkg.rm("MuJoCo") catch end
+            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
             Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@v1

@@ -3,4 +3,4 @@ library_name = "libmujuco"
 output_file_path = "./LibMuJoCo/LibMuJoCo.jl"
 module_name = "LibMuJoCo"
 jll_pkg_name = "MuJoCo_jll"
-export_symbol_prefixes = ["MJ", "mj_"]
+export_symbol_prefixes = ["mj"]
