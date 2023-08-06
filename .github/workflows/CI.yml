@@ -58,9 +58,8 @@ jobs:
           version: '1'
       - name: Configure doc environment
         run: |
-          julia --project=. -e '
+          julia --project=docs -e '
             using Pkg
-            try Pkg.rm("MuJoCo") catch end
             try Pkg.rm("MuJoCo_jll") catch end
             Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
             Pkg.develop(PackageSpec(path=pwd()))
