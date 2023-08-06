@@ -4,7 +4,7 @@ include("LibMuJoCo/LibMuJoCo.jl")
 using .LibMuJoCo
 import .LibMuJoCo: Model, Data
 
-export Model, Data, load_xml, init_data, step!, sample_xml_filepath
+export load_xml, init_data, step!, sample_xml_filepath
 
 function sample_xml_filepath()
     return abspath(joinpath(abspath(@__DIR__), "..", "models", "humanoid.xml"))

@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 MuJoCo_jll = "32af7c3b-80ec-5621-8194-2f6cb2280831"
+TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [compat]
 julia = "1.6"
