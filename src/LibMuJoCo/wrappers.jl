@@ -3,6 +3,7 @@ struct Model
 end
 function Base.getproperty(x::Model, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
+    f === :internal_pointer && return internal_pointer
     f === :nq && return unsafe_load(Ptr{Int32}(internal_pointer + 0))
     f === :nv && return unsafe_load(Ptr{Int32}(internal_pointer + 4))
     f === :nu && return unsafe_load(Ptr{Int32}(internal_pointer + 8))
@@ -385,6 +386,7 @@ struct Data
 end
 function Base.getproperty(x::Data, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
+    f === :internal_pointer && return internal_pointer
     f === :nstack && return unsafe_load(Ptr{Int32}(internal_pointer + 0))
     f === :nbuffer && return unsafe_load(Ptr{Int32}(internal_pointer + 4))
     f === :nplugin && return unsafe_load(Ptr{Int32}(internal_pointer + 8))

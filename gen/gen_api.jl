@@ -11,9 +11,14 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol)
     get_property_lines = Expr[]
     offset = 0
 
+    # Add a local variable for the internal pointer
     push!(get_property_lines, Expr(:(=), :internal_pointer, Expr(:call, :getfield, :x, QuoteNode(:internal_pointer))))
+    # Allow the struct to reference internal pointer, overriding any internal names
+    push!(get_property_lines, Expr(:(&&), Expr(:call, :(===), :f, QuoteNode(:internal_pointer)), Expr(:return, :internal_pointer)))
+    
     prop_names = Expr(:tuple, QuoteNode.(Symbol.(fieldnames(mj_struct)))...)
     for (fname, ftype) in zip(fieldnames(mj_struct), fieldtypes(mj_struct))
+        @assert fname != :internal_pointer "Struct field cannot be accessed as it conflicts with an internal name."
         cmp_expr = Expr(:call, :(===), :f, QuoteNode(fname))
         
 
