@@ -14,11 +14,20 @@ end
 
 @testitem "Check errors when performing invalid settings." begin
     model, data = MuJoCo.sample_model_and_data()
-    @test_throws "Cannot overwrite a pointer field." begin
-        model.buffer = Ptr{Cvoid}(0)
-    end
-    @test_throws "Cannot overwrite array field. Mutate the array instead." begin
-        data.energy = [0.0, 0.0]
+    if VERSION > v"1.8"
+        @test_throws "Cannot overwrite a pointer field." begin
+            model.buffer = Ptr{Cvoid}(0)
+        end
+        @test_throws "Cannot overwrite array field. Mutate the array instead." begin
+            data.energy = [0.0, 0.0]
+        end
+    else
+        @test_throws ErrorException begin
+            model.buffer = Ptr{Cvoid}(0)
+        end
+        @test_throws ErrorException begin
+            data.energy = [0.0, 0.0]
+        end
     end
 end
 
