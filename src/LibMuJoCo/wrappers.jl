@@ -1,4 +1,5 @@
 using UnsafeArrays
+export Options, Statistics, Model, Data
 struct Options
     internal_pointer::Ptr{mjOption}
 end

@@ -47,3 +47,18 @@ end
         end
     end
 end
+
+
+@testitem "Accessing wrapped structs" begin
+    using UnsafeArrays
+    model, data = MuJoCo.sample_model_and_data()
+
+    # Test whether wrapped structs are created
+    @test model.opt isa MuJoCo.LibMuJoCo.Options
+    @test model.stat isa MuJoCo.LibMuJoCo.Statistics
+
+    # Test chained accessing
+    @test model.opt.timestep isa AbstractFloat
+    @test model.opt.gravity isa UnsafeArray
+    @test length(model.opt.gravity) == 3
+end
