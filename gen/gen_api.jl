@@ -2,7 +2,22 @@
 include("LibMuJoCo/LibMuJoCo.jl")
 import .LibMuJoCo
 
+function ntuple_to_array_extents(::Type{NTuple{N, T}}) where {N, T}
+    return (N, ntuple_to_array_extents(T)...)
+end
+function ntuple_to_array_extents(::Type{<:Any})
+    return () # Return empty tuple
+end
+
+function ntuple_type(::Type{NTuple{N, T}}) where {N, T}
+    return ntuple_type(T)
+end
+function ntuple_type(::Type{T}) where {T}
+    return T
+end
+
 function generate_getproperty_fn(mj_struct, new_name::Symbol)
+
     get_property_lines = Expr[]
     offset = 0
 
@@ -18,9 +33,19 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol)
         
 
         rtn_expr = if ftype <: Ptr
+            # TODO: Wrap in other struct types if possible
             Expr(:return, Expr(:call, ftype, Expr(:call, :+, :internal_pointer, offset)))
+        elseif ftype <: NTuple # Specially wrap array type
+            # Get the extents from the type
+            array_type = ntuple_type(ftype)
+            extents = ntuple_to_array_extents(ftype)
+            # TODO: Check whether the wrapped array has row/column major consistency
+            # TODO: Check consistency with the struct mapping
+            # TODO: Explicitly choose own=false in the `unsafe_wrap call`
+            dims_expr = Expr(:tuple, extents...)
+            Expr(:return, Expr(:call, :unsafe_wrap, :Array, Expr(:call, Expr(:curly, :Ptr, nameof(array_type)), Expr(:call, :+, :internal_pointer, offset)), dims_expr))
         else
-            Expr(:return, Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, offset))))
+            Expr(:return, Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, nameof(ftype)), Expr(:call, :+, :internal_pointer, offset))))
         end
         return_expr = Expr(:(&&), cmp_expr, rtn_expr)
         push!(get_property_lines, return_expr)
@@ -48,7 +73,7 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol)
 
     wrapped_struct = Expr(:struct, false, new_name, Expr(:block, Expr(:(::), :internal_pointer, Expr(:curly, :Ptr, struct_name))))
 
-    fn_expr = generate_getproperty_fns(mj_struct, new_name)
+    fn_expr = generate_getproperty_fn(mj_struct, new_name)
     propnames_expr = generate_propertynames_fn(mj_struct, new_name)
 
     return (wrapped_struct, fn_expr, propnames_expr)
