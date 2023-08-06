@@ -16,6 +16,7 @@ function ntuple_type(::Type{T}) where {T}
     return T
 end
 
+
 function generate_getproperty_fn(mj_struct, new_name::Symbol)
 
     get_property_lines = Expr[]
@@ -34,6 +35,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol)
 
         rtn_expr = if ftype <: Ptr
             # TODO: Wrap in other struct types if possible
+            # Extract inner type
             Expr(:return, Expr(:call, ftype, Expr(:call, :+, :internal_pointer, offset)))
         elseif ftype <: NTuple # Specially wrap array type
             # Get the extents from the type

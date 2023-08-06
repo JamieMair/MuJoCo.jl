@@ -131,20 +131,22 @@ function print_expr(io, expr)
 end
 function create_file_from_expr(filepath, expr)
     remove_line_comments = r"#=.*=#\s*"
+    remove_main_qualifiers = r"Main.LibMuJoCo."
     b = IOBuffer()
     print_expr(b, expr)
     open(filepath, "w") do io
-        print(io, replace(String(take!(b)), remove_line_comments=>""))
+        print(io, replace(String(take!(b)), remove_line_comments=>"", remove_main_qualifiers=>""))
     end
 end
 function create_file_from_expr(filepath, exprs::AbstractArray)
     remove_line_comments = r"#=.*=#\s*"
+    remove_main_qualifiers = r"Main.LibMuJoCo."
     b = IOBuffer()
     for expr in exprs
         print_expr(b, expr)
     end
     open(filepath, "w") do io
-        print(io, replace(String(take!(b)), remove_line_comments=>""))
+        print(io, replace(String(take!(b)), remove_line_comments=>"", remove_main_qualifiers=>""))
     end
 end
 
