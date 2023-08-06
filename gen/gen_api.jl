@@ -109,15 +109,17 @@ begin
         :mjOption => :Options,
     )
 
-    exprs = Expr[]
-    push!(exprs, :(using UnsafeArrays))
+    other_exprs = Expr[]
+    first_exprs = Expr[]
+    push!(first_exprs, :(using UnsafeArrays))
     for (k, v) in struct_wrappers
         ws, fe, pn = build_struct_wrapper(k, v, struct_wrappers)
-        push!(exprs, ws)
-        push!(exprs, fe)
-        push!(exprs, pn)
+        push!(first_exprs, ws)
+        push!(other_exprs, fe)
+        push!(other_exprs, pn)
     end
 
+    exprs = vcat(first_exprs, other_exprs)
 
     create_file_from_expr(joinpath(staging_dir, "wrappers.jl"), exprs)
 end
