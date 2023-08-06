@@ -4,7 +4,7 @@ include("LibMuJoCo/LibMuJoCo.jl")
 using .LibMuJoCo
 import .LibMuJoCo: Model, Data
 
-export load_xml, init_data, step!, sample_xml_filepath
+export load_xml, init_data, step!
 
 function sample_xml_filepath()
     return abspath(joinpath(abspath(@__DIR__), "..", "models", "humanoid.xml"))
@@ -21,6 +21,12 @@ function init_data(model::Model)
 end
 function step!(data::Data, model::Model)
     mj_step(model.internal_pointer, data.internal_pointer)
+end
+
+function sample_model_and_data()
+    model = load_xml(sample_xml_filepath())
+    data = init_data(model)
+    return model, data
 end
 
 end
