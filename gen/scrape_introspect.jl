@@ -96,6 +96,7 @@ function construct_struct_docs(expr)
     if haskey(struct_mapping, struct_name)
         s = struct_mapping[struct_name]
         io = IOBuffer()
+        ndocs = 0
         println(io, "\t$struct_name")
         println(io, "")
         println(io, "# Fields")
@@ -103,12 +104,13 @@ function construct_struct_docs(expr)
         for f in s.fields
             if f isa StructFieldDecl
                 if !isempty(f.doc)
+                    ndocs += 1
                     println(io, "## $(f.name)")
                     println(io, f.doc)
                 end 
             end
         end
-        docs = String(take!(io))
+        docs = ndocs == 0 ? "\t$struct_name" : String(take!(io))
         return Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), docs, expr)
     else
         return expr

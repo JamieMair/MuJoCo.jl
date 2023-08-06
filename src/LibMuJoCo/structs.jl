@@ -795,10 +795,6 @@ struct var"##Ctag#319"
 end
 """
 	mjVisual
-
-# Fields
-
-
 """
 struct mjVisual_
     data::NTuple{568,UInt8}
