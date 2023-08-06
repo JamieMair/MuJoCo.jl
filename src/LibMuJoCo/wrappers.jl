@@ -12,6 +12,9 @@ end
 struct Data
     internal_pointer::Ptr{mjData}
 end
+function Base.propertynames(x::Options)
+    (:timestep, :apirate, :impratio, :tolerance, :noslip_tolerance, :mpr_tolerance, :gravity, :wind, :magnetic, :density, :viscosity, :o_margin, :o_solref, :o_solimp, :integrator, :collision, :cone, :jacobian, :solver, :iterations, :noslip_iterations, :mpr_iterations, :disableflags, :enableflags)
+end
 function Base.getproperty(x::Options, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
     f === :internal_pointer && return internal_pointer
@@ -41,8 +44,111 @@ function Base.getproperty(x::Options, f::Symbol)
     f === :enableflags && return unsafe_load(Ptr{Int32}(internal_pointer + 236))
     error("Could not find property $(f)")
 end
-function Base.propertynames(x::Options)
-    (:timestep, :apirate, :impratio, :tolerance, :noslip_tolerance, :mpr_tolerance, :gravity, :wind, :magnetic, :density, :viscosity, :o_margin, :o_solref, :o_solimp, :integrator, :collision, :cone, :jacobian, :solver, :iterations, :noslip_iterations, :mpr_iterations, :disableflags, :enableflags)
+function Base.setproperty!(x::Options, f::Symbol, value)
+    internal_pointer = getfield(x, :internal_pointer)
+    f === :internal_pointer && error("Cannot set the internal pointer, create a new struct instead.")
+    if f === :timestep
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 0), cvalue)
+        return cvalue
+    end
+    if f === :apirate
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 8), cvalue)
+        return cvalue
+    end
+    if f === :impratio
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 16), cvalue)
+        return cvalue
+    end
+    if f === :tolerance
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 24), cvalue)
+        return cvalue
+    end
+    if f === :noslip_tolerance
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 32), cvalue)
+        return cvalue
+    end
+    if f === :mpr_tolerance
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 40), cvalue)
+        return cvalue
+    end
+    if f === :density
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 48), cvalue)
+        return cvalue
+    end
+    if f === :viscosity
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 56), cvalue)
+        return cvalue
+    end
+    if f === :o_margin
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 64), cvalue)
+        return cvalue
+    end
+    if f === :integrator
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 72), cvalue)
+        return cvalue
+    end
+    if f === :collision
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 76), cvalue)
+        return cvalue
+    end
+    if f === :cone
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 80), cvalue)
+        return cvalue
+    end
+    if f === :jacobian
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
+        return cvalue
+    end
+    if f === :solver
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
+        return cvalue
+    end
+    if f === :iterations
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 92), cvalue)
+        return cvalue
+    end
+    if f === :noslip_iterations
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 96), cvalue)
+        return cvalue
+    end
+    if f === :mpr_iterations
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 100), cvalue)
+        return cvalue
+    end
+    if f === :disableflags
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 104), cvalue)
+        return cvalue
+    end
+    if f === :enableflags
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 108), cvalue)
+        return cvalue
+    end
+    if f in (:gravity, :wind, :magnetic, :o_solref, :o_solimp)
+        error("Cannot overwrite array field. Mutate the array instead.")
+    end
+    error("Could not find property $(f) to set.")
+end
+function Base.propertynames(x::Statistics)
+    (:meaninertia, :meanmass, :meansize, :extent, :center)
 end
 function Base.getproperty(x::Statistics, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
@@ -54,8 +160,36 @@ function Base.getproperty(x::Statistics, f::Symbol)
     f === :center && return UnsafeArray(Ptr{Float64}(internal_pointer + 32), (3,))
     error("Could not find property $(f)")
 end
-function Base.propertynames(x::Statistics)
-    (:meaninertia, :meanmass, :meansize, :extent, :center)
+function Base.setproperty!(x::Statistics, f::Symbol, value)
+    internal_pointer = getfield(x, :internal_pointer)
+    f === :internal_pointer && error("Cannot set the internal pointer, create a new struct instead.")
+    if f === :meaninertia
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 0), cvalue)
+        return cvalue
+    end
+    if f === :meanmass
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 8), cvalue)
+        return cvalue
+    end
+    if f === :meansize
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 16), cvalue)
+        return cvalue
+    end
+    if f === :extent
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 24), cvalue)
+        return cvalue
+    end
+    if f in (:center,)
+        error("Cannot overwrite array field. Mutate the array instead.")
+    end
+    error("Could not find property $(f) to set.")
+end
+function Base.propertynames(x::Model)
+    (:nq, :nv, :nu, :na, :nbody, :nbvh, :njnt, :ngeom, :nsite, :ncam, :nlight, :nmesh, :nmeshvert, :nmeshnormal, :nmeshtexcoord, :nmeshface, :nmeshgraph, :nskin, :nskinvert, :nskintexvert, :nskinface, :nskinbone, :nskinbonevert, :nhfield, :nhfielddata, :ntex, :ntexdata, :nmat, :npair, :nexclude, :neq, :ntendon, :nwrap, :nsensor, :nnumeric, :nnumericdata, :ntext, :ntextdata, :ntuple, :ntupledata, :nkey, :nmocap, :nplugin, :npluginattr, :nuser_body, :nuser_jnt, :nuser_geom, :nuser_site, :nuser_cam, :nuser_tendon, :nuser_actuator, :nuser_sensor, :nnames, :nnames_map, :nM, :nD, :nB, :nemax, :njmax, :nconmax, :nstack, :nuserdata, :nsensordata, :npluginstate, :nbuffer, :opt, :vis, :stat, :buffer, :qpos0, :qpos_spring, :body_parentid, :body_rootid, :body_weldid, :body_mocapid, :body_jntnum, :body_jntadr, :body_dofnum, :body_dofadr, :body_geomnum, :body_geomadr, :body_simple, :body_sameframe, :body_pos, :body_quat, :body_ipos, :body_iquat, :body_mass, :body_subtreemass, :body_inertia, :body_invweight0, :body_gravcomp, :body_user, :body_plugin, :body_bvhadr, :body_bvhnum, :bvh_depth, :bvh_child, :bvh_geomid, :bvh_aabb, :jnt_type, :jnt_qposadr, :jnt_dofadr, :jnt_bodyid, :jnt_group, :jnt_limited, :jnt_actfrclimited, :jnt_solref, :jnt_solimp, :jnt_pos, :jnt_axis, :jnt_stiffness, :jnt_range, :jnt_actfrcrange, :jnt_margin, :jnt_user, :dof_bodyid, :dof_jntid, :dof_parentid, :dof_Madr, :dof_simplenum, :dof_solref, :dof_solimp, :dof_frictionloss, :dof_armature, :dof_damping, :dof_invweight0, :dof_M0, :geom_type, :geom_contype, :geom_conaffinity, :geom_condim, :geom_bodyid, :geom_dataid, :geom_matid, :geom_group, :geom_priority, :geom_sameframe, :geom_solmix, :geom_solref, :geom_solimp, :geom_size, :geom_aabb, :geom_rbound, :geom_pos, :geom_quat, :geom_friction, :geom_margin, :geom_gap, :geom_fluid, :geom_user, :geom_rgba, :site_type, :site_bodyid, :site_matid, :site_group, :site_sameframe, :site_size, :site_pos, :site_quat, :site_user, :site_rgba, :cam_mode, :cam_bodyid, :cam_targetbodyid, :cam_pos, :cam_quat, :cam_poscom0, :cam_pos0, :cam_mat0, :cam_fovy, :cam_ipd, :cam_user, :light_mode, :light_bodyid, :light_targetbodyid, :light_directional, :light_castshadow, :light_active, :light_pos, :light_dir, :light_poscom0, :light_pos0, :light_dir0, :light_attenuation, :light_cutoff, :light_exponent, :light_ambient, :light_diffuse, :light_specular, :mesh_vertadr, :mesh_vertnum, :mesh_faceadr, :mesh_facenum, :mesh_bvhadr, :mesh_bvhnum, :mesh_normaladr, :mesh_normalnum, :mesh_texcoordadr, :mesh_texcoordnum, :mesh_graphadr, :mesh_vert, :mesh_normal, :mesh_texcoord, :mesh_face, :mesh_facenormal, :mesh_facetexcoord, :mesh_graph, :skin_matid, :skin_group, :skin_rgba, :skin_inflate, :skin_vertadr, :skin_vertnum, :skin_texcoordadr, :skin_faceadr, :skin_facenum, :skin_boneadr, :skin_bonenum, :skin_vert, :skin_texcoord, :skin_face, :skin_bonevertadr, :skin_bonevertnum, :skin_bonebindpos, :skin_bonebindquat, :skin_bonebodyid, :skin_bonevertid, :skin_bonevertweight, :hfield_size, :hfield_nrow, :hfield_ncol, :hfield_adr, :hfield_data, :tex_type, :tex_height, :tex_width, :tex_adr, :tex_rgb, :mat_texid, :mat_texuniform, :mat_texrepeat, :mat_emission, :mat_specular, :mat_shininess, :mat_reflectance, :mat_rgba, :pair_dim, :pair_geom1, :pair_geom2, :pair_signature, :pair_solref, :pair_solreffriction, :pair_solimp, :pair_margin, :pair_gap, :pair_friction, :exclude_signature, :eq_type, :eq_obj1id, :eq_obj2id, :eq_active, :eq_solref, :eq_solimp, :eq_data, :tendon_adr, :tendon_num, :tendon_matid, :tendon_group, :tendon_limited, :tendon_width, :tendon_solref_lim, :tendon_solimp_lim, :tendon_solref_fri, :tendon_solimp_fri, :tendon_range, :tendon_margin, :tendon_stiffness, :tendon_damping, :tendon_frictionloss, :tendon_lengthspring, :tendon_length0, :tendon_invweight0, :tendon_user, :tendon_rgba, :wrap_type, :wrap_objid, :wrap_prm, :actuator_trntype, :actuator_dyntype, :actuator_gaintype, :actuator_biastype, :actuator_trnid, :actuator_actadr, :actuator_actnum, :actuator_group, :actuator_ctrllimited, :actuator_forcelimited, :actuator_actlimited, :actuator_dynprm, :actuator_gainprm, :actuator_biasprm, :actuator_ctrlrange, :actuator_forcerange, :actuator_actrange, :actuator_gear, :actuator_cranklength, :actuator_acc0, :actuator_length0, :actuator_lengthrange, :actuator_user, :actuator_plugin, :sensor_type, :sensor_datatype, :sensor_needstage, :sensor_objtype, :sensor_objid, :sensor_reftype, :sensor_refid, :sensor_dim, :sensor_adr, :sensor_cutoff, :sensor_noise, :sensor_user, :sensor_plugin, :plugin, :plugin_stateadr, :plugin_statenum, :plugin_attr, :plugin_attradr, :numeric_adr, :numeric_size, :numeric_data, :text_adr, :text_size, :text_data, :tuple_adr, :tuple_size, :tuple_objtype, :tuple_objid, :tuple_objprm, :key_time, :key_qpos, :key_qvel, :key_act, :key_mpos, :key_mquat, :key_ctrl, :name_bodyadr, :name_jntadr, :name_geomadr, :name_siteadr, :name_camadr, :name_lightadr, :name_meshadr, :name_skinadr, :name_hfieldadr, :name_texadr, :name_matadr, :name_pairadr, :name_excludeadr, :name_eqadr, :name_tendonadr, :name_actuatoradr, :name_sensoradr, :name_numericadr, :name_textadr, :name_tupleadr, :name_keyadr, :name_pluginadr, :names, :names_map)
 end
 function Base.getproperty(x::Model, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
@@ -434,8 +568,356 @@ function Base.getproperty(x::Model, f::Symbol)
     f === :names_map && return (Ptr{Int32})(internal_pointer + 3548)
     error("Could not find property $(f)")
 end
-function Base.propertynames(x::Model)
-    (:nq, :nv, :nu, :na, :nbody, :nbvh, :njnt, :ngeom, :nsite, :ncam, :nlight, :nmesh, :nmeshvert, :nmeshnormal, :nmeshtexcoord, :nmeshface, :nmeshgraph, :nskin, :nskinvert, :nskintexvert, :nskinface, :nskinbone, :nskinbonevert, :nhfield, :nhfielddata, :ntex, :ntexdata, :nmat, :npair, :nexclude, :neq, :ntendon, :nwrap, :nsensor, :nnumeric, :nnumericdata, :ntext, :ntextdata, :ntuple, :ntupledata, :nkey, :nmocap, :nplugin, :npluginattr, :nuser_body, :nuser_jnt, :nuser_geom, :nuser_site, :nuser_cam, :nuser_tendon, :nuser_actuator, :nuser_sensor, :nnames, :nnames_map, :nM, :nD, :nB, :nemax, :njmax, :nconmax, :nstack, :nuserdata, :nsensordata, :npluginstate, :nbuffer, :opt, :vis, :stat, :buffer, :qpos0, :qpos_spring, :body_parentid, :body_rootid, :body_weldid, :body_mocapid, :body_jntnum, :body_jntadr, :body_dofnum, :body_dofadr, :body_geomnum, :body_geomadr, :body_simple, :body_sameframe, :body_pos, :body_quat, :body_ipos, :body_iquat, :body_mass, :body_subtreemass, :body_inertia, :body_invweight0, :body_gravcomp, :body_user, :body_plugin, :body_bvhadr, :body_bvhnum, :bvh_depth, :bvh_child, :bvh_geomid, :bvh_aabb, :jnt_type, :jnt_qposadr, :jnt_dofadr, :jnt_bodyid, :jnt_group, :jnt_limited, :jnt_actfrclimited, :jnt_solref, :jnt_solimp, :jnt_pos, :jnt_axis, :jnt_stiffness, :jnt_range, :jnt_actfrcrange, :jnt_margin, :jnt_user, :dof_bodyid, :dof_jntid, :dof_parentid, :dof_Madr, :dof_simplenum, :dof_solref, :dof_solimp, :dof_frictionloss, :dof_armature, :dof_damping, :dof_invweight0, :dof_M0, :geom_type, :geom_contype, :geom_conaffinity, :geom_condim, :geom_bodyid, :geom_dataid, :geom_matid, :geom_group, :geom_priority, :geom_sameframe, :geom_solmix, :geom_solref, :geom_solimp, :geom_size, :geom_aabb, :geom_rbound, :geom_pos, :geom_quat, :geom_friction, :geom_margin, :geom_gap, :geom_fluid, :geom_user, :geom_rgba, :site_type, :site_bodyid, :site_matid, :site_group, :site_sameframe, :site_size, :site_pos, :site_quat, :site_user, :site_rgba, :cam_mode, :cam_bodyid, :cam_targetbodyid, :cam_pos, :cam_quat, :cam_poscom0, :cam_pos0, :cam_mat0, :cam_fovy, :cam_ipd, :cam_user, :light_mode, :light_bodyid, :light_targetbodyid, :light_directional, :light_castshadow, :light_active, :light_pos, :light_dir, :light_poscom0, :light_pos0, :light_dir0, :light_attenuation, :light_cutoff, :light_exponent, :light_ambient, :light_diffuse, :light_specular, :mesh_vertadr, :mesh_vertnum, :mesh_faceadr, :mesh_facenum, :mesh_bvhadr, :mesh_bvhnum, :mesh_normaladr, :mesh_normalnum, :mesh_texcoordadr, :mesh_texcoordnum, :mesh_graphadr, :mesh_vert, :mesh_normal, :mesh_texcoord, :mesh_face, :mesh_facenormal, :mesh_facetexcoord, :mesh_graph, :skin_matid, :skin_group, :skin_rgba, :skin_inflate, :skin_vertadr, :skin_vertnum, :skin_texcoordadr, :skin_faceadr, :skin_facenum, :skin_boneadr, :skin_bonenum, :skin_vert, :skin_texcoord, :skin_face, :skin_bonevertadr, :skin_bonevertnum, :skin_bonebindpos, :skin_bonebindquat, :skin_bonebodyid, :skin_bonevertid, :skin_bonevertweight, :hfield_size, :hfield_nrow, :hfield_ncol, :hfield_adr, :hfield_data, :tex_type, :tex_height, :tex_width, :tex_adr, :tex_rgb, :mat_texid, :mat_texuniform, :mat_texrepeat, :mat_emission, :mat_specular, :mat_shininess, :mat_reflectance, :mat_rgba, :pair_dim, :pair_geom1, :pair_geom2, :pair_signature, :pair_solref, :pair_solreffriction, :pair_solimp, :pair_margin, :pair_gap, :pair_friction, :exclude_signature, :eq_type, :eq_obj1id, :eq_obj2id, :eq_active, :eq_solref, :eq_solimp, :eq_data, :tendon_adr, :tendon_num, :tendon_matid, :tendon_group, :tendon_limited, :tendon_width, :tendon_solref_lim, :tendon_solimp_lim, :tendon_solref_fri, :tendon_solimp_fri, :tendon_range, :tendon_margin, :tendon_stiffness, :tendon_damping, :tendon_frictionloss, :tendon_lengthspring, :tendon_length0, :tendon_invweight0, :tendon_user, :tendon_rgba, :wrap_type, :wrap_objid, :wrap_prm, :actuator_trntype, :actuator_dyntype, :actuator_gaintype, :actuator_biastype, :actuator_trnid, :actuator_actadr, :actuator_actnum, :actuator_group, :actuator_ctrllimited, :actuator_forcelimited, :actuator_actlimited, :actuator_dynprm, :actuator_gainprm, :actuator_biasprm, :actuator_ctrlrange, :actuator_forcerange, :actuator_actrange, :actuator_gear, :actuator_cranklength, :actuator_acc0, :actuator_length0, :actuator_lengthrange, :actuator_user, :actuator_plugin, :sensor_type, :sensor_datatype, :sensor_needstage, :sensor_objtype, :sensor_objid, :sensor_reftype, :sensor_refid, :sensor_dim, :sensor_adr, :sensor_cutoff, :sensor_noise, :sensor_user, :sensor_plugin, :plugin, :plugin_stateadr, :plugin_statenum, :plugin_attr, :plugin_attradr, :numeric_adr, :numeric_size, :numeric_data, :text_adr, :text_size, :text_data, :tuple_adr, :tuple_size, :tuple_objtype, :tuple_objid, :tuple_objprm, :key_time, :key_qpos, :key_qvel, :key_act, :key_mpos, :key_mquat, :key_ctrl, :name_bodyadr, :name_jntadr, :name_geomadr, :name_siteadr, :name_camadr, :name_lightadr, :name_meshadr, :name_skinadr, :name_hfieldadr, :name_texadr, :name_matadr, :name_pairadr, :name_excludeadr, :name_eqadr, :name_tendonadr, :name_actuatoradr, :name_sensoradr, :name_numericadr, :name_textadr, :name_tupleadr, :name_keyadr, :name_pluginadr, :names, :names_map)
+function Base.setproperty!(x::Model, f::Symbol, value)
+    internal_pointer = getfield(x, :internal_pointer)
+    f === :internal_pointer && error("Cannot set the internal pointer, create a new struct instead.")
+    if f === :nq
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 0), cvalue)
+        return cvalue
+    end
+    if f === :nv
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 4), cvalue)
+        return cvalue
+    end
+    if f === :nu
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
+        return cvalue
+    end
+    if f === :na
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 12), cvalue)
+        return cvalue
+    end
+    if f === :nbody
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 16), cvalue)
+        return cvalue
+    end
+    if f === :nbvh
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 20), cvalue)
+        return cvalue
+    end
+    if f === :njnt
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 24), cvalue)
+        return cvalue
+    end
+    if f === :ngeom
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 28), cvalue)
+        return cvalue
+    end
+    if f === :nsite
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 32), cvalue)
+        return cvalue
+    end
+    if f === :ncam
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 36), cvalue)
+        return cvalue
+    end
+    if f === :nlight
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 40), cvalue)
+        return cvalue
+    end
+    if f === :nmesh
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 44), cvalue)
+        return cvalue
+    end
+    if f === :nmeshvert
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 48), cvalue)
+        return cvalue
+    end
+    if f === :nmeshnormal
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 52), cvalue)
+        return cvalue
+    end
+    if f === :nmeshtexcoord
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 56), cvalue)
+        return cvalue
+    end
+    if f === :nmeshface
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 60), cvalue)
+        return cvalue
+    end
+    if f === :nmeshgraph
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 64), cvalue)
+        return cvalue
+    end
+    if f === :nskin
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 68), cvalue)
+        return cvalue
+    end
+    if f === :nskinvert
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 72), cvalue)
+        return cvalue
+    end
+    if f === :nskintexvert
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 76), cvalue)
+        return cvalue
+    end
+    if f === :nskinface
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 80), cvalue)
+        return cvalue
+    end
+    if f === :nskinbone
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
+        return cvalue
+    end
+    if f === :nskinbonevert
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
+        return cvalue
+    end
+    if f === :nhfield
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 92), cvalue)
+        return cvalue
+    end
+    if f === :nhfielddata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 96), cvalue)
+        return cvalue
+    end
+    if f === :ntex
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 100), cvalue)
+        return cvalue
+    end
+    if f === :ntexdata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 104), cvalue)
+        return cvalue
+    end
+    if f === :nmat
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 108), cvalue)
+        return cvalue
+    end
+    if f === :npair
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 112), cvalue)
+        return cvalue
+    end
+    if f === :nexclude
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 116), cvalue)
+        return cvalue
+    end
+    if f === :neq
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 120), cvalue)
+        return cvalue
+    end
+    if f === :ntendon
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 124), cvalue)
+        return cvalue
+    end
+    if f === :nwrap
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 128), cvalue)
+        return cvalue
+    end
+    if f === :nsensor
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 132), cvalue)
+        return cvalue
+    end
+    if f === :nnumeric
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 136), cvalue)
+        return cvalue
+    end
+    if f === :nnumericdata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 140), cvalue)
+        return cvalue
+    end
+    if f === :ntext
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 144), cvalue)
+        return cvalue
+    end
+    if f === :ntextdata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 148), cvalue)
+        return cvalue
+    end
+    if f === :ntuple
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 152), cvalue)
+        return cvalue
+    end
+    if f === :ntupledata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 156), cvalue)
+        return cvalue
+    end
+    if f === :nkey
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 160), cvalue)
+        return cvalue
+    end
+    if f === :nmocap
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 164), cvalue)
+        return cvalue
+    end
+    if f === :nplugin
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 168), cvalue)
+        return cvalue
+    end
+    if f === :npluginattr
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 172), cvalue)
+        return cvalue
+    end
+    if f === :nuser_body
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 176), cvalue)
+        return cvalue
+    end
+    if f === :nuser_jnt
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 180), cvalue)
+        return cvalue
+    end
+    if f === :nuser_geom
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 184), cvalue)
+        return cvalue
+    end
+    if f === :nuser_site
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 188), cvalue)
+        return cvalue
+    end
+    if f === :nuser_cam
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 192), cvalue)
+        return cvalue
+    end
+    if f === :nuser_tendon
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 196), cvalue)
+        return cvalue
+    end
+    if f === :nuser_actuator
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 200), cvalue)
+        return cvalue
+    end
+    if f === :nuser_sensor
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 204), cvalue)
+        return cvalue
+    end
+    if f === :nnames
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 208), cvalue)
+        return cvalue
+    end
+    if f === :nnames_map
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 212), cvalue)
+        return cvalue
+    end
+    if f === :nM
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 216), cvalue)
+        return cvalue
+    end
+    if f === :nD
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 220), cvalue)
+        return cvalue
+    end
+    if f === :nB
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 224), cvalue)
+        return cvalue
+    end
+    if f === :nemax
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 228), cvalue)
+        return cvalue
+    end
+    if f === :njmax
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 232), cvalue)
+        return cvalue
+    end
+    if f === :nconmax
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 236), cvalue)
+        return cvalue
+    end
+    if f === :nstack
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 240), cvalue)
+        return cvalue
+    end
+    if f === :nuserdata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 244), cvalue)
+        return cvalue
+    end
+    if f === :nsensordata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 248), cvalue)
+        return cvalue
+    end
+    if f === :npluginstate
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 252), cvalue)
+        return cvalue
+    end
+    if f === :nbuffer
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 256), cvalue)
+        return cvalue
+    end
+    if f === :opt
+        cvalue = convert(mjOption_, value)
+        unsafe_store!(Ptr{mjOption_}(internal_pointer + 260), cvalue)
+        return cvalue
+    end
+    if f === :vis
+        cvalue = convert(mjVisual_, value)
+        unsafe_store!(Ptr{mjVisual_}(internal_pointer + 500), cvalue)
+        return cvalue
+    end
+    if f === :stat
+        cvalue = convert(mjStatistic_, value)
+        unsafe_store!(Ptr{mjStatistic_}(internal_pointer + 1068), cvalue)
+        return cvalue
+    end
+    if f in (:buffer, :qpos0, :qpos_spring, :body_parentid, :body_rootid, :body_weldid, :body_mocapid, :body_jntnum, :body_jntadr, :body_dofnum, :body_dofadr, :body_geomnum, :body_geomadr, :body_simple, :body_sameframe, :body_pos, :body_quat, :body_ipos, :body_iquat, :body_mass, :body_subtreemass, :body_inertia, :body_invweight0, :body_gravcomp, :body_user, :body_plugin, :body_bvhadr, :body_bvhnum, :bvh_depth, :bvh_child, :bvh_geomid, :bvh_aabb, :jnt_type, :jnt_qposadr, :jnt_dofadr, :jnt_bodyid, :jnt_group, :jnt_limited, :jnt_actfrclimited, :jnt_solref, :jnt_solimp, :jnt_pos, :jnt_axis, :jnt_stiffness, :jnt_range, :jnt_actfrcrange, :jnt_margin, :jnt_user, :dof_bodyid, :dof_jntid, :dof_parentid, :dof_Madr, :dof_simplenum, :dof_solref, :dof_solimp, :dof_frictionloss, :dof_armature, :dof_damping, :dof_invweight0, :dof_M0, :geom_type, :geom_contype, :geom_conaffinity, :geom_condim, :geom_bodyid, :geom_dataid, :geom_matid, :geom_group, :geom_priority, :geom_sameframe, :geom_solmix, :geom_solref, :geom_solimp, :geom_size, :geom_aabb, :geom_rbound, :geom_pos, :geom_quat, :geom_friction, :geom_margin, :geom_gap, :geom_fluid, :geom_user, :geom_rgba, :site_type, :site_bodyid, :site_matid, :site_group, :site_sameframe, :site_size, :site_pos, :site_quat, :site_user, :site_rgba, :cam_mode, :cam_bodyid, :cam_targetbodyid, :cam_pos, :cam_quat, :cam_poscom0, :cam_pos0, :cam_mat0, :cam_fovy, :cam_ipd, :cam_user, :light_mode, :light_bodyid, :light_targetbodyid, :light_directional, :light_castshadow, :light_active, :light_pos, :light_dir, :light_poscom0, :light_pos0, :light_dir0, :light_attenuation, :light_cutoff, :light_exponent, :light_ambient, :light_diffuse, :light_specular, :mesh_vertadr, :mesh_vertnum, :mesh_faceadr, :mesh_facenum, :mesh_bvhadr, :mesh_bvhnum, :mesh_normaladr, :mesh_normalnum, :mesh_texcoordadr, :mesh_texcoordnum, :mesh_graphadr, :mesh_vert, :mesh_normal, :mesh_texcoord, :mesh_face, :mesh_facenormal, :mesh_facetexcoord, :mesh_graph, :skin_matid, :skin_group, :skin_rgba, :skin_inflate, :skin_vertadr, :skin_vertnum, :skin_texcoordadr, :skin_faceadr, :skin_facenum, :skin_boneadr, :skin_bonenum, :skin_vert, :skin_texcoord, :skin_face, :skin_bonevertadr, :skin_bonevertnum, :skin_bonebindpos, :skin_bonebindquat, :skin_bonebodyid, :skin_bonevertid, :skin_bonevertweight, :hfield_size, :hfield_nrow, :hfield_ncol, :hfield_adr, :hfield_data, :tex_type, :tex_height, :tex_width, :tex_adr, :tex_rgb, :mat_texid, :mat_texuniform, :mat_texrepeat, :mat_emission, :mat_specular, :mat_shininess, :mat_reflectance, :mat_rgba, :pair_dim, :pair_geom1, :pair_geom2, :pair_signature, :pair_solref, :pair_solreffriction, :pair_solimp, :pair_margin, :pair_gap, :pair_friction, :exclude_signature, :eq_type, :eq_obj1id, :eq_obj2id, :eq_active, :eq_solref, :eq_solimp, :eq_data, :tendon_adr, :tendon_num, :tendon_matid, :tendon_group, :tendon_limited, :tendon_width, :tendon_solref_lim, :tendon_solimp_lim, :tendon_solref_fri, :tendon_solimp_fri, :tendon_range, :tendon_margin, :tendon_stiffness, :tendon_damping, :tendon_frictionloss, :tendon_lengthspring, :tendon_length0, :tendon_invweight0, :tendon_user, :tendon_rgba, :wrap_type, :wrap_objid, :wrap_prm, :actuator_trntype, :actuator_dyntype, :actuator_gaintype, :actuator_biastype, :actuator_trnid, :actuator_actadr, :actuator_actnum, :actuator_group, :actuator_ctrllimited, :actuator_forcelimited, :actuator_actlimited, :actuator_dynprm, :actuator_gainprm, :actuator_biasprm, :actuator_ctrlrange, :actuator_forcerange, :actuator_actrange, :actuator_gear, :actuator_cranklength, :actuator_acc0, :actuator_length0, :actuator_lengthrange, :actuator_user, :actuator_plugin, :sensor_type, :sensor_datatype, :sensor_needstage, :sensor_objtype, :sensor_objid, :sensor_reftype, :sensor_refid, :sensor_dim, :sensor_adr, :sensor_cutoff, :sensor_noise, :sensor_user, :sensor_plugin, :plugin, :plugin_stateadr, :plugin_statenum, :plugin_attr, :plugin_attradr, :numeric_adr, :numeric_size, :numeric_data, :text_adr, :text_size, :text_data, :tuple_adr, :tuple_size, :tuple_objtype, :tuple_objid, :tuple_objprm, :key_time, :key_qpos, :key_qvel, :key_act, :key_mpos, :key_mquat, :key_ctrl, :name_bodyadr, :name_jntadr, :name_geomadr, :name_siteadr, :name_camadr, :name_lightadr, :name_meshadr, :name_skinadr, :name_hfieldadr, :name_texadr, :name_matadr, :name_pairadr, :name_excludeadr, :name_eqadr, :name_tendonadr, :name_actuatoradr, :name_sensoradr, :name_numericadr, :name_textadr, :name_tupleadr, :name_keyadr, :name_pluginadr, :names, :names_map)
+        error("Cannot overwrite a pointer field.")
+    end
+    error("Could not find property $(f) to set.")
+end
+function Base.propertynames(x::Data)
+    (:nstack, :nbuffer, :nplugin, :pstack, :parena, :maxuse_stack, :maxuse_arena, :maxuse_con, :maxuse_efc, :warning, :timer, :solver, :solver_iter, :solver_nnz, :solver_fwdinv, :nbodypair_broad, :nbodypair_narrow, :ngeompair_mid, :ngeompair_narrow, :ne, :nf, :nefc, :nnzJ, :ncon, :time, :energy, :buffer, :arena, :qpos, :qvel, :act, :qacc_warmstart, :plugin_state, :ctrl, :qfrc_applied, :xfrc_applied, :mocap_pos, :mocap_quat, :qacc, :act_dot, :userdata, :sensordata, :plugin, :plugin_data, :xpos, :xquat, :xmat, :xipos, :ximat, :xanchor, :xaxis, :geom_xpos, :geom_xmat, :site_xpos, :site_xmat, :cam_xpos, :cam_xmat, :light_xpos, :light_xdir, :subtree_com, :cdof, :cinert, :ten_wrapadr, :ten_wrapnum, :ten_J_rownnz, :ten_J_rowadr, :ten_J_colind, :ten_length, :ten_J, :wrap_obj, :wrap_xpos, :actuator_length, :actuator_moment, :crb, :qM, :qLD, :qLDiagInv, :qLDiagSqrtInv, :bvh_active, :ten_velocity, :actuator_velocity, :cvel, :cdof_dot, :qfrc_bias, :qfrc_passive, :efc_vel, :efc_aref, :subtree_linvel, :subtree_angmom, :qH, :qHDiagInv, :D_rownnz, :D_rowadr, :D_colind, :B_rownnz, :B_rowadr, :B_colind, :qDeriv, :qLU, :actuator_force, :qfrc_actuator, :qfrc_smooth, :qacc_smooth, :qfrc_constraint, :qfrc_inverse, :cacc, :cfrc_int, :cfrc_ext, :contact, :efc_type, :efc_id, :efc_J_rownnz, :efc_J_rowadr, :efc_J_rowsuper, :efc_J_colind, :efc_JT_rownnz, :efc_JT_rowadr, :efc_JT_rowsuper, :efc_JT_colind, :efc_J, :efc_JT, :efc_pos, :efc_margin, :efc_frictionloss, :efc_diagApprox, :efc_KBIP, :efc_D, :efc_R, :efc_b, :efc_force, :efc_state, :efc_AR_rownnz, :efc_AR_rowadr, :efc_AR_colind, :efc_AR)
 end
 function Base.getproperty(x::Data, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
@@ -577,6 +1059,119 @@ function Base.getproperty(x::Data, f::Symbol)
     f === :efc_AR && return (Ptr{Float64})(internal_pointer + 41268)
     error("Could not find property $(f)")
 end
-function Base.propertynames(x::Data)
-    (:nstack, :nbuffer, :nplugin, :pstack, :parena, :maxuse_stack, :maxuse_arena, :maxuse_con, :maxuse_efc, :warning, :timer, :solver, :solver_iter, :solver_nnz, :solver_fwdinv, :nbodypair_broad, :nbodypair_narrow, :ngeompair_mid, :ngeompair_narrow, :ne, :nf, :nefc, :nnzJ, :ncon, :time, :energy, :buffer, :arena, :qpos, :qvel, :act, :qacc_warmstart, :plugin_state, :ctrl, :qfrc_applied, :xfrc_applied, :mocap_pos, :mocap_quat, :qacc, :act_dot, :userdata, :sensordata, :plugin, :plugin_data, :xpos, :xquat, :xmat, :xipos, :ximat, :xanchor, :xaxis, :geom_xpos, :geom_xmat, :site_xpos, :site_xmat, :cam_xpos, :cam_xmat, :light_xpos, :light_xdir, :subtree_com, :cdof, :cinert, :ten_wrapadr, :ten_wrapnum, :ten_J_rownnz, :ten_J_rowadr, :ten_J_colind, :ten_length, :ten_J, :wrap_obj, :wrap_xpos, :actuator_length, :actuator_moment, :crb, :qM, :qLD, :qLDiagInv, :qLDiagSqrtInv, :bvh_active, :ten_velocity, :actuator_velocity, :cvel, :cdof_dot, :qfrc_bias, :qfrc_passive, :efc_vel, :efc_aref, :subtree_linvel, :subtree_angmom, :qH, :qHDiagInv, :D_rownnz, :D_rowadr, :D_colind, :B_rownnz, :B_rowadr, :B_colind, :qDeriv, :qLU, :actuator_force, :qfrc_actuator, :qfrc_smooth, :qacc_smooth, :qfrc_constraint, :qfrc_inverse, :cacc, :cfrc_int, :cfrc_ext, :contact, :efc_type, :efc_id, :efc_J_rownnz, :efc_J_rowadr, :efc_J_rowsuper, :efc_J_colind, :efc_JT_rownnz, :efc_JT_rowadr, :efc_JT_rowsuper, :efc_JT_colind, :efc_J, :efc_JT, :efc_pos, :efc_margin, :efc_frictionloss, :efc_diagApprox, :efc_KBIP, :efc_D, :efc_R, :efc_b, :efc_force, :efc_state, :efc_AR_rownnz, :efc_AR_rowadr, :efc_AR_colind, :efc_AR)
+function Base.setproperty!(x::Data, f::Symbol, value)
+    internal_pointer = getfield(x, :internal_pointer)
+    f === :internal_pointer && error("Cannot set the internal pointer, create a new struct instead.")
+    if f === :nstack
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 0), cvalue)
+        return cvalue
+    end
+    if f === :nbuffer
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 4), cvalue)
+        return cvalue
+    end
+    if f === :nplugin
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
+        return cvalue
+    end
+    if f === :pstack
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 12), cvalue)
+        return cvalue
+    end
+    if f === :parena
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 20), cvalue)
+        return cvalue
+    end
+    if f === :maxuse_stack
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 28), cvalue)
+        return cvalue
+    end
+    if f === :maxuse_arena
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 32), cvalue)
+        return cvalue
+    end
+    if f === :maxuse_con
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 40), cvalue)
+        return cvalue
+    end
+    if f === :maxuse_efc
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 44), cvalue)
+        return cvalue
+    end
+    if f === :solver_iter
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 48), cvalue)
+        return cvalue
+    end
+    if f === :solver_nnz
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 52), cvalue)
+        return cvalue
+    end
+    if f === :nbodypair_broad
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 56), cvalue)
+        return cvalue
+    end
+    if f === :nbodypair_narrow
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 60), cvalue)
+        return cvalue
+    end
+    if f === :ngeompair_mid
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 64), cvalue)
+        return cvalue
+    end
+    if f === :ngeompair_narrow
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 68), cvalue)
+        return cvalue
+    end
+    if f === :ne
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 72), cvalue)
+        return cvalue
+    end
+    if f === :nf
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 76), cvalue)
+        return cvalue
+    end
+    if f === :nefc
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 80), cvalue)
+        return cvalue
+    end
+    if f === :nnzJ
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
+        return cvalue
+    end
+    if f === :ncon
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
+        return cvalue
+    end
+    if f === :time
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 92), cvalue)
+        return cvalue
+    end
+    if f in (:warning, :timer, :solver, :solver_fwdinv, :energy)
+        error("Cannot overwrite array field. Mutate the array instead.")
+    end
+    if f in (:buffer, :arena, :qpos, :qvel, :act, :qacc_warmstart, :plugin_state, :ctrl, :qfrc_applied, :xfrc_applied, :mocap_pos, :mocap_quat, :qacc, :act_dot, :userdata, :sensordata, :plugin, :plugin_data, :xpos, :xquat, :xmat, :xipos, :ximat, :xanchor, :xaxis, :geom_xpos, :geom_xmat, :site_xpos, :site_xmat, :cam_xpos, :cam_xmat, :light_xpos, :light_xdir, :subtree_com, :cdof, :cinert, :ten_wrapadr, :ten_wrapnum, :ten_J_rownnz, :ten_J_rowadr, :ten_J_colind, :ten_length, :ten_J, :wrap_obj, :wrap_xpos, :actuator_length, :actuator_moment, :crb, :qM, :qLD, :qLDiagInv, :qLDiagSqrtInv, :bvh_active, :ten_velocity, :actuator_velocity, :cvel, :cdof_dot, :qfrc_bias, :qfrc_passive, :efc_vel, :efc_aref, :subtree_linvel, :subtree_angmom, :qH, :qHDiagInv, :D_rownnz, :D_rowadr, :D_colind, :B_rownnz, :B_rowadr, :B_colind, :qDeriv, :qLU, :actuator_force, :qfrc_actuator, :qfrc_smooth, :qacc_smooth, :qfrc_constraint, :qfrc_inverse, :cacc, :cfrc_int, :cfrc_ext, :contact, :efc_type, :efc_id, :efc_J_rownnz, :efc_J_rowadr, :efc_J_rowsuper, :efc_J_colind, :efc_JT_rownnz, :efc_JT_rowadr, :efc_JT_rowsuper, :efc_JT_colind, :efc_J, :efc_JT, :efc_pos, :efc_margin, :efc_frictionloss, :efc_diagApprox, :efc_KBIP, :efc_D, :efc_R, :efc_b, :efc_force, :efc_state, :efc_AR_rownnz, :efc_AR_rowadr, :efc_AR_colind, :efc_AR)
+        error("Cannot overwrite a pointer field.")
+    end
+    error("Could not find property $(f) to set.")
 end
