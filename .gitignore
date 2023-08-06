@@ -5,3 +5,6 @@
 /docs/Manifest.toml
 /docs/build/
 .vscode
+
+# MuJoCo Specifics
+MUJOCO_LOG.TXT
