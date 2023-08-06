@@ -45,7 +45,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol)
             # TODO: Check consistency with the struct mapping
             # TODO: Explicitly choose own=false in the `unsafe_wrap call`
             dims_expr = Expr(:tuple, extents...)
-            Expr(:return, Expr(:call, :unsafe_wrap, :Array, Expr(:call, Expr(:curly, :Ptr, nameof(array_type)), Expr(:call, :+, :internal_pointer, offset)), dims_expr))
+            Expr(:return, Expr(:call, :UnsafeArray, Expr(:call, Expr(:curly, :Ptr, nameof(array_type)), Expr(:call, :+, :internal_pointer, offset)), dims_expr))
         else
             Expr(:return, Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, nameof(ftype)), Expr(:call, :+, :internal_pointer, offset))))
         end
@@ -82,19 +82,20 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol)
 end
 
 begin
-    
     struct_wrappers = Dict{Symbol, Symbol}(
         :mjData => :Data,
         :mjModel => :Model,
     )
 
     exprs = Expr[]
+    push!(exprs, :(using UnsafeArrays))
     for (k, v) in struct_wrappers
         ws, fe, pn = build_struct_wrapper(k, v)
         push!(exprs, ws)
         push!(exprs, fe)
         push!(exprs, pn)
     end
+
 
     create_file_from_expr(joinpath(staging_dir, "wrappers.jl"), exprs)
 end
