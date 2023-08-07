@@ -12,5 +12,5 @@ end
 
 @testitem "Step Simulation" begin
     model, data = MuJoCo.sample_model_and_data()
-    step!(data, model)
+    step!(model, data)
 end

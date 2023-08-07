@@ -42,7 +42,7 @@ function testrender()
         randn!(controller.control)
         controller.control .*= 10.0
         for _ in 1:num_steps
-            step!(data, model)
+            step!(model, data)
         end
         
         viewport = LibMuJoCo.mjrRect(0, 0, 1920, 1080)
