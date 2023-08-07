@@ -1,9 +1,11 @@
 module MuJoCo
 
+using UnsafeArrays
 include("LibMuJoCo/LibMuJoCo.jl")
 using .LibMuJoCo
 import .LibMuJoCo: Model, Data
-
+include("controller.jl")
+export Controller
 export load_xml, init_data, step!
 
 function sample_xml_filepath()
@@ -29,5 +31,7 @@ function sample_model_and_data()
     data = init_data(model)
     return model, data
 end
+
+include("basic_render.jl")
 
 end
