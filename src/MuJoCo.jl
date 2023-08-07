@@ -19,7 +19,7 @@ function init_data(model::Model)
     data_ptr = mj_makeData(model.internal_pointer)
     return Data(data_ptr)
 end
-function step!(data::Data, model::Model)
+function step!(model::Model, data::Data)
     mj_step(model.internal_pointer, data.internal_pointer)
 end
 
