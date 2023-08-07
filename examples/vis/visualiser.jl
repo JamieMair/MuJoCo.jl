@@ -18,6 +18,7 @@ function alloc(::Type{T}) where {T}
 end
 
 # From Lyceum types.jl
+# TODO: Move back into a types file
 Base.@kwdef mutable struct UIState
     scn::Ptr{mjvScene} = alloc(mjvScene)
     cam::Ptr{mjvCamera} = alloc(mjvCamera)
