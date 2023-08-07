@@ -31,4 +31,6 @@ function sample_model_and_data()
     return model, data
 end
 
+include("basic_render.jl")
+
 end
