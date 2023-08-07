@@ -14,8 +14,6 @@ function testrender()
     scn_ptr = alloc(LibMuJoCo.mjvScene)
     con_ptr = alloc(LibMuJoCo.mjrContext)
 
-        
-
     window = GLFW.CreateWindow(1920, 1080, "MuJoCo.jl")
     GLFW.MakeContextCurrent(window)
     GLFW.SwapInterval(1);
@@ -32,8 +30,6 @@ function testrender()
 
         # Render here
         num_steps = Int(ceil((1.0/60.0) / model.opt.timestep))
-        randn!(controller.control)
-        controller.control .*= 10.0
         for _ in 1:num_steps
             step!(model, data)
         end
