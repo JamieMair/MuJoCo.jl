@@ -1,13 +1,6 @@
 import GLFW
 using Random
 
-create_undef(::Type{T}) where {T<:Number} = zero(T)
-create_undef(::Type{NTuple{N, T}}) where {N, T} = Tuple(create_undef(T) for _ in 1:N)
-function create_undef(::Type{T}) where {T}
-    return T((create_undef(FT) for FT in fieldtypes(T))...)
-end
-
-
 function alloc(::Type{T}) where {T}
     return Ptr{T}(Libc.malloc(sizeof(T)))
 end
