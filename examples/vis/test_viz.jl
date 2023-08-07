@@ -26,3 +26,13 @@ end
 LibMuJoCo.mj_deleteModel(model.internal_pointer)
 LibMuJoCo.mj_deleteData(data.internal_pointer)
 close_viewer!(viewer)
+
+"""
+Next steps: get mouse and button callbacks working
+
+- Use register!(mngr::WindowManager, hs::EventHandler...) in glfw.jl
+- Look at Lyceum code for how they set up the event handlers.
+- Most of their code is based on the PhysicsState type
+- Can modify it to take in Model and Data rather than their custom MJSim
+- Need nice array handling first
+"""
