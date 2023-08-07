@@ -12,7 +12,7 @@ end
 
 function load_xml(path)
     error_msg = "Could not load XML model from $path"
-    model_ptr = mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))#
+    model_ptr = mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))
     return Model(model_ptr)
 end
 function init_data(model::Model)

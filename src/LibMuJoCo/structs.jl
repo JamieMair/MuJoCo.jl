@@ -711,7 +711,7 @@ struct mjOption_
     enableflags::Cint
 end
 const mjOption = mjOption_
-struct var"##Ctag#314"
+struct var"##Ctag#304"
     fovy::Cfloat
     ipd::Cfloat
     azimuth::Cfloat
@@ -723,20 +723,20 @@ struct var"##Ctag#314"
     offheight::Cint
     ellipsoidinertia::Cint
 end
-struct var"##Ctag#315"
+struct var"##Ctag#305"
     shadowsize::Cint
     offsamples::Cint
     numslices::Cint
     numstacks::Cint
     numquads::Cint
 end
-struct var"##Ctag#316"
+struct var"##Ctag#306"
     ambient::NTuple{3,Cfloat}
     diffuse::NTuple{3,Cfloat}
     specular::NTuple{3,Cfloat}
     active::Cint
 end
-struct var"##Ctag#317"
+struct var"##Ctag#307"
     stiffness::Cfloat
     stiffnessrot::Cfloat
     force::Cfloat
@@ -751,7 +751,7 @@ struct var"##Ctag#317"
     shadowscale::Cfloat
     actuatortendon::Cfloat
 end
-struct var"##Ctag#318"
+struct var"##Ctag#308"
     forcewidth::Cfloat
     contactwidth::Cfloat
     contactheight::Cfloat
@@ -769,7 +769,7 @@ struct var"##Ctag#318"
     constraint::Cfloat
     slidercrank::Cfloat
 end
-struct var"##Ctag#319"
+struct var"##Ctag#309"
     fog::NTuple{4,Cfloat}
     haze::NTuple{4,Cfloat}
     force::NTuple{4,Cfloat}
@@ -3023,7 +3023,7 @@ struct mjvFigure_
     yaxisdata::NTuple{2,Cfloat}
 end
 const mjvFigure = mjvFigure_
-struct var"##Ctag#320"
+struct var"##Ctag#310"
     nu::Cint
     na::Cint
     nbody::Cint
@@ -3166,7 +3166,7 @@ struct var"##Ctag#320"
     name_actuatoradr::Ptr{Cint}
     names::Ptr{Cchar}
 end
-struct var"##Ctag#321"
+struct var"##Ctag#311"
     warning::NTuple{8,mjWarningStat}
     nefc::Cint
     ncon::Cint
