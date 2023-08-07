@@ -1,3 +1,5 @@
 [deps]
+GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
 MuJoCo = "1c101251-5e0f-4746-b44c-0728d433b68a"
 MuJoCo_jll = "32af7c3b-80ec-5621-8194-2f6cb2280831"
+Observables = "510215fc-4207-5dde-b226-833fc4488ee2"

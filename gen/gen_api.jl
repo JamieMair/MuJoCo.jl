@@ -47,12 +47,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
         cmp_expr = Expr(:call, :(===), :f, QuoteNode(fname))
         
 
-        rtn_expr = if ftype <: Ptr
-            # TODO: Check the struct_mapping to see if this is an array
-            convert_to_ptr_expr = Expr(:call, ftype, Expr(:call, :+, :internal_pointer, offset))
-            expr = Expr(:return, try_wrap_pointer(ftype, convert_to_ptr_expr, struct_to_new_symbol_mapping))
-            expr
-        elseif ftype <: NTuple # Specially wrap array type
+        rtn_expr = if ftype <: NTuple # Specially wrap array type
             # Get the extents from the type
             array_type = ntuple_type(ftype)
             extents = ntuple_to_array_extents(ftype)
@@ -60,9 +55,9 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
             # TODO: Check consistency with the struct mapping
             # TODO: Explicitly choose own=false in the `unsafe_wrap call`
             dims_expr = Expr(:tuple, extents...)
-            Expr(:return, Expr(:call, :UnsafeArray, Expr(:call, Expr(:curly, :Ptr, nameof(array_type)), Expr(:call, :+, :internal_pointer, offset)), dims_expr))
+            Expr(:return, Expr(:call, :UnsafeArray, Expr(:call, Expr(:curly, :Ptr, array_type), Expr(:call, :+, :internal_pointer, offset)), dims_expr))
         else
-            ptr_expr = Expr(:call, Expr(:curly, :Ptr, nameof(ftype)), Expr(:call, :+, :internal_pointer, offset))
+            ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, offset))
             if haskey(struct_to_new_symbol_mapping, ftype)
                 Expr(:return, try_wrap_pointer(ftype, ptr_expr, struct_to_new_symbol_mapping))
             else
@@ -108,8 +103,8 @@ function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
             push!(array_field_symbols, fname)
             continue
         else
-            ptr_expr = Expr(:call, Expr(:curly, :Ptr, nameof(ftype)), Expr(:call, :+, :internal_pointer, offset))
-            convert_expr = Expr(:call, :convert, nameof(ftype), :value)
+            ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, offset))
+            convert_expr = Expr(:call, :convert, ftype, :value)
             local_var_expr = Expr(:(=), :cvalue, convert_expr)
             store_expr = Expr(:call, :unsafe_store!, ptr_expr, :cvalue)
             return_expr = Expr(:return, :cvalue)

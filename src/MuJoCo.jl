@@ -1,9 +1,9 @@
 module MuJoCo
 
+using UnsafeArrays
 include("LibMuJoCo/LibMuJoCo.jl")
 using .LibMuJoCo
 import .LibMuJoCo: Model, Data
-
 export load_xml, init_data, step!
 
 function sample_xml_filepath()
@@ -12,6 +12,7 @@ end
 
 function load_xml(path)
     error_msg = "Could not load XML model from $path"
+    !isfile(path) && error(error_msg)
     model_ptr = mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))
     return Model(model_ptr)
 end
