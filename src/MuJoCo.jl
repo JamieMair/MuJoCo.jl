@@ -14,14 +14,14 @@ end
 
 function load_xml(path)
     error_msg = "Could not load XML model from $path"
-    model_ptr = mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))#
+    model_ptr = mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))
     return Model(model_ptr)
 end
 function init_data(model::Model)
     data_ptr = mj_makeData(model.internal_pointer)
     return Data(data_ptr)
 end
-function step!(data::Data, model::Model)
+function step!(model::Model, data::Data)
     mj_step(model.internal_pointer, data.internal_pointer)
 end
 
