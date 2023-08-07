@@ -1,14 +1,19 @@
-import GLFW
-using Random
+cd(@__DIR__)
+using Pkg
+Pkg.activate("..")
+
+using GLFW
+using MuJoCo
+using MuJoCo: LibMuJoCo
 
 function alloc(::Type{T}) where {T}
     return Ptr{T}(Libc.malloc(sizeof(T)))
 end
 
-function testrender()
-    model, data = sample_model_and_data()
+function testrender(xml="../../models/humanoid.xml")
+    model = load_xml(xml)
+    data = init_data(model)
 
-    controller = Controller(model, data)
     cam_ptr = alloc(LibMuJoCo.mjvCamera)
     opt_ptr = alloc(LibMuJoCo.mjvOption)
     scn_ptr = alloc(LibMuJoCo.mjvScene)
@@ -30,6 +35,7 @@ function testrender()
 
         # Render here
         num_steps = Int(ceil((1.0/60.0) / model.opt.timestep))
+        println(num_steps)
         for _ in 1:num_steps
             step!(model, data)
         end
@@ -62,3 +68,5 @@ function testrender()
 
     nothing
 end
+
+testrender()
