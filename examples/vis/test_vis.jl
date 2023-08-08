@@ -34,5 +34,5 @@ Next steps: get mouse and button callbacks working
 - Look at Lyceum code for how they set up the event handlers.
 - Most of their code is based on the PhysicsState type
 - Can modify it to take in Model and Data rather than their custom MJSim
-- Need nice array handling first
+- Need nicer pointer handling?
 """

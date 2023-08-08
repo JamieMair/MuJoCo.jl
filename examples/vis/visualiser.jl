@@ -80,6 +80,8 @@ end
     MuJoCoViewer(m::Model, d::Data; show_window=true)
 
 Initialise a visualiser for a given MuJoCo model
+
+#TODO: This should effectively copy initialisation of `Engine(...)` from the `LyceumMuJoCoViz` `types.jl` file.
 """
 function MuJoCoViewer(m::Model, d::Data; show_window=true)
 
@@ -91,6 +93,10 @@ function MuJoCoViewer(m::Model, d::Data; show_window=true)
     # Initialise visualisation data structures
     ui = init_ui!(UIState())
 
+    # TODO: Add these
+    # ui.refreshrate = GetRefreshRate()
+    # ui.lastrender = time()
+
     # Create scene and context
     LibMuJoCo.mjv_makeScene(m.internal_pointer, ui.scn, MAXGEOM)
     LibMuJoCo.mjr_makeContext(m.internal_pointer, ui.con, LibMuJoCo.mjFONTSCALE_150)
@@ -99,6 +105,16 @@ function MuJoCoViewer(m::Model, d::Data; show_window=true)
     # alignscale!(ui, sim)
     # init_figsensor!(ui.figsensor)
 
+    # TODO: add handlers to the struct, see defaulthandlers.jl
+    # handlers = handlers(e)
+    # register!(mngr, handlers...)
+
+    # TODO: Add frame buffer and framerate stuff from engine
+    # nothing,
+    # UInt8[],
+    # nothing,
+    # min(map(GetRefreshRate, GLFW.GetMonitors())..., MIN_REFRESHRATE),
+
     return MuJoCoViewer(manager, ui, false)
 end
 
@@ -106,6 +122,8 @@ end
     render!(viewer::MuJoCoViewer, m::Model, d::Data)
 
 Render the viewer given current model and data.
+
+# TODO: Add all extra stuff equivalent to `runui(e::Engine)` in `LyceumMuJoCoViz.jl` file
 """
 function render!(viewer::MuJoCoViewer, m::Model, d::Data)
     LibMuJoCo.mjv_updateScene(
