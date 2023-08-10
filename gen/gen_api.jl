@@ -48,12 +48,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
         
         foffset = Int64(foffset) # convert to Int64 for readability
 
-        rtn_expr = if ftype <: Ptr
-            # TODO: Check the struct_mapping to see if this is an array
-            convert_to_ptr_expr = Expr(:call, ftype, Expr(:call, :+, :internal_pointer, foffset))
-            expr = Expr(:return, try_wrap_pointer(ftype, convert_to_ptr_expr, struct_to_new_symbol_mapping))
-            expr
-        elseif ftype <: NTuple # Specially wrap array type
+        rtn_expr = if ftype <: NTuple # Specially wrap array type
             # Get the extents from the type
             array_type = ntuple_type(ftype)
             extents = ntuple_to_array_extents(ftype)
