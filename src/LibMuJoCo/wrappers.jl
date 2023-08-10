@@ -194,7 +194,7 @@ function Base.propertynames(x::Model)
 end
 function Base.getproperty(x::Model, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
-    model = getfield(x, :model)
+    model = x
     f === :internal_pointer && return internal_pointer
     f === :nq && return unsafe_load(Ptr{Int32}(internal_pointer + 0))
     f === :nv && return unsafe_load(Ptr{Int32}(internal_pointer + 4))

@@ -47,7 +47,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
         _, extra_deps = match_macroinfo
         for d in extra_deps
             conv_name = convert_dep_structname(d)
-            if d == nameof(mj_struct)
+            if d == Symbol(string(nameof(mj_struct))[begin:end-1]) # remove _ on the end
                 push!(get_property_lines, Expr(:(=), conv_name, :x))
             else
                 push!(get_property_lines, Expr(:(=), conv_name, Expr(:call, :getfield, :x, QuoteNode(conv_name))))
