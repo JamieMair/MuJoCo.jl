@@ -80,9 +80,9 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
             # TODO: Make sure the datatypes match
             converted_array_sizes = map(finfo.array_sizes) do a
                 if a isa Symbol
-                    return Expr(:., :x, QuoteNode(a))
+                    return Expr(:call, :Int, Expr(:., :x, QuoteNode(a)))
                 else
-                    return a
+                    return Expr(:call, :Int, a)
                 end
             end
             dims_expr = Expr(:tuple, converted_array_sizes...)
