@@ -80,14 +80,46 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
             # TODO: Make sure the datatypes match
             converted_array_sizes = map(finfo.array_sizes) do a
                 if a isa Symbol
-                    return Expr(:call, :Int, Expr(:., :x, QuoteNode(a)))
+                    # Add workaround
+                    if hasfield(mj_struct, a)
+                        return Expr(:call, :Int, Expr(:., :x, QuoteNode(a)))
+                    else
+                        # Try to find the location where this field exists
+                        deps = last(match_macroinfo)
+                        for d in deps
+                            other_mj_struct = Base.getglobal(LibMuJoCo, d)
+                            if other_mj_struct == mj_struct
+                                continue
+                            end
+                            if hasfield(other_mj_struct, a)
+                                s_name = string(nameof(other_mj_struct))
+                                if endswith(s_name, "_")
+                                    s_name = s_name[begin:end-1]
+                                end
+                                @info "Found issue in mujoco's library. Field $a is not available in $(nameof(mj_struct)), but found one in $s_name"
+                                return Expr(:call, :Int, Expr(:., convert_dep_structname(Symbol(s_name)), QuoteNode(a)))
+                            end
+                        end
+                        return nothing
+                    end
                 else
                     return Expr(:call, :Int, a)
                 end
             end
-            dims_expr = Expr(:tuple, converted_array_sizes...)
-            pointer_to_pointer = Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset)))
-            Expr(:return, Expr(:call, :UnsafeArray, pointer_to_pointer, dims_expr))
+            if any(isnothing, converted_array_sizes)
+                @info "Could not find the appropriate sizes for field $fname of $(nameof(mj_struct)). Not converting to array."
+                ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset))
+                return_value = if haskey(struct_to_new_symbol_mapping, ftype)
+                    Expr(:return, try_wrap_pointer(ftype, ptr_expr, struct_to_new_symbol_mapping))
+                else
+                    Expr(:return, Expr(:call, :unsafe_load, ptr_expr))
+                end
+                return_value
+            else
+                dims_expr = Expr(:tuple, converted_array_sizes...)
+                pointer_to_pointer = Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset)))
+                Expr(:return, Expr(:call, :UnsafeArray, pointer_to_pointer, dims_expr))
+            end
         else
             ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset))
             if haskey(struct_to_new_symbol_mapping, ftype)
