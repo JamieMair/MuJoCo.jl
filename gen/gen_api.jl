@@ -30,7 +30,7 @@ end
 function try_wrap_pointer(::Type{Ptr{T}}, expr, mapping) where {T}
     try_wrap_pointer(T, expr, mapping)
 end
-
+structinfo(T) = [(fieldoffset(T,i), fieldname(T,i), fieldtype(T,i)) for i = 1:fieldcount(T)];
 function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
     struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn)=>s for (sn, s) in all_wrappers)
     get_property_lines = Expr[]
@@ -41,15 +41,16 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
     # Allow the struct to reference internal pointer, overriding any internal names
     push!(get_property_lines, Expr(:(&&), Expr(:call, :(===), :f, QuoteNode(:internal_pointer)), Expr(:return, :internal_pointer)))
     
-
-    for (fname, ftype) in zip(fieldnames(mj_struct), fieldtypes(mj_struct))
+    
+    for (foffset, fname, ftype) in structinfo(mj_struct)
         @assert fname != :internal_pointer "Struct field cannot be accessed as it conflicts with an internal name."
         cmp_expr = Expr(:call, :(===), :f, QuoteNode(fname))
         
+        foffset = Int64(foffset) # convert to Int64 for readability
 
         rtn_expr = if ftype <: Ptr
             # TODO: Check the struct_mapping to see if this is an array
-            convert_to_ptr_expr = Expr(:call, ftype, Expr(:call, :+, :internal_pointer, offset))
+            convert_to_ptr_expr = Expr(:call, ftype, Expr(:call, :+, :internal_pointer, foffset))
             expr = Expr(:return, try_wrap_pointer(ftype, convert_to_ptr_expr, struct_to_new_symbol_mapping))
             expr
         elseif ftype <: NTuple # Specially wrap array type
@@ -60,9 +61,9 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
             # TODO: Check consistency with the struct mapping
             # TODO: Explicitly choose own=false in the `unsafe_wrap call`
             dims_expr = Expr(:tuple, extents...)
-            Expr(:return, Expr(:call, :UnsafeArray, Expr(:call, Expr(:curly, :Ptr, nameof(array_type)), Expr(:call, :+, :internal_pointer, offset)), dims_expr))
+            Expr(:return, Expr(:call, :UnsafeArray, Expr(:call, Expr(:curly, :Ptr, nameof(array_type)), Expr(:call, :+, :internal_pointer, foffset)), dims_expr))
         else
-            ptr_expr = Expr(:call, Expr(:curly, :Ptr, nameof(ftype)), Expr(:call, :+, :internal_pointer, offset))
+            ptr_expr = Expr(:call, Expr(:curly, :Ptr, nameof(ftype)), Expr(:call, :+, :internal_pointer, foffset))
             if haskey(struct_to_new_symbol_mapping, ftype)
                 Expr(:return, try_wrap_pointer(ftype, ptr_expr, struct_to_new_symbol_mapping))
             else
@@ -71,7 +72,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
         end
         return_expr = Expr(:(&&), cmp_expr, rtn_expr)
         push!(get_property_lines, return_expr)
-        offset += sizeof(ftype)
+        offset = max(offset, foffset) + sizeof(ftype)
     end
 
     expected_struct_size = sizeof(mj_struct)
