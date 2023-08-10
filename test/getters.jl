@@ -80,3 +80,19 @@ end
     @test c isa UnsafeArray
     @test size(c) == (21, 1)
 end
+
+@testitem "Test that all fields can be accessed without error." begin
+    using UnsafeArrays
+    model, data = MuJoCo.sample_model_and_data()
+
+    @testset "Model accessors" begin
+        for fname in Base.propertynames(model)
+            @test typeof(getproperty(model, fname)) <: Any
+        end
+    end
+    @testset "Data accessors" begin
+        for fname in Base.propertynames(data)
+            @test typeof(getproperty(data, fname)) <: Any
+        end
+    end
+end
