@@ -74,6 +74,12 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
         offset += sizeof(ftype)
     end
 
+    expected_struct_size = sizeof(mj_struct)
+    if offset != expected_struct_size
+        num_padded_bytes = expected_struct_size - offset
+        @warn "Padding of $num_padded_bytes bytes in $(nameof(mj_struct)) detected.\nExpected $expected_struct_size bytes, but only accounted for $offset bytes."  
+    end
+
     push!(get_property_lines, :(error("Could not find property $f")))
 
     # TODO refactor this fn to have better variable names
