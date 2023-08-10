@@ -1,4 +1,5 @@
 # A script for generating the API from the existing LibMuJoCo files
+include("mjmacro_parsing.jl")
 include("LibMuJoCo/LibMuJoCo.jl")
 import .LibMuJoCo
 
@@ -31,15 +32,32 @@ function try_wrap_pointer(::Type{Ptr{T}}, expr, mapping) where {T}
     try_wrap_pointer(T, expr, mapping)
 end
 structinfo(T) = [(fieldoffset(T,i), fieldname(T,i), fieldtype(T,i)) for i = 1:fieldcount(T)];
-function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
+
+
+function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, match_macroinfo)
     struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn)=>s for (sn, s) in all_wrappers)
     get_property_lines = Expr[]
     offset = 0
 
     # Add a local variable for the internal pointer
     push!(get_property_lines, Expr(:(=), :internal_pointer, Expr(:call, :getfield, :x, QuoteNode(:internal_pointer))))
+
+    # Add lines to get a variable to the dependency
+    if !isnothing(match_macroinfo)
+        _, extra_deps = match_macroinfo
+        for d in extra_deps
+            conv_name = convert_dep_structname(d)
+            if d == nameof(mj_struct)
+                push!(get_property_lines, Expr(:(=), conv_name, :x))
+            else
+                push!(get_property_lines, Expr(:(=), conv_name, Expr(:call, :getfield, :x, QuoteNode(conv_name))))
+            end
+        end
+    end
+
     # Allow the struct to reference internal pointer, overriding any internal names
     push!(get_property_lines, Expr(:(&&), Expr(:call, :(===), :f, QuoteNode(:internal_pointer)), Expr(:return, :internal_pointer)))
+
     
     
     for (foffset, fname, ftype) in structinfo(mj_struct)
@@ -57,6 +75,19 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
             # TODO: Explicitly choose own=false in the `unsafe_wrap call`
             dims_expr = Expr(:tuple, extents...)
             Expr(:return, Expr(:call, :UnsafeArray, Expr(:call, Expr(:curly, :Ptr, array_type), Expr(:call, :+, :internal_pointer, foffset)), dims_expr))
+        elseif ftype <: Ptr && !isnothing(match_macroinfo) && haskey(first(match_macroinfo), fname)
+            finfo = first(match_macroinfo)[fname]
+            # TODO: Make sure the datatypes match
+            converted_array_sizes = map(finfo.array_sizes) do a
+                if a isa Symbol
+                    return Expr(:., :x, QuoteNode(a))
+                else
+                    return a
+                end
+            end
+            dims_expr = Expr(:tuple, converted_array_sizes...)
+            pointer_to_pointer = Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset)))
+            Expr(:return, Expr(:call, :UnsafeArray, pointer_to_pointer, dims_expr))
         else
             ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset))
             if haskey(struct_to_new_symbol_mapping, ftype)
@@ -149,12 +180,29 @@ function generate_propertynames_fn(mj_struct, new_name::Symbol)
 end
 
 
-function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrappers::Dict{Symbol, Symbol})
+function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrappers::Dict{Symbol, Symbol}, parsed_macro_info_dict)
     mj_struct = Base.getglobal(LibMuJoCo, struct_name)
+    field_info_dict = nothing
+    extra_deps, match_macroinfo = if !haskey(parsed_macro_info_dict, struct_name)
+        (), nothing # empty tuple
+    else
+        fieldinfo_dict, deps = parsed_macro_info_dict[struct_name]
+        filtered_deps = Set{Symbol}()
+        for d in deps
+            if d != struct_name
+                push!(filtered_deps, d)
+            end
+        end
+        other_deps = map(collect(filtered_deps)) do d
+            wrapped_type = all_wrappers[d]
+            Expr(:(::), convert_dep_structname(d), wrapped_type)
+        end
+        other_deps, (fieldinfo_dict, deps)
+    end
+    
+    wrapped_struct = Expr(:struct, false, new_name, Expr(:block, Expr(:(::), :internal_pointer, Expr(:curly, :Ptr, struct_name)), extra_deps...))
 
-    wrapped_struct = Expr(:struct, false, new_name, Expr(:block, Expr(:(::), :internal_pointer, Expr(:curly, :Ptr, struct_name))))
-
-    fn_expr = generate_getproperty_fn(mj_struct, new_name, all_wrappers)
+    fn_expr = generate_getproperty_fn(mj_struct, new_name, all_wrappers, match_macroinfo)
     propnames_expr = generate_propertynames_fn(mj_struct, new_name)
     set_prop_fn_expr =generate_setproperty_fn(mj_struct, new_name, all_wrappers)
 
@@ -168,18 +216,20 @@ begin
         :mjStatistic => :Statistics,
         :mjOption => :Options,
     )
-
+    parsed_macro_info = parse_macro_file(macro_file)
     other_exprs = Expr[]
     first_exprs = Expr[]
     push!(first_exprs, :(using UnsafeArrays))
     push!(first_exprs, Expr(:export, values(struct_wrappers)...))
+    
     for (k, v) in struct_wrappers
-        ws, fe, pn, spfn = build_struct_wrapper(k, v, struct_wrappers)
+        ws, fe, pn, spfn = build_struct_wrapper(k, v, struct_wrappers, parsed_macro_info)
         push!(first_exprs, ws)
         push!(other_exprs, pn)
         push!(other_exprs, fe)
         push!(other_exprs, spfn)
     end
+    # TODO sort the `first_exprs` array in topological order
 
     exprs = vcat(first_exprs, other_exprs)
 
