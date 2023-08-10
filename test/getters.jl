@@ -62,3 +62,12 @@ end
     @test model.opt.gravity isa UnsafeArray
     @test length(model.opt.gravity) == 3
 end
+
+@testitem "Test array pointer alignment" begin
+    using UnsafeArrays
+    model, data = MuJoCo.sample_model_and_data()
+
+    g = model.opt.gravity
+    @test g isa UnsafeArray
+    @test g ≈ [0.0, 0.0, -9.81]
+end
