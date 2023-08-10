@@ -71,3 +71,12 @@ end
     @test g isa UnsafeArray
     @test g ≈ [0.0, 0.0, -9.81]
 end
+
+@testitem "Test pointer arrays" begin
+    using UnsafeArrays
+    model, data = MuJoCo.sample_model_and_data()
+
+    c = data.ctrl
+    @test c isa UnsafeArray
+    @test size(c) == (21, 1)
+end
