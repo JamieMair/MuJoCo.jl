@@ -11,12 +11,13 @@ function main()
     data.qpos .= [0, 0.1]
 
     viewer = MuJoCoViewer(model, data)
+    fps = 60
+    frametime = 1 / fps
     # Loop and simulate for now
     while !viewer.should_close
-
         # TODO: Throttle visualisation inside render!() somewhere
-        nsteps = Int(ceil((1.0/60.0) / model.opt.timestep))
-        for _ in 1:nsteps
+        previous_time = data.time
+        while (data.time - previous_time < frametime)
             step!(model, data)
         end
 
