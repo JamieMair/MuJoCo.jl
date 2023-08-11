@@ -1,32 +1,34 @@
 using MuJoCo
 include("visualiser.jl")
 
+function main()
+    root_path = normpath(joinpath(@__DIR__, "..", ".."))
+    # Load model, data, and viewer
+    model  = load_xml(joinpath(root_path, "models", "cartpole.xml"))
+    data   = init_data(model)
 
-root_path = normpath(joinpath(@__DIR__, "..", ".."))
-# Load model, data, and viewer
-model  = load_xml(joinpath(root_path, "models", "cartpole.xml"))
-data   = init_data(model)
-viewer = MuJoCoViewer(model, data)
+    # Change initial conditions
+    data.qpos .= [0, 0.1]
 
-# Change initial conditions
-d.qpos .= [0, 0.1]
+    viewer = MuJoCoViewer(model, data)
+    # Loop and simulate for now
+    while !viewer.should_close
 
+        # TODO: Throttle visualisation inside render!() somewhere
+        nsteps = Int(ceil((1.0/60.0) / model.opt.timestep))
+        for _ in 1:nsteps
+            step!(model, data)
+        end
 
-# Loop and simulate for now
-while !viewer.should_close
-
-    # TODO: Throttle visualisation inside render!() somewhere
-    nsteps = Int(ceil((1.0/60.0) / m.opt.timestep))
-    for _ in 1:nsteps
-        step!(model, data)
+        render!(viewer, model, data)
     end
+    close_viewer!(viewer)
 
-    render!(viewer, model, data)
+    LibMuJoCo.mj_deleteModel(model.internal_pointer)
+    LibMuJoCo.mj_deleteData(data.internal_pointer)
 end
 
-LibMuJoCo.mj_deleteModel(model.internal_pointer)
-LibMuJoCo.mj_deleteData(data.internal_pointer)
-close_viewer!(viewer)
+main()
 
 """
 Next steps: get mouse and button callbacks working
