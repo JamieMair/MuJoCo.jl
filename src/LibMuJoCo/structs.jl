@@ -54,6 +54,7 @@ struct mjContact_
     geom2::Cint
     exclude::Cint
     efc_address::Cint
+    mjContact_() = new()
 end
 const mjContact = mjContact_
 """
@@ -70,6 +71,7 @@ how many times was warning raised
 struct mjWarningStat_
     lastinfo::Cint
     number::Cint
+    mjWarningStat_() = new()
 end
 const mjWarningStat = mjWarningStat_
 """
@@ -86,6 +88,7 @@ how many times was timer called
 struct mjTimerStat_
     duration::mjtNum
     number::Cint
+    mjTimerStat_() = new()
 end
 const mjTimerStat = mjTimerStat_
 """
@@ -117,6 +120,7 @@ struct mjSolverStat_
     nchange::Cint
     neval::Cint
     nupdate::Cint
+    mjSolverStat_() = new()
 end
 const mjSolverStat = mjSolverStat_
 """
@@ -532,6 +536,7 @@ struct mjData_
     efc_AR_rowadr::Ptr{Cint}
     efc_AR_colind::Ptr{Cint}
     efc_AR::Ptr{mjtNum}
+    mjData_() = new()
 end
 const mjData = mjData_
 const mjtDisableBit = mjtDisableBit_
@@ -596,6 +601,7 @@ struct mjLROpt_
     inttotal::mjtNum
     interval::mjtNum
     tolrange::mjtNum
+    mjLROpt_() = new()
 end
 const mjLROpt = mjLROpt_
 """
@@ -618,6 +624,7 @@ struct mjVFS_
     filename::NTuple{2000,NTuple{1000,Cchar}}
     filesize::NTuple{2000,Cint}
     filedata::NTuple{2000,Ptr{Cvoid}}
+    mjVFS_() = new()
 end
 const mjVFS = mjVFS_
 struct mjResource_
@@ -627,6 +634,7 @@ struct mjResource_
     read::Ptr{Cvoid}
     close::Ptr{Cvoid}
     getdir::Ptr{Cvoid}
+    mjResource_() = new()
 end
 const mjResource = mjResource_
 """
@@ -709,9 +717,10 @@ struct mjOption_
     mpr_iterations::Cint
     disableflags::Cint
     enableflags::Cint
+    mjOption_() = new()
 end
 const mjOption = mjOption_
-struct var"##Ctag#304"
+struct var"##Ctag#314"
     fovy::Cfloat
     ipd::Cfloat
     azimuth::Cfloat
@@ -722,21 +731,24 @@ struct var"##Ctag#304"
     offwidth::Cint
     offheight::Cint
     ellipsoidinertia::Cint
+    var"##Ctag#314"() = new()
 end
-struct var"##Ctag#305"
+struct var"##Ctag#315"
     shadowsize::Cint
     offsamples::Cint
     numslices::Cint
     numstacks::Cint
     numquads::Cint
+    var"##Ctag#315"() = new()
 end
-struct var"##Ctag#306"
+struct var"##Ctag#316"
     ambient::NTuple{3,Cfloat}
     diffuse::NTuple{3,Cfloat}
     specular::NTuple{3,Cfloat}
     active::Cint
+    var"##Ctag#316"() = new()
 end
-struct var"##Ctag#307"
+struct var"##Ctag#317"
     stiffness::Cfloat
     stiffnessrot::Cfloat
     force::Cfloat
@@ -750,8 +762,9 @@ struct var"##Ctag#307"
     shadowclip::Cfloat
     shadowscale::Cfloat
     actuatortendon::Cfloat
+    var"##Ctag#317"() = new()
 end
-struct var"##Ctag#308"
+struct var"##Ctag#318"
     forcewidth::Cfloat
     contactwidth::Cfloat
     contactheight::Cfloat
@@ -768,8 +781,9 @@ struct var"##Ctag#308"
     framewidth::Cfloat
     constraint::Cfloat
     slidercrank::Cfloat
+    var"##Ctag#318"() = new()
 end
-struct var"##Ctag#309"
+struct var"##Ctag#319"
     fog::NTuple{4,Cfloat}
     haze::NTuple{4,Cfloat}
     force::NTuple{4,Cfloat}
@@ -792,12 +806,14 @@ struct var"##Ctag#309"
     constraint::NTuple{4,Cfloat}
     slidercrank::NTuple{4,Cfloat}
     crankbroken::NTuple{4,Cfloat}
+    var"##Ctag#319"() = new()
 end
 """
 	mjVisual
 """
 struct mjVisual_
     data::NTuple{568,UInt8}
+    mjVisual_() = new()
 end
 const mjVisual = mjVisual_
 """
@@ -823,6 +839,7 @@ struct mjStatistic_
     meansize::mjtNum
     extent::mjtNum
     center::NTuple{3,mjtNum}
+    mjStatistic_() = new()
 end
 const mjStatistic = mjStatistic_
 """
@@ -1949,6 +1966,7 @@ struct mjModel_
     name_pluginadr::Ptr{Cint}
     names::Ptr{Cchar}
     names_map::Ptr{Cint}
+    mjModel_() = new()
 end
 const mjModel = mjModel_
 struct mjpResourceProvider_
@@ -1958,6 +1976,7 @@ struct mjpResourceProvider_
     close::mjfCloseResource
     getdir::mjfGetResourceDir
     data::Ptr{Cvoid}
+    mjpResourceProvider_() = new()
 end
 const mjpResourceProvider = mjpResourceProvider_
 const mjtPluginCapabilityBit = mjtPluginCapabilityBit_
@@ -1976,6 +1995,7 @@ struct mjpPlugin_
     compute::Ptr{Cvoid}
     advance::Ptr{Cvoid}
     visualize::Ptr{Cvoid}
+    mjpPlugin_() = new()
 end
 const mjpPlugin = mjpPlugin_
 const mjtGridPos = mjtGridPos_
@@ -2002,6 +2022,7 @@ struct mjrRect_
     bottom::Cint
     width::Cint
     height::Cint
+    mjrRect_() = new()
 end
 const mjrRect = mjrRect_
 """
@@ -2183,6 +2204,7 @@ struct mjrContext_
     windowDoublebuffer::Cint
     currentBuffer::Cint
     readPixelFormat::Cint
+    mjrContext_() = new()
 end
 const mjrContext = mjrContext_
 const mjtButton = mjtButton_
@@ -2274,6 +2296,7 @@ struct mjuiState_
     dragbutton::Cint
     dropcount::Cint
     droppaths::Ptr{Ptr{Cchar}}
+    mjuiState_() = new()
 end
 const mjuiState = mjuiState_
 """
@@ -2317,6 +2340,7 @@ struct mjuiThemeSpacing_
     textver::Cint
     linescroll::Cint
     samples::Cint
+    mjuiThemeSpacing_() = new()
 end
 const mjuiThemeSpacing = mjuiThemeSpacing_
 """
@@ -2390,23 +2414,28 @@ struct mjuiThemeColor_
     edit::NTuple{3,Cfloat}
     edit2::NTuple{3,Cfloat}
     cursor::NTuple{3,Cfloat}
+    mjuiThemeColor_() = new()
 end
 const mjuiThemeColor = mjuiThemeColor_
 struct mjuiItemSingle_
     modifier::Cint
     shortcut::Cint
+    mjuiItemSingle_() = new()
 end
 struct mjuiItemMulti_
     nelem::Cint
     name::NTuple{35,NTuple{40,Cchar}}
+    mjuiItemMulti_() = new()
 end
 struct mjuiItemSlider_
     range::NTuple{2,Cdouble}
     divisions::Cdouble
+    mjuiItemSlider_() = new()
 end
 struct mjuiItemEdit_
     nelem::Cint
     range::NTuple{7,NTuple{2,Cdouble}}
+    mjuiItemEdit_() = new()
 end
 """
 	mjuiItem
@@ -2431,6 +2460,7 @@ rectangle occupied by item
 """
 struct mjuiItem_
     data::NTuple{1488,UInt8}
+    mjuiItem_() = new()
 end
 const mjuiItem = mjuiItem_
 """
@@ -2465,6 +2495,7 @@ struct mjuiSection_
     item::NTuple{100,mjuiItem}
     rtitle::mjrRect
     rcontent::mjrRect
+    mjuiSection_() = new()
 end
 const mjuiSection = mjuiSection_
 """
@@ -2541,6 +2572,7 @@ struct mjUI_
     editchanged::Ptr{mjuiItem}
     nsect::Cint
     sect::NTuple{10,mjuiSection}
+    mjUI_() = new()
 end
 const mjUI = mjUI_
 """
@@ -2566,6 +2598,7 @@ struct mjuiDef_
     state::Cint
     pdata::Ptr{Cvoid}
     other::NTuple{300,Cchar}
+    mjuiDef_() = new()
 end
 const mjuiDef = mjuiDef_
 const mjtCatBit = mjtCatBit_
@@ -2615,6 +2648,7 @@ struct mjvPerturb_
     localpos::NTuple{3,mjtNum}
     localmass::mjtNum
     scale::mjtNum
+    mjvPerturb_() = new()
 end
 const mjvPerturb = mjvPerturb_
 """
@@ -2646,6 +2680,7 @@ struct mjvCamera_
     distance::mjtNum
     azimuth::mjtNum
     elevation::mjtNum
+    mjvCamera_() = new()
 end
 const mjvCamera = mjvCamera_
 """
@@ -2680,6 +2715,7 @@ struct mjvGLCamera_
     frustum_top::Cfloat
     frustum_near::Cfloat
     frustum_far::Cfloat
+    mjvGLCamera_() = new()
 end
 const mjvGLCamera = mjvGLCamera_
 """
@@ -2756,6 +2792,7 @@ struct mjvGeom_
     camdist::Cfloat
     modelrbound::Cfloat
     transparent::mjtByte
+    mjvGeom_() = new()
 end
 const mjvGeom = mjvGeom_
 """
@@ -2799,6 +2836,7 @@ struct mjvLight_
     headlight::mjtByte
     directional::mjtByte
     castshadow::mjtByte
+    mjvLight_() = new()
 end
 const mjvLight = mjvLight_
 """
@@ -2839,6 +2877,7 @@ struct mjvOption_
     skingroup::NTuple{6,mjtByte}
     flags::NTuple{25,mjtByte}
     bvh_depth::Cint
+    mjvOption_() = new()
 end
 const mjvOption = mjvOption_
 """
@@ -2912,6 +2951,7 @@ struct mjvScene_
     flags::NTuple{10,mjtByte}
     framewidth::Cint
     framergb::NTuple{3,Cfloat}
+    mjvScene_() = new()
 end
 const mjvScene = mjvScene_
 """
@@ -3021,9 +3061,10 @@ struct mjvFigure_
     yaxispixel::NTuple{2,Cint}
     xaxisdata::NTuple{2,Cfloat}
     yaxisdata::NTuple{2,Cfloat}
+    mjvFigure_() = new()
 end
 const mjvFigure = mjvFigure_
-struct var"##Ctag#310"
+struct var"##Ctag#320"
     nu::Cint
     na::Cint
     nbody::Cint
@@ -3165,8 +3206,9 @@ struct var"##Ctag#310"
     name_tendonadr::Ptr{Cint}
     name_actuatoradr::Ptr{Cint}
     names::Ptr{Cchar}
+    var"##Ctag#320"() = new()
 end
-struct var"##Ctag#311"
+struct var"##Ctag#321"
     warning::NTuple{8,mjWarningStat}
     nefc::Cint
     ncon::Cint
@@ -3198,6 +3240,7 @@ struct var"##Ctag#311"
     bvh_active::Ptr{mjtByte}
     contact::Ptr{mjContact}
     efc_force::Ptr{mjtNum}
+    var"##Ctag#321"() = new()
 end
 """
 	mjvSceneState
@@ -3216,5 +3259,6 @@ scratch space for vis geoms inserted by plugins
 """
 struct mjvSceneState_
     data::NTuple{10856,UInt8}
+    mjvSceneState_() = new()
 end
 const mjvSceneState = mjvSceneState_

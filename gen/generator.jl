@@ -149,6 +149,17 @@ function create_file_from_expr(filepath, exprs::AbstractArray)
     end
 end
 
+function insert_default_ctor!(expr)
+    @assert expr.head == :struct
+
+    # Insert a default constructor to the struct definition
+    fields_block = expr.args[end]
+    @assert fields_block.head == :block
+    new_ctor_expr = Expr(:(=), Expr(:call, expr.args[2]), Expr(:call, :new))
+    push!(fields_block.args, new_ctor_expr)
+    return expr
+end
+
 function write_content_files(destination_dir, module_content)
     # Uses global variables function_mapping, and calls functions relying on struct_mapping from the scraped introspect module.
 
@@ -171,6 +182,7 @@ function write_content_files(destination_dir, module_content)
         if def.head == :macrocall
             push!(enum_block_args, def)
         elseif def.head == :struct
+            insert_default_ctor!(def)
             push!(struct_block_args, construct_struct_docs(def))
         elseif def.head == :function
             fn_sig = def.args[1]
