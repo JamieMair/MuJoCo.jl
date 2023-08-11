@@ -6,7 +6,7 @@ Pkg.activate(".")
 using MuJoCo
 
 # Load a model and data
-m = load_xml("../models/humanoid.xml")
+m = load_xml("../models/cartpole.xml")
 d = init_data(m)
 
 println(m.opt.timestep)

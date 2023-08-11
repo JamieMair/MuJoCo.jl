@@ -7,15 +7,18 @@ using MuJoCo
 include("visualiser.jl")
 
 # Load model, data, and viewer
-model  = load_xml("../../models/humanoid.xml")
+model  = load_xml("../../models/cartpole.xml")
 data   = init_data(model)
 viewer = MuJoCoViewer(model, data)
+
+# Change initial conditions
+d.qpos .= [0, 0.1]
 
 # Loop and simulate for now
 while !viewer.should_close
 
-    # TODO: nsteps = Int(ceil((1.0/60.0) / m.opt.timestep))
-    nsteps = Int(ceil((1.0/60.0) / 0.01))
+    # TODO: Throttle visualisation inside render!() somewhere
+    nsteps = Int(ceil((1.0/60.0) / m.opt.timestep))
     for _ in 1:nsteps
         step!(model, data)
     end
