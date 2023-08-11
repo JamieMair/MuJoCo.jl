@@ -149,6 +149,11 @@ function create_file_from_expr(filepath, exprs::AbstractArray)
     end
 end
 
+function insert_ctors!(expr)
+    expr = insert_default_ctor!(expr)
+    expr = insert_regular_ctor!(expr)
+    expr
+end
 function insert_default_ctor!(expr)
     @assert expr.head == :struct
 
@@ -159,6 +164,20 @@ function insert_default_ctor!(expr)
     push!(fields_block.args, new_ctor_expr)
     return expr
 end
+function insert_regular_ctor!(expr)
+    @assert expr.head == :struct
+
+    # Insert a default constructor to the struct definition
+    fields_block = expr.args[end]
+    @assert fields_block.head == :block
+    # Assume after default constructor
+    fields = [a for a in fields_block.args if !(typeof(a) <: LineNumberNode) && a.head == :(::)]
+    fields_no_types = [a.args[1] for a in fields]
+    new_ctor_expr = Expr(:(=), Expr(:call, expr.args[2], fields...), Expr(:call, :new, fields_no_types...))
+    push!(fields_block.args, new_ctor_expr)
+    return expr
+end
+
 
 function write_content_files(destination_dir, module_content)
     # Uses global variables function_mapping, and calls functions relying on struct_mapping from the scraped introspect module.
@@ -182,7 +201,7 @@ function write_content_files(destination_dir, module_content)
         if def.head == :macrocall
             push!(enum_block_args, def)
         elseif def.head == :struct
-            insert_default_ctor!(def)
+            def = insert_ctors!(def)
             push!(struct_block_args, construct_struct_docs(def))
         elseif def.head == :function
             fn_sig = def.args[1]
