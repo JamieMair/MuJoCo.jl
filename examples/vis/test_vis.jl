@@ -3,18 +3,21 @@ include("visualiser.jl")
 
 function main()
     root_path = normpath(joinpath(@__DIR__, "..", ".."))
+
     # Load model, data, and viewer
     model  = load_xml(joinpath(root_path, "models", "cartpole.xml"))
     data   = init_data(model)
+    viewer = MuJoCoViewer(model, data)
 
     # Change initial conditions
-    data.qpos .= [0, 0.1]
+    data.qpos .= [0, 0.0001]
+    data.qvel .= [0.01, 0]
 
-    viewer = MuJoCoViewer(model, data)
+    # Loop and simulate for now
     fps = 60
     frametime = 1 / fps
-    # Loop and simulate for now
     while !viewer.should_close
+
         # TODO: Throttle visualisation inside render!() somewhere
         previous_time = data.time
         while (data.time - previous_time < frametime)
