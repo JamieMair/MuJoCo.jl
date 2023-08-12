@@ -6,10 +6,10 @@ end
 struct Statistics
     internal_pointer::Ptr{mjStatistic}
 end
-struct Model
+mutable struct Model
     internal_pointer::Ptr{mjModel}
 end
-struct Data
+mutable struct Data
     internal_pointer::Ptr{mjData}
     model::Model
 end

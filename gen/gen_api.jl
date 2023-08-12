@@ -261,6 +261,14 @@ begin
         push!(other_exprs, fe)
         push!(other_exprs, spfn)
     end
+
+    mutable_structs = Set([:Data, :Model]) # Make main structs mutable so they can be garbage collected
+    for expr in first_exprs
+        if expr.head == :struct && expr.args[2] in mutable_structs
+            expr.args[1] = true # change to mutable
+        end
+    end
+    
     # TODO sort the `first_exprs` array in topological order
 
     exprs = vcat(first_exprs, other_exprs)
