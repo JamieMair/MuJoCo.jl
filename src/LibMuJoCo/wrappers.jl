@@ -8,10 +8,26 @@ struct Statistics
 end
 mutable struct Model
     internal_pointer::Ptr{mjModel}
+    function Model(internal_pointer::Ptr{mjModel})
+        __model = new(internal_pointer)
+        function __finalizer(__model)
+            mj_deleteModel(__model.internal_pointer)
+        end
+        Base.finalizer(__finalizer, __model)
+        return __model
+    end
 end
 mutable struct Data
     internal_pointer::Ptr{mjData}
     model::Model
+    function Data(internal_pointer::Ptr{mjData}, model::Model)
+        __data = new(internal_pointer, model)
+        function __finalizer(__data)
+            mj_deleteData(__data.internal_pointer)
+        end
+        Base.finalizer(__finalizer, __data)
+        return __data
+    end
 end
 function Base.propertynames(x::Options)
     (:timestep, :apirate, :impratio, :tolerance, :noslip_tolerance, :mpr_tolerance, :gravity, :wind, :magnetic, :density, :viscosity, :o_margin, :o_solref, :o_solimp, :integrator, :collision, :cone, :jacobian, :solver, :iterations, :noslip_iterations, :mpr_iterations, :disableflags, :enableflags)
