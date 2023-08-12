@@ -64,13 +64,14 @@ function injest_pointer_def(io)
 end
 
 function parse_macro_file(macro_file)
-    pointer_def_regex = r"#define MJ([a-zA-Z0-9]+)\_POINTERS"
+    pointer_def_regex = r"#define MJ([a-zA-Z0-9]+)\_(?:[a-zA-Z0-9\_]*)?POINTERS(?:[a-zA-Z0-9\_]*)?"
     size_definitions = Dict{Symbol, Tuple{Dict{Symbol, XMacroFieldInfo}, Set{Symbol}}}()
     open(macro_file, "r") do io
         while !eof(io)
             next_line = readline(io)
             m = match(pointer_def_regex, next_line)
             if !isnothing(m)
+                @info "Parsing $next_line"
                 struct_name = Symbol("mj" * uppercasefirst(lowercase(m.captures[begin])))
                 new_dict, deps = injest_pointer_def(io)
                 if haskey(size_definitions, struct_name)

@@ -241,6 +241,31 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrapper
     return (wrapped_struct, fn_expr, propnames_expr, set_prop_fn_expr)
 end
 
+struct MutableStructInfo
+    finalizer_fn::Symbol
+    args::Vector{Union{Symbol,Expr,<:Number,<:AbstractString}}
+end
+conv_internal_ref(struct_name) = Symbol("__" * lowercase(string(struct_name)))
+function insert_regular_gc_ctor!(expr, info::MutableStructInfo)
+    @assert expr.head == :struct
+    struct_name = expr.args[2]
+    # Insert a default constructor to the struct definition
+    fields_block = expr.args[end]
+    @assert fields_block.head == :block
+    # Assume after default constructor
+    fields = [a for a in fields_block.args if !(typeof(a) <: LineNumberNode) && a.head == :(::)]
+    fields_no_types = [a.args[1] for a in fields]
+    instantiate_expr = Expr(:(=), conv_internal_ref(struct_name), Expr(:call, :new, fields_no_types...))
+    custom_finalizer = Expr(:call, info.finalizer_fn, info.args...)
+    gc_fun_expr = Expr(:function, Expr(:call, :__finalizer, conv_internal_ref(struct_name)), Expr(:block, custom_finalizer))
+    finalizer_expr = Expr(:call, :(Base.finalizer), :__finalizer, conv_internal_ref(struct_name))
+    return_expr = Expr(:return, conv_internal_ref(struct_name))
+    new_ctor_fn = Expr(:function, Expr(:call, struct_name, fields...), Expr(:block, instantiate_expr, gc_fun_expr, finalizer_expr, return_expr))
+    push!(fields_block.args, new_ctor_fn)
+    return expr
+end
+
+
 begin
     struct_wrappers = Dict{Symbol, Symbol}(
         :mjData => :Data,
@@ -261,6 +286,23 @@ begin
         push!(other_exprs, fe)
         push!(other_exprs, spfn)
     end
+
+    mutable_struct_info = Dict{Symbol, MutableStructInfo}(
+        :Data => MutableStructInfo(:mj_deleteData, [Expr(:., conv_internal_ref(:Data), QuoteNode(:internal_pointer))]),
+        :Model => MutableStructInfo(:mj_deleteModel, [Expr(:., conv_internal_ref(:Model), QuoteNode(:internal_pointer))])
+    )
+    mutable_structs = Set([:Data, :Model]) # Make main structs mutable so they can be garbage collected
+    for expr in first_exprs
+        if length(expr.args) >= 2
+            struct_name = expr.args[2]
+            if expr.head == :struct && haskey(mutable_struct_info, struct_name)
+                expr.args[1] = true # change to mutable
+                # Add in a new constructor
+                insert_regular_gc_ctor!(expr, mutable_struct_info[struct_name])
+            end
+        end
+    end
+
     # TODO sort the `first_exprs` array in topological order
 
     exprs = vcat(first_exprs, other_exprs)
