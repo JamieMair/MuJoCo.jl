@@ -129,7 +129,9 @@ function MuJoCoViewer(m::Model, d::Data; show_window=true)
     LibMuJoCo.mjv_makeScene(m.internal_pointer, ui.scn, MAXGEOM)
     LibMuJoCo.mjr_makeContext(m.internal_pointer, ui.con, LibMuJoCo.mjFONTSCALE_150)
 
-    # TODO: Add these in once bugs are fixed
+    # The remaining comments are notes on what to add when incorporating LyceumMuJoCoViz
+
+    # TODO: Add these in once ui.cam[] and others are actually mutable
     # alignscale!(ui, m)
     # init_figsensor!(ui.figsensor)
 
@@ -137,7 +139,7 @@ function MuJoCoViewer(m::Model, d::Data; show_window=true)
     # handlers = handlers(e)
     # register!(mngr, handlers...)
 
-    # # TODO: Add frame buffer and framerate stuff from engine
+    # # TODO: Add frame buffer and framerate stuff from engine as fields for later use
     # nothing,
     # UInt8[],
     # nothing,
