@@ -23,7 +23,6 @@ function alloc(::Type{T}) where {T}
 end
 
 # From Lyceum types.jl
-# TODO: How to deal with GC here? Currently segfaults
 Base.@kwdef mutable struct UIState
     scn::RefValue{mjvScene} = Ref(mjvScene())
     cam::RefValue{mjvCamera} = Ref(mjvCamera())

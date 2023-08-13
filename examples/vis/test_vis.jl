@@ -27,9 +27,6 @@ function main()
         render!(viewer, model, data)
     end
     close_viewer!(viewer)
-
-    LibMuJoCo.mj_deleteModel(model.internal_pointer)
-    LibMuJoCo.mj_deleteData(data.internal_pointer)
 end
 
 main()
