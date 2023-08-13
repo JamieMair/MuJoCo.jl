@@ -1,3 +1,8 @@
+# Many elements of this file are taken from https://github.com/Lyceum/LyceumMuJoCoViz.jl
+# It is a work-in-progress
+
+import Base.RefValue
+
 import MuJoCo.LibMuJoCo
 import MuJoCo.LibMuJoCo: Model, Data
 import MuJoCo.LibMuJoCo: mjvScene, mjvCamera, mjvOption, mjvFigure
@@ -18,13 +23,13 @@ function alloc(::Type{T}) where {T}
 end
 
 # From Lyceum types.jl
-# TODO: Move back into a types file
+# TODO: How to deal with GC here? Currently segfaults
 Base.@kwdef mutable struct UIState
-    scn::Ptr{mjvScene} = alloc(mjvScene)
-    cam::Ptr{mjvCamera} = alloc(mjvCamera)
-    vopt::Ptr{mjvOption} = alloc(mjvOption)
-    con::Ptr{mjrContext} = alloc(mjrContext)
-    figsensor::Ptr{mjvFigure} = alloc(mjvFigure)
+    scn::RefValue{mjvScene} = Ref(mjvScene())
+    cam::RefValue{mjvCamera} = Ref(mjvCamera())
+    vopt::RefValue{mjvOption} = Ref(mjvOption())
+    con::RefValue{mjrContext} = Ref(mjrContext())
+    figsensor::RefValue{mjvFigure} = Ref(mjvFigure())
 
     showinfo::Bool = true
     showsensor::Bool = false
@@ -76,6 +81,32 @@ mutable struct MuJoCoViewer
     should_close::Bool
 end
 
+# # From functions.jl in LyceumMuJoCoViz
+# # TODO: Can't change this because ui.cam is an immutable struct
+# function alignscale!(ui::UIState, m::Model)
+#     ui.cam[].lookat = m.stat.center
+#     ui.cam[].distance = 1.5 * m.stat.extent
+#     ui.cam[].type = LibMuJoCo.mjCAMERA_FREE
+#     return ui
+# end
+
+# # From util.jl in LyceumMuJoCoViz
+# function str2vec(s::String, len::Int)
+#     str = zeros(UInt8, len)
+#     str[1:length(s)] = codeunits(s)
+#     return str
+# end
+
+# function init_figsensor!(figsensor::Ref{mjvFigure})
+#     figsensor[].flg_extend = 1
+#     figsensor[].flg_barplot = 1
+#     figsensor[].title = str2vec("Sensor Data", length(figsensor[].title))
+#     figsensor[].yformat = str2vec("%.0f", length(figsensor[].yformat))
+#     figsensor[].gridsize = [2, 3]
+#     figsensor[].range = [[0 1], [-1 1]]
+#     return figsensor
+# end
+
 """
     MuJoCoViewer(m::Model, d::Data; show_window=true)
 
@@ -92,24 +123,22 @@ function MuJoCoViewer(m::Model, d::Data; show_window=true)
 
     # Initialise visualisation data structures
     ui = init_ui!(UIState())
-
-    # TODO: Add these
-    # ui.refreshrate = GetRefreshRate()
-    # ui.lastrender = time()
+    ui.refreshrate = GetRefreshRate()
+    ui.lastrender = time()
 
     # Create scene and context
     LibMuJoCo.mjv_makeScene(m.internal_pointer, ui.scn, MAXGEOM)
     LibMuJoCo.mjr_makeContext(m.internal_pointer, ui.con, LibMuJoCo.mjFONTSCALE_150)
 
-    # TODO: Add equivalent of these once we have nice array handling
-    # alignscale!(ui, sim)
+    # TODO: Add these in once bugs are fixed
+    # alignscale!(ui, m)
     # init_figsensor!(ui.figsensor)
 
     # TODO: add handlers to the struct, see defaulthandlers.jl
     # handlers = handlers(e)
     # register!(mngr, handlers...)
 
-    # TODO: Add frame buffer and framerate stuff from engine
+    # # TODO: Add frame buffer and framerate stuff from engine
     # nothing,
     # UInt8[],
     # nothing,
@@ -151,12 +180,6 @@ function close_viewer!(viewer::MuJoCoViewer)
 
     LibMuJoCo.mjv_freeScene(viewer.ui.scn)
     LibMuJoCo.mjr_freeContext(viewer.ui.con)
-
-    Libc.free(viewer.ui.cam)
-    Libc.free(viewer.ui.vopt)
-    Libc.free(viewer.ui.scn)
-    Libc.free(viewer.ui.con)
-
     GLFW.DestroyWindow(viewer.manager.state.window)
 
     return nothing
