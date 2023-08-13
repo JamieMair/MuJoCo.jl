@@ -262,8 +262,13 @@ format_file(joinpath(staging_dir, "structs.jl"))
 format_file(joinpath(staging_dir, "LibMuJoCo.jl"))
 
 # Create a wrapper file as a placeholder
-open(joinpath(staging_dir, "wrappers.jl"), "w") do io
-    println(io, "# Temporary file, should be overwritten.")
+begin
+    open(joinpath(staging_dir, "wrappers.jl"), "w") do io
+        println(io, "# Temporary file, should be overwritten.")
+    end
+    open(joinpath(staging_dir, "visualiser_wrappers.jl"), "w") do io
+        println(io, "# Temporary file, should be overwritten.")
+    end
 end
 include("gen_api.jl")
 
