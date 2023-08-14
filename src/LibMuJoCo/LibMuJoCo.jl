@@ -7,6 +7,7 @@ include("enums.jl")
 include("structs.jl")
 include("functions.jl")
 include("wrappers.jl")
+include("visualiser_wrappers.jl")
 for name in names(@__MODULE__(); all = true), prefix in PREFIXES
     if startswith(string(name), prefix)
         @eval export $name

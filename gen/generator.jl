@@ -233,6 +233,7 @@ function write_content_files(destination_dir, module_content)
         create_file_from_expr(joinpath(destination_dir, filename), exprs)
     end
     push!(original_module_block_args, Expr(:call, :include, "wrappers.jl"))
+    push!(original_module_block_args, Expr(:call, :include, "visualiser_wrappers.jl"))
 
     for arg in for_block_args
         push!(original_module_block_args, arg)
