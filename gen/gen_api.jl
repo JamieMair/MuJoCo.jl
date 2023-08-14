@@ -242,7 +242,7 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrapper
 end
 
 struct MutableStructInfo
-    finalizer_fn::Symbol
+    finalizer_expr::Union{Expr, Symbol}
     args::Vector{Union{Symbol,Expr,<:Number,<:AbstractString}}
 end
 conv_internal_ref(struct_name) = Symbol("__" * lowercase(string(struct_name)))
@@ -256,7 +256,7 @@ function insert_regular_gc_ctor!(expr, info::MutableStructInfo)
     fields = [a for a in fields_block.args if !(typeof(a) <: LineNumberNode) && a.head == :(::)]
     fields_no_types = [a.args[1] for a in fields]
     instantiate_expr = Expr(:(=), conv_internal_ref(struct_name), Expr(:call, :new, fields_no_types...))
-    custom_finalizer = Expr(:call, info.finalizer_fn, info.args...)
+    custom_finalizer = Expr(:call, info.finalizer_expr, info.args...)
     gc_fun_expr = Expr(:function, Expr(:call, :__finalizer, conv_internal_ref(struct_name)), Expr(:block, custom_finalizer))
     finalizer_expr = Expr(:call, :(Base.finalizer), :__finalizer, conv_internal_ref(struct_name))
     return_expr = Expr(:return, conv_internal_ref(struct_name))
@@ -265,6 +265,7 @@ function insert_regular_gc_ctor!(expr, info::MutableStructInfo)
     return expr
 end
 
+parsed_macro_info = parse_macro_file(macro_file)
 
 begin
     struct_wrappers = Dict{Symbol, Symbol}(
@@ -273,7 +274,6 @@ begin
         :mjStatistic => :Statistics,
         :mjOption => :Options,
     )
-    parsed_macro_info = parse_macro_file(macro_file)
     other_exprs = Expr[]
     first_exprs = Expr[]
     push!(first_exprs, :(using UnsafeArrays))
@@ -291,7 +291,7 @@ begin
         :Data => MutableStructInfo(:mj_deleteData, [Expr(:., conv_internal_ref(:Data), QuoteNode(:internal_pointer))]),
         :Model => MutableStructInfo(:mj_deleteModel, [Expr(:., conv_internal_ref(:Model), QuoteNode(:internal_pointer))])
     )
-    mutable_structs = Set([:Data, :Model]) # Make main structs mutable so they can be garbage collected
+    mutable_structs = Set(collect(keys(mutable_struct_info))) # Make main structs mutable so they can be garbage collected
     for expr in first_exprs
         if length(expr.args) >= 2
             struct_name = expr.args[2]
@@ -308,4 +308,51 @@ begin
     exprs = vcat(first_exprs, other_exprs)
 
     create_file_from_expr(joinpath(staging_dir, "wrappers.jl"), exprs)
+end
+
+begin
+    struct_wrappers = Dict{Symbol, Symbol}(
+        :mjvScene => :VisualiserScene,
+        :mjvCamera => :VisualiserCamera,
+        :mjvOption => :VisualiserOption,
+        :mjrContext => :RendererContext,
+        :mjvFigure => :VisualiserFigure,
+    )
+    other_exprs = Expr[]
+    first_exprs = Expr[]
+    push!(first_exprs, :(using UnsafeArrays))
+    push!(first_exprs, Expr(:export, values(struct_wrappers)...))
+    
+    for (k, v) in struct_wrappers
+        ws, fe, pn, spfn = build_struct_wrapper(k, v, struct_wrappers, parsed_macro_info)
+        push!(first_exprs, ws)
+        push!(other_exprs, pn)
+        push!(other_exprs, fe)
+        push!(other_exprs, spfn)
+    end
+
+    mutable_struct_info = Dict{Symbol, MutableStructInfo}(
+        :VisualiserScene => MutableStructInfo(:mjv_freeScene, [Expr(:., conv_internal_ref(:VisualiserScene), QuoteNode(:internal_pointer))]),
+        :RendererContext => MutableStructInfo(:mjr_freeContext, [Expr(:., conv_internal_ref(:RendererContext), QuoteNode(:internal_pointer))]),
+        :VisualiserCamera => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserCamera), QuoteNode(:internal_pointer))]),
+        :VisualiserOption => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserOption), QuoteNode(:internal_pointer))]),
+        :VisualiserFigure => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserFigure), QuoteNode(:internal_pointer))])
+    )
+    mutable_structs = Set(collect(keys(mutable_struct_info))) # Make main structs mutable so they can be garbage collected
+    for expr in first_exprs
+        if length(expr.args) >= 2
+            struct_name = expr.args[2]
+            if expr.head == :struct && haskey(mutable_struct_info, struct_name)
+                expr.args[1] = true # change to mutable
+                # Add in a new constructor
+                insert_regular_gc_ctor!(expr, mutable_struct_info[struct_name])
+            end
+        end
+    end
+
+    # TODO sort the `first_exprs` array in topological order
+
+    exprs = vcat(first_exprs, other_exprs)
+
+    create_file_from_expr(joinpath(staging_dir, "visualiser_wrappers.jl"), exprs)
 end

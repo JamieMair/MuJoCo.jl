@@ -1,10 +1,14 @@
 module MuJoCo
-
 using UnsafeArrays
+
 include("LibMuJoCo/LibMuJoCo.jl")
+include("utils.jl")
+include("visualiser.jl")
+
 using .LibMuJoCo
 import .LibMuJoCo: Model, Data
 export load_xml, init_data, step!
+
 
 function sample_xml_filepath()
     return abspath(joinpath(abspath(@__DIR__), "..", "models", "humanoid.xml"))
