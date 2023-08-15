@@ -32,7 +32,9 @@ function LibMuJoCo.VisualiserScene()
     return VisualiserScene(mj_scene)
 end
 
-export RendererContext, VisualiserOption, VisualiserCamera, VisualiserFigure, VisualiserScene
+function test_visualiser end
+
+export RendererContext, VisualiserOption, VisualiserCamera, VisualiserFigure, VisualiserScene, test_visualiser
 
 end
 
