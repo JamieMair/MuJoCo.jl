@@ -34,4 +34,20 @@ function sample_model_and_data()
     return model, data
 end
 
+# Handle backwards compatibility
+
+if !isdefined(Base, :get_extension)
+    using Requires
+end
+
+@static if !isdefined(Base, :get_extension)
+function __init__()
+    @static if !isdefined(Base, :get_extension)
+        @require GLFW="f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98" begin
+             include("../ext/VisualiserExt/VisualiserExt.jl")
+         end
+    end
+end
+end
+
 end
