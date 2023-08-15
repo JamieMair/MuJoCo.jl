@@ -23,8 +23,6 @@ VisualiserExt = ["GLFW", "Observables", "StaticArrays"]
 julia = "1.6"
 
 [extras]
-GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
-Observables = "510215fc-4207-5dde-b226-833fc4488ee2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
