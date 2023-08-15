@@ -56,7 +56,9 @@ the visualisation features, or run "install_visualiser()".
 """
 function init_visualiser()
     @eval Main using GLFW, Observables, StaticArrays
-    @eval Main Base.retry_load_extensions()
+    if isdefined(Base, :get_extension)
+        @eval Main Base.retry_load_extensions()
+    end
 end
 """
     install_visualiser()
