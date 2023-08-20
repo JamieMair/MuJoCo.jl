@@ -24,6 +24,7 @@ const MAXGEOM = 10000 # preallocated geom array in mjvScene
 
 include("util.jl")
 include("glfw.jl")
+include("ratetimer.jl")
 include("types.jl")
 include("functions.jl")
 

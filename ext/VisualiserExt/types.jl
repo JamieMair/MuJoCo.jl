@@ -2,22 +2,21 @@
 
 # Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
 
-abstract type ViewerMode end # Previously EngineMode
+# abstract type ViewerMode end # Previously EngineMode
 
-# mutable struct PhysicsState
-#     model::Model
-#     data::Data
-#     pert::RefValue{mjvPerturb}
-#     elapsedsim::Float64
-#     timer::RateTimer
-#     lock::ReentrantLock
+mutable struct PhysicsState
+    model::Model
+    data::Data
+    pert::VisualiserPerturb
+    elapsedsim::Float64
+    timer::RateTimer
+    lock::ReentrantLock # TODO: Check what we need this for
 
-#     function PhysicsState(model::Model, data::Data)
-#         pert = Ref(mjvPerturb())
-#         mjv_defaultPerturb(pert)
-#         new(model, data, pert, 0, RateTimer(), ReentrantLock())
-#     end
-# end
+    function PhysicsState(model::Model, data::Data)
+        pert = VisualiserPerturb()
+        new(model, data, pert, 0, RateTimer(), ReentrantLock())
+    end
+end
 
 Base.@kwdef mutable struct UIState
     scn::VisualiserScene = VisualiserScene()
