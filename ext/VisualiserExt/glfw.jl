@@ -1,6 +1,5 @@
 # File copied from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
-
 @enum Mod::UInt16 begin
     MOD_ALT = GLFW.MOD_ALT
     MOD_SHIFT = GLFW.MOD_SHIFT
