@@ -21,6 +21,7 @@ end
 
 const Maybe{T} = Union{T, Nothing} # From LyceumBase.jl
 const MAXGEOM = 10000 # preallocated geom array in mjvScene
+const MIN_REFRESHRATE = 30 # minimum rate when sim cannot run at the native refresh rate
 
 include("util.jl")
 include("glfw.jl")
@@ -42,9 +43,16 @@ function render(manager::WindowManager, ui::UIState)
 end
 
 mutable struct MuJoCoViewer
+    phys::PhysicsState
     manager::WindowManager
     ui::UIState
     should_close::Bool
+
+    # For button/mouse callbacks
+    ffmpeghandle::Maybe{Base.Process}
+    framebuf::Vector{UInt8}
+    videodst::Maybe{String}
+    min_refreshrate::Int
 end
 
 """
@@ -55,6 +63,9 @@ Initialise a visualiser for a given MuJoCo model
 #TODO: This should effectively copy initialisation of `Engine(...)` from the `LyceumMuJoCoViz` `types.jl` file.
 """
 function MuJoCoViewer(m::Model, d::Data; show_window=true)
+
+    # Store the physics state
+    phys = PhysicsState(m, d)
 
     # Create and show window
     window = create_window(default_windowsize()..., "MuJoCo.jl")
@@ -76,16 +87,23 @@ function MuJoCoViewer(m::Model, d::Data; show_window=true)
     # The remaining comments are notes on what to add when incorporating LyceumMuJoCoViz
 
     # TODO: add handlers to the struct, see defaulthandlers.jl
+    # TODO: Do this externally, after creating the struct!!
     # handlers = handlers(e)
     # register!(mngr, handlers...)
 
-    # # TODO: Add frame buffer and framerate stuff from engine as fields for later use
-    # nothing,
-    # UInt8[],
-    # nothing,
-    # min(map(GetRefreshRate, GLFW.GetMonitors())..., MIN_REFRESHRATE),
+    # For button/mouse callbacks
+    ffmpeghandle = nothing
+    framebuf = UInt8[]
+    videodst = nothing
+    min_refreshrate = min(map(GetRefreshRate, GLFW.GetMonitors())..., MIN_REFRESHRATE)
 
-    return MuJoCoViewer(manager, ui, false)
+    return MuJoCoViewer(
+        phys, manager, ui, false,
+        ffmpeghandle,
+        framebuf,
+        videodst,
+        min_refreshrate,
+    )
 end
 
 """

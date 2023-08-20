@@ -60,6 +60,7 @@ end
 #     videodst::Maybe{String}
 #     min_refreshrate::Int
 
+# TODO: We'll replace the Engine type with MuJoCoViewer.
 #     function Engine(windowsize::NTuple{2,Integer}, model::Union{MJSim,AbstractMuJoCoEnvironment}, modes::Tuple{Vararg{EngineMode}})
 #         window = create_window(windowsize..., "LyceumMuJoCoViz")
 #         try

@@ -6,7 +6,7 @@
 #### PhysicsState
 ####
 
-# resettime!(phys::PhysicsState) = (reset!(phys.timer); phys.elapsedsim = 0; phys)
+resettime!(phys::PhysicsState) = (reset!(phys.timer); phys.elapsedsim = 0; phys)
 
 
 ####
@@ -38,7 +38,7 @@ end
 #     return e
 # end
 
-
+# TODO: Implement this and add the method in defaulthandlers.jl where it's commented out.
 # function printhelp(e::Engine)
 #     io = e.ui.io1
 
@@ -197,9 +197,8 @@ end
 #     return e
 # end
 
-
-# function setpause!(ui::UIState, p::PhysicsState, status::Bool)
-#     status ? stop!(p.timer) : start!(p.timer)
-#     ui.paused = status
-#     ui
-# end
+function setpause!(ui::UIState, p::PhysicsState, status::Bool)
+    status ? stop!(p.timer) : start!(p.timer)
+    ui.paused = status
+    ui
+end
