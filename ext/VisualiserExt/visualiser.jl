@@ -23,11 +23,18 @@ const Maybe{T} = Union{T, Nothing} # From LyceumBase.jl
 const MAXGEOM = 10000 # preallocated geom array in mjvScene
 const MIN_REFRESHRATE = 30 # minimum rate when sim cannot run at the native refresh rate
 
+const RES_HD = (1280, 720)
+const RES_FHD = (1920, 1080)
+const RES_XGA = (1024, 768)
+const RES_SXGA = (1280, 1024)
+
 include("util.jl")
 include("glfw.jl")
 include("ratetimer.jl")
 include("types.jl")
 include("functions.jl")
+include("defaulthandlers.jl")
+
 
 # ----------------------------------------------------------------------------------
 
@@ -40,70 +47,6 @@ function render(manager::WindowManager, ui::UIState)
     # ui.showinfo && overlay_info(rect, e) # TODO: Add in the info later
     GLFW.SwapBuffers(manager.state.window)
     return
-end
-
-mutable struct MuJoCoViewer
-    phys::PhysicsState
-    manager::WindowManager
-    ui::UIState
-    should_close::Bool
-
-    # For button/mouse callbacks
-    ffmpeghandle::Maybe{Base.Process}
-    framebuf::Vector{UInt8}
-    videodst::Maybe{String}
-    min_refreshrate::Int
-end
-
-"""
-    MuJoCoViewer(m::Model, d::Data; show_window=true)
-
-Initialise a visualiser for a given MuJoCo model
-
-#TODO: This should effectively copy initialisation of `Engine(...)` from the `LyceumMuJoCoViz` `types.jl` file.
-"""
-function MuJoCoViewer(m::Model, d::Data; show_window=true)
-
-    # Store the physics state
-    phys = PhysicsState(m, d)
-
-    # Create and show window
-    window = create_window(default_windowsize()..., "MuJoCo.jl")
-    manager = WindowManager(window)
-    show_window && GLFW.ShowWindow(manager.state.window)
-
-    # Initialise visualisation data structures
-    ui = UIState()
-    ui.refreshrate = GetRefreshRate()
-    ui.lastrender = time()
-
-    # Create scene and context
-    LibMuJoCo.mjv_makeScene(m.internal_pointer, ui.scn.internal_pointer, MAXGEOM)
-    LibMuJoCo.mjr_makeContext(m.internal_pointer, ui.con.internal_pointer, LibMuJoCo.mjFONTSCALE_150)
-
-    alignscale!(ui, m)
-    init_figsensor!(ui.figsensor)
-
-    # The remaining comments are notes on what to add when incorporating LyceumMuJoCoViz
-
-    # TODO: add handlers to the struct, see defaulthandlers.jl
-    # TODO: Do this externally, after creating the struct!!
-    # handlers = handlers(e)
-    # register!(mngr, handlers...)
-
-    # For button/mouse callbacks
-    ffmpeghandle = nothing
-    framebuf = UInt8[]
-    videodst = nothing
-    min_refreshrate = min(map(GetRefreshRate, GLFW.GetMonitors())..., MIN_REFRESHRATE)
-
-    return MuJoCoViewer(
-        phys, manager, ui, false,
-        ffmpeghandle,
-        framebuf,
-        videodst,
-        min_refreshrate,
-    )
 end
 
 """

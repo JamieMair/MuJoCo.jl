@@ -45,6 +45,73 @@ Base.@kwdef mutable struct UIState
     lock::ReentrantLock = ReentrantLock()
 end
 
+mutable struct MuJoCoViewer
+    phys::PhysicsState
+    manager::WindowManager
+    ui::UIState
+    should_close::Bool
+
+    # For button/mouse callbacks
+    ffmpeghandle::Maybe{Base.Process}
+    framebuf::Vector{UInt8}
+    videodst::Maybe{String}
+    min_refreshrate::Int
+
+    # Event handlers
+    handlers::Vector{EventHandler}
+end
+
+"""
+    MuJoCoViewer(m::Model, d::Data; show_window=true)
+
+Initialise a visualiser for a given MuJoCo model
+
+This effectively copies initialisation of `Engine(...)` from `LyceumMuJoCoViz.jl`.
+"""
+function MuJoCoViewer(m::Model, d::Data; show_window=true)
+
+    # Store the physics state
+    phys = PhysicsState(m, d)
+
+    # Create and show window
+    window = create_window(default_windowsize()..., "MuJoCo.jl")
+    manager = WindowManager(window)
+    show_window && GLFW.ShowWindow(manager.state.window)
+
+    # Initialise visualisation data structures
+    ui = UIState()
+    ui.refreshrate = GetRefreshRate()
+    ui.lastrender = time()
+
+    # Create scene and context
+    LibMuJoCo.mjv_makeScene(m.internal_pointer, ui.scn.internal_pointer, MAXGEOM)
+    LibMuJoCo.mjr_makeContext(m.internal_pointer, ui.con.internal_pointer, LibMuJoCo.mjFONTSCALE_150)
+
+    alignscale!(ui, m)
+    init_figsensor!(ui.figsensor)
+
+    # For button/mouse callbacks
+    ffmpeghandle = nothing
+    framebuf = UInt8[]
+    videodst = nothing
+    min_refreshrate = min(map(GetRefreshRate, GLFW.GetMonitors())..., MIN_REFRESHRATE)
+
+    v = MuJoCoViewer(
+        phys, manager, ui, false,
+        ffmpeghandle,
+        framebuf,
+        videodst,
+        min_refreshrate,
+        EventHandler[]
+    )
+
+    # Register event handlers
+    v.handlers = handlers(v)
+    register!(manager, v.handlers...)
+
+    return v
+end
+
 # mutable struct Engine{T,M}
 #     phys::PhysicsState{T}
 #     ui::UIState
