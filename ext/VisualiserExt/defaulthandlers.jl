@@ -179,7 +179,6 @@ function handlers(v::MuJoCoViewer)
                 end
             end,
 
-
             onscroll(what = "Zoom camera") do s, ev
                 default_scrollcb(v, s, ev)
             end,
@@ -194,12 +193,12 @@ function handlers(v::MuJoCoViewer)
                 end
             end,
 
-            # TODO: Implement this?
+            # TODO: Implement this? This makes sense if there actually is a reset! method implemented for MuJoCo models, but that's very user-dependent
             # onkey(GLFW.KEY_BACKSPACE, what = "Reset model") do s, ev
             #     ispress_or_repeat(ev.action) && reset!(p, mode(e))
             # end,
 
-            # TODO: Implement this?
+            # TODO: Implement this? Going backwards makes sense for some models, but could cause issues with stateful controllers. Maybe that's up to the user to figure out and choose wisely though...
             # onkey(GLFW.KEY_R, MOD_CONTROL, what = "Toggle reverse") do s, ev
             #     if ispress_or_repeat(ev.action)
             #         ui.reversed = !ui.reversed
@@ -208,11 +207,12 @@ function handlers(v::MuJoCoViewer)
             #     end
             # end,
 
+            # TODO: Actually handle pause properly elsewhere
             onkey(GLFW.KEY_SPACE, what = "Pause") do s, ev
                 ispress_or_repeat(ev.action) && setpause!(ui, p, !ui.paused)
             end,
 
-            # TODO: Implement this?
+            # TODO: Implement this? I think we should, it's a nice feature.
             # onevent(
             #     KeyEvent,
             #     when = describe(GLFW.KEY_RIGHT),
@@ -226,7 +226,7 @@ function handlers(v::MuJoCoViewer)
             #     end
             # end,
 
-            # TODO: Implement this?
+            # TODO: Implement this? If we impement reverse mode, then we should also implement this.
             # onevent(
             #     KeyEvent,
             #     when = describe(GLFW.KEY_LEFT),
@@ -262,7 +262,7 @@ function handlers(v::MuJoCoViewer)
             end,
 
 
-            # TODO: Do we want to include these?
+            # TODO: Do we want to include these? At the moment we've ignored engine modes to make life simpler. Can add them in later.
             # onkey(GLFW.KEY_RIGHT, MOD_CONTROL, what = "Cycle engine mode forward") do s, ev
             #     if ispress_or_repeat(ev.action)
             #         switchmode!(e, inc(e.curmodeidx, 1, length(e.modes)))
@@ -275,84 +275,79 @@ function handlers(v::MuJoCoViewer)
             #     end
             # end,
 
+            onkey(GLFW.KEY_MINUS, what = "Cycle label mode backwards") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.vopt.label = dec(ui.vopt.label, 0, Int(LibMuJoCo.mjNLABEL) - 1)
+                end
+            end,
 
-            # TODO: Implement this
-            # onkey(GLFW.KEY_MINUS, what = "Cycle label mode backwards") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         ui.vopt[].label = dec(ui.vopt[].label, 0, Int(LibMuJoCo.mjNLABEL) - 1)
-            #     end
-            # end,
+            onkey(GLFW.KEY_EQUAL, what = "Cycle label mode forward") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.vopt.label = inc(ui.vopt.label, 0, Int(LibMuJoCo.mjNLABEL) - 1)
+                end
+            end,
 
-            # TODO: Implement this
-            # onkey(GLFW.KEY_EQUAL, what = "Cycle label mode forward") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         ui.vopt[].label = inc(ui.vopt[].label, 0, Int(LibMuJoCo.mjNLABEL) - 1)
-            #     end
-            # end,
+            onkey(GLFW.KEY_LEFT_BRACKET, what = "Cycle frame mode backwards") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.vopt.frame = dec(ui.vopt.frame, 0, Int(LibMuJoCo.mjNFRAME) - 1)
+                end
+            end,
 
+            onkey(GLFW.KEY_RIGHT_BRACKET, what = "Cycle frame mode forward") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.vopt.frame = inc(ui.vopt.frame, 0, Int(LibMuJoCo.mjNFRAME) - 1)
+                end
+            end,
 
-            # TODO: Implement this
-            # onkey(GLFW.KEY_LEFT_BRACKET, what = "Cycle frame mode backwards") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         ui.vopt[].frame = dec(ui.vopt[].frame, 0, Int(LibMuJoCo.mjNFRAME) - 1)
-            #     end
-            # end,
-
-            # TODO: Implement this
-            # onkey(GLFW.KEY_RIGHT_BRACKET, what = "Cycle frame mode forward") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         ui.vopt[].frame = inc(ui.vopt[].frame, 0, Int(LibMuJoCo.mjNFRAME) - 1)
-            #     end
-            # end,
-
-
-            # gen_mjflag_handlers(ui)... #TODO: Implement this. Need the mjVISSTRING stuff
+            # gen_mjflag_handlers(ui)...
         ]
     end
 end
 
-# function gen_mjflag_handlers(ui::UIState)
-#     handlers = EventHandler[]
-#     let vopt = ui.vopt, scn = ui.scn
-#         for i=1:Int(LibMuJoCo.mjNVISFLAG)
-#             key = glfw_lookup_key(LibMuJoCo.mjVISSTRING[3, i])
-#             name = LibMuJoCo.mjVISSTRING[1, i]
-#             h = onkey(key, what = "Toggle $name Viz Flag") do s, ev
-#                 ispress_or_repeat(ev.action) && (vopt.flags = _toggle(vopt.flags, i))
-#             end
-#             push!(handlers, h)
-#         end
+# TODO: We should be able to generate constants/globals like mjVISSTRING automatically. I've just copied these in here for now. Only required by the visualiser. See https://github.com/Lyceum/MuJoCo.jl/blob/master/src/MJCore/wrapper/cglobals.jl
 
-#         for i=1:Int(LibMuJoCo.mjNRNDFLAG)
-#             key = glfw_lookup_key(LibMuJoCo.mjRNDSTRING[3, i])
-#             name = LibMuJoCo.mjRNDSTRING[1, i]
-#             h = onkey(key, what = "Toggle $name Render Flag") do s, ev
-#                 ispress_or_repeat(ev.action) && (scn.flags = _toggle(scn.flags, i))
-#             end
-#             push!(handlers, h)
-#         end
+function gen_mjflag_handlers(ui::UIState)
 
+    handlers = EventHandler[]
+    let vopt = ui.vopt, scn = ui.scn
+        for i=1:Int(LibMuJoCo.mjNVISFLAG)
+            key = glfw_lookup_key(mjVISSTRING[3, i])
+            name = mjVISSTRING[1, i]
+            h = onkey(key, what = "Toggle $name Viz Flag") do s, ev
+                ispress_or_repeat(ev.action) && (vopt.flags = _toggle(vopt.flags, i))
+            end
+            push!(handlers, h)
+        end
 
-#         n = LibMuJoCo.mjNGROUP
+        for i=1:Int(LibMuJoCo.mjNRNDFLAG)
+            key = glfw_lookup_key(mjRNDSTRING[3, i])
+            name = mjRNDSTRING[1, i]
+            h = onkey(key, what = "Toggle $name Render Flag") do s, ev
+                ispress_or_repeat(ev.action) && (scn.flags = _toggle(scn.flags, i))
+            end
+            push!(handlers, h)
+        end
 
-#         h = onevent(KeyEvent, when = "[1-$n]", what = "Toggle Group Groups 1-$n") do s, ev
-#             i = Int(ev.key) - Int('0')
-#             if ispress_or_repeat(ev.action) && iszero(modbits(s)) && checkbounds(Bool, vopt.geomgroup, i)
-#                 vopt.geomgroup = _toggle(vopt.geomgroup, i)
-#             end
-#         end
-#         push!(handlers, h)
+        n = LibMuJoCo.mjNGROUP
 
-#         h = onevent(KeyEvent, when = "SHIFT+[1-$n]", what = "Toggle Site Groups 1-$n") do s, ev
-#             i = Int(ev.key) - Int('0')
-#             if ispress_or_repeat(ev.action) && isshift(modbits(s)) && checkbounds(Bool, vopt.sitegroup, i)
-#                 vopt.sitegroup = _toggle(vopt.sitegroup, i)
-#             end
-#         end
-#         push!(handlers, h)
-#     end
-#     return handlers
-# end
+        h = onevent(KeyEvent, when = "[1-$n]", what = "Toggle Group Groups 1-$n") do s, ev
+            i = Int(ev.key) - Int('0')
+            if ispress_or_repeat(ev.action) && iszero(modbits(s)) && checkbounds(Bool, vopt.geomgroup, i)
+                vopt.geomgroup = _toggle(vopt.geomgroup, i)
+            end
+        end
+        push!(handlers, h)
+
+        h = onevent(KeyEvent, when = "SHIFT+[1-$n]", what = "Toggle Site Groups 1-$n") do s, ev
+            i = Int(ev.key) - Int('0')
+            if ispress_or_repeat(ev.action) && isshift(modbits(s)) && checkbounds(Bool, vopt.sitegroup, i)
+                vopt.sitegroup = _toggle(vopt.sitegroup, i)
+            end
+        end
+        push!(handlers, h)
+    end
+    return handlers
+end
 
 @inline function _toggle(A::SVector{N,LibMuJoCo.mjtByte}, i::Integer) where {N}
     A = MVector(A)

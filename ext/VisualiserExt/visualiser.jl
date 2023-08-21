@@ -50,35 +50,35 @@ function render(manager::WindowManager, ui::UIState)
 end
 
 """
-    render!(viewer::MuJoCoViewer, m::Model, d::Data)
+    render!(v::MuJoCoViewer, m::Model, d::Data)
 
 Render the viewer given current model and data.
 
 # TODO: Add all extra stuff equivalent to `runui(e::Engine)` in `LyceumMuJoCoViz.jl` file
 """
-function render!(viewer::MuJoCoViewer, m::Model, d::Data)
+function render!(v::MuJoCoViewer, m::Model, d::Data)
     LibMuJoCo.mjv_updateScene(
         m.internal_pointer, 
         d.internal_pointer, 
-        viewer.ui.vopt.internal_pointer, 
+        v.ui.vopt.internal_pointer, 
         C_NULL, 
-        viewer.ui.cam.internal_pointer, 
+        v.ui.cam.internal_pointer, 
         LibMuJoCo.mjCAT_ALL, 
-        viewer.ui.scn.internal_pointer
+        v.ui.scn.internal_pointer
     )
-    render(viewer.manager, viewer.ui)
+    render(v.manager, v.ui)
     GLFW.PollEvents()
-    viewer.should_close = GLFW.WindowShouldClose(viewer.manager.state.window)
+    v.should_close = v.ui.shouldexit | GLFW.WindowShouldClose(v.manager.state.window)
 
     return nothing
 end
 
 """
-    close_viewer!(ui, manager)
+    close_viewer!(v::MuJoCoViewer)
 
 Close the viewer when done.
 """
-function close_viewer!(viewer::MuJoCoViewer)
-    GLFW.DestroyWindow(viewer.manager.state.window)
+function close_viewer!(v::MuJoCoViewer)
+    GLFW.DestroyWindow(v.manager.state.window)
     return nothing
 end

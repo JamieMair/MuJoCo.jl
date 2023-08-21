@@ -2,7 +2,7 @@
 
 # Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
 
-const ASCII = raw"""TODO: Make a logo or remove this"""
+# const ASCII = raw"""TODO: Make a logo or remove this"""
 
 function set_string!(buffer::AbstractArray, s::String)
     buffer_size = length(buffer)
@@ -23,8 +23,8 @@ function init_figsensor!(figsensor::VisualiserFigure)
     return figsensor
 end
 
-# @inline inc(x::Integer, min::Integer, max::Integer) = ifelse(x == max, min, x + 1)
-# @inline dec(x::Integer, min::Integer, max::Integer) = ifelse(x == min, max, x - 1)
+@inline inc(x::Integer, min::Integer, max::Integer) = ifelse(x == max, min, x + 1)
+@inline dec(x::Integer, min::Integer, max::Integer) = ifelse(x == min, max, x - 1)
 
 # function startffmpeg(w::Integer, h::Integer, rout::Integer; squashoutput::Bool = true)
 #     w > 0 && h > 0 || error("w and h must be > 0")
@@ -66,10 +66,10 @@ end
 #     return nothing
 # end
 
-# @inline function str2unicode(s::AbstractString)
-#     length(s) == 1 || error("s must be a single length string")
-#     return Int(first(s))
-# end
+@inline function str2unicode(s::AbstractString)
+    length(s) == 1 || error("s must be a single length string")
+    return Int(first(s))
+end
 
 # # From PrettyTables.jl: https://github.com/ronisbr/PrettyTables.jl/blob/d8a948a2dd14df66852c9702387c13f4dfce30d8/src/backends/text/print.jl#L50
 # function get_terminalsize()
