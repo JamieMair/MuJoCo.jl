@@ -26,9 +26,9 @@ function default_mousemovecb(v::MuJoCoViewer, s::WindowState, ev::MouseMoveEvent
         end
 
         if iszero(p.pert.active)
-            mjv_moveCamera(m.internal_pointer, action, scaled_dx, scaled_dy, ui.scn.internal_pointer, ui.cam.internal_pointer)
+            LibMuJoCo.mjv_moveCamera(m.internal_pointer, action, scaled_dx, scaled_dy, ui.scn.internal_pointer, ui.cam.internal_pointer)
         else
-            mjv_movePerturb(m.internal_pointer, d.internal_pointer, action, scaled_dx, scaled_dy, ui.scn.internal_pointer, p.pert.internal_pointer)
+            LibMuJoCo.mjv_movePerturb(m.internal_pointer, d.internal_pointer, action, scaled_dx, scaled_dy, ui.scn.internal_pointer, p.pert.internal_pointer)
         end
     end
 
@@ -47,7 +47,7 @@ function default_buttoncb(v::MuJoCoViewer, s::WindowState, ev::ButtonEvent)
         if ispress(ev.action) && s.control && pert.select > 0
             newpert = s.right ? Int(LibMuJoCo.mjPERT_TRANSLATE) : Int(LibMuJoCo.mjPERT_ROTATE)
             # perturbation onset: reset reference
-            iszero(pert.active) && mjv_initPerturb(m.internal_pointer, d.internal_pointer, ui.scn.internal_pointer, pert.internal_pointer)
+            iszero(pert.active) && LibMuJoCo.mjv_initPerturb(m.internal_pointer, d.internal_pointer, ui.scn.internal_pointer, pert.internal_pointer)
             pert.active = newpert
         elseif isrelease(ev.action)
             # stop pertubation
@@ -64,7 +64,7 @@ function default_buttoncb(v::MuJoCoViewer, s::WindowState, ev::ButtonEvent)
         # find the selected body
         selpnt = zeros(MVector{3,Float64})
         selgeom, selskin = Ref(Cint(0)), Ref(Cint(0))
-        selbody = mjv_select(
+        selbody = LibMuJoCo.mjv_select(
             m.internal_pointer,
             d.internal_pointer,
             ui.vopt.internal_pointer,
@@ -77,22 +77,23 @@ function default_buttoncb(v::MuJoCoViewer, s::WindowState, ev::ButtonEvent)
             selskin,
         )
 
+        # TODO: Bug here, crashes
         if isleft(ev.button) && nomod(s)
-            if selbody >= 0
-                # set body selection (including world body)
+            # if selbody >= 0
+            #     # set body selection (including world body)
 
-                # compute localpos
-                tmp = selpnt - d.xpos[:, selbody+1] # TODO
-                pert.localpos .= reshape(d.xmat[:, selbody+1], 3, 3) * tmp
+            #     # compute localpos
+            #     tmp = selpnt - d.xpos[:, selbody+1] # TODO
+            #     pert.localpos .= reshape(d.xmat[:, selbody+1], 3, 3) * tmp
 
-                # record selection
-                pert.select = selbody
-                pert.skinselect = selskin
-            else
-                # no body selected, unset selection
-                pert.select = 0
-                pert.skinselect = -1
-            end
+            #     # record selection
+            #     pert.select = selbody
+            #     pert.skinselect = selskin
+            # else
+            #     # no body selected, unset selection
+            #     pert.select = 0
+            #     pert.skinselect = -1
+            # end
         elseif isright(ev.button)
             # set camera to look at selected body (including world body)
             selbody >= 0 && (ui.cam.lookat .= selpnt)
@@ -111,19 +112,20 @@ end
 
 function default_scrollcb(v::MuJoCoViewer, s::WindowState, ev::ScrollEvent)
     m = v.phys.model
-    mjv_moveCamera(m.internal_pointer, LibMuJoCo.mjMOUSE_ZOOM, 0.0, 0.05 * ev.dy, v.ui.scn.internal_pointer, v.ui.cam.internal_pointer)
+    LibMuJoCo.mjv_moveCamera(m.internal_pointer, LibMuJoCo.mjMOUSE_ZOOM, 0.0, 0.05 * ev.dy, v.ui.scn.internal_pointer, v.ui.cam.internal_pointer)
     return
 end
 
+# TODO: Note that this used to take in e::Engine, not v::MuJoCoViewer
 function handlers(v::MuJoCoViewer)
     return let v = v, ui = v.ui, p = v.phys
         [
             onevent(ButtonEvent) do s, ev
-                default_buttoncb(e, s, ev)
+                default_buttoncb(v, s, ev)
             end,
 
             onevent(MouseMoveEvent) do s, ev
-                default_mousemovecb(e, s, ev)
+                default_mousemovecb(v, s, ev)
             end,
 
 
@@ -179,7 +181,7 @@ function handlers(v::MuJoCoViewer)
 
 
             onscroll(what = "Zoom camera") do s, ev
-                default_scrollcb(e, s, ev)
+                default_scrollcb(v, s, ev)
             end,
 
             onkey(GLFW.KEY_A, MOD_CONTROL, what = "Align camera scale") do s, ev
@@ -192,12 +194,12 @@ function handlers(v::MuJoCoViewer)
                 end
             end,
 
-            # TODO: Implement this
+            # TODO: Implement this?
             # onkey(GLFW.KEY_BACKSPACE, what = "Reset model") do s, ev
             #     ispress_or_repeat(ev.action) && reset!(p, mode(e))
             # end,
 
-            # TODO: Implement this
+            # TODO: Implement this?
             # onkey(GLFW.KEY_R, MOD_CONTROL, what = "Toggle reverse") do s, ev
             #     if ispress_or_repeat(ev.action)
             #         ui.reversed = !ui.reversed
@@ -206,13 +208,11 @@ function handlers(v::MuJoCoViewer)
             #     end
             # end,
 
+            onkey(GLFW.KEY_SPACE, what = "Pause") do s, ev
+                ispress_or_repeat(ev.action) && setpause!(ui, p, !ui.paused)
+            end,
 
-            # TODO: Implement this
-            # onkey(GLFW.KEY_SPACE, what = "Pause") do s, ev
-            #     ispress_or_repeat(ev.action) && setpause!(ui, p, !ui.paused)
-            # end,
-
-            # TODO: Implement this
+            # TODO: Implement this?
             # onevent(
             #     KeyEvent,
             #     when = describe(GLFW.KEY_RIGHT),
@@ -226,7 +226,7 @@ function handlers(v::MuJoCoViewer)
             #     end
             # end,
 
-            # TODO: Implement this
+            # TODO: Implement this?
             # onevent(
             #     KeyEvent,
             #     when = describe(GLFW.KEY_LEFT),
@@ -240,30 +240,26 @@ function handlers(v::MuJoCoViewer)
             #     end
             # end,
 
+            onkey(GLFW.KEY_ENTER, what = "Toggle speed mode") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.speedmode = !ui.speedmode
+                    setrate!(p.timer, ui.speedmode ? ui.speedfactor : 1)
+                end
+            end,
 
-            # TODO: Implement this
-            # onkey(GLFW.KEY_ENTER, what = "Toggle speed mode") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         ui.speedmode = !ui.speedmode
-            #         setrate!(p.timer, ui.speedmode ? ui.speedfactor : 1)
-            #     end
-            # end,
+            onkey(GLFW.KEY_UP, MOD_SHIFT, what = "Increase sim rate in speedmode") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.speedfactor *= 2
+                    setrate!(p.timer, ui.speedfactor)
+                end
+            end,
 
-            # TODO: Implement this
-            # onkey(GLFW.KEY_UP, MOD_SHIFT, what = "Increase sim rate in speedmode") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         ui.speedfactor *= 2
-            #         setrate!(p.timer, ui.speedfactor)
-            #     end
-            # end,
-
-            # TODO: Implement this
-            # onkey(GLFW.KEY_DOWN, MOD_SHIFT, what = "Decrease sim rate in speedmode") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         ui.speedfactor /= 2
-            #         setrate!(p.timer, ui.speedfactor)
-            #     end
-            # end,
+            onkey(GLFW.KEY_DOWN, MOD_SHIFT, what = "Decrease sim rate in speedmode") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.speedfactor /= 2
+                    setrate!(p.timer, ui.speedfactor)
+                end
+            end,
 
 
             # TODO: Do we want to include these?
@@ -310,12 +306,11 @@ function handlers(v::MuJoCoViewer)
             # end,
 
 
-            gen_mjflag_handlers(ui)...
+            # gen_mjflag_handlers(ui)... #TODO: Implement this. Need the mjVISSTRING stuff
         ]
     end
 end
 
-# TODO: Implement this
 # function gen_mjflag_handlers(ui::UIState)
 #     handlers = EventHandler[]
 #     let vopt = ui.vopt, scn = ui.scn
@@ -323,7 +318,7 @@ end
 #             key = glfw_lookup_key(LibMuJoCo.mjVISSTRING[3, i])
 #             name = LibMuJoCo.mjVISSTRING[1, i]
 #             h = onkey(key, what = "Toggle $name Viz Flag") do s, ev
-#                 ispress_or_repeat(ev.action) && (vopt[].flags = _toggle(vopt[].flags, i))
+#                 ispress_or_repeat(ev.action) && (vopt.flags = _toggle(vopt.flags, i))
 #             end
 #             push!(handlers, h)
 #         end
@@ -332,7 +327,7 @@ end
 #             key = glfw_lookup_key(LibMuJoCo.mjRNDSTRING[3, i])
 #             name = LibMuJoCo.mjRNDSTRING[1, i]
 #             h = onkey(key, what = "Toggle $name Render Flag") do s, ev
-#                 ispress_or_repeat(ev.action) && (scn[].flags = _toggle(scn[].flags, i))
+#                 ispress_or_repeat(ev.action) && (scn.flags = _toggle(scn.flags, i))
 #             end
 #             push!(handlers, h)
 #         end
@@ -342,16 +337,16 @@ end
 
 #         h = onevent(KeyEvent, when = "[1-$n]", what = "Toggle Group Groups 1-$n") do s, ev
 #             i = Int(ev.key) - Int('0')
-#             if ispress_or_repeat(ev.action) && iszero(modbits(s)) && checkbounds(Bool, vopt[].geomgroup, i)
-#                 vopt[].geomgroup = _toggle(vopt[].geomgroup, i)
+#             if ispress_or_repeat(ev.action) && iszero(modbits(s)) && checkbounds(Bool, vopt.geomgroup, i)
+#                 vopt.geomgroup = _toggle(vopt.geomgroup, i)
 #             end
 #         end
 #         push!(handlers, h)
 
 #         h = onevent(KeyEvent, when = "SHIFT+[1-$n]", what = "Toggle Site Groups 1-$n") do s, ev
 #             i = Int(ev.key) - Int('0')
-#             if ispress_or_repeat(ev.action) && isshift(modbits(s)) && checkbounds(Bool, vopt[].sitegroup, i)
-#                 vopt[].sitegroup = _toggle(vopt[].sitegroup, i)
+#             if ispress_or_repeat(ev.action) && isshift(modbits(s)) && checkbounds(Bool, vopt.sitegroup, i)
+#                 vopt.sitegroup = _toggle(vopt.sitegroup, i)
 #             end
 #         end
 #         push!(handlers, h)
