@@ -77,23 +77,22 @@ function default_buttoncb(v::MuJoCoViewer, s::WindowState, ev::ButtonEvent)
             selskin,
         )
 
-        # TODO: Bug here, crashes
         if isleft(ev.button) && nomod(s)
-            # if selbody >= 0
-            #     # set body selection (including world body)
+            if selbody >= 0
+                # set body selection (including world body)
 
-            #     # compute localpos
-            #     tmp = selpnt - d.xpos[:, selbody+1] # TODO
-            #     pert.localpos .= reshape(d.xmat[:, selbody+1], 3, 3) * tmp
+                # compute localpos
+                tmp = selpnt - d.xpos[selbody+1,:]
+                pert.localpos .= reshape(d.xmat[selbody+1,:], 3, 3) * tmp
 
-            #     # record selection
-            #     pert.select = selbody
-            #     pert.skinselect = selskin
-            # else
-            #     # no body selected, unset selection
-            #     pert.select = 0
-            #     pert.skinselect = -1
-            # end
+                # record selection
+                pert.select = selbody
+                pert.skinselect = selskin[]
+            else
+                # no body selected, unset selection
+                pert.select = 0
+                pert.skinselect = -1
+            end
         elseif isright(ev.button)
             # set camera to look at selected body (including world body)
             selbody >= 0 && (ui.cam.lookat .= selpnt)
@@ -116,7 +115,6 @@ function default_scrollcb(v::MuJoCoViewer, s::WindowState, ev::ScrollEvent)
     return
 end
 
-# TODO: Note that this used to take in e::Engine, not v::MuJoCoViewer
 function handlers(v::MuJoCoViewer)
     return let v = v, ui = v.ui, p = v.phys
         [
@@ -265,13 +263,13 @@ function handlers(v::MuJoCoViewer)
             # TODO: Do we want to include these? At the moment we've ignored engine modes to make life simpler. Can add them in later.
             # onkey(GLFW.KEY_RIGHT, MOD_CONTROL, what = "Cycle engine mode forward") do s, ev
             #     if ispress_or_repeat(ev.action)
-            #         switchmode!(e, inc(e.curmodeidx, 1, length(e.modes)))
+            #         switchmode!(e, inc(v.curmodeidx, 1, length(v.modes)))
             #     end
             # end,
 
             # onkey(GLFW.KEY_LEFT, MOD_CONTROL, what = "Cycle engine mode backwards") do s, ev
             #     if ispress_or_repeat(ev.action)
-            #         switchmode!(e, dec(e.curmodeidx, 1, length(e.modes)))
+            #         switchmode!(e, dec(v.curmodeidx, 1, length(v.modes)))
             #     end
             # end,
 
