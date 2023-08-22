@@ -2,7 +2,7 @@
 
 # Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
 
-# const ASCII = raw"""TODO: Make a logo or remove this"""
+const ASCII = raw"""TODO: Make a logo or remove this"""
 
 function set_string!(buffer::AbstractArray, s::String)
     buffer_size = length(buffer)

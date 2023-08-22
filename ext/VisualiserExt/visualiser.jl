@@ -21,9 +21,9 @@ else
     using ..Observables: AbstractObservable, Observable, on, off
 end
 
-const Maybe{T} = Union{T, Nothing} # From LyceumBase.jl
-const MAXGEOM = 10000 # preallocated geom array in mjvScene
-const MIN_REFRESHRATE = 30 # minimum rate when sim cannot run at the native refresh rate
+const Maybe{T} = Union{T, Nothing}  # From LyceumBase.jl
+const MAXGEOM = 10000               # preallocated geom array in mjvScene
+const MIN_REFRESHRATE = 30          # minimum rate when sim can't run at native refresh rate
 
 const RES_HD = (1280, 720)
 const RES_FHD = (1920, 1080)
