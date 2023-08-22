@@ -71,9 +71,9 @@ end
     return Int(first(s))
 end
 
-# # From PrettyTables.jl: https://github.com/ronisbr/PrettyTables.jl/blob/d8a948a2dd14df66852c9702387c13f4dfce30d8/src/backends/text/print.jl#L50
-# function get_terminalsize()
-#     return withenv("LINES" => -1, "COLUMNS" => -1) do
-#         displaysize(stdout)
-#     end
-# end
+# From PrettyTables.jl: https://github.com/ronisbr/PrettyTables.jl/blob/d8a948a2dd14df66852c9702387c13f4dfce30d8/src/backends/text/print.jl#L50
+function get_terminalsize()
+    return withenv("LINES" => -1, "COLUMNS" => -1) do
+        displaysize(stdout)
+    end
+end

@@ -80,14 +80,14 @@ function writedescription(io, hs::Vector{EventHandler})
 
         w1 = min(w1max, div(ncols, 2))
         w2 = min(w2max, ncols - w1 - 4 * length(header)) # each column is padded by 4 spaces
-        pretty_table(io, hcat(whens, whats), ["Command", "Description"], alignment = :L, linebreaks = true, autowrap = true, columns_width = [w1, w2])
-        # pretty_table(
-        #     io, hcat(whens, whats); 
-        #     header=["Command", "Description"],
-        #     alignment = [:c, :l],
-        #     linebreaks = true, autowrap = true,
-        #     columns_width = [w1, w2]
-        # )
+        pretty_table(
+            io, hcat(whens, whats); 
+            header=["Command", "Description"],
+            alignment = [:c, :l],
+            linebreaks = true, 
+            autowrap = true,
+            columns_width = [w1, w2]
+        )
     end
 
     return

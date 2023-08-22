@@ -131,10 +131,9 @@ function handlers(e::Engine)
                 ispress_or_repeat(ev.action) && (ui.shouldexit = true)
             end,
 
-            # TODO: Do this next! :)
-            # onkey(GLFW.KEY_F1, what = "Show help message") do s, ev
-            #     ispress_or_repeat(ev.action) && printhelp(e) 
-            # end,
+            onkey(GLFW.KEY_F1, what = "Show help message") do s, ev
+                ispress_or_repeat(ev.action) && printhelp(e) 
+            end,
 
             onkey(GLFW.KEY_F2, what = "Toggle simulation info") do s, ev
                 ispress_or_repeat(ev.action) && (ui.showinfo = !ui.showinfo)
