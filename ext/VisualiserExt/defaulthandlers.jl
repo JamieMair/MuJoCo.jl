@@ -196,7 +196,7 @@ function handlers(e::Engine)
             #     ispress_or_repeat(ev.action) && reset!(p, mode(e))
             # end,
 
-            # TODO: Implement this? Going backwards makes sense for some models, but could cause issues with stateful controllers. Maybe that's up to the user to figure out and choose wisely though...
+            # TODO: Add reverse mode when we add in Trajectories
             # onkey(GLFW.KEY_R, MOD_CONTROL, what = "Toggle reverse") do s, ev
             #     if ispress_or_repeat(ev.action)
             #         ui.reversed = !ui.reversed
@@ -205,26 +205,24 @@ function handlers(e::Engine)
             #     end
             # end,
 
-            # TODO: Actually handle pause properly elsewhere
             onkey(GLFW.KEY_SPACE, what = "Pause") do s, ev
                 ispress_or_repeat(ev.action) && setpause!(ui, p, !ui.paused)
             end,
 
-            # TODO: Implement this? I think we should, it's a nice feature.
-            # onevent(
-            #     KeyEvent,
-            #     when = describe(GLFW.KEY_RIGHT),
-            #     what = "Step forward when paused (hold SHIFT for $(SHIFTSTEPSPERKEY) steps)"
-            # ) do s, ev
-            #     if ui.paused && ev.key === GLFW.KEY_RIGHT && ispress_or_repeat(ev.action)
-            #         steps = s.shift ? 50 : 1
-            #         for _ = 1:steps
-            #             forwardstep!(p, mode(e))
-            #         end
-            #     end
-            # end,
+            onevent(
+                KeyEvent,
+                when = describe(GLFW.KEY_RIGHT),
+                what = "Step forward when paused (hold SHIFT for $(SHIFTSTEPSPERKEY) steps)"
+            ) do s, ev
+                if ui.paused && ev.key === GLFW.KEY_RIGHT && ispress_or_repeat(ev.action)
+                    steps = s.shift ? 50 : 1
+                    for _ = 1:steps
+                        forwardstep!(p, mode(e))
+                    end
+                end
+            end,
 
-            # TODO: Implement this? If we impement reverse mode, then we should also implement this.
+            # TODO: Add reverse mode when we add in Trajectories
             # onevent(
             #     KeyEvent,
             #     when = describe(GLFW.KEY_LEFT),
@@ -259,19 +257,17 @@ function handlers(e::Engine)
                 end
             end,
 
+            onkey(GLFW.KEY_RIGHT, MOD_CONTROL, what = "Cycle engine mode forward") do s, ev
+                if ispress_or_repeat(ev.action)
+                    switchmode!(e, inc(e.curmodeidx, 1, length(e.modes)))
+                end
+            end,
 
-            # TODO: Do we want to include these? At the moment we've ignored engine modes to make life simpler. Can add them in later.
-            # onkey(GLFW.KEY_RIGHT, MOD_CONTROL, what = "Cycle engine mode forward") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         switchmode!(e, inc(e.curmodeidx, 1, length(e.modes)))
-            #     end
-            # end,
-
-            # onkey(GLFW.KEY_LEFT, MOD_CONTROL, what = "Cycle engine mode backwards") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         switchmode!(e, dec(e.curmodeidx, 1, length(e.modes)))
-            #     end
-            # end,
+            onkey(GLFW.KEY_LEFT, MOD_CONTROL, what = "Cycle engine mode backwards") do s, ev
+                if ispress_or_repeat(ev.action)
+                    switchmode!(e, dec(e.curmodeidx, 1, length(e.modes)))
+                end
+            end,
 
             onkey(GLFW.KEY_MINUS, what = "Cycle label mode backwards") do s, ev
                 if ispress_or_repeat(ev.action)
@@ -302,7 +298,7 @@ function handlers(e::Engine)
     end
 end
 
-# TODO: We should be able to generate constants/globals like mjVISSTRING automatically. I've just copied these in here for now. Only required by the visualiser. See https://github.com/Lyceum/MuJoCo.jl/blob/master/src/MJCore/wrapper/cglobals.jl
+# TODO: We should be able to generate constants/globals like mjVISSTRING automatically. Only required by the visualiser. See https://github.com/Lyceum/MuJoCo.jl/blob/master/src/MJCore/wrapper/cglobals.jl
 
 function gen_mjflag_handlers(ui::UIState)
 

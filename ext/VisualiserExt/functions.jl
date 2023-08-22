@@ -38,54 +38,60 @@ function switchmode!(e::Engine, idx::Integer)
     return e
 end
 
-# TODO: Implement this and add the method in defaulthandlers.jl where it's commented out.
-# function printhelp(e::Engine)
-#     io = e.ui.io1
+function printhelp(e::Engine)
+    io = e.ui.io1
 
-#     writedescription(io, e.handlers)
-#     handlerdescription = String(take!(io))
+    writedescription(io, e.handlers)
+    handlerdescription = String(take!(io))
 
-#     writedescription(io, e.modehandlers)
-#     modehandlerdescription = String(take!(io))
+    writedescription(io, e.modehandlers)
+    modehandlerdescription = String(take!(io))
 
-#     println("Standard Commands:")
-#     print(handlerdescription)
-#     if !isempty(modehandlerdescription)
-#         println("$(nameof(mode(e))) Mode Commands:")
-#         print(modehandlerdescription)
-#     end
-#     println()
-#     println()
+    println("Standard Commands:")
+    print(handlerdescription)
+    if !isempty(modehandlerdescription)
+        println("$(nameof(mode(e))) Mode Commands:")
+        print(modehandlerdescription)
+    end
+    println()
+    println()
 
-#     return
-# end
+    return
+end
 
-# function writedescription(io, hs::Vector{EventHandler})
-#     if !isempty(hs)
-#         whens = String[]
-#         whats = String[]
-#         for h in hs
-#             if h.when !== nothing && h.what !== nothing
-#                 push!(whens, h.when)
-#                 push!(whats, h.what)
-#             elseif h.what !== nothing
-#                 push!(whens, "----")
-#                 push!(whats, h.what)
-#             end
-#         end
+function writedescription(io, hs::Vector{EventHandler})
+    if !isempty(hs)
+        whens = String[]
+        whats = String[]
+        for h in hs
+            if h.when !== nothing && h.what !== nothing
+                push!(whens, h.when)
+                push!(whats, h.what)
+            elseif h.what !== nothing
+                push!(whens, "----")
+                push!(whats, h.what)
+            end
+        end
 
-#         header = ["Command", "Description"]
-#         _, ncols = get_terminalsize()
-#         w1max = max(maximum(length, whens), length(first(header)))
-#         w2max = max(maximum(length, whats), length(first(header)))
+        header = ["Command", "Description"]
+        _, ncols = get_terminalsize()
+        w1max = max(maximum(length, whens), length(first(header)))
+        w2max = max(maximum(length, whats), length(first(header)))
 
-#         w1 = min(w1max, div(ncols, 2))
-#         w2 = min(w2max, ncols - w1 - 4 * length(header)) # each column is padded by 4 spaces
-#         pretty_table(io, hcat(whens, whats), ["Command", "Description"], alignment = :L, linebreaks = true, autowrap = true, columns_width = [w1, w2])
-#     end
+        w1 = min(w1max, div(ncols, 2))
+        w2 = min(w2max, ncols - w1 - 4 * length(header)) # each column is padded by 4 spaces
+        pretty_table(io, hcat(whens, whats), ["Command", "Description"], alignment = :L, linebreaks = true, autowrap = true, columns_width = [w1, w2])
+        # pretty_table(
+        #     io, hcat(whens, whats); 
+        #     header=["Command", "Description"],
+        #     alignment = [:c, :l],
+        #     linebreaks = true, autowrap = true,
+        #     columns_width = [w1, w2]
+        # )
+    end
 
-#     return
-# end
+    return
+end
 
 
 # function overlay_info(rect::MJCore.mjrRect, e::Engine)

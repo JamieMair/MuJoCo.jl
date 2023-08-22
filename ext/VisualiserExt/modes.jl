@@ -2,6 +2,22 @@
 
 # Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
 
+function pausestep!(p::PhysicsState)
+    m, d = p.model, p.data
+    LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 1)
+    forward!(m, d)
+    return p
+end
+
+function forwardstep!(p::PhysicsState)
+    m, d = p.model, p.data
+    fill!(d.xfrc_applied, 0) # TODO: Check that fill!() is ok
+    LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 0)
+    LibMuJoCo.mjv_applyPerturbForce(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer)
+    step!(m, d)
+    return p
+end
+
 ####
 #### EngineMode
 ####
@@ -317,19 +333,3 @@ end
 
 #     return ui
 # end
-
-function pausestep!(p::PhysicsState)
-    m, d = p.model, p.data
-    LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 1)
-    forward!(m, d)
-    return p
-end
-
-function forwardstep!(p::PhysicsState)
-    m, d = p.model, p.data
-    fill!(d.xfrc_applied, 0) # TODO: Check that fill!() is ok
-    LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 0)
-    LibMuJoCo.mjv_applyPerturbForce(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer)
-    step!(m, d)
-    return p
-end
