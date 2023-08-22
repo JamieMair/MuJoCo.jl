@@ -42,8 +42,9 @@ include("defaulthandlers.jl")
 # ----------------------------------------------------------------------------------
 
 # TODO: Remove this later
-function MuJoCoViewer(m::Model, d::Data)
+function MuJoCoViewer(m::Model, d::Data; controller=nothing)
     modes = EngineMode[PassiveDynamics()]
+    !isnothing(controller) && push!(modes, Controller(controller))
     return Engine(default_windowsize(), m, d, Tuple(modes))
 end
 

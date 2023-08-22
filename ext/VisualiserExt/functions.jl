@@ -163,6 +163,7 @@ function overlay_info(rect::mjrRect, e::Engine)
     return
 end
 
+# TODO: Add in recording with FFMPEG
 
 # function startrecord!(e::Engine)
 #     window = e.mngr.state.window

@@ -60,7 +60,7 @@ mutable struct Controller{F} <: EngineMode
 end
 Controller(controller) = Controller(controller, 1.0)
 
-# TODO: This will destroy stateful controllers! Find a better way. Can we just ignore it completely?
+# TODO: This will destroy stateful controllers! Find a better way. Can we just ignore it completely? If so, delete it.
 # function setup!(ui::UIState, p::PhysicsState, x::Controller)
 #     dt = @elapsed x.controller(p.model, p.data)
 #     x.realtimefactor = timestep(p.model.opt.timestep) / dt

@@ -44,27 +44,27 @@ end
 #     end
 # end
 
-# function safe_unlock(lck::ReentrantLock)
-#     if islocked(lck) && current_task() === lck.locked_by
-#         unlock(lck)
-#     end
-#     return
-# end
+function safe_unlock(lck::ReentrantLock)
+    if islocked(lck) && current_task() === lck.locked_by
+        unlock(lck)
+    end
+    return
+end
 
-# """
-#     spinwait(delay)
+"""
+    spinwait(delay)
 
-# Spin in a tight loop for at least `delay` seconds.
+Spin in a tight loop for at least `delay` seconds.
 
-# Note this function is only accurate on the order of approximately `@elapsed time()`
-# seconds.
-# """
-# @inline function spinwait(dt::Real)
-#     dt > 0 || error("dt must be > 0")
-#     t0 = time()
-#     while time() - t0 < dt end
-#     return nothing
-# end
+Note this function is only accurate on the order of approximately `@elapsed time()`
+seconds.
+"""
+@inline function spinwait(dt::Real)
+    dt > 0 || error("dt must be > 0")
+    t0 = time()
+    while time() - t0 < dt end
+    return nothing
+end
 
 @inline function str2unicode(s::AbstractString)
     length(s) == 1 || error("s must be a single length string")
