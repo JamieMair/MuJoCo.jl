@@ -5,11 +5,11 @@
 const STEPSPERKEY = 1
 const SHIFTSTEPSPERKEY = 50
 
-function default_mousemovecb(v::MuJoCoViewer, s::WindowState, ev::MouseMoveEvent)
-    p = v.phys
+function default_mousemovecb(e::Engine, s::WindowState, ev::MouseMoveEvent)
+    p = e.phys
     m = p.model
     d = p.data
-    ui = v.ui
+    ui = e.ui
 
     if ev.isdrag
         # Move free camera
@@ -35,11 +35,11 @@ function default_mousemovecb(v::MuJoCoViewer, s::WindowState, ev::MouseMoveEvent
     return
 end
 
-function default_buttoncb(v::MuJoCoViewer, s::WindowState, ev::ButtonEvent)
-    p = v.phys
+function default_buttoncb(e::Engine, s::WindowState, ev::ButtonEvent)
+    p = e.phys
     m = p.model
     d = p.data
-    ui = v.ui
+    ui = e.ui
     pert = p.pert
 
     if isright(ev.button) || isleft(ev.button)
@@ -109,21 +109,21 @@ function default_buttoncb(v::MuJoCoViewer, s::WindowState, ev::ButtonEvent)
     return
 end
 
-function default_scrollcb(v::MuJoCoViewer, s::WindowState, ev::ScrollEvent)
-    m = v.phys.model
-    LibMuJoCo.mjv_moveCamera(m.internal_pointer, LibMuJoCo.mjMOUSE_ZOOM, 0.0, 0.05 * ev.dy, v.ui.scn.internal_pointer, v.ui.cam.internal_pointer)
+function default_scrollcb(e::Engine, s::WindowState, ev::ScrollEvent)
+    m = e.phys.model
+    LibMuJoCo.mjv_moveCamera(m.internal_pointer, LibMuJoCo.mjMOUSE_ZOOM, 0.0, 0.05 * ev.dy, e.ui.scn.internal_pointer, e.ui.cam.internal_pointer)
     return
 end
 
-function handlers(v::MuJoCoViewer)
-    return let v = v, ui = v.ui, p = v.phys
+function handlers(e::Engine)
+    return let e = e, ui = e.ui, p = e.phys
         [
             onevent(ButtonEvent) do s, ev
-                default_buttoncb(v, s, ev)
+                default_buttoncb(e, s, ev)
             end,
 
             onevent(MouseMoveEvent) do s, ev
-                default_mousemovecb(v, s, ev)
+                default_mousemovecb(e, s, ev)
             end,
 
 
@@ -134,7 +134,7 @@ function handlers(v::MuJoCoViewer)
             # TODO: Implement printhelp()
             # onkey(GLFW.KEY_F1, what = "Show help message") do s, ev
             #     @warn "Not implemented yet"
-            #     ispress_or_repeat(ev.action) && printhelp(v) 
+            #     ispress_or_repeat(ev.action) && printhelp(e) 
             # end,
 
             onkey(GLFW.KEY_F2, what = "Toggle simulation info") do s, ev
@@ -143,42 +143,42 @@ function handlers(v::MuJoCoViewer)
 
 
             onkey(GLFW.KEY_F8, what = "Resize window to $RES_XGA (XGA)") do s, ev
-                if ispress(ev.action) && v.ffmpeghandle === nothing
+                if ispress(ev.action) && e.ffmpeghandle === nothing
                     GLFW.SetWindowSize(s.window, RES_XGA...)
                 end
             end,
             onkey(GLFW.KEY_F8, MOD_SHIFT, what = "Resize window to $RES_SXGA (SXGA)") do s, ev
-                if ispress(ev.action) && v.ffmpeghandle === nothing
+                if ispress(ev.action) && e.ffmpeghandle === nothing
                     GLFW.SetWindowSize(s.window, RES_SXGA...)
                 end
             end,
 
             onkey(GLFW.KEY_F9, what = "Resize window to $RES_HD (HD)") do s, ev
-                if ispress(ev.action) && v.ffmpeghandle === nothing
+                if ispress(ev.action) && e.ffmpeghandle === nothing
                     GLFW.SetWindowSize(s.window, RES_HD...)
                 end
             end,
             onkey(GLFW.KEY_F9, MOD_SHIFT, what = "Resize window to $RES_FHD (FHD)") do s, ev
-                if ispress(ev.action) && v.ffmpeghandle === nothing
+                if ispress(ev.action) && e.ffmpeghandle === nothing
                     GLFW.SetWindowSize(s.window, RES_FHD...)
                 end
             end,
 
             onkey(GLFW.KEY_F10, what = "Resize window to defaults") do s, ev
-                if ispress(ev.action) && v.ffmpeghandle === nothing
+                if ispress(ev.action) && e.ffmpeghandle === nothing
                     GLFW.SetWindowSize(s.window, default_windowsize()...)
                 end
             end,
 
             onkey(GLFW.KEY_F11, what = "Toggle fullscreen") do s, ev
-                if ispress(ev.action) && v.ffmpeghandle === nothing
+                if ispress(ev.action) && e.ffmpeghandle === nothing
                     ismin = iszero(GLFW.GetWindowAttrib(s.window, GLFW.MAXIMIZED))
                     ismin ? GLFW.MaximizeWindow(s.window) : GLFW.RestoreWindow(s.window)
                 end
             end,
 
             onscroll(what = "Zoom camera") do s, ev
-                default_scrollcb(v, s, ev)
+                default_scrollcb(e, s, ev)
             end,
 
             onkey(GLFW.KEY_A, MOD_CONTROL, what = "Align camera scale") do s, ev
@@ -187,7 +187,7 @@ function handlers(v::MuJoCoViewer)
 
             onkey(GLFW.KEY_V, MOD_CONTROL, what = "Toggle video recording") do s, ev
                 if ispress(ev.action)
-                    v.ffmpeghandle === nothing ? startrecord!(v) : stoprecord!(v)
+                    e.ffmpeghandle === nothing ? startrecord!(e) : stoprecord!(e)
                 end
             end,
 
@@ -263,13 +263,13 @@ function handlers(v::MuJoCoViewer)
             # TODO: Do we want to include these? At the moment we've ignored engine modes to make life simpler. Can add them in later.
             # onkey(GLFW.KEY_RIGHT, MOD_CONTROL, what = "Cycle engine mode forward") do s, ev
             #     if ispress_or_repeat(ev.action)
-            #         switchmode!(e, inc(v.curmodeidx, 1, length(v.modes)))
+            #         switchmode!(e, inc(e.curmodeidx, 1, length(e.modes)))
             #     end
             # end,
 
             # onkey(GLFW.KEY_LEFT, MOD_CONTROL, what = "Cycle engine mode backwards") do s, ev
             #     if ispress_or_repeat(ev.action)
-            #         switchmode!(e, dec(v.curmodeidx, 1, length(v.modes)))
+            #         switchmode!(e, dec(e.curmodeidx, 1, length(e.modes)))
             #     end
             # end,
 

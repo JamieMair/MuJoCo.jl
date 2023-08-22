@@ -7,7 +7,7 @@ include("visualiser.jl")
 
 using .LibMuJoCo
 import .LibMuJoCo: Model, Data
-export load_xml, init_data, step!
+export load_xml, init_data, step!, forward!
 export init_visualiser, install_visualiser
 
 
@@ -21,18 +21,21 @@ function load_xml(path)
     model_ptr = mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))
     return Model(model_ptr)
 end
-function init_data(model::Model)
-    data_ptr = mj_makeData(model.internal_pointer)
-    return Data(data_ptr, model) # Requires a reference to the model to get array sizes
+function init_data(m::Model)
+    data_ptr = mj_makeData(m.internal_pointer)
+    return Data(data_ptr, m) # Requires a reference to the model to get array sizes
 end
-function step!(model::Model, data::Data)
-    mj_step(model.internal_pointer, data.internal_pointer)
+function step!(m::Model, d::Data)
+    mj_step(m.internal_pointer, d.internal_pointer)
+end
+function forward!(m::Model, d::Data)
+    mj_forward(m.internal_pointer, d.internal_pointer)
 end
 
 function sample_model_and_data()
-    model = load_xml(sample_xml_filepath())
-    data = init_data(model)
-    return model, data
+    m = load_xml(sample_xml_filepath())
+    d = init_data(m)
+    return m, d
 end
 
 # Handle backwards compatibility
