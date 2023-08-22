@@ -11,7 +11,7 @@ end
 
 function forwardstep!(p::PhysicsState)
     m, d = p.model, p.data
-    fill!(d.xfrc_applied, 0) # TODO: Check that fill!() is ok
+    fill!(d.xfrc_applied, 0)
     LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 0)
     LibMuJoCo.mjv_applyPerturbForce(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer)
     step!(m, d)
@@ -35,7 +35,7 @@ end
 nameof(m::EngineMode) = string(Base.nameof(typeof(m)))
 setup!(ui, p, ::EngineMode) = ui
 teardown!(ui, p, ::EngineMode) = ui
-# reset!(p, ::EngineMode) = (reset!(p.model); p)        # TODO: Are we implementing reset?
+# reset!(p, ::EngineMode) = (reset!(p.model); p)   # TODO: Should we implement reset!() ?
 pausestep!(p, ::EngineMode) = pausestep!(p)
 prepare!(ui, p, ::EngineMode) = ui
 modeinfo(io1, io2, ui, p, ::EngineMode) = nothing
@@ -60,14 +60,14 @@ mutable struct Controller{F} <: EngineMode
 end
 Controller(controller) = Controller(controller, 1.0)
 
-# TODO: This will destroy stateful controllers! Find a better way. Can we just ignore it completely? If so, delete it.
+# Including this will destroy stateful controllers! 
+# We can ignore it and just set the real-time factor on the first forwardstep!()
 # function setup!(ui::UIState, p::PhysicsState, x::Controller)
 #     dt = @elapsed x.controller(p.model, p.data)
 #     x.realtimefactor = timestep(p.model) / dt
 #     return ui
 # end
 
-# TODO: Check that fill!() is ok
 function teardown!(ui::UIState, p::PhysicsState, x::Controller)
     d = p.data
     fill!(d.ctrl, 0)

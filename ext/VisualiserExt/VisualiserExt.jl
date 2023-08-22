@@ -23,6 +23,7 @@ else
 end
 
 include("visualiser.jl")
+export visualise
 
 function __init__()
     if Threads.nthreads() == 1
@@ -49,23 +50,7 @@ function MuJoCo.Visualiser.test_visualiser()
     end
 
     # Visualise the model with this controller
-    viewer = visualise(model, data, controller=ctrl!)
-
-    # # Loop and simulate for now
-    # fps = 60
-    # frametime = 1 / fps
-    # while !viewer.should_close
-
-    #     # TODO: Throttle visualisation inside render!() somewhere
-    #     previous_time = data.time
-    #     while (data.time - previous_time < frametime)
-    #         ctrl!(model, data)
-    #         step!(model, data)
-    #     end
-
-    #     render!(viewer, model, data)
-    # end
-    # close_viewer!(viewer)
+    visualise(model, data, controller=ctrl!)
 end
 
 end

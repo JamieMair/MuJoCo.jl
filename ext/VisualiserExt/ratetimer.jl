@@ -28,5 +28,3 @@ stop!(rt::RateTimer) = (rt.elapsed = time_ns(rt); rt.paused = true; rt)
 start!(rt::RateTimer) = (rt.tlast = time_ns(); rt.paused = false; rt)
 setrate!(rt::RateTimer, r) = (rt.rate = r; rt)
 reset!(rt::RateTimer) = (rt.tlast = time_ns(); rt.elapsed = 0; rt) 
-
-# TODO: Should we have a common reset!() function for many purposes?
