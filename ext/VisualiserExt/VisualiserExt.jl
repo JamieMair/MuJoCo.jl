@@ -5,12 +5,14 @@ if isdefined(Base, :get_extension)
     import MuJoCo.LibMuJoCo
     import MuJoCo.Visualiser
     import GLFW
+    using Printf: @printf
     using StaticArrays
 else
     using ..MuJoCo
     import ..MuJoCo.LibMuJoCo
     import ..MuJoCo.Visualiser
     import ..GLFW
+    using ..Printf: @printf
     using ..StaticArrays
 end
 

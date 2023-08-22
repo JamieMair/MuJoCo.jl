@@ -55,10 +55,11 @@ the visualisation features, or run "install_visualiser()".
 # Packages:
 - GLFW
 - Observables
+- Printf
 - StaticArrays
 """
 function init_visualiser()
-    @eval Main using GLFW, Observables, StaticArrays
+    @eval Main using GLFW, Observables, Printf, StaticArrays
     if isdefined(Base, :get_extension)
         @eval Main Base.retry_load_extensions()
     end
@@ -72,11 +73,12 @@ into the current running environment.
 # Packages:
 - GLFW
 - Observables
+- Printf
 - StaticArrays
 """
 function install_visualiser()
     @eval Main import Pkg
-    @eval Main Pkg.add(["GLFW", "Observables", "StaticArrays"])
+    @eval Main Pkg.add(["GLFW", "Observables", "Printf", "StaticArrays"])
 end
 
 @static if !isdefined(Base, :get_extension)
@@ -84,8 +86,10 @@ function __init__()
     @static if !isdefined(Base, :get_extension)
         @require GLFW="f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98" begin
             @require Observables = "510215fc-4207-5dde-b226-833fc4488ee2" begin
-                @require StaticArrays = "90137ffa-7385-5640-81b9-e52037218182" begin
-                    include("../ext/VisualiserExt/VisualiserExt.jl")
+                @require Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7" begin
+                    @require StaticArrays = "90137ffa-7385-5640-81b9-e52037218182" begin
+                        include("../ext/VisualiserExt/VisualiserExt.jl")
+                    end
                 end
             end
          end
