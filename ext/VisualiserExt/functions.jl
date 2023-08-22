@@ -152,8 +152,8 @@ function overlay_info(rect::mjrRect, e::Engine)
     info2 = string(chomp(String(take!(io2))))
 
     LibMuJoCo.mjr_overlay(
-        LibMuJoCo.mjtFont(0),    # mjFONT_NORMAL
-        LibMuJoCo.mjtGridPos(2), # mjGRID_BOTTOMRIGHT
+        LibMuJoCo.mjFONT_NORMAL,
+        LibMuJoCo.mjGRID_BOTTOMLEFT,
         rect,
         info1,
         info2,
