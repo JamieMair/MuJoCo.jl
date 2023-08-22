@@ -47,14 +47,14 @@ function MuJoCoViewer(m::Model, d::Data)
     return Engine(default_windowsize(), m, d, Tuple(modes))
 end
 
-# Adapted from LyceumMuJoCoViz.jl
-function render(manager::WindowManager, ui::UIState)
-    w, h = GLFW.GetFramebufferSize(manager.state.window)
+# From LyceumMuJoCoViz.jl
+function render(e::Engine)
+    w, h = GLFW.GetFramebufferSize(e.manager.state.window)
     rect = mjrRect(Cint(0), Cint(0), Cint(w), Cint(h))
-    mjr_render(rect, ui.scn.internal_pointer, ui.con.internal_pointer)
-    # ui.showinfo && overlay_info(rect, e) # TODO: Add in the info later
-    GLFW.SwapBuffers(manager.state.window)
-    return
+    mjr_render(rect, e.ui.scn.internal_pointer, e.ui.con.internal_pointer)
+    e.ui.showinfo && overlay_info(rect, e)
+    GLFW.SwapBuffers(e.manager.state.window)
+    return nothing
 end
 
 """
@@ -74,7 +74,7 @@ function render!(e::Engine, m::Model, d::Data)
         LibMuJoCo.mjCAT_ALL, 
         e.ui.scn.internal_pointer
     )
-    render(e.manager, e.ui)
+    render(e)
     GLFW.PollEvents()
     e.should_close = e.ui.shouldexit | GLFW.WindowShouldClose(e.manager.state.window)
 

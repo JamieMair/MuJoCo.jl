@@ -94,83 +94,74 @@ function writedescription(io, hs::Vector{EventHandler})
 end
 
 
-# function overlay_info(rect::MJCore.mjrRect, e::Engine)
-#     ui = e.ui
-#     io1 = ui.io1
-#     io2 = ui.io2
-#     phys = e.phys
-#     sim = getsim(phys.model)
+function overlay_info(rect::mjrRect, e::Engine)
+    ui = e.ui
+    io1 = ui.io1
+    io2 = ui.io2
+    phys = e.phys
+    data = phys.data
 
-#     seekstart(io1)
-#     seekstart(io2)
+    seekstart(io1)
+    seekstart(io2)
 
-#     println(io1, "Mode")
-#     println(io2, nameof(mode(e)))
+    println(io1, "Mode")
+    println(io2, nameof(mode(e)))
 
-#     println(io1, "Status")
-#     if ui.paused
-#         println(io2, "Paused")
-#     elseif ui.reversed
-#         println(io2, "Reverse Simulation")
-#     else
-#         println(io2, "Forward Simulation")
-#     end
+    println(io1, "Status")
+    if ui.paused
+        println(io2, "Paused")
+    elseif ui.reversed
+        println(io2, "Reverse Simulation")
+    else
+        println(io2, "Forward Simulation")
+    end
 
-#     println(io1, "Time")
-#     @printf io2 "%.3f s\n" time(sim)
+    println(io1, "Time")
+    @printf io2 "%.3f s\n" data.time
 
-#     println(io1, "Refresh Rate")
-#     @printf io2 "%d Hz\n" ui.refreshrate
+    println(io1, "Refresh Rate")
+    @printf io2 "%d Hz\n" ui.refreshrate
 
-#     println(io1, "Resolution")
-#     @printf io2 "(%d, %d)\n" e.mngr.state.width e.mngr.state.height
+    println(io1, "Resolution")
+    @printf io2 "(%d, %d)\n" e.manager.state.width e.manager.state.height
 
-#     println(io1, "Sim Speed")
-#     if ui.speedmode
-#         if ui.speedfactor < 1
-#             @printf io2 "%.5gx (slower)\n" 1 / ui.speedfactor
-#         else
-#             @printf io2 "%.5gx (faster)\n" ui.speedfactor
-#         end
-#     else
-#         println(io2, "1")
-#     end
+    println(io1, "Sim Speed")
+    if ui.speedmode
+        if ui.speedfactor < 1
+            @printf io2 "%.5gx (slower)\n" 1 / ui.speedfactor
+        else
+            @printf io2 "%.5gx (faster)\n" ui.speedfactor
+        end
+    else
+        println(io2, "1")
+    end
 
-#     println(io1, "Frame")
-#     println(io2, MJCore.mjFRAMESTRING[e.ui.vopt[].frame+1])
+    # TODO: Need to get mjFRAMESTRING
+    # println(io1, "Frame")
+    # println(io2, MJCore.mjFRAMESTRING[e.ui.vopt[].frame+1])
 
-#     println(io1, "Label")
-#     println(io2, MJCore.mjLABELSTRING[e.ui.vopt[].label+1])
+    # println(io1, "Label")
+    # println(io2, MJCore.mjLABELSTRING[e.ui.vopt[].label+1])
 
-#     # env specific info
-#     if phys.model isa AbstractMuJoCoEnvironment
-#         name = string(Base.nameof(typeof(phys.model)))
-#         println(io1, "Env")
-#         println(io2, name)
+    # mode specific info
+    println(io1, "Mode Info")
+    println(io2)
+    modeinfo(io1, io2, ui, phys, mode(e))
 
-#         println(io1, "Reward")
-#         @printf io2 "%.5g\n" ui.reward
-#     end
+    info1 = string(chomp(String(take!(io1))))
+    info2 = string(chomp(String(take!(io2))))
 
-#     # mode specific info
-#     println(io1, "Mode Info")
-#     println(io2)
-#     modeinfo(io1, io2, ui, phys, mode(e))
+    LibMuJoCo.mjr_overlay(
+        LibMuJoCo.mjtFont(0),    # mjFONT_NORMAL
+        LibMuJoCo.mjtGridPos(2), # mjGRID_BOTTOMRIGHT
+        rect,
+        info1,
+        info2,
+        ui.con.internal_pointer,
+    )
 
-#     info1 = string(chomp(String(take!(io1))))
-#     info2 = string(chomp(String(take!(io2))))
-
-#     mjr_overlay(
-#         MJCore.FONT_NORMAL,
-#         MJCore.GRID_BOTTOMLEFT,
-#         rect,
-#         info1,
-#         info2,
-#         ui.con,
-#     )
-
-#     return
-# end
+    return
+end
 
 
 # function startrecord!(e::Engine)

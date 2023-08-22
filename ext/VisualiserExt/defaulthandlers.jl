@@ -131,9 +131,8 @@ function handlers(e::Engine)
                 ispress_or_repeat(ev.action) && (ui.shouldexit = true)
             end,
 
-            # TODO: Implement printhelp()
+            # TODO: Do this next! :)
             # onkey(GLFW.KEY_F1, what = "Show help message") do s, ev
-            #     @warn "Not implemented yet"
             #     ispress_or_repeat(ev.action) && printhelp(e) 
             # end,
 
