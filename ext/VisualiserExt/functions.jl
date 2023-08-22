@@ -24,19 +24,19 @@ end
 #### Engine
 ####
 
-# @inline mode(e::Engine, idx::Integer = e.curmodeidx) = e.modes[idx]
+@inline mode(e::Engine, idx::Integer = e.curmodeidx) = e.modes[idx]
 
-# function switchmode!(e::Engine, idx::Integer)
-#     teardown!(e.ui, e.phys, mode(e))
-#     deregister!(e.mngr, e.modehandlers...)
+function switchmode!(e::Engine, idx::Integer)
+    teardown!(e.ui, e.phys, mode(e))
+    deregister!(e.manager, e.modehandlers...)
 
-#     e.curmodeidx = idx
-#     e.modehandlers = handlers(e.ui, e.phys, mode(e))
-#     setup!(e.ui, e.phys, mode(e))
-#     register!(e.mngr, e.modehandlers...)
+    e.curmodeidx = idx
+    e.modehandlers = handlers(e.ui, e.phys, mode(e))
+    setup!(e.ui, e.phys, mode(e))
+    register!(e.manager, e.modehandlers...)
 
-#     return e
-# end
+    return e
+end
 
 # TODO: Implement this and add the method in defaulthandlers.jl where it's commented out.
 # function printhelp(e::Engine)
