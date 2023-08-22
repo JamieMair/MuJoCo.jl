@@ -11,13 +11,15 @@ TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
 
 [weakdeps]
+FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
 Observables = "510215fc-4207-5dde-b226-833fc4488ee2"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [extensions]
-VisualiserExt = ["GLFW", "Observables", "StaticArrays"]
+VisualiserExt = ["FFMPEG", "GLFW", "Observables", "Printf", "StaticArrays"]
 
 [compat]
 julia = "1.6"

@@ -2,75 +2,82 @@
 
 # Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
 
-# ####
-# #### EngineMode
-# ####
+####
+#### EngineMode
+####
 
-# # required
-# forwardstep!(p, ::EngineMode) = error("must implement")
+# required
+forwardstep!(p, ::EngineMode) = error("must implement")
 
-# supportsreverse(::EngineMode) = false
-# function reversestep!(p, m::EngineMode)
-#     supportsreverse(m) && error("supportsreverse was true but reversestep! undefined")
-#     return p
-# end
+supportsreverse(::EngineMode) = false
+function reversestep!(p, m::EngineMode)
+    supportsreverse(m) && error("supportsreverse was true but reversestep! undefined")
+    return p
+end
 
-# # optional
-# nameof(m::EngineMode) = string(Base.nameof(typeof(m)))
-# setup!(ui, p, ::EngineMode) = ui
-# teardown!(ui, p, ::EngineMode) = ui
-# reset!(p, ::EngineMode) = (reset!(p.model); p)
-# pausestep!(p, ::EngineMode) = pausestep!(p)
-# prepare!(ui, p, ::EngineMode) = ui
-# modeinfo(io1, io2, ui, p, ::EngineMode) = nothing
-# handlers(ui, p, ::EngineMode) = EventHandler[]
-
-
-# ####
-# #### PassiveDynamics
-# ####
-
-# struct PassiveDynamics <: EngineMode end
-# forwardstep!(p::PhysicsState, ::PassiveDynamics) = forwardstep!(p)
+# optional
+nameof(m::EngineMode) = string(Base.nameof(typeof(m)))
+setup!(ui, p, ::EngineMode) = ui
+teardown!(ui, p, ::EngineMode) = ui
+# reset!(p, ::EngineMode) = (reset!(p.model); p)        # TODO: Are we implementing reset?
+pausestep!(p, ::EngineMode) = pausestep!(p)
+# prepare!(ui, p, ::EngineMode) = ui                    # TODO: Do we want this?
+modeinfo(io1, io2, ui, p, ::EngineMode) = nothing
+handlers(ui, p, ::EngineMode) = EventHandler[]
 
 
-# ####
-# #### Controller
-# ####
+####
+#### PassiveDynamics
+####
 
-# mutable struct Controller{F} <: EngineMode
-#     controller::F
-#     realtimefactor::Float64
-# end
-# Controller(controller) = Controller(controller, 1.0)
+struct PassiveDynamics <: EngineMode end
+forwardstep!(p::PhysicsState, ::PassiveDynamics) = forwardstep!(p)
 
+
+####
+#### Controller
+####
+
+mutable struct Controller{F} <: EngineMode
+    controller::F
+    realtimefactor::Float64
+end
+Controller(controller) = Controller(controller, 1.0)
+
+# TODO: This will destroy stateful controllers! Find a better way. Can we just ignore it completely?
 # function setup!(ui::UIState, p::PhysicsState, x::Controller)
-#     dt = @elapsed x.controller(p.model)
-#     x.realtimefactor = timestep(p.model) / dt
+#     dt = @elapsed x.controller(p.model, p.data)
+#     x.realtimefactor = timestep(p.model.opt.timestep) / dt
 #     return ui
 # end
 
-# function teardown!(ui::UIState, p::PhysicsState, x::Controller)
-#     zerofullctrl!(getsim(p.model))
-#     return ui
-# end
+# TODO: Check that fill!() is ok
+function teardown!(ui::UIState, p::PhysicsState, x::Controller)
+    d = p.data
+    fill!(d.ctrl, 0)
+    fill!(d.qfrc_applied, 0)
+    fill!(d.xfrc_applied, 0)
+    return ui
+end
 
-# function forwardstep!(p::PhysicsState, x::Controller)
-#     dt = @elapsed x.controller(p.model)
-#     x.realtimefactor = timestep(p.model) / dt
-#     return forwardstep!(p)
-# end
+function forwardstep!(p::PhysicsState, x::Controller)
+    m, d = p.model, p.data
+    dt = @elapsed x.controller(m, d)
+    x.realtimefactor = timestep(p.model) / dt
+    return forwardstep!(p)
+end
 
-# function modeinfo(io1, io2, ui::UIState, p::PhysicsState, x::Controller)
-#     println(io1, "Realtime Factor")
-#     @printf io2 "%.2fx\n" x.realtimefactor
-#     return nothing
-# end
+function modeinfo(io1, io2, ui::UIState, p::PhysicsState, x::Controller)
+    println(io1, "Realtime Factor")
+    @printf io2 "%.2fx\n" x.realtimefactor
+    return nothing
+end
 
+# TODO: Implement Trajectory mode later
 
-# ####
-# #### Trajectory
-# ####
+####
+#### Trajectory
+####
 
 # mutable struct Trajectory{TR<:AbsVec{<:AbsMat}} <: EngineMode
 #     trajectories::TR
@@ -217,9 +224,9 @@
 # gettraj(m::Trajectory) = m.trajectories[m.k]
 
 
-# ####
-# #### Util
-# ####
+####
+#### Util
+####
 
 # function burst!(
 #     ui::UIState,
@@ -311,18 +318,18 @@
 #     return ui
 # end
 
-# function pausestep!(p::PhysicsState)
-#     sim = getsim(p.model)
-#     mjv_applyPerturbPose(sim.m, sim.d, p.pert, 1)
-#     forward!(sim)
-#     return p
-# end
+function pausestep!(p::PhysicsState)
+    m, d = p.model, p.data
+    LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 1)
+    forward!(m, d)
+    return p
+end
 
-# function forwardstep!(p::PhysicsState)
-#     sim = getsim(p.model)
-#     fill!(sim.d.xfrc_applied, 0)
-#     mjv_applyPerturbPose(sim.m, sim.d, p.pert, 0)
-#     mjv_applyPerturbForce(sim.m, sim.d, p.pert)
-#     step!(p.model)
-#     return p
-# end
+function forwardstep!(p::PhysicsState)
+    m, d = p.model, p.data
+    fill!(d.xfrc_applied, 0) # TODO: Check that fill!() is ok
+    LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 0)
+    LibMuJoCo.mjv_applyPerturbForce(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer)
+    step!(m, d)
+    return p
+end

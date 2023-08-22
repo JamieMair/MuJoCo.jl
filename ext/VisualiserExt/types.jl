@@ -2,7 +2,7 @@
 
 # Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
 
-# abstract type ViewerMode end # Previously EngineMode
+abstract type EngineMode end
 
 mutable struct PhysicsState
     model::Model
@@ -10,7 +10,7 @@ mutable struct PhysicsState
     pert::VisualiserPerturb
     elapsedsim::Float64
     timer::RateTimer
-    lock::ReentrantLock # TODO: Check what we need this for
+    lock::ReentrantLock
 
     function PhysicsState(model::Model, data::Data)
         pert = VisualiserPerturb()
@@ -45,11 +45,16 @@ Base.@kwdef mutable struct UIState
     lock::ReentrantLock = ReentrantLock()
 end
 
-mutable struct MuJoCoViewer
+mutable struct Engine{M}
     phys::PhysicsState
     manager::WindowManager
     ui::UIState
     should_close::Bool
+
+    # Engine modes
+    modes::M
+    modehandlers::Vector{EventHandler}
+    curmodeidx::Int
 
     # For button/mouse callbacks
     ffmpeghandle::Maybe{Base.Process}
@@ -61,20 +66,19 @@ mutable struct MuJoCoViewer
     handlers::Vector{EventHandler}
 end
 
-"""
-    MuJoCoViewer(m::Model, d::Data; show_window=true)
+function Engine(
+    windowsize::NTuple{2,Integer}, 
+    m::Model, 
+    d::Data,
+    modes::Tuple{Vararg{EngineMode}},
+    show_window=true,
+)    
 
-Initialise a visualiser for a given MuJoCo model
-
-This effectively copies initialisation of `Engine(...)` from `LyceumMuJoCoViz.jl`.
-"""
-function MuJoCoViewer(m::Model, d::Data; show_window=true)
-
-    # Store the physics state
+    # Store physics sate
     phys = PhysicsState(m, d)
 
-    # Create and show window
-    window = create_window(default_windowsize()..., "MuJoCo.jl")
+    # Create the window and manager
+    window = create_window(windowsize..., "MuJoCo.jl")
     manager = WindowManager(window)
     show_window && GLFW.ShowWindow(manager.state.window)
 
@@ -95,9 +99,13 @@ function MuJoCoViewer(m::Model, d::Data; show_window=true)
     framebuf = UInt8[]
     videodst = nothing
     min_refreshrate = min(map(GetRefreshRate, GLFW.GetMonitors())..., MIN_REFRESHRATE)
-
-    v = MuJoCoViewer(
+    
+    # Build the engine
+    e = Engine{typeof(modes)}(
         phys, manager, ui, false,
+        modes,
+        handlers(ui, phys, first(modes)),
+        1,
         ffmpeghandle,
         framebuf,
         videodst,
@@ -105,72 +113,8 @@ function MuJoCoViewer(m::Model, d::Data; show_window=true)
         EventHandler[]
     )
 
-    # Register event handlers
-    v.handlers = handlers(v)
-    register!(manager, v.handlers...)
+    e.handlers = handlers(e)
+    register!(manager, e.handlers...)
 
-    return v
+    return e
 end
-
-# mutable struct Engine{T,M}
-#     phys::PhysicsState{T}
-#     ui::UIState
-#     mngr::WindowManager
-#     handlers::Vector{EventHandler}
-
-#     modes::M
-#     modehandlers::Vector{EventHandler}
-#     curmodeidx::Int
-
-#     ffmpeghandle::Maybe{Base.Process}
-#     framebuf::Vector{UInt8}
-#     videodst::Maybe{String}
-#     min_refreshrate::Int
-
-# TODO: We'll replace the Engine type with MuJoCoViewer.
-#     function Engine(windowsize::NTuple{2,Integer}, model::Union{MJSim,AbstractMuJoCoEnvironment}, modes::Tuple{Vararg{EngineMode}})
-#         window = create_window(windowsize..., "LyceumMuJoCoViz")
-#         try
-#             phys = PhysicsState(model)
-#             ui = UIState()
-#             mngr = WindowManager(window)
-
-#             mjv_defaultScene(ui.scn)
-#             mjv_defaultCamera(ui.cam)
-#             mjv_defaultOption(ui.vopt)
-#             mjr_defaultContext(ui.con)
-#             mjv_defaultFigure(ui.figsensor)
-
-#             sim = getsim(model)
-#             mjv_makeScene(sim.m, ui.scn, MAXGEOM) # TODO calculate MAXGEOM form model and moes
-#             mjr_makeContext(sim.m, ui.con, FONTSCALE)
-
-#             alignscale!(ui, sim)
-#             init_figsensor!(ui.figsensor)
-
-#             e = new{typeof(model),typeof(modes)}(
-#                 phys,
-#                 ui,
-#                 mngr,
-#                 EventHandler[],
-
-#                 modes,
-#                 handlers(ui, phys, first(modes)),
-#                 1,
-
-#                 nothing,
-#                 UInt8[],
-#                 nothing,
-#                 min(map(GetRefreshRate, GLFW.GetMonitors())..., MIN_REFRESHRATE),
-#             )
-
-#             e.handlers = handlers(e)
-#             register!(mngr, e.handlers...)
-
-#             return e
-#         catch e
-#             GLFW.DestroyWindow(window)
-#             rethrow(e)
-#         end
-#     end
-# end
