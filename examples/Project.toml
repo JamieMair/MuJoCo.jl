@@ -1,5 +1,6 @@
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
 MuJoCo = "1c101251-5e0f-4746-b44c-0728d433b68a"
 MuJoCo_jll = "32af7c3b-80ec-5621-8194-2f6cb2280831"

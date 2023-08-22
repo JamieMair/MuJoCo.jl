@@ -5,6 +5,7 @@ if isdefined(Base, :get_extension)
     import MuJoCo.LibMuJoCo
     import MuJoCo.Visualiser
     import GLFW
+    using FFMPEG
     using Printf: @printf
     using StaticArrays
 else
@@ -12,6 +13,7 @@ else
     import ..MuJoCo.LibMuJoCo
     import ..MuJoCo.Visualiser
     import ..GLFW
+    using ..FFMPEG
     using ..Printf: @printf
     using ..StaticArrays
 end

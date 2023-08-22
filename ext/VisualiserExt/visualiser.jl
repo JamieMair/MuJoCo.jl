@@ -1,6 +1,8 @@
 # Many elements of this file are taken from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 # It is a work-in-progress
 
+# TODO: Move all of this into the main VisualiserExt.jl script so it's all together
+
 import Base.RefValue
 
 if isdefined(Base, :get_extension)
