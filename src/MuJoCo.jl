@@ -7,7 +7,7 @@ include("visualiser.jl")
 
 using .LibMuJoCo
 import .LibMuJoCo: Model, Data
-export load_xml, init_data, step!, forward!
+export load_xml, init_data, step!, forward!, timestep
 export init_visualiser, install_visualiser
 
 
@@ -31,6 +31,7 @@ end
 function forward!(m::Model, d::Data)
     mj_forward(m.internal_pointer, d.internal_pointer)
 end
+timestep(m::Model) = m.opt.timestep # Useful
 
 function sample_model_and_data()
     m = load_xml(sample_xml_filepath())

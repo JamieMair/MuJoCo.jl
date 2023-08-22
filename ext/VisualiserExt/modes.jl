@@ -37,7 +37,7 @@ setup!(ui, p, ::EngineMode) = ui
 teardown!(ui, p, ::EngineMode) = ui
 # reset!(p, ::EngineMode) = (reset!(p.model); p)        # TODO: Are we implementing reset?
 pausestep!(p, ::EngineMode) = pausestep!(p)
-# prepare!(ui, p, ::EngineMode) = ui                    # TODO: Do we want this?
+prepare!(ui, p, ::EngineMode) = ui
 modeinfo(io1, io2, ui, p, ::EngineMode) = nothing
 handlers(ui, p, ::EngineMode) = EventHandler[]
 
@@ -63,7 +63,7 @@ Controller(controller) = Controller(controller, 1.0)
 # TODO: This will destroy stateful controllers! Find a better way. Can we just ignore it completely? If so, delete it.
 # function setup!(ui::UIState, p::PhysicsState, x::Controller)
 #     dt = @elapsed x.controller(p.model, p.data)
-#     x.realtimefactor = timestep(p.model.opt.timestep) / dt
+#     x.realtimefactor = timestep(p.model) / dt
 #     return ui
 # end
 

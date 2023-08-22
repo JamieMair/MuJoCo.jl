@@ -1,3 +1,5 @@
+# Many elements of this file are taken from https://github.com/Lyceum/LyceumMuJoCoViz.jl
+
 module VisualiserExt
 
 if isdefined(Base, :get_extension)
@@ -22,6 +24,13 @@ end
 
 include("visualiser.jl")
 
+function __init__()
+    if Threads.nthreads() == 1
+        @warn "The visualiser for MuJoCo.jl is designed to run multi-threaded, but the current Julia session was started with only one thread. Degraded performance will occur. To enable multi-threading, set JULIA_NUM_THREADS to a value greater than 1 before starting Julia."
+    end
+    return nothing
+end
+
 function MuJoCo.Visualiser.test_visualiser()
     root_path = normpath(joinpath(@__DIR__, "..", ".."))
 
@@ -39,24 +48,24 @@ function MuJoCo.Visualiser.test_visualiser()
         return nothing
     end
 
-    # Load the viewer
-    viewer = MuJoCoViewer(model, data, controller=ctrl!)
+    # Visualise the model with this controller
+    viewer = visualise(model, data, controller=ctrl!)
 
-    # Loop and simulate for now
-    fps = 60
-    frametime = 1 / fps
-    while !viewer.should_close
+    # # Loop and simulate for now
+    # fps = 60
+    # frametime = 1 / fps
+    # while !viewer.should_close
 
-        # TODO: Throttle visualisation inside render!() somewhere
-        previous_time = data.time
-        while (data.time - previous_time < frametime)
-            ctrl!(model, data)
-            step!(model, data)
-        end
+    #     # TODO: Throttle visualisation inside render!() somewhere
+    #     previous_time = data.time
+    #     while (data.time - previous_time < frametime)
+    #         ctrl!(model, data)
+    #         step!(model, data)
+    #     end
 
-        render!(viewer, model, data)
-    end
-    close_viewer!(viewer)
+    #     render!(viewer, model, data)
+    # end
+    # close_viewer!(viewer)
 end
 
 end

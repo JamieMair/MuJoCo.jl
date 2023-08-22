@@ -49,7 +49,6 @@ mutable struct Engine{M}
     phys::PhysicsState
     manager::WindowManager
     ui::UIState
-    should_close::Bool
 
     # Engine modes
     modes::M
@@ -71,21 +70,15 @@ function Engine(
     m::Model, 
     d::Data,
     modes::Tuple{Vararg{EngineMode}},
-    show_window=true,
 )    
 
-    # Store physics sate
+    # Store physics sate and visualisation interface
     phys = PhysicsState(m, d)
+    ui = UIState()
 
     # Create the window and manager
     window = create_window(windowsize..., "MuJoCo.jl")
     manager = WindowManager(window)
-    show_window && GLFW.ShowWindow(manager.state.window)
-
-    # Initialise visualisation data structures
-    ui = UIState()
-    ui.refreshrate = GetRefreshRate()
-    ui.lastrender = time()
 
     # Create scene and context
     LibMuJoCo.mjv_makeScene(m.internal_pointer, ui.scn.internal_pointer, MAXGEOM)
@@ -102,7 +95,7 @@ function Engine(
     
     # Build the engine
     e = Engine{typeof(modes)}(
-        phys, manager, ui, false,
+        phys, manager, ui,
         modes,
         handlers(ui, phys, first(modes)),
         1,
