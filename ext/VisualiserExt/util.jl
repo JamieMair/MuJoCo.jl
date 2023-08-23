@@ -46,7 +46,7 @@ function safe_unlock(lck::ReentrantLock)
     if islocked(lck) && current_task() === lck.locked_by
         unlock(lck)
     end
-    return
+    return nothing
 end
 
 """

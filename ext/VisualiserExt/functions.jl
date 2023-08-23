@@ -157,7 +157,7 @@ function overlay_info(rect::mjrRect, e::Engine)
         ui.con.internal_pointer,
     )
 
-    return
+    return nothing
 end
 
 function startrecord!(e::Engine)
@@ -193,5 +193,5 @@ end
 function setpause!(ui::UIState, p::PhysicsState, status::Bool)
     status ? stop!(p.timer) : start!(p.timer)
     ui.paused = status
-    ui
+    return ui
 end
