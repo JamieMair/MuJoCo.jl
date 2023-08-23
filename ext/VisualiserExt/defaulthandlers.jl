@@ -289,31 +289,37 @@ function handlers(e::Engine)
                 end
             end,
 
-            # gen_mjflag_handlers(ui)...
+            gen_mjflag_handlers(ui)...
         ]
     end
 end
-
-# TODO: We should be able to generate constants/globals like mjVISSTRING automatically. Only required by the visualiser. See https://github.com/Lyceum/MuJoCo.jl/blob/master/src/MJCore/wrapper/cglobals.jl
 
 function gen_mjflag_handlers(ui::UIState)
 
     handlers = EventHandler[]
     let vopt = ui.vopt, scn = ui.scn
         for i=1:Int(LibMuJoCo.mjNVISFLAG)
-            key = glfw_lookup_key(mjVISSTRING[3, i])
+
+            k = mjVISSTRING[3, i]
+            isempty(k) && continue
+
+            key = glfw_lookup_key(k)
             name = mjVISSTRING[1, i]
             h = onkey(key, what = "Toggle $name Viz Flag") do s, ev
-                ispress_or_repeat(ev.action) && (vopt.flags = _toggle(vopt.flags, i))
+                ispress_or_repeat(ev.action) && _toggle!(vopt.flags, i)
             end
             push!(handlers, h)
         end
 
         for i=1:Int(LibMuJoCo.mjNRNDFLAG)
-            key = glfw_lookup_key(mjRNDSTRING[3, i])
+            
+            k = mjRNDSTRING[3, i]
+            isempty(k) && continue
+
+            key = glfw_lookup_key(k)
             name = mjRNDSTRING[1, i]
             h = onkey(key, what = "Toggle $name Render Flag") do s, ev
-                ispress_or_repeat(ev.action) && (scn.flags = _toggle(scn.flags, i))
+                ispress_or_repeat(ev.action) && _toggle!(scn.flags, i)
             end
             push!(handlers, h)
         end
@@ -323,7 +329,7 @@ function gen_mjflag_handlers(ui::UIState)
         h = onevent(KeyEvent, when = "[1-$n]", what = "Toggle Group Groups 1-$n") do s, ev
             i = Int(ev.key) - Int('0')
             if ispress_or_repeat(ev.action) && iszero(modbits(s)) && checkbounds(Bool, vopt.geomgroup, i)
-                vopt.geomgroup = _toggle(vopt.geomgroup, i)
+                _toggle!(vopt.geomgroup, i)
             end
         end
         push!(handlers, h)
@@ -331,7 +337,7 @@ function gen_mjflag_handlers(ui::UIState)
         h = onevent(KeyEvent, when = "SHIFT+[1-$n]", what = "Toggle Site Groups 1-$n") do s, ev
             i = Int(ev.key) - Int('0')
             if ispress_or_repeat(ev.action) && isshift(modbits(s)) && checkbounds(Bool, vopt.sitegroup, i)
-                vopt.sitegroup = _toggle(vopt.sitegroup, i)
+                _toggle!(vopt.sitegroup, i)
             end
         end
         push!(handlers, h)
@@ -339,8 +345,7 @@ function gen_mjflag_handlers(ui::UIState)
     return handlers
 end
 
-@inline function _toggle(A::SVector{N,LibMuJoCo.mjtByte}, i::Integer) where {N}
-    A = MVector(A)
-    A[i] = ifelse(A[i] > 0, 0, 1)
-    SVector(A)
+@inline function _toggle!(A::UnsafeArray{UInt8, N}, i::Integer) where {N}
+    A[i] = (A[i] > 0) ? 0 : 1
+    return nothing
 end

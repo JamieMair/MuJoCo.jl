@@ -133,12 +133,11 @@ function overlay_info(rect::mjrRect, e::Engine)
         println(io2, "1")
     end
 
-    # TODO: Need to get mjFRAMESTRING
-    # println(io1, "Frame")
-    # println(io2, MJCore.mjFRAMESTRING[e.ui.vopt[].frame+1])
+    println(io1, "Frame")
+    println(io2, mjFRAMESTRING[e.ui.vopt.frame+1])
 
-    # println(io1, "Label")
-    # println(io2, MJCore.mjLABELSTRING[e.ui.vopt[].label+1])
+    println(io1, "Label")
+    println(io2, mjLABELSTRING[e.ui.vopt.label+1])
 
     # mode specific info
     println(io1, "Mode Info")
