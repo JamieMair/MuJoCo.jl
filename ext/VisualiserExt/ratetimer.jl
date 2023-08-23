@@ -1,4 +1,4 @@
-# Copied from https://github.com/Lyceum/LyceumMuJoCoViz.jl
+# Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
 mutable struct RateTimer
     tlast::Float64

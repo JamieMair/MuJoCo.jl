@@ -1,7 +1,5 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
-# Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
-
 ####
 #### PhysicsState
 ####
@@ -93,7 +91,6 @@ function writedescription(io, hs::Vector{EventHandler})
     return
 end
 
-
 function overlay_info(rect::mjrRect, e::Engine)
     ui = e.ui
     io1 = ui.io1
@@ -163,37 +160,35 @@ function overlay_info(rect::mjrRect, e::Engine)
     return
 end
 
-# TODO: Add in recording with FFMPEG
+function startrecord!(e::Engine)
+    window = e.manager.state.window
+    SetWindowAttrib(window, GLFW.RESIZABLE, 0)
+    w, h = GLFW.GetFramebufferSize(window)
+    resize!(e.framebuf, 3 * w * h)
+    e.ffmpeghandle, e.videodst = startffmpeg(w, h, e.min_refreshrate)
+    @info "Recording video. Window resizing temporarily disabled"
+    return e
+end
 
-# function startrecord!(e::Engine)
-#     window = e.mngr.state.window
-#     SetWindowAttrib(window, GLFW.RESIZABLE, 0)
-#     w, h = GLFW.GetFramebufferSize(window)
-#     resize!(e.framebuf, 3 * w * h)
-#     e.ffmpeghandle, e.videodst = startffmpeg(w, h, e.min_refreshrate)
-#     @info "Recording video. Window resizing temporarily disabled"
-#     return e
-# end
+function recordframe(e::Engine)
+    w, h = GLFW.GetFramebufferSize(e.manager.state.window)
+    rect = mjrRect(Cint(0), Cint(0), Cint(w), Cint(h))
+    LibMuJoCo.mjr_readPixels(e.framebuf, C_NULL, rect, e.ui.con.internal_pointer)
+    write(e.ffmpeghandle, e.framebuf)
+    return nothing
+end
 
-# function recordframe(e::Engine)
-#     w, h = GLFW.GetFramebufferSize(e.mngr.state.window)
-#     rect = mjrRect(Cint(0), Cint(0), Cint(w), Cint(h))
-#     mjr_readPixels(e.framebuf, C_NULL, rect, e.ui.con)
-#     write(e.ffmpeghandle, e.framebuf)
-#     return nothing
-# end
-
-# function stoprecord!(e::Engine)
-#     SetWindowAttrib(e.mngr.state.window, GLFW.RESIZABLE, 1)
-#     @info "Recording finished, window resizing re-enabled. Waiting for transcoding to finish."
-#     ispaused = e.ui.paused
-#     setpause!(e.ui, e.phys, true)
-#     close(e.ffmpeghandle)
-#     @info "Finished recording! Video saved to $(e.videodst)"
-#     e.ffmpeghandle = e.videodst = nothing
-#     setpause!(e.ui, e.phys, ispaused)
-#     return e
-# end
+function stoprecord!(e::Engine)
+    SetWindowAttrib(e.manager.state.window, GLFW.RESIZABLE, 1)
+    @info "Recording finished, window resizing re-enabled. Waiting for transcoding to finish."
+    ispaused = e.ui.paused
+    setpause!(e.ui, e.phys, true)
+    close(e.ffmpeghandle)
+    @info "Finished recording! Video saved to $(e.videodst)"
+    e.ffmpeghandle = e.videodst = nothing
+    setpause!(e.ui, e.phys, ispaused)
+    return e
+end
 
 function setpause!(ui::UIState, p::PhysicsState, status::Bool)
     status ? stop!(p.timer) : start!(p.timer)

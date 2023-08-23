@@ -36,8 +36,8 @@ function MuJoCo.Visualiser.test_visualiser()
     root_path = normpath(joinpath(@__DIR__, "..", ".."))
 
     # Load model, data
-    model  = load_xml(joinpath(root_path, "models", "cartpole.xml"))
-    data   = init_data(model)
+    model = load_xml(joinpath(root_path, "models", "cartpole.xml"))
+    data  = init_data(model)
 
     # Change initial conditions
     data.qpos .= @SVector [0, 0.0001]

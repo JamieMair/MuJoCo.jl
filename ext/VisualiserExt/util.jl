@@ -1,7 +1,5 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
-# Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
-
 const ASCII = raw"""TODO: Make a logo or remove this"""
 
 function set_string!(buffer::AbstractArray, s::String)
@@ -26,23 +24,23 @@ end
 @inline inc(x::Integer, min::Integer, max::Integer) = ifelse(x == max, min, x + 1)
 @inline dec(x::Integer, min::Integer, max::Integer) = ifelse(x == min, max, x - 1)
 
-# function startffmpeg(w::Integer, h::Integer, rout::Integer; squashoutput::Bool = true)
-#     w > 0 && h > 0 || error("w and h must be > 0")
+function startffmpeg(w::Integer, h::Integer, rout::Integer; squashoutput::Bool = true)
+    w > 0 && h > 0 || error("w and h must be > 0")
 
-#     dst = tempname() * ".mp4"
-#     arg = `-y -f rawvideo -pixel_format rgb24 -video_size $(w)x$(h) -use_wallclock_as_timestamps true -i pipe:0 -c:v libx264 -preset ultrafast -tune animation -vf "vflip" -r $rout $dst`
+    dst = tempname(pwd()) * ".mp4"
+    arg = `-y -f rawvideo -pixel_format rgb24 -video_size $(w)x$(h) -use_wallclock_as_timestamps true -i pipe:0 -c:v libx264 -preset ultrafast -tune animation -vf "vflip" -r $rout $dst`
 
-#     FFMPEG.@ffmpeg_env begin
-#         in = Base.PipeEndpoint()
-#         if squashoutput
-#             p = Base._spawn(`$(FFMPEG.ffmpeg) $arg`, Any[in, devnull, devnull])
-#         else
-#             p = Base._spawn(`$(FFMPEG.ffmpeg) $arg`, Any[in, stdout, stderr])
-#         end
-#         p.in = in
-#         return p, dst
-#     end
-# end
+    FFMPEG.@ffmpeg_env begin
+        indata = Base.PipeEndpoint()
+        if squashoutput
+            p = Base._spawn(`$(FFMPEG.ffmpeg) $arg`, Base.SpawnIO[indata, devnull, devnull])
+        else
+            p = Base._spawn(`$(FFMPEG.ffmpeg) $arg`, Base.SpawnIO[indata, stdout, stderr])
+        end
+        p.in = indata
+        return p, dst
+    end
+end
 
 function safe_unlock(lck::ReentrantLock)
     if islocked(lck) && current_task() === lck.locked_by

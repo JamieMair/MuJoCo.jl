@@ -1,4 +1,4 @@
-# Most this file is slightly modified from https://github.com/Lyceum/LyceumMuJoCoViz.jl
+# Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
 import Base: @lock, @lock_nofail
 

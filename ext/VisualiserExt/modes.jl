@@ -1,7 +1,5 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
-# Anything commented out is a function we have copied but not yet changed. Some of these will not be required in our final version and can be deleted.
-
 function pausestep!(p::PhysicsState)
     m, d = p.model, p.data
     LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 1)
