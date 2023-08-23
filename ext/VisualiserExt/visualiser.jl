@@ -40,19 +40,57 @@ include("defaulthandlers.jl")
 # ----------------------------------------------------------------------------------
 
 """
-Add docstring here
+    visualise(m::Model, d::Data; controller=nothing, trajectories=nothing)
+
+Starts an interactive visualization of a MuJoCo model specified by an instance of `Model` and `Data`.
+
+The visualizer has several "modes" that allow you to visualize passive dynamics, play back recorded trajectories, and run a controller interactively. The passive dynamics mode is always available, while the other modes are specified by the keyword arguments below.
+
+Press F1 for help after running the visualiser to print the available options in a terminal.
+
+# Keywords
+
+- `controller`: a callback function with the signature `controller(m, d)`, called at each timestep, that applies a control input to the system (or does any other operation you like).
+
+- `trajectories`: [IGNORE THIS] a single trajectory or vector of trajectories, where each trajectory is an AbstractMatrix of states with size `(length(statespace(model)), T)` and `T` is the length of the trajectory. Note that each trajectory can have different length.
+
+TODO: Trajectories have not yet been implemented, but are coming soon. This documentation is leftover from the original Lyceum visualiser as a placeholder. Need to add trajectories to the example below.
+
+# Examples
+
+```julia
+using MuJoCo
+
+# Load a model
+model, data = MuJoCo.sample_model_and_data()
+
+# Define a controller
+function ctrl!(m,d)
+    d.ctrl .= 2*rand(m.nu) .- 1
+end
+
+# Run the visualiser
+# MuJoCo.install_visualiser() # Run this to install dependencies only once
+MuJoCo.init_visualiser()
+MuJoCo.Visualiser.visualise(model, data, controller=ctrl!)
+```
 """
-function visualise(m::Model, d::Data; controller=nothing)
+function MuJoCo.Visualiser.visualise(
+    m::Model, d::Data; 
+    controller = nothing, 
+    trajectories = nothing
+)
     modes = EngineMode[PassiveDynamics()]
     !isnothing(controller) && push!(modes, Controller(controller))
     e = Engine(default_windowsize(), m, d, Tuple(modes))
-    run(e)
+    run!(e)
+    return nothing
 end
 
 """
 Run the visualiser engine
 """
-function run(e::Engine)
+function run!(e::Engine)
 
     # Render the first frame before opening window
     prepare!(e)
@@ -61,14 +99,14 @@ function run(e::Engine)
     GLFW.ShowWindow(e.manager.state.window)
 
     # Run the simulation/mode in a different thread
-    modetask = Threads.@spawn runphysics(e)
+    modetask = Threads.@spawn runphysics!(e)
 
     # Print help info
     println(ASCII)
     println("Press \"F1\" to show the help message.")
 
     # Run the visuals
-    runui(e)
+    runui!(e)
     wait(modetask)
     return nothing
 end
@@ -76,7 +114,7 @@ end
 """
 Run the UI
 """
-function runui(e::Engine)
+function runui!(e::Engine)
     shouldexit = false
     trecord = 0.0
     try
@@ -89,7 +127,7 @@ function runui(e::Engine)
             end
 
             # Render
-            render(e)
+            render!(e)
             trender = time()
 
             # Match the rendering rate to desired rates
@@ -139,7 +177,7 @@ end
 """
 Render a frame
 """
-function render(e::Engine)
+function render!(e::Engine)
     w, h = GLFW.GetFramebufferSize(e.manager.state.window)
     rect = mjrRect(Cint(0), Cint(0), Cint(w), Cint(h))
     mjr_render(rect, e.ui.scn.internal_pointer, e.ui.con.internal_pointer)
@@ -154,7 +192,7 @@ Run the MuJoCo model.
 This function handles simulating the model in pause, forward, and reverse mode.
 Note that reverse mode is only implemented for the `Trajectory` EngineMode.
 """
-function runphysics(e::Engine)
+function runphysics!(e::Engine)
     p = e.phys
     ui = e.ui
     resettime!(p) # reset sim and world clocks to 0

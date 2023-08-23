@@ -39,7 +39,9 @@ end
 
 function test_visualiser end
 
-export RendererContext, VisualiserOption, VisualiserCamera, VisualiserFigure, VisualiserScene, VisualiserPerturb, test_visualiser
+function visualise end
+
+export RendererContext, VisualiserOption, VisualiserCamera, VisualiserFigure, VisualiserScene, VisualiserPerturb, test_visualiser, visualise
 
 end
 

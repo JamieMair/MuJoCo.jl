@@ -23,7 +23,6 @@ else
 end
 
 include("visualiser.jl")
-export visualise
 
 function __init__()
     if Threads.nthreads() == 1
