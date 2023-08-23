@@ -97,7 +97,7 @@ function default_buttoncb(e::Engine, s::WindowState, ev::ButtonEvent)
 
             if s.control && selbody > 0
                 # also set camera to track selected body (excluding world body)
-                ui.cam.type = Int(LibMuJoCo.mjCAMERA_TRACKING)
+                ui.cam.type = LibMuJoCo.mjCAMERA_TRACKING
                 ui.cam.trackbodyid = selbody
                 ui.cam.fixedcamid = -1
             end
@@ -179,6 +179,17 @@ function handlers(e::Engine)
 
             onkey(GLFW.KEY_A, MOD_CONTROL, what = "Align camera scale") do s, ev
                 ispress_or_repeat(ev.action) && alignscale!(ui, p.model)
+            end,
+
+            onkey(GLFW.KEY_TAB, what = "Change camera view") do s, ev
+                if ispress(ev.action)
+                    ui.cam.fixedcamid += 1
+                    ui.cam.type = LibMuJoCo.mjCAMERA_FIXED
+                    if ui.cam.fixedcamid >= p.model.ncam
+                        ui.cam.fixedcamid = -1
+                        ui.cam.type = LibMuJoCo.mjCAMERA_FREE
+                    end
+                end
             end,
 
             onkey(GLFW.KEY_V, MOD_CONTROL, what = "Toggle video recording") do s, ev

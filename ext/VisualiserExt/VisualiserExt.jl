@@ -56,7 +56,7 @@ const RES_SXGA = (1280, 1024)
 
 # The following is from https://github.com/Lyceum/MuJoCo.jl/blob/master/src/MJCore/wrapper/cglobals.jl and https://github.com/Lyceum/MuJoCo.jl/blob/master/src/MJCore/util.jl#L132
 
-# TODO: Move this to the codegen? @Jamie where do you reckon is best?
+# TODO: Move this to the codegen or MuJoCo.jl? @Jamie where do you reckon is best?
 
 struct CRef{name, T}
     CRef{name, T}() where {name, T} = new{name::Symbol, T}()
