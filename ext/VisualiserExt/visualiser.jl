@@ -1,44 +1,5 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
-import Base: @lock, @lock_nofail
-
-if isdefined(Base, :get_extension)
-    import MuJoCo.LibMuJoCo: Model, Data
-    import MuJoCo.LibMuJoCo: mjvScene, mjvCamera, mjvOption, mjvFigure
-    import MuJoCo.LibMuJoCo: mjrContext, mjrRect, mjr_render
-    using MuJoCo.Visualiser
-    using GLFW: GLFW, Window, Key, Action, MouseButton, GetKey, RELEASE, PRESS, REPEAT
-    using Observables: AbstractObservable, Observable, on, off
-else
-    import ..MuJoCo.LibMuJoCo: Model, Data
-    import ..MuJoCo.LibMuJoCo: mjvScene, mjvCamera, mjvOption, mjvFigure
-    import ..MuJoCo.LibMuJoCo: mjrContext, mjrRect, mjr_render
-    using ..MuJoCo.Visualiser
-    using ..GLFW: GLFW, Window, Key, Action, MouseButton, GetKey, RELEASE, PRESS, REPEAT
-    using ..Observables: AbstractObservable, Observable, on, off
-end
-
-const Maybe{T} = Union{T, Nothing}  # From LyceumBase.jl
-const MAXGEOM = 10000               # preallocated geom array in mjvScene
-const MIN_REFRESHRATE = 30          # minimum rate when sim can't run at native refresh rate
-const RNDGAMMA = 0.9
-
-const RES_HD = (1280, 720)
-const RES_FHD = (1920, 1080)
-const RES_XGA = (1024, 768)
-const RES_SXGA = (1280, 1024)
-
-include("util.jl")
-include("glfw.jl")
-include("ratetimer.jl")
-include("types.jl")
-include("functions.jl")
-include("modes.jl")
-include("defaulthandlers.jl")
-
-
-# ----------------------------------------------------------------------------------
-
 """
     visualise(m::Model, d::Data; controller=nothing, trajectories=nothing)
 
