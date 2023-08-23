@@ -1,6 +1,15 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
-const ASCII = raw"""TODO: Make a logo or remove this"""
+const ASCII = raw"""
+ __  __            _        _____       _ _ 
+|  \/  |          | |      / ____|     (_) |
+| \  / |_   _     | | ___ | |     ___   _| |
+| |\/| | | | |_   | |/ _ \| |    / _ \ | | |
+| |  | | |_| | |__| | (_) | |___| (_) || | |
+|_|  |_|\__,_|\____/ \___/ \_____\___(_) |_|
+                                      _/ |  
+                                     |__/   
+"""
 
 function set_string!(buffer::AbstractArray, s::String)
     buffer_size = length(buffer)

@@ -83,7 +83,7 @@ function Engine(
     LibMuJoCo.mjr_makeContext(m.internal_pointer, ui.con.internal_pointer, LibMuJoCo.mjFONTSCALE_150)
 
     alignscale!(ui, m)
-    init_figsensor!(ui.figsensor) # TODO: What is figsensor used for?
+    init_figsensor!(ui.figsensor)
 
     # For button/mouse callbacks
     ffmpeghandle = nothing
