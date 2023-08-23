@@ -33,7 +33,7 @@ end
 nameof(m::EngineMode) = string(Base.nameof(typeof(m)))
 setup!(ui, p, ::EngineMode) = ui
 teardown!(ui, p, ::EngineMode) = ui
-# reset!(p, ::EngineMode) = (reset!(p.model); p)   # TODO: Should we implement reset!() ?
+# reset!(p, ::EngineMode) = (reset!(p.model); p)   # TODO: reset! is highly model-dependent
 pausestep!(p, ::EngineMode) = pausestep!(p)
 prepare!(ui, p, ::EngineMode) = ui
 modeinfo(io1, io2, ui, p, ::EngineMode) = nothing
@@ -87,13 +87,13 @@ function modeinfo(io1, io2, ui::UIState, p::PhysicsState, x::Controller)
     return nothing
 end
 
-# TODO: Implement Trajectory mode later
+# TODO: Implement Trajectory mode later. It relies on setstate!(m, d), which is highly dependent on the model and should be user-defined. We should think about the best way to include this.
 
 ####
 #### Trajectory
 ####
 
-# mutable struct Trajectory{TR<:AbsVec{<:AbsMat}} <: EngineMode
+# mutable struct Trajectory{TR<:AbstractVector{<:AbstractMatrix}} <: EngineMode
 #     trajectories::TR
 #     k::Int
 #     t::Int
@@ -104,13 +104,19 @@ end
 #     bg_idx::Int
 #     bg_range::LinRange{Float64}
 #     doppler::Bool
-#     function Trajectory{TR}(trajectories) where {TR<:AbsVec{<:AbsMat}}
-#         new{TR}(trajectories, 1, 1, false, 1, LinRange(0, 1, 2), 1, LinRange(0, 1, 2), false)
-#     end
 # end
-# Trajectory(trajectories::AbsVec{<:AbsMat}) = Trajectory{typeof(trajectories)}(trajectories)
-# Trajectory(trajectories::AbsMat) = Trajectory([trajectories])
 
+# function Trajectory{T}(trajectories) where {T <: AbstractVector{<:AbstractMatrix}}
+#     return Trajectory{T}(
+#         trajectories, 1, 1, false, 1, 
+#         LinRange(0, 1, 2), 1, 
+#         LinRange(0, 1, 2), false
+#     )
+# end
+
+# Trajectory(trajectories::AbstractVector{<:AbstractMatrix}) = Trajectory{typeof(trajectories)}(trajectories)
+
+# Trajectory(trajectories::AbstractMatrix) = Trajectory([trajectories])
 
 # function setup!(ui::UIState, p::PhysicsState, m::Trajectory)
 #     setburstmodeparams!(m, p)

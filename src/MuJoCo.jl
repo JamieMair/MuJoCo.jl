@@ -40,7 +40,6 @@ function sample_model_and_data()
 end
 
 # Handle backwards compatibility
-
 if !isdefined(Base, :get_extension)
     using Requires
 end

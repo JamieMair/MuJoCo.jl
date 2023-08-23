@@ -1,21 +1,18 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
 """
-    visualise(m::Model, d::Data; controller=nothing, trajectories=nothing)
+
+    visualise(m::Model, d::Data; controller=nothing)
 
 Starts an interactive visualization of a MuJoCo model specified by an instance of `Model` and `Data`.
 
-The visualizer has several "modes" that allow you to visualize passive dynamics, play back recorded trajectories, and run a controller interactively. The passive dynamics mode is always available, while the other modes are specified by the keyword arguments below.
+The visualizer has two "modes" that allow you to visualize passive dynamics or run a controller interactively. The passive dynamics mode is always available, while the controller mode is specified by the keyword argument below.
 
 Press F1 for help after running the visualiser to print the available options in a terminal.
 
 # Keywords
 
 - `controller`: a callback function with the signature `controller(m, d)`, called at each timestep, that applies a control input to the system (or does any other operation you like).
-
-- `trajectories`: [IGNORE THIS] a single trajectory or vector of trajectories, where each trajectory is an AbstractMatrix of states with size `(length(statespace(model)), T)` and `T` is the length of the trajectory. Note that each trajectory can have different length.
-
-TODO: Trajectories have not yet been implemented, but are coming soon. This documentation is leftover from the original Lyceum visualiser as a placeholder. Need to add trajectories to the example below.
 
 # Examples
 
@@ -39,7 +36,7 @@ MuJoCo.Visualiser.visualise(model, data, controller=ctrl!)
 function MuJoCo.Visualiser.visualise(
     m::Model, d::Data; 
     controller = nothing, 
-    trajectories = nothing
+    # trajectories = nothing
 )
     modes = EngineMode[PassiveDynamics()]
     !isnothing(controller) && push!(modes, Controller(controller))
