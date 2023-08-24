@@ -1,7 +1,7 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
 """
-    visualise(m::Model, d::Data; controller=nothing)
+    visualise!(m::Model, d::Data; controller=nothing)
 
 Starts an interactive visualization of a MuJoCo model specified by an instance of `Model` and `Data`.
 
@@ -29,10 +29,10 @@ function ctrl!(m,d)
 end
 
 # Run the visualiser
-visualise(model, data, controller=ctrl!)
+visualise!(model, data, controller=ctrl!)
 ```
 """
-function MuJoCo.Visualiser.visualise(
+function MuJoCo.Visualiser.visualise!(
     m::Model, d::Data; 
     controller = nothing, 
     # trajectories = nothing

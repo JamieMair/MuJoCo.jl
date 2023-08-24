@@ -7,9 +7,9 @@ include("visualiser.jl")
 
 using .LibMuJoCo
 import .LibMuJoCo: Model, Data
-using .Visualiser: visualise
+using .Visualiser: visualise!
 export load_xml, init_data, step!, forward!, timestep
-export init_visualiser, install_visualiser, visualise
+export init_visualiser, install_visualiser, visualise!
 
 
 function sample_xml_filepath()

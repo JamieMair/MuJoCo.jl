@@ -134,7 +134,7 @@ function MuJoCo.Visualiser.test_visualiser()
     end
 
     # Visualise the model with this controller
-    visualise(model, data, controller=ctrl!)
+    visualise!(model, data, controller=ctrl!)
 end
 
 end # end VisualiserExt
