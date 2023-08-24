@@ -114,6 +114,7 @@ function default_scrollcb(e::Engine, s::WindowState, ev::ScrollEvent)
 end
 
 function handlers(e::Engine)
+    cycle_key = Sys.isapple() ? MOD_SUPER : MOD_CTRL # Avoid mac keyboard shortcuts
     return let e = e, ui = e.ui, p = e.phys
         [
             onevent(ButtonEvent) do s, ev
@@ -264,13 +265,13 @@ function handlers(e::Engine)
                 end
             end,
 
-            onkey(GLFW.KEY_RIGHT, MOD_CONTROL, what = "Cycle engine mode forward") do s, ev
+            onkey(GLFW.KEY_RIGHT, cycle_key, what = "Cycle engine mode forward") do s, ev
                 if ispress_or_repeat(ev.action)
                     switchmode!(e, inc(e.curmodeidx, 1, length(e.modes)))
                 end
             end,
 
-            onkey(GLFW.KEY_LEFT, MOD_CONTROL, what = "Cycle engine mode backwards") do s, ev
+            onkey(GLFW.KEY_LEFT, cycle_key, what = "Cycle engine mode backwards") do s, ev
                 if ispress_or_repeat(ev.action)
                     switchmode!(e, dec(e.curmodeidx, 1, length(e.modes)))
                 end
