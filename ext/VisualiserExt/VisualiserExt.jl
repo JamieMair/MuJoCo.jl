@@ -123,7 +123,7 @@ function MuJoCo.Visualiser.test_visualiser()
     model = load_xml(joinpath(root_path, "models", "humanoid.xml"))
     data  = init_data(model)
 
-    # # Change initial conditions
+    # # Change initial conditions for cartpole
     # data.qpos .= @SVector [0, 0.0001]
     # data.qvel .= @SVector [0.01, 0]
 

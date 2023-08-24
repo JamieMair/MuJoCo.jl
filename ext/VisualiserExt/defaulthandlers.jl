@@ -114,7 +114,7 @@ function default_scrollcb(e::Engine, s::WindowState, ev::ScrollEvent)
 end
 
 function handlers(e::Engine)
-    cycle_key = Sys.isapple() ? MOD_SUPER : MOD_CTRL # Avoid mac keyboard shortcuts
+    cycle_key = Sys.isapple() ? MOD_SUPER : MOD_CONTROL # Avoid mac keyboard shortcuts
     return let e = e, ui = e.ui, p = e.phys
         [
             onevent(ButtonEvent) do s, ev

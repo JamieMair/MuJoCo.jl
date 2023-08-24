@@ -1,7 +1,6 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
 """
-
     visualise(m::Model, d::Data; controller=nothing)
 
 Starts an interactive visualization of a MuJoCo model specified by an instance of `Model` and `Data`.
@@ -18,6 +17,8 @@ Press F1 for help after running the visualiser to print the available options in
 
 ```julia
 using MuJoCo
+install_visualiser() # Run this to install dependencies only once
+init_visualiser()    # Load required dependencies into session
 
 # Load a model
 model, data = MuJoCo.sample_model_and_data()
@@ -28,9 +29,7 @@ function ctrl!(m,d)
 end
 
 # Run the visualiser
-# MuJoCo.install_visualiser() # Run this to install dependencies only once
-MuJoCo.init_visualiser()
-MuJoCo.Visualiser.visualise(model, data, controller=ctrl!)
+visualise(model, data, controller=ctrl!)
 ```
 """
 function MuJoCo.Visualiser.visualise(
