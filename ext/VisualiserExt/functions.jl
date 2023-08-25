@@ -39,16 +39,23 @@ end
 function printhelp(e::Engine)
     io = e.ui.io1
 
-    writedescription(io, e.handlers)
+    writedescription!(io, getmousedescription())
+    mousedescription = String(take!(io))
+
+    writedescription!(io, e.handlers)
     handlerdescription = String(take!(io))
 
-    writedescription(io, e.modehandlers)
+    writedescription!(io, e.modehandlers)
     modehandlerdescription = String(take!(io))
 
-    println("Standard Commands:")
-    print(handlerdescription)
+    println("Mouse click commands:")
+    println(mousedescription)
+
+    println("Standard button commands:")
+    println(handlerdescription)
+
     if !isempty(modehandlerdescription)
-        println("$(nameof(mode(e))) Mode Commands:")
+        println("$(nameof(mode(e))) mode commands:")
         print(modehandlerdescription)
     end
     println()
@@ -57,7 +64,19 @@ function printhelp(e::Engine)
     return
 end
 
-function writedescription(io, hs::Vector{EventHandler})
+function getmousedescription()
+    return [
+        (when="Left click", what="Rotate scene"),
+        (when="Right click", what="Translate scene"),
+        (when="Left double-click", what="Select body"),
+        (when="Right double-click", what="Point camera at body"),
+        (when="Left+CTRL", what="Rotate selected body"),
+        (when="Right+CTRL", what="Translate selected body"),
+        (when="Right double-click + CTRL", what="Fix camera on selected body"),
+    ]
+end
+
+function writedescription!(io, hs::Union{Vector{EventHandler},Vector{<:NamedTuple}})
     if !isempty(hs)
         whens = String[]
         whats = String[]
@@ -75,7 +94,7 @@ function writedescription(io, hs::Vector{EventHandler})
         _, ncols = get_terminalsize()
         w1max = max(maximum(length, whens), length(first(header)))
         w2max = max(maximum(length, whats), length(first(header)))
-
+        
         w1 = min(w1max, div(ncols, 2))
         w2 = min(w2max, ncols - w1 - 4 * length(header)) # each column is padded by 4 spaces
         pretty_table(
@@ -87,8 +106,7 @@ function writedescription(io, hs::Vector{EventHandler})
             columns_width = [w1, w2]
         )
     end
-
-    return
+    return nothing
 end
 
 function overlay_info(rect::mjrRect, e::Engine)
