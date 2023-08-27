@@ -16,9 +16,8 @@ function forwardstep!(p::PhysicsState)
     return p
 end
 
-####
-#### EngineMode
-####
+
+############ EngineMode ############
 
 # required
 forwardstep!(p, ::EngineMode) = error("must implement")
@@ -40,31 +39,19 @@ modeinfo(io1, io2, ui, p, ::EngineMode) = nothing
 handlers(ui, p, ::EngineMode) = EventHandler[]
 
 
-####
-#### PassiveDynamics
-####
+############ PassiveDynamics ############
 
 struct PassiveDynamics <: EngineMode end
 forwardstep!(p::PhysicsState, ::PassiveDynamics) = forwardstep!(p)
 
 
-####
-#### Controller
-####
+############ Controller ############
 
 mutable struct Controller{F} <: EngineMode
     controller::F
     realtimefactor::Float64
 end
 Controller(controller) = Controller(controller, 1.0)
-
-# Including this will destroy stateful controllers! 
-# We can ignore it and just set the real-time factor on the first forwardstep!()
-# function setup!(ui::UIState, p::PhysicsState, x::Controller)
-#     dt = @elapsed x.controller(p.model, p.data)
-#     x.realtimefactor = timestep(p.model) / dt
-#     return ui
-# end
 
 function teardown!(ui::UIState, p::PhysicsState, x::Controller)
     d = p.data
