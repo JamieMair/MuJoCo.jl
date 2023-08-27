@@ -21,11 +21,11 @@ function load_xml(path)
     return Model(model_ptr)
 end
 function init_data(model::Model)
-    data_ptr = mj_makeData(model.internal_pointer)
+    data_ptr = mj_makeData(model)
     return Data(data_ptr, model) # Requires a reference to the model to get array sizes
 end
 function step!(model::Model, data::Data)
-    mj_step(model.internal_pointer, data.internal_pointer)
+    mj_step(model, data)
 end
 
 function sample_model_and_data()
