@@ -199,19 +199,7 @@ function handlers(e::Engine)
                 end
             end,
 
-            # TODO: Implement this? This makes sense if there actually is a reset! method implemented for MuJoCo models, but that's very model-dependent
-            # onkey(GLFW.KEY_BACKSPACE, what = "Reset model") do s, ev
-            #     ispress_or_repeat(ev.action) && reset!(p, mode(e))
-            # end,
-
-            # TODO: Add reverse mode if we add in Trajectories
-            # onkey(GLFW.KEY_R, MOD_CONTROL, what = "Toggle reverse") do s, ev
-            #     if ispress_or_repeat(ev.action)
-            #         ui.reversed = !ui.reversed
-            #         p.timer.rate *= -1
-            #         resettime!(p)
-            #     end
-            # end,
+            # TODO: see https://github.com/JamieMair/MuJoCo.jl/issues/43
 
             onkey(GLFW.KEY_SPACE, what = "Pause") do s, ev
                 ispress_or_repeat(ev.action) && setpause!(ui, p, !ui.paused)
