@@ -230,19 +230,7 @@ function handlers(e::Engine)
                 end
             end,
 
-            # TODO: Add reverse mode if we add in Trajectories
-            # onevent(
-            #     KeyEvent,
-            #     when = describe(GLFW.KEY_LEFT),
-            #     what = "Step backwards when paused (hold SHIFT for $(SHIFTSTEPSPERKEY) steps)"
-            # ) do s, ev
-            #     if ui.paused && ev.key === GLFW.KEY_LEFT && ispress_or_repeat(ev.action)
-            #         steps = s.shift ? 50 : 1
-            #         for _ = 1:steps
-            #             reversestep!(p, mode(e))
-            #         end
-            #     end
-            # end,
+            # TODO: see https://github.com/JamieMair/MuJoCo.jl/issues/42
 
             onkey(GLFW.KEY_ENTER, what = "Toggle speed mode") do s, ev
                 if ispress_or_repeat(ev.action)
