@@ -347,6 +347,9 @@ function Base.setproperty!(x::RendererContext, f::Symbol, value)
     end
     error("Could not find property $(f) to set.")
 end
+function Base.cconvert(::Type{Ptr{mjrContext}}, wrapper::RendererContext)
+    return wrapper.internal_pointer
+end
 function Base.propertynames(x::VisualiserOption)
     (:label, :frame, :geomgroup, :sitegroup, :jointgroup, :tendongroup, :actuatorgroup, :skingroup, :flags, :bvh_depth)
 end
@@ -387,6 +390,9 @@ function Base.setproperty!(x::VisualiserOption, f::Symbol, value)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
     error("Could not find property $(f) to set.")
+end
+function Base.cconvert(::Type{Ptr{mjvOption}}, wrapper::VisualiserOption)
+    return wrapper.internal_pointer
 end
 function Base.propertynames(x::VisualiserCamera)
     (:type, :fixedcamid, :trackbodyid, :lookat, :distance, :azimuth, :elevation)
@@ -440,6 +446,9 @@ function Base.setproperty!(x::VisualiserCamera, f::Symbol, value)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
     error("Could not find property $(f) to set.")
+end
+function Base.cconvert(::Type{Ptr{mjvCamera}}, wrapper::VisualiserCamera)
+    return wrapper.internal_pointer
 end
 function Base.propertynames(x::VisualiserFigure)
     (:flg_legend, :flg_ticklabel, :flg_extend, :flg_barplot, :flg_selection, :flg_symmetric, :linewidth, :gridwidth, :gridsize, :gridrgb, :figurergba, :panergba, :legendrgba, :textrgb, :linergb, :range, :xformat, :yformat, :minwidth, :title, :xlabel, :linename, :legendoffset, :subplot, :highlight, :highlightid, :selection, :linepnt, :linedata, :xaxispixel, :yaxispixel, :xaxisdata, :yaxisdata)
@@ -545,6 +554,9 @@ function Base.setproperty!(x::VisualiserFigure, f::Symbol, value)
     end
     error("Could not find property $(f) to set.")
 end
+function Base.cconvert(::Type{Ptr{mjvFigure}}, wrapper::VisualiserFigure)
+    return wrapper.internal_pointer
+end
 function Base.propertynames(x::VisualiserPerturb)
     (:select, :skinselect, :active, :active2, :refpos, :refquat, :refselpos, :localpos, :localmass, :scale)
 end
@@ -600,6 +612,9 @@ function Base.setproperty!(x::VisualiserPerturb, f::Symbol, value)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
     error("Could not find property $(f) to set.")
+end
+function Base.cconvert(::Type{Ptr{mjvPerturb}}, wrapper::VisualiserPerturb)
+    return wrapper.internal_pointer
 end
 function Base.propertynames(x::VisualiserScene)
     (:maxgeom, :ngeom, :geoms, :geomorder, :nskin, :skinfacenum, :skinvertadr, :skinvertnum, :skinvert, :skinnormal, :nlight, :lights, :camera, :enabletransform, :translate, :rotate, :scale, :stereo, :flags, :framewidth, :framergb)
@@ -680,4 +695,7 @@ function Base.setproperty!(x::VisualiserScene, f::Symbol, value)
         error("Cannot overwrite a pointer field.")
     end
     error("Could not find property $(f) to set.")
+end
+function Base.cconvert(::Type{Ptr{mjvScene}}, wrapper::VisualiserScene)
+    return wrapper.internal_pointer
 end

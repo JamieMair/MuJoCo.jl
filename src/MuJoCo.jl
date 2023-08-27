@@ -22,22 +22,22 @@ function load_xml(path)
     model_ptr = mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))
     return Model(model_ptr)
 end
-function init_data(m::Model)
-    data_ptr = mj_makeData(m.internal_pointer)
-    return Data(data_ptr, m) # Requires a reference to the model to get array sizes
+function init_data(model::Model)
+    data_ptr = mj_makeData(model)
+    return Data(data_ptr, model) # Requires a reference to the model to get array sizes
 end
-function step!(m::Model, d::Data)
-    mj_step(m.internal_pointer, d.internal_pointer)
+function step!(model::Model, data::Data)
+    mj_step(model, data)
 end
-function forward!(m::Model, d::Data)
-    mj_forward(m.internal_pointer, d.internal_pointer)
+function forward!(model::Model, data::Data)
+    mj_forward(model, data)
 end
-timestep(m::Model) = m.opt.timestep # Useful
+timestep(model::Model) = model.opt.timestep # Useful
 
 function sample_model_and_data()
-    m = load_xml(sample_xml_filepath())
-    d = init_data(m)
-    return m, d
+    model = load_xml(sample_xml_filepath())
+    data = init_data(model)
+    return model, data
 end
 
 # Handle backwards compatibility

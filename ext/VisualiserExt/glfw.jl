@@ -487,36 +487,3 @@ function onscroll(cb, mods::Mod...; what = nothing)
         end
     end
 end
-
-# Note: the following were commented out in the original file from LyceumMuJoCoViz.jl
-
-#function onclick(cb, button::MouseButton; desc = nothing)
-#    EventHandler{ButtonPress}(describe(desc, button)) do s, e
-#        e.button == button && iszero(modbits(s)) && cb(s, e)
-#    end
-#end
-#
-#function onclick(cb, button::MouseButton, mods::Mod...; desc = nothing)
-#    desc = describe(desc, button, mods...)
-#    mods = modbits(mods)
-#    EventHandler{ButtonPress}(desc) do s, e
-#        e.button == button && modbits(s) == mods && cb(s, e)
-#    end
-#end
-
-
-#function ondoubleclick(cb, button::MouseButton; desc = nothing)
-#    desc = isnothing(desc) ? desc : "$(describe(button)) (doubleclick): $desc"
-#    EventHandler{Doubleclick}(desc) do s, e
-#        e.button == button && iszero(modbits(s)) && cb(s, e)
-#    end
-#end
-#
-#function ondoubleclick(cb, button::MouseButton, mods::Mod...; desc = nothing)
-#    desc = isnothing(desc) ? desc : "$(describe(button, mods...)) (doubleclick): $desc"
-#    mods = modbits(mods)
-#    EventHandler{Doubleclick}(desc) do s, e
-#        e.button == button && modbits(s) == mods && cb(s, e)
-#    end
-#end
-

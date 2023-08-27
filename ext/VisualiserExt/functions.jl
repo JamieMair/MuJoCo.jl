@@ -171,7 +171,7 @@ function overlay_info(rect::mjrRect, e::Engine)
         rect,
         info1,
         info2,
-        ui.con.internal_pointer,
+        ui.con,
     )
 
     return nothing
@@ -190,7 +190,7 @@ end
 function recordframe(e::Engine)
     w, h = GLFW.GetFramebufferSize(e.manager.state.window)
     rect = mjrRect(Cint(0), Cint(0), Cint(w), Cint(h))
-    LibMuJoCo.mjr_readPixels(e.framebuf, C_NULL, rect, e.ui.con.internal_pointer)
+    LibMuJoCo.mjr_readPixels(e.framebuf, C_NULL, rect, e.ui.con)
     write(e.ffmpeghandle, e.framebuf)
     return nothing
 end

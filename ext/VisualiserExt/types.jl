@@ -79,8 +79,8 @@ function Engine(
     manager = WindowManager(window)
 
     # Create scene and context
-    LibMuJoCo.mjv_makeScene(m.internal_pointer, ui.scn.internal_pointer, MAXGEOM)
-    LibMuJoCo.mjr_makeContext(m.internal_pointer, ui.con.internal_pointer, LibMuJoCo.mjFONTSCALE_150)
+    LibMuJoCo.mjv_makeScene(m, ui.scn, MAXGEOM)
+    LibMuJoCo.mjr_makeContext(m, ui.con, LibMuJoCo.mjFONTSCALE_150)
 
     alignscale!(ui, m)
     init_figsensor!(ui.figsensor)

@@ -119,13 +119,13 @@ function prepare!(e::Engine)
     ui, p = e.ui, e.phys
     m, d = p.model, p.data
     LibMuJoCo.mjv_updateScene(
-        m.internal_pointer, 
-        d.internal_pointer, 
-        ui.vopt.internal_pointer, 
-        p.pert.internal_pointer, 
-        ui.cam.internal_pointer, 
+        m, 
+        d, 
+        ui.vopt, 
+        p.pert, 
+        ui.cam, 
         LibMuJoCo.mjCAT_ALL,
-        ui.scn.internal_pointer
+        ui.scn
     )
     prepare!(ui, p, mode(e))
     return e
@@ -137,7 +137,7 @@ Render a frame
 function render!(e::Engine)
     w, h = GLFW.GetFramebufferSize(e.manager.state.window)
     rect = mjrRect(Cint(0), Cint(0), Cint(w), Cint(h))
-    mjr_render(rect, e.ui.scn.internal_pointer, e.ui.con.internal_pointer)
+    mjr_render(rect, e.ui.scn, e.ui.con)
     e.ui.showinfo && overlay_info(rect, e)
     GLFW.SwapBuffers(e.manager.state.window)
     return nothing
