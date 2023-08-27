@@ -29,15 +29,15 @@ end
 function step!(model::Model, data::Data)
     mj_step(model, data)
 end
-function forward!(m::Model, d::Data)
-    mj_forward(m, d)
+function forward!(model::Model, data::Data)
+    mj_forward(model, data)
 end
-timestep(m::Model) = m.opt.timestep # Useful
+timestep(model::Model) = model.opt.timestep # Useful
 
 function sample_model_and_data()
-    m = load_xml(sample_xml_filepath())
-    d = init_data(m)
-    return m, d
+    model = load_xml(sample_xml_filepath())
+    ddata = init_data(m)
+    return model, data
 end
 
 # Handle backwards compatibility
