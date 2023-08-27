@@ -347,6 +347,9 @@ function Base.setproperty!(x::RendererContext, f::Symbol, value)
     end
     error("Could not find property $(f) to set.")
 end
+function Base.cconvert(::Type{Ptr{mjrContext}}, wrapper::RendererContext)
+    return wrapper.internal_pointer
+end
 function Base.propertynames(x::VisualiserOption)
     (:label, :frame, :geomgroup, :sitegroup, :jointgroup, :tendongroup, :actuatorgroup, :skingroup, :flags, :bvh_depth)
 end
@@ -387,6 +390,9 @@ function Base.setproperty!(x::VisualiserOption, f::Symbol, value)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
     error("Could not find property $(f) to set.")
+end
+function Base.cconvert(::Type{Ptr{mjvOption}}, wrapper::VisualiserOption)
+    return wrapper.internal_pointer
 end
 function Base.propertynames(x::VisualiserCamera)
     (:type, :fixedcamid, :trackbodyid, :lookat, :distance, :azimuth, :elevation)
@@ -440,6 +446,9 @@ function Base.setproperty!(x::VisualiserCamera, f::Symbol, value)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
     error("Could not find property $(f) to set.")
+end
+function Base.cconvert(::Type{Ptr{mjvCamera}}, wrapper::VisualiserCamera)
+    return wrapper.internal_pointer
 end
 function Base.propertynames(x::VisualiserFigure)
     (:flg_legend, :flg_ticklabel, :flg_extend, :flg_barplot, :flg_selection, :flg_symmetric, :linewidth, :gridwidth, :gridsize, :gridrgb, :figurergba, :panergba, :legendrgba, :textrgb, :linergb, :range, :xformat, :yformat, :minwidth, :title, :xlabel, :linename, :legendoffset, :subplot, :highlight, :highlightid, :selection, :linepnt, :linedata, :xaxispixel, :yaxispixel, :xaxisdata, :yaxisdata)
@@ -545,62 +554,6 @@ function Base.setproperty!(x::VisualiserFigure, f::Symbol, value)
     end
     error("Could not find property $(f) to set.")
 end
-function Base.propertynames(x::VisualiserPerturb)
-    (:select, :skinselect, :active, :active2, :refpos, :refquat, :refselpos, :localpos, :localmass, :scale)
-end
-function Base.getproperty(x::VisualiserPerturb, f::Symbol)
-    internal_pointer = getfield(x, :internal_pointer)
-    f === :internal_pointer && return internal_pointer
-    f === :select && return unsafe_load(Ptr{Int32}(internal_pointer + 0))
-    f === :skinselect && return unsafe_load(Ptr{Int32}(internal_pointer + 4))
-    f === :active && return unsafe_load(Ptr{Int32}(internal_pointer + 8))
-    f === :active2 && return unsafe_load(Ptr{Int32}(internal_pointer + 12))
-    f === :refpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 16), (3,))
-    f === :refquat && return UnsafeArray(Ptr{Float64}(internal_pointer + 40), (4,))
-    f === :refselpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 72), (3,))
-    f === :localpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 96), (3,))
-    f === :localmass && return unsafe_load(Ptr{Float64}(internal_pointer + 120))
-    f === :scale && return unsafe_load(Ptr{Float64}(internal_pointer + 128))
-    error("Could not find property $(f)")
-end
-function Base.setproperty!(x::VisualiserPerturb, f::Symbol, value)
-    internal_pointer = getfield(x, :internal_pointer)
-    f === :internal_pointer && error("Cannot set the internal pointer, create a new struct instead.")
-    if f === :select
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 0), cvalue)
-        return cvalue
-    end
-    if f === :skinselect
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 4), cvalue)
-        return cvalue
-    end
-    if f === :active
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
-        return cvalue
-    end
-    if f === :active2
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 12), cvalue)
-        return cvalue
-    end
-    if f === :localmass
-        cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 16), cvalue)
-        return cvalue
-    end
-    if f === :scale
-        cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 24), cvalue)
-        return cvalue
-    end
-    if f in (:refpos, :refquat, :refselpos, :localpos)
-        error("Cannot overwrite array field. Mutate the array instead.")
-    end
-    error("Could not find property $(f) to set.")
-end
 function Base.propertynames(x::VisualiserScene)
     (:maxgeom, :ngeom, :geoms, :geomorder, :nskin, :skinfacenum, :skinvertadr, :skinvertnum, :skinvert, :skinnormal, :nlight, :lights, :camera, :enabletransform, :translate, :rotate, :scale, :stereo, :flags, :framewidth, :framergb)
 end
@@ -680,4 +633,7 @@ function Base.setproperty!(x::VisualiserScene, f::Symbol, value)
         error("Cannot overwrite a pointer field.")
     end
     error("Could not find property $(f) to set.")
+end
+function Base.cconvert(::Type{Ptr{mjvScene}}, wrapper::VisualiserScene)
+    return wrapper.internal_pointer
 end
