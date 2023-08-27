@@ -24,9 +24,9 @@ function default_mousemovecb(e::Engine, s::WindowState, ev::MouseMoveEvent)
         end
 
         if iszero(p.pert.active)
-            LibMuJoCo.mjv_moveCamera(m.internal_pointer, action, scaled_dx, scaled_dy, ui.scn.internal_pointer, ui.cam.internal_pointer)
+            LibMuJoCo.mjv_moveCamera(m, action, scaled_dx, scaled_dy, ui.scn, ui.cam)
         else
-            LibMuJoCo.mjv_movePerturb(m.internal_pointer, d.internal_pointer, action, scaled_dx, scaled_dy, ui.scn.internal_pointer, p.pert.internal_pointer)
+            LibMuJoCo.mjv_movePerturb(m, d, action, scaled_dx, scaled_dy, ui.scn, p.pert)
         end
     end
 
@@ -45,7 +45,7 @@ function default_buttoncb(e::Engine, s::WindowState, ev::ButtonEvent)
         if ispress(ev.action) && s.control && pert.select > 0
             newpert = s.right ? Int(LibMuJoCo.mjPERT_TRANSLATE) : Int(LibMuJoCo.mjPERT_ROTATE)
             # perturbation onset: reset reference
-            iszero(pert.active) && LibMuJoCo.mjv_initPerturb(m.internal_pointer, d.internal_pointer, ui.scn.internal_pointer, pert.internal_pointer)
+            iszero(pert.active) && LibMuJoCo.mjv_initPerturb(m, d, ui.scn, pert)
             pert.active = newpert
         elseif isrelease(ev.action)
             # stop pertubation
@@ -63,13 +63,13 @@ function default_buttoncb(e::Engine, s::WindowState, ev::ButtonEvent)
         selpnt = zeros(MVector{3,Float64})
         selgeom, selskin = Ref(Cint(0)), Ref(Cint(0))
         selbody = LibMuJoCo.mjv_select(
-            m.internal_pointer,
-            d.internal_pointer,
-            ui.vopt.internal_pointer,
+            m,
+            d,
+            ui.vopt,
             s.width / s.height,
             s.x / s.width,
             (s.height - s.y) / s.height,
-            ui.scn.internal_pointer,
+            ui.scn,
             selpnt,
             selgeom,
             selskin,
@@ -109,7 +109,7 @@ end
 
 function default_scrollcb(e::Engine, s::WindowState, ev::ScrollEvent)
     m = e.phys.model
-    LibMuJoCo.mjv_moveCamera(m.internal_pointer, LibMuJoCo.mjMOUSE_ZOOM, 0.0, 0.05 * ev.dy, e.ui.scn.internal_pointer, e.ui.cam.internal_pointer)
+    LibMuJoCo.mjv_moveCamera(m, LibMuJoCo.mjMOUSE_ZOOM, 0.0, 0.05 * ev.dy, e.ui.scn, e.ui.cam)
     return
 end
 

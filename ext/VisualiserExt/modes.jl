@@ -2,7 +2,7 @@
 
 function pausestep!(p::PhysicsState)
     m, d = p.model, p.data
-    LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 1)
+    LibMuJoCo.mjv_applyPerturbPose(m, d, p.pert, 1)
     forward!(m, d)
     return p
 end
@@ -10,8 +10,8 @@ end
 function forwardstep!(p::PhysicsState)
     m, d = p.model, p.data
     fill!(d.xfrc_applied, 0)
-    LibMuJoCo.mjv_applyPerturbPose(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer, 0)
-    LibMuJoCo.mjv_applyPerturbForce(m.internal_pointer, d.internal_pointer, p.pert.internal_pointer)
+    LibMuJoCo.mjv_applyPerturbPose(m, d, p.pert, 0)
+    LibMuJoCo.mjv_applyPerturbForce(m, d, p.pert)
     step!(m, d)
     return p
 end

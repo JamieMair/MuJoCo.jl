@@ -30,7 +30,7 @@ function step!(model::Model, data::Data)
     mj_step(model, data)
 end
 function forward!(m::Model, d::Data)
-    mj_forward(m.internal_pointer, d.internal_pointer)
+    mj_forward(m, d)
 end
 timestep(m::Model) = m.opt.timestep # Useful
 
