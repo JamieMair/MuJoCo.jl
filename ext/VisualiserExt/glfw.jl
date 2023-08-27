@@ -1,5 +1,4 @@
-# File copied from https://github.com/Lyceum/LyceumMuJoCoViz.jl
-
+# Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
 @enum Mod::UInt16 begin
     MOD_ALT = GLFW.MOD_ALT
@@ -35,7 +34,6 @@ const PRINTABLE_KEYS = let
     Set{Int}(keys)
 end
 
-
 function SetWindowAttrib(window::Window, attrib::Integer, value::Integer)
     ccall(
         (:glfwSetWindowAttrib, GLFW.libglfw),
@@ -66,7 +64,6 @@ function create_window(width::Integer, height::Integer, title::String)
     return window
 end
 
-
 @inline modbits(ms::Tuple{Vararg{Mod}}) = mapreduce(Cint, |, ms)
 @inline modbits(ms::Mod...) = modbits(ms)
 
@@ -88,7 +85,6 @@ end
 @inline isshift(key::Key) = key === GLFW.KEY_LEFT_SHIFT || key === GLFW.KEY_RIGHT_SHIFT
 @inline iscontrol(key::Key) = key === GLFW.KEY_LEFT_CONTROL || key === GLFW.KEY_RIGHT_CONTROL
 @inline issuper(key::Key) = key === GLFW.KEY_LEFT_SUPER || key === GLFW.KEY_RIGHT_SUPER
-
 
 function glfw_lookup_key(x::Integer)
     for key in instances(Key)
@@ -249,7 +245,6 @@ end
 
 @inline nomod(s::WindowState) = iszero(modbits(s))
 
-
 struct ObsEntry{E<:Event}
     state::WindowState
     event::E
@@ -277,7 +272,6 @@ end
 eventtype(x::Union{Obs{E},ObsEntry{E}}) where {E} = E
 
 events(x::WindowEvents) = ntuple(i -> getfield(x, i), Val(fieldcount(WindowEvents)))
-
 
 mutable struct WindowManager
     state::WindowState
@@ -456,11 +450,9 @@ function deregister!(mngr::WindowManager, hs::EventHandler...)
     return mngr
 end
 
-
 function onevent(cb, E::Type{<:Event}; what = nothing, when = nothing)
     return EventHandler{E}(cb, what, when)
 end
-
 
 function onkey(cb, key::Key; what = nothing)
     return let cb = cb
@@ -495,35 +487,3 @@ function onscroll(cb, mods::Mod...; what = nothing)
         end
     end
 end
-
-
-#function onclick(cb, button::MouseButton; desc = nothing)
-#    EventHandler{ButtonPress}(describe(desc, button)) do s, e
-#        e.button == button && iszero(modbits(s)) && cb(s, e)
-#    end
-#end
-#
-#function onclick(cb, button::MouseButton, mods::Mod...; desc = nothing)
-#    desc = describe(desc, button, mods...)
-#    mods = modbits(mods)
-#    EventHandler{ButtonPress}(desc) do s, e
-#        e.button == button && modbits(s) == mods && cb(s, e)
-#    end
-#end
-
-
-#function ondoubleclick(cb, button::MouseButton; desc = nothing)
-#    desc = isnothing(desc) ? desc : "$(describe(button)) (doubleclick): $desc"
-#    EventHandler{Doubleclick}(desc) do s, e
-#        e.button == button && iszero(modbits(s)) && cb(s, e)
-#    end
-#end
-#
-#function ondoubleclick(cb, button::MouseButton, mods::Mod...; desc = nothing)
-#    desc = isnothing(desc) ? desc : "$(describe(button, mods...)) (doubleclick): $desc"
-#    mods = modbits(mods)
-#    EventHandler{Doubleclick}(desc) do s, e
-#        e.button == button && modbits(s) == mods && cb(s, e)
-#    end
-#end
-

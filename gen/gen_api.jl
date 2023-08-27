@@ -328,6 +328,7 @@ begin
         :mjvOption => :VisualiserOption,
         :mjrContext => :RendererContext,
         :mjvFigure => :VisualiserFigure,
+        :mjvPerturb => :VisualiserPerturb,
     )
     other_exprs = Expr[]
     first_exprs = Expr[]
@@ -348,7 +349,8 @@ begin
         :RendererContext => MutableStructInfo(:mjr_freeContext, [Expr(:., conv_internal_ref(:RendererContext), QuoteNode(:internal_pointer))]),
         :VisualiserCamera => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserCamera), QuoteNode(:internal_pointer))]),
         :VisualiserOption => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserOption), QuoteNode(:internal_pointer))]),
-        :VisualiserFigure => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserFigure), QuoteNode(:internal_pointer))])
+        :VisualiserFigure => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserFigure), QuoteNode(:internal_pointer))]),
+        :VisualiserPerturb => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserPerturb), QuoteNode(:internal_pointer))])
     )
     mutable_structs = Set(collect(keys(mutable_struct_info))) # Make main structs mutable so they can be garbage collected
     for expr in first_exprs

@@ -2,8 +2,8 @@
 module Visualiser
 
 import ..LibMuJoCo
-import ..LibMuJoCo: mjrContext, mjvOption, mjvCamera, mjvFigure, mjvScene
-import ..LibMuJoCo: RendererContext, VisualiserOption, VisualiserCamera, VisualiserFigure, VisualiserScene
+import ..LibMuJoCo: mjrContext, mjvOption, mjvCamera, mjvFigure, mjvScene, mjvPerturb
+import ..LibMuJoCo: RendererContext, VisualiserOption, VisualiserCamera, VisualiserFigure, VisualiserScene, VisualiserPerturb
 import ..Utils: alloc
 
 function LibMuJoCo.RendererContext()
@@ -31,8 +31,17 @@ function LibMuJoCo.VisualiserScene()
     LibMuJoCo.mjv_defaultScene(mj_scene)
     return VisualiserScene(mj_scene)
 end
+function LibMuJoCo.VisualiserPerturb()
+    mj_perturb = alloc(mjvPerturb)
+    LibMuJoCo.mjv_defaultPerturb(mj_perturb)
+    return VisualiserPerturb(mj_perturb)
+end
 
-export RendererContext, VisualiserOption, VisualiserCamera, VisualiserFigure, VisualiserScene
+function test_visualiser end
+
+function visualise! end
+
+export RendererContext, VisualiserOption, VisualiserCamera, VisualiserFigure, VisualiserScene, VisualiserPerturb, test_visualiser, visualise!
 
 end
 
