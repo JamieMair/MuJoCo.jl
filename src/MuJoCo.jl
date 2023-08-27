@@ -36,7 +36,7 @@ timestep(model::Model) = model.opt.timestep # Useful
 
 function sample_model_and_data()
     model = load_xml(sample_xml_filepath())
-    ddata = init_data(m)
+    data = init_data(model)
     return model, data
 end
 
