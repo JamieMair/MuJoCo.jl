@@ -34,6 +34,15 @@ end
 structinfo(T) = [(fieldoffset(T,i), fieldname(T,i), fieldtype(T,i)) for i = 1:fieldcount(T)];
 
 
+function gen_auto_cconvert_fn(mj_struct_name, new_name)
+    target_type_expr = Expr(:(::), Expr(:curly, :Type, Expr(:curly, :Ptr, mj_struct_name)))
+    original_type_expr = Expr(:(::), :wrapper, new_name)
+    method_sig = Expr(:call, Expr(:., :Base, QuoteNode(:cconvert)), target_type_expr, original_type_expr)
+    method_block = Expr(:block, Expr(:return, Expr(:., :wrapper, QuoteNode(:internal_pointer))))
+    return Expr(:function, method_sig, method_block)
+end
+
+
 function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, match_macroinfo)
     struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn)=>s for (sn, s) in all_wrappers)
     get_property_lines = Expr[]
@@ -233,12 +242,13 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrapper
     end
     
     wrapped_struct = Expr(:struct, false, new_name, Expr(:block, Expr(:(::), :internal_pointer, Expr(:curly, :Ptr, struct_name)), extra_deps...))
-
+    
     fn_expr = generate_getproperty_fn(mj_struct, new_name, all_wrappers, match_macroinfo)
     propnames_expr = generate_propertynames_fn(mj_struct, new_name)
-    set_prop_fn_expr =generate_setproperty_fn(mj_struct, new_name, all_wrappers)
-
-    return (wrapped_struct, fn_expr, propnames_expr, set_prop_fn_expr)
+    set_prop_fn_expr = generate_setproperty_fn(mj_struct, new_name, all_wrappers)
+    auto_convert_fn_expr = gen_auto_cconvert_fn(struct_name, new_name)
+    
+    return (wrapped_struct, fn_expr, propnames_expr, set_prop_fn_expr, auto_convert_fn_expr)
 end
 
 struct MutableStructInfo
@@ -280,11 +290,12 @@ begin
     push!(first_exprs, Expr(:export, values(struct_wrappers)...))
     
     for (k, v) in struct_wrappers
-        ws, fe, pn, spfn = build_struct_wrapper(k, v, struct_wrappers, parsed_macro_info)
+        ws, fe, pn, spfn, ac = build_struct_wrapper(k, v, struct_wrappers, parsed_macro_info)
         push!(first_exprs, ws)
         push!(other_exprs, pn)
         push!(other_exprs, fe)
         push!(other_exprs, spfn)
+        push!(other_exprs, ac)
     end
 
     mutable_struct_info = Dict{Symbol, MutableStructInfo}(
@@ -324,11 +335,12 @@ begin
     push!(first_exprs, Expr(:export, values(struct_wrappers)...))
     
     for (k, v) in struct_wrappers
-        ws, fe, pn, spfn = build_struct_wrapper(k, v, struct_wrappers, parsed_macro_info)
+        ws, fe, pn, spfn, ac = build_struct_wrapper(k, v, struct_wrappers, parsed_macro_info)
         push!(first_exprs, ws)
         push!(other_exprs, pn)
         push!(other_exprs, fe)
         push!(other_exprs, spfn)
+        push!(other_exprs, ac)
     end
 
     mutable_struct_info = Dict{Symbol, MutableStructInfo}(
