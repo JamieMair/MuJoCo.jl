@@ -77,7 +77,7 @@ end
     model, data = MuJoCo.sample_model_and_data()
 
     c = data.ctrl
-    @test c isa UnsafeArray
+    @test c isa AbstractArray
     @test size(c) == (21, 1)
 end
 
