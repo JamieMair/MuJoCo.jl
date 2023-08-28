@@ -38,7 +38,6 @@ jobs:
             try Pkg.rm("MuJoCo_jll") catch end
             Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
             Pkg.instantiate()'
-      - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
