@@ -23,6 +23,8 @@ jobs:
           - 'nightly'
         os:
           - ubuntu-latest
+          - macOS-latest
+          - windows-latest
         arch:
           - x64
     steps:
@@ -31,9 +33,9 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - name: Remove old package
+      - name: Remove old manifest
         run: |
-          rm -fr ~/.julia/*
+          rm Manifest.toml
       - name: Temporarily use custom JLL
         run: |
           julia --project=. -e '
@@ -41,6 +43,7 @@ jobs:
             try Pkg.rm("MuJoCo_jll") catch end
             Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
             Pkg.instantiate()'
+      - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
@@ -58,9 +61,9 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
-      - name: Remove old package
+      - name: Remove old manifest
         run: |
-          rm -fr ~/.julia/*
+          rm Manifest.toml
       - name: Configure MuJoCo env
         run: |
           julia --project=. -e '
