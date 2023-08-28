@@ -33,9 +33,6 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - name: Remove old manifest
-        run: |
-          rm Manifest.toml
       - name: Temporarily use custom JLL
         run: |
           julia --project=. -e '
@@ -61,9 +58,6 @@ jobs:
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1'
-      - name: Remove old manifest
-        run: |
-          rm Manifest.toml
       - name: Configure MuJoCo env
         run: |
           julia --project=. -e '
