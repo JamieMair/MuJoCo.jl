@@ -12,13 +12,11 @@ isplot = false
 # Useful functions
 reset!(m::Model, d::Data) = LibMuJoCo.mj_resetData(m, d)
 resetkey!(m::Model, d::Data) = LibMuJoCo.mj_resetDataKeyframe(m, d, 1)
+row2col(M::AbstractMatrix) = transpose(reshape(M, size(M, 2), size(M, 1))) # Convert row-major matrices to column-major
 
 # Load humanoid in specific keyframe
 model, data = MuJoCo.sample_model_and_data()
 resetkey!(model, data)
-
-# Convert row-major matrices to column-major
-row2col(M::AbstractMatrix) = permutedims(reshape(M, size(M)[2], size(M)[1]), (2,1))
 
 
 ################## Get control set-point ##################
@@ -89,6 +87,11 @@ isplot && visualise!(model, data)
 nu = model.nu
 nv = model.nv
 
+# Body IDs
+# TODO: Named access like the Python bindings would be great
+id_torso = LibMuJoCo.mj_name2id(model, LibMuJoCo.mjOBJ_XBODY, "torso")
+id_lfoot = LibMuJoCo.mj_name2id(model, LibMuJoCo.mjOBJ_XBODY, "foot_left")
+
 # R-matrix just identity
 R = Matrix{Float64}(I, nu, nu)
 
@@ -97,5 +100,19 @@ reset!(model, data)
 data.qpos .= qpos0
 forward!(model, data)
 jac_com = zeros(3,nv)
-# LibMuJoCo.mj_jacSubtreeCom(model, data, jac_com, model.body("torso").id) 
-# TODO: We need a nice way to handle body IDs...
+LibMuJoCo.mj_jacSubtreeCom(model, data, jac_com, id_torso)
+jac_com = row2col(jac_com)
+
+# Get (left) foot Jacobian for balancing
+# TODO: Pass in `nothing` instead of C_NULL?
+jac_foot = zeros(3,nv)
+LibMuJoCo.mj_jacBodyCom(model, data, jac_foot, C_NULL, id_lfoot) 
+jac_foot = row2col(jac_foot)
+
+# Design Q-matrix to balance CoM over foot
+jac_diff = jac_com .- jac_foot
+Qbalance = jac_diff' * jac_diff
+
+# Now we include a cost on joints deviating from the steady-state.
+# Torso already sorted. Left leg should remain rigid. Other joints can move for balance.
+# Let's start by getting all the joint indices
