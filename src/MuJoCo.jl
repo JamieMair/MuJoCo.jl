@@ -11,6 +11,7 @@ using .Visualiser: visualise!
 export load_xml, init_data, step!, forward!, timestep
 export init_visualiser, install_visualiser, visualise!
 
+include("named_access.jl")
 
 function sample_xml_filepath()
     return abspath(joinpath(abspath(@__DIR__), "..", "models", "humanoid.xml"))
