@@ -82,8 +82,13 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
             # TODO: Check whether the wrapped array has row/column major consistency
             # TODO: Check consistency with the struct mapping
             # TODO: Explicitly choose own=false in the `unsafe_wrap call`
-            dims_expr = Expr(:tuple, extents...)
-            Expr(:return, Expr(:call, :UnsafeArray, Expr(:call, Expr(:curly, :Ptr, array_type), Expr(:call, :+, :internal_pointer, foffset)), dims_expr))
+            dims_expr = Expr(:tuple, Base.reverse(extents)...)
+            pointer_expr = Expr(:call, Expr(:curly, :Ptr, array_type), Expr(:call, :+, :internal_pointer, foffset))
+            if length(extents) > 1
+                Expr(:return, Expr(:call, :transpose, Expr(:call, :UnsafeArray, pointer_expr, dims_expr)))
+            else
+                Expr(:return, Expr(:call, :UnsafeArray, pointer_expr, dims_expr))
+            end
         elseif ftype <: Ptr && !isnothing(match_macroinfo) && haskey(first(match_macroinfo), fname)
             finfo = first(match_macroinfo)[fname]
             # TODO: Make sure the datatypes match
@@ -125,9 +130,10 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
                 end
                 return_value
             else
-                dims_expr = Expr(:tuple, converted_array_sizes...)
+                # Transpose for row-major order
+                dims_expr = Expr(:tuple, Iterators.reverse(converted_array_sizes)...)
                 pointer_to_pointer = Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset)))
-                Expr(:return, Expr(:call, :UnsafeArray, pointer_to_pointer, dims_expr))
+                Expr(:return, Expr(:call, :transpose, Expr(:call, :UnsafeArray, pointer_to_pointer, dims_expr)))
             end
         else
             ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset))
