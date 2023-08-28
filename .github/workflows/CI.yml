@@ -19,7 +19,6 @@ jobs:
       matrix:
         version:
           - '1.6'
-          - '1.9'
           - 'nightly'
         os:
           - ubuntu-latest
@@ -35,11 +34,7 @@ jobs:
           arch: ${{ matrix.arch }}
       - name: Temporarily use custom JLL
         run: |
-          julia --project=. -e '
-            using Pkg
-            try Pkg.rm("MuJoCo_jll") catch end
-            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
-            Pkg.instantiate()'
+          julia --project=. -e 'using Pkg; try Pkg.rm("MuJoCo_jll") catch end; Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll"); Pkg.instantiate()'
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
@@ -60,18 +55,10 @@ jobs:
           version: '1'
       - name: Configure MuJoCo env
         run: |
-          julia --project=. -e '
-            using Pkg
-            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
-            Pkg.instantiate()'
+          julia --project=. -e 'using Pkg; Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll"); Pkg.instantiate()'
       - name: Configure doc environment
         run: |
-          julia --project=docs -e '
-            using Pkg
-            try Pkg.rm("MuJoCo") catch end
-            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
-            Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()'
+          julia --project=docs -e 'using Pkg; try Pkg.rm("MuJoCo") catch end; Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll"); Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-docdeploy@v1
         env:
