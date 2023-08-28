@@ -1,5 +1,6 @@
 using CairoMakie
 using LinearAlgebra
+using MatrixEquations: ared
 using MuJoCo
 using MuJoCo.LibMuJoCo
 
@@ -12,7 +13,6 @@ isplot = false
 # Useful functions
 reset!(m::Model, d::Data) = LibMuJoCo.mj_resetData(m, d)
 resetkey!(m::Model, d::Data) = LibMuJoCo.mj_resetDataKeyframe(m, d, 1)
-row2col(M::AbstractMatrix) = transpose(reshape(M, size(M, 2), size(M, 1))) # Convert row-major matrices to column-major
 
 # Load humanoid in specific keyframe
 model, data = MuJoCo.sample_model_and_data()
@@ -63,7 +63,7 @@ qfrc0 = vec(copy(data.qfrc_inverse))
 println("Desired forces qfrc0 acquired")
 
 # Need the corresponding control torque (through the actuators)
-M_act = row2col(data.actuator_moment)
+M_act = data.actuator_moment
 ctrl0 = pinv(M_act)' * qfrc0
 println("Control set-point ctrl0 acquired")
 
@@ -99,15 +99,15 @@ R = Matrix{Float64}(I, nu, nu)
 reset!(model, data)
 data.qpos .= qpos0
 forward!(model, data)
-jac_com = zeros(3,nv)
+jac_com = zeros(nv,3) # TODO: Document row/column-major
 LibMuJoCo.mj_jacSubtreeCom(model, data, jac_com, id_torso)
-jac_com = row2col(jac_com)
+jac_com = transpose(jac_com)
 
 # Get (left) foot Jacobian for balancing
 # TODO: Pass in `nothing` instead of C_NULL?
-jac_foot = zeros(3,nv)
+jac_foot = zeros(nv,3)
 LibMuJoCo.mj_jacBodyCom(model, data, jac_foot, C_NULL, id_lfoot) 
-jac_foot = row2col(jac_foot)
+jac_foot = transpose(jac_foot)
 
 # Design Q-matrix to balance CoM over foot
 jac_diff = jac_com .- jac_foot
@@ -116,3 +116,86 @@ Qbalance = jac_diff' * jac_diff
 # Now we include a cost on joints deviating from the steady-state.
 # Torso already sorted. Left leg should remain rigid. Other joints can move for balance.
 # Let's start by getting all the joint indices
+
+"""
+Python bindings do this:
+
+# Get all joint names.
+joint_names = [model.joint(i).name for i in range(model.njnt)]
+
+# Get indices into relevant sets of joints.
+root_dofs = range(6)
+body_dofs = range(6, nv)
+abdomen_dofs = [
+    model.joint(name).dofadr[0]
+    for name in joint_names
+    if 'abdomen' in name
+    and not 'z' in name
+]
+left_leg_dofs = [
+    model.joint(name).dofadr[0]
+    for name in joint_names
+    if 'left' in name
+    and ('hip' in name or 'knee' in name or 'ankle' in name)
+    and not 'z' in name
+]
+balance_dofs = abdomen_dofs + left_leg_dofs
+other_dofs = np.setdiff1d(body_dofs, balance_dofs)
+"""
+
+# TODO: As a place-holder, here are the indices we need. Should get them ourselves later
+root_dofs = 1:6
+body_dofs = 7:nv
+balance_dofs = [8, 9, 16, 18, 19, 20, 21, 25, 26, 27]
+other_dofs = [1, 7, 10, 11, 12, 13, 14, 15, 17, 22, 23, 24]
+
+# Cost coefficients
+balance_cost       = 1000       # CoM units large, keep it still
+balance_joint_cost = 3          # Joints can move a bit and still balance
+other_joint_cost   = 0.3        # Other joints can do whatever
+
+# Construct joint Q matrix
+Qjoint = Matrix{Float64}(I, nv, nv)
+Qjoint[root_dofs, root_dofs] *= 0
+Qjoint[balance_dofs, balance_dofs] *= balance_joint_cost
+Qjoint[other_dofs, other_dofs] *= other_joint_cost
+
+# Total Q-matrix
+Qpos = balance_cost*Qbalance + Qjoint
+Q = [Qpos zeros(nv,nv); zeros(nv, 2nv)]  + (1e-10)I # Add ϵI for positive definite Q
+
+# Get A and B matrices from Jacobian
+reset!(model, data)
+data.ctrl .= ctrl0
+data.qpos .= qpos0
+
+A = zeros(2nv, 2nv)
+B = zeros(nu, 2nv)
+ϵ = 1e-6
+centred = true
+LibMuJoCo.mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
+A = transpose(A)
+B = transpose(B)
+
+# Solve LQR with MatrixEquations.jl (faster than loading ControlSystems.jl)
+S = zeros(size(Q,1), size(R,1))
+_, _, K, _ = ared(A,B,R,Q,S)
+
+# Write the LQR function
+function humanoid_ctrl!(m::Model, d::Data)
+
+    # Get difference in states qpos - qpos0 (this function does quaternion diff)
+    Δq = zeros(nv)
+    LibMuJoCo.mj_differentiatePos(m, Δq, 1, qpos0, d.qpos)
+    Δx = vcat(Δq, data.qvel)
+
+    # Compute controls with LQR
+    data.ctrl .= (ctrl0 .- K*Δx)
+
+    return nothing
+end
+
+# Initialise the humanoid and visualise
+reset!(model, data)
+data.qpos .= qpos0
+visualise!(model, data, controller=humanoid_ctrl!)
