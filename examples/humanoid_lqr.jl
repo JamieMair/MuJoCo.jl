@@ -9,13 +9,16 @@ isplot = false
 # Note: follow along with the DeepMind notebook: 
 # https://colab.research.google.com/github/deepmind/mujoco/blob/main/python/LQR.ipynb
 
-# TODO: Make this into a Pluto.jl notebook?
-
+# Useful functions
+reset!(m::Model, d::Data) = LibMuJoCo.mj_resetData(m, d)
+resetkey!(m::Model, d::Data) = LibMuJoCo.mj_resetDataKeyframe(m, d, 1)
 
 # Load humanoid in specific keyframe
 model, data = MuJoCo.sample_model_and_data()
-reset!(m::Model, d::Data) = LibMuJoCo.mj_resetDataKeyframe(m, d, 1)
-reset!(model, data)
+resetkey!(model, data)
+
+# Convert row-major matrices to column-major
+row2col(M::AbstractMatrix) = permutedims(reshape(M, size(M)[2], size(M)[1]), (2,1))
 
 
 ################## Get control set-point ##################
@@ -28,7 +31,7 @@ u_vert = zeros(length(heights))
 for k in eachindex(heights)
 
     # Set model in position and assume qacc == 0
-    reset!(model, data)
+    resetkey!(model, data)
     forward!(model, data)
     data.qacc .= 0
 
@@ -52,7 +55,7 @@ lines!(ax, [height, height]*1000, [minimum(u_vert), maximum(u_vert)], linestyle=
 isplot && display(fig)
 
 # We'll use the best-choice offset to get our required ID forces and save q0
-reset!(model, data)
+resetkey!(model, data)
 forward!(model, data)
 data.qacc .= 0
 data.qpos[3] += height
@@ -62,7 +65,7 @@ qfrc0 = vec(copy(data.qfrc_inverse))
 println("Desired forces qfrc0 acquired")
 
 # Need the corresponding control torque (through the actuators)
-M_act = data.actuator_moment # TODO: This should be in column-major not row-major form... bugger
+M_act = row2col(data.actuator_moment)
 ctrl0 = pinv(M_act)' * qfrc0
 println("Control set-point ctrl0 acquired")
 
@@ -70,7 +73,29 @@ println("Control set-point ctrl0 acquired")
 data.ctrl .= ctrl0
 forward!(model, data)
 qfrc_test = vec(copy(data.qfrc_actuator))
-println("Desired force meets actual? ", qfrc_test .≈ qfrc0)
+println("Desired force meets actual? ", all((qfrc_test .≈ qfrc0)[7:end]))
 
-# # Take a look
-# visualise!(model, data)
+# Run the simulation
+reset!(model, data)
+data.qpos .= qpos0
+data.ctrl .= ctrl0
+
+isplot && visualise!(model, data)
+
+
+################## LQR Design ##################
+
+# Useful dimensions
+nu = model.nu
+nv = model.nv
+
+# R-matrix just identity
+R = Matrix{Float64}(I, nu, nu)
+
+# Get Jacobian for torso CoM
+reset!(model, data)
+data.qpos .= qpos0
+forward!(model, data)
+jac_com = zeros(3,nv)
+# LibMuJoCo.mj_jacSubtreeCom(model, data, jac_com, model.body("torso").id) 
+# TODO: We need a nice way to handle body IDs...
