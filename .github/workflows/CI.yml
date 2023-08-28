@@ -31,6 +31,9 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+      - name: Remove old package
+        run: |
+          rm -fr ~/.julia/packages/MuJoCo_jll
       - name: Temporarily use custom JLL
         run: |
           julia --project=. -e '
