@@ -16,6 +16,12 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "API" => "api.md",
+        "Index" => "api_index.md",
+        "C Bindings" => Any[
+            "API" => "libmujoco.md",
+            "Index" => "libmujoco_index.md"
+        ]
     ],
 )
 

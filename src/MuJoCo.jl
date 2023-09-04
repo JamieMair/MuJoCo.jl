@@ -16,10 +16,22 @@ export init_visualiser, install_visualiser, visualise!
 
 include("io.jl")
 
+"""
+    init_data(model::Model)
+
+Creates an instance of the data required for the [`step!`](@ref) simulation.
+
+Returns a `Data` object, wrapping the underlying `mjData` object.
+"""
 function init_data(model::Model)
     data_ptr = mj_makeData(model)
     return Data(data_ptr, model) # Requires a reference to the model to get array sizes
 end
+"""
+    step!(model::Model, data::Data)
+
+Runs the simulation forward one time step, modifying the underlying `data` object.
+"""
 function step!(model::Model, data::Data)
     mj_step(model, data)
 end
