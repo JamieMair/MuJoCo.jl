@@ -1125,7 +1125,7 @@ struct mjOption_
     )
 end
 const mjOption = mjOption_
-struct var"##Ctag#314"
+struct var"##Ctag#247"
     fovy::Cfloat
     ipd::Cfloat
     azimuth::Cfloat
@@ -1136,8 +1136,8 @@ struct var"##Ctag#314"
     offwidth::Cint
     offheight::Cint
     ellipsoidinertia::Cint
-    var"##Ctag#314"() = new()
-    var"##Ctag#314"(
+    var"##Ctag#247"() = new()
+    var"##Ctag#247"(
         fovy::Cfloat,
         ipd::Cfloat,
         azimuth::Cfloat,
@@ -1161,14 +1161,14 @@ struct var"##Ctag#314"
         ellipsoidinertia,
     )
 end
-struct var"##Ctag#315"
+struct var"##Ctag#248"
     shadowsize::Cint
     offsamples::Cint
     numslices::Cint
     numstacks::Cint
     numquads::Cint
-    var"##Ctag#315"() = new()
-    var"##Ctag#315"(
+    var"##Ctag#248"() = new()
+    var"##Ctag#248"(
         shadowsize::Cint,
         offsamples::Cint,
         numslices::Cint,
@@ -1176,20 +1176,20 @@ struct var"##Ctag#315"
         numquads::Cint,
     ) = new(shadowsize, offsamples, numslices, numstacks, numquads)
 end
-struct var"##Ctag#316"
+struct var"##Ctag#249"
     ambient::NTuple{3,Cfloat}
     diffuse::NTuple{3,Cfloat}
     specular::NTuple{3,Cfloat}
     active::Cint
-    var"##Ctag#316"() = new()
-    var"##Ctag#316"(
+    var"##Ctag#249"() = new()
+    var"##Ctag#249"(
         ambient::NTuple{3,Cfloat},
         diffuse::NTuple{3,Cfloat},
         specular::NTuple{3,Cfloat},
         active::Cint,
     ) = new(ambient, diffuse, specular, active)
 end
-struct var"##Ctag#317"
+struct var"##Ctag#250"
     stiffness::Cfloat
     stiffnessrot::Cfloat
     force::Cfloat
@@ -1203,8 +1203,8 @@ struct var"##Ctag#317"
     shadowclip::Cfloat
     shadowscale::Cfloat
     actuatortendon::Cfloat
-    var"##Ctag#317"() = new()
-    var"##Ctag#317"(
+    var"##Ctag#250"() = new()
+    var"##Ctag#250"(
         stiffness::Cfloat,
         stiffnessrot::Cfloat,
         force::Cfloat,
@@ -1234,7 +1234,7 @@ struct var"##Ctag#317"
         actuatortendon,
     )
 end
-struct var"##Ctag#318"
+struct var"##Ctag#251"
     forcewidth::Cfloat
     contactwidth::Cfloat
     contactheight::Cfloat
@@ -1251,8 +1251,8 @@ struct var"##Ctag#318"
     framewidth::Cfloat
     constraint::Cfloat
     slidercrank::Cfloat
-    var"##Ctag#318"() = new()
-    var"##Ctag#318"(
+    var"##Ctag#251"() = new()
+    var"##Ctag#251"(
         forcewidth::Cfloat,
         contactwidth::Cfloat,
         contactheight::Cfloat,
@@ -1288,7 +1288,7 @@ struct var"##Ctag#318"
         slidercrank,
     )
 end
-struct var"##Ctag#319"
+struct var"##Ctag#252"
     fog::NTuple{4,Cfloat}
     haze::NTuple{4,Cfloat}
     force::NTuple{4,Cfloat}
@@ -1311,8 +1311,8 @@ struct var"##Ctag#319"
     constraint::NTuple{4,Cfloat}
     slidercrank::NTuple{4,Cfloat}
     crankbroken::NTuple{4,Cfloat}
-    var"##Ctag#319"() = new()
-    var"##Ctag#319"(
+    var"##Ctag#252"() = new()
+    var"##Ctag#252"(
         fog::NTuple{4,Cfloat},
         haze::NTuple{4,Cfloat},
         force::NTuple{4,Cfloat},
@@ -4983,7 +4983,7 @@ struct mjvFigure_
     )
 end
 const mjvFigure = mjvFigure_
-struct var"##Ctag#320"
+struct var"##Ctag#253"
     nu::Cint
     na::Cint
     nbody::Cint
@@ -5125,8 +5125,8 @@ struct var"##Ctag#320"
     name_tendonadr::Ptr{Cint}
     name_actuatoradr::Ptr{Cint}
     names::Ptr{Cchar}
-    var"##Ctag#320"() = new()
-    var"##Ctag#320"(
+    var"##Ctag#253"() = new()
+    var"##Ctag#253"(
         nu::Cint,
         na::Cint,
         nbody::Cint,
@@ -5412,7 +5412,7 @@ struct var"##Ctag#320"
         names,
     )
 end
-struct var"##Ctag#321"
+struct var"##Ctag#254"
     warning::NTuple{8,mjWarningStat}
     nefc::Cint
     ncon::Cint
@@ -5444,8 +5444,8 @@ struct var"##Ctag#321"
     bvh_active::Ptr{mjtByte}
     contact::Ptr{mjContact}
     efc_force::Ptr{mjtNum}
-    var"##Ctag#321"() = new()
-    var"##Ctag#321"(
+    var"##Ctag#254"() = new()
+    var"##Ctag#254"(
         warning::NTuple{8,mjWarningStat},
         nefc::Cint,
         ncon::Cint,
