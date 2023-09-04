@@ -19,10 +19,11 @@ jobs:
       matrix:
         version:
           - '1.6'
-          - '1.9'
           - 'nightly'
         os:
           - ubuntu-latest
+          - macOS-latest
+          - windows-latest
         arch:
           - x64
     steps:
@@ -31,20 +32,13 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - name: Remove old package
-        run: |
-          rm -fr ~/.julia/packages/MuJoCo_jll
-      - name: Temporarily use custom JLL
-        run: |
-          julia --project=. -e '
-            using Pkg
-            try Pkg.rm("MuJoCo_jll") catch end
-            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
-            Pkg.instantiate()'
+      - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: lcov.info
   docs:
@@ -60,25 +54,13 @@ jobs:
           version: '1'
       - name: Configure MuJoCo env
         run: |
-          julia --project=. -e '
-            using Pkg
-            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
-            Pkg.instantiate()'
+          julia --project=. -e "using Pkg; Pkg.instantiate()"
       - name: Configure doc environment
         run: |
-          julia --project=docs -e '
-            using Pkg
-            try Pkg.rm("MuJoCo") catch end
-            Pkg.add(url="https://github.com/JamieMair/MuJoCo_jll")
-            Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()'
+          julia --project=docs -e "using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()"
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-docdeploy@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-          julia --project=docs -e '
-            using Documenter: DocMeta, doctest
-            using MuJoCo
-            DocMeta.setdocmeta!(MuJoCo, :DocTestSetup, :(using MuJoCo); recursive=true)
-            doctest(MuJoCo)'
+          julia --project=docs -e "using Documenter: DocMeta, doctest; using MuJoCo; DocMeta.setdocmeta!(MuJoCo, :DocTestSetup, :(using MuJoCo); recursive=true); doctest(MuJoCo)"
