@@ -76,8 +76,6 @@ function __init__()
 end
 
 function MuJoCo.Visualiser.test_visualiser()
-    root_path = normpath(joinpath(@__DIR__, "..", ".."))
-
     # Load model, data
     model = load_model(MuJoCo.humanoid_model_file())
     data  = init_data(model)
