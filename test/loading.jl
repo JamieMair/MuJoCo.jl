@@ -1,11 +1,11 @@
 using TestItemRunner
 
 @testitem "Load XML" begin
-    @test load_xml(MuJoCo.sample_xml_filepath()) isa MuJoCo.Model
+    @test load_model(MuJoCo.humanoid_model_file()) isa MuJoCo.Model
 end
 
 @testitem "Initialise Data" begin
-    model = load_xml(MuJoCo.sample_xml_filepath())
+    model = load_model(MuJoCo.humanoid_model_file())
 
     @test init_data(model) isa MuJoCo.Data
 end
