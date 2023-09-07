@@ -288,12 +288,16 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
             cstruct_name = collection_struct_name(struct_name, collection_name)
             # Create functions to create the struct objects
+            named_type = Symbol("Named" * string(struct_name))
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), index::Int)
+                return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
+            end))
             push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), index::Int)
                 return $(cstruct_name)($(lower_struct_name), index)
             end))
-            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), name::Symbol)
-                index = index_by_name($(lower_struct_name), name)
-                return $(cstruct_name)($(lower_struct_name), index)
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), name::Symbol)
+                index = index_by_name($(lower_struct_name), $(QuoteNode(identifier)), name)
+                return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
             end))
 
 
@@ -352,8 +356,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
     module_expr = Expr(:module, true, :NamedAccess, Expr(:block, 
         :(import ..LibMuJoCo),
-        :(import ..Data),
-        :(import ..Model),
+        :(include("named_model.jl")),
         export_expr,
         exprs...
     ))
