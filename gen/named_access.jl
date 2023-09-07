@@ -331,7 +331,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                         Expr(:call, :(Base.OneTo), xmacro.numrows)
                     end
                     return_expr = Expr(:return, Expr(:call, :view, get_array_expr, :index, second_dims))
-                    entry_expr = :(f == $(QuoteNode(propname)) && $(return_expr))
+                    entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
                     push!(fn_block_exprs, entry_expr)
                 end
             end
