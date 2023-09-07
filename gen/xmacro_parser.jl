@@ -4,10 +4,18 @@ struct XMacroEntry
     numcols::Union{Expr, String, Symbol, Int}
     numrows::Union{Expr, String, Symbol, Int}
 end
-struct XMacro
-    structname::Symbol
-    itemname::Symbol
-    entries::Vector{XMacroEntry}
+struct XGroupMacroEntry
+    name::Symbol
+    identifier::Symbol
+    size_identifier::Symbol
+    struct_name::Symbol
+    collection_name::Symbol
+end
+struct XGroupAltNamesMacroEntry
+    base_identifier::Symbol
+    alt_identifier::Symbol
+    struct_name::Symbol
+    collection_name::Symbol
 end
 
 const type_mapping = Dict(
@@ -15,26 +23,58 @@ const type_mapping = Dict(
     :float => :Float32
 )
 
-function parse_xmacros(file)
-    xmacros = XMacro[]
+"""
+Makes the input all lowercase, apart from the first letter which is uppercase, and then converts it to a symbol.
+"""
+function standardise_symbol(input)
+    Symbol(uppercasefirst(lowercase(string(input))))
+end
+
+function parse_x_defs(file)
+    xmacros_dict = Dict{Symbol, Dict{Symbol, Vector{XMacroEntry}}}()
+    xviewgroups = Dict{Symbol, Dict{Symbol, XGroupMacroEntry}}()
+    xviewgroupaltnames = Dict{Symbol, Dict{Symbol, XGroupAltNamesMacroEntry}}()
     open(file, "r") do io
-        xmacro_start_regex = r"#define\s+MJ([a-zA-Z]+)\_([a-zA-Z]+)\s+"
+        def_macro_regex = r"#define\s+MJ([a-zA-Z]+)\_([a-zA-Z\_]+)\s+"
         while !eof(io)
             line = readline(io)
-            m = match(xmacro_start_regex, line)
+            m = match(def_macro_regex, line)
             if !isnothing(m)
-                structname = Symbol(uppercasefirst(lowercase(m.captures[begin]))) # e.g. Model, Data etc
-                itemname = Symbol(uppercasefirst(lowercase(m.captures[end]))) # e.g. Actuator, Body etc
+                struct_name = standardise_symbol(m.captures[begin]) # e.g. Model, Data etc
+                if m.captures[end] == "VIEW_GROUPS"
+                    xgroupmacros = parse_xgroup_macro!(io)
+                    xviewgroups[struct_name] = xgroupmacros
+                elseif m.captures[end] == "VIEW_GROUPS_ALTNAMES"
+                    xgroupaltnamemacros = parse_xgroup_altnames_macro!(io)
+                    xviewgroupaltnames[struct_name] = xgroupaltnamemacros
+                else
+                    collection_name = standardise_symbol(m.captures[end]) # e.g. Actuator, Body etc
 
-                xmacro = parse_xmacro!(io, structname, itemname)
-                push!(xmacros, xmacro)
+                    xmacros = parse_xmacro!(io)
+                    if !haskey(xmacros_dict, struct_name)
+                        xmacros_dict[struct_name] = Dict{Symbol, Vector{XMacroEntry}}()
+                    end
+                    
+                    xmacros_dict[struct_name][collection_name] = xmacros
+                end
             end
         end
     end
-    return xmacros
+
+    for (struct_name, xaltname_dict) in xviewgroupaltnames
+        for (alt_identifier, xaltname) in xaltname_dict
+            xviewgroup = xviewgroups[struct_name]
+            base_xgroup = xviewgroup[xaltname.base_identifier]
+
+            altname_xgroup = XGroupMacroEntry(base_xgroup.name, alt_identifier, base_xgroup.size_identifier, struct_name, base_xgroup.collection_name)
+            xviewgroup[alt_identifier] = altname_xgroup
+        end
+    end
+
+    return xmacros_dict, xviewgroups
 end
 
-function parse_xmacro!(io, structname, itemname)
+function parse_xmacro!(io)
     entries = XMacroEntry[]
     while true
         info = parse_xmacro_entry!(io)
@@ -49,7 +89,39 @@ function parse_xmacro!(io, structname, itemname)
             break
         end
     end
-    return XMacro(structname, itemname, entries)
+    return entries
+end
+function parse_xgroup_macro!(io)
+    entries = Dict{Symbol, XGroupMacroEntry}()
+    while true
+        info = parse_xmacro_group_entry!(io)
+        if isnothing(info)
+            break
+        end
+
+        islast, xgroupmacro = info
+        entries[xgroupmacro.identifier] = xgroupmacro
+        if islast
+            break
+        end
+    end
+    return entries
+end
+function parse_xgroup_altnames_macro!(io)
+    entries = Dict{Symbol, XGroupAltNamesMacroEntry}()
+    while true
+        info = parse_xmacro_group_altnames_entry!(io)
+        if isnothing(info)
+            break
+        end
+
+        islast, xgroupaltnamesmacro = info
+        entries[xgroupaltnamesmacro.alt_identifier] = xgroupaltnamesmacro
+        if islast
+            break
+        end
+    end
+    return entries
 end
 
 function simplify_dimension_expr(expr::Any)
@@ -67,19 +139,20 @@ function simplify_dimension_expr(expr::Expr)
     end
 end
 
-function parse_xentry(line)
+function _process_line(line)
     islast = !endswith(line, "\\")
     if !islast
         line = line[begin:end-1] # remove trailing dash
     end
     # replace any empty args
     line = replace(line, r",[^\S\r\n]*,"=>",\"\",")
-    # convert to an expression
     expr = Meta.parse(line)
-    if expr.head != :call
-        @show line
-        @show expr
-    end
+    return islast, expr
+end
+
+function parse_xentry(line)
+    islast, expr = _process_line(line)
+
     @assert expr.head == :call
     @assert length(expr.args) == 6
 
@@ -97,6 +170,46 @@ function parse_xentry(line)
 
     return (; islast, type, prefix, suffix, numcols, numrows)    
 end
+function parse_xgroup_entry(line)
+    islast, expr = _process_line(line)
+
+    @assert expr.head == :call
+    @assert length(expr.args) == 5
+
+    # Convert call to struct name
+    expr.args[1] = nameof(XGroupMacroEntry)
+    # Convert other args to symbols
+    expr.args[2:end-1] .= QuoteNode.(expr.args[2:end-1])
+    # Convert last argument into same format as before
+    (mjtype, collectionname) = split(string(expr.args[end]), "_")
+    struct_name = standardise_symbol(mjtype[3:end]) # remove mj
+    collectionname = standardise_symbol(collectionname)
+
+    expr.args[end] = QuoteNode(struct_name)
+    push!(expr.args, QuoteNode(collectionname))
+
+    return islast, Base.eval(Main, expr)
+end
+function parse_xgroup_altnames_entry(line)
+    islast, expr = _process_line(line)
+
+    @assert expr.head == :call
+    @assert length(expr.args) == 4
+
+    # Convert call to struct name
+    expr.args[1] = nameof(XGroupAltNamesMacroEntry)
+    # Convert other args to symbols
+    expr.args[2:end-1] .= QuoteNode.(expr.args[2:end-1])
+    # Convert last argument into same format as before
+    (mjtype, collectionname) = split(string(expr.args[end]), "_")
+    struct_name = standardise_symbol(mjtype[3:end]) # remove mj
+    collectionname = standardise_symbol(collectionname)
+
+    expr.args[end] = QuoteNode(struct_name)
+    push!(expr.args, QuoteNode(collectionname))
+
+    return islast, Base.eval(Main, expr)
+end
 
 function parse_xmacro_entry!(io)
     line = strip(readline(io))
@@ -105,8 +218,32 @@ function parse_xmacro_entry!(io)
     end
 
     if startswith(line, "XGROUP")
-        return nothing
+        return error("Unexpected macro.")
     elseif startswith(line, "X")
         return parse_xentry(line)
+    end
+end
+function parse_xmacro_group_entry!(io)
+    line = strip(readline(io))
+    if line == ""
+        return nothing
+    end
+
+    if !startswith(line, "XGROUP")
+        return error("Unexpected macro.")
+    else
+        return parse_xgroup_entry(line)
+    end
+end
+function parse_xmacro_group_altnames_entry!(io)
+    line = strip(readline(io))
+    if line == ""
+        return nothing
+    end
+
+    if !startswith(line, "XGROUP")
+        return error("Unexpected macro.")
+    else
+        return parse_xgroup_altnames_entry(line)
     end
 end
