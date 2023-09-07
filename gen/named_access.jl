@@ -356,6 +356,8 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
     module_expr = Expr(:module, true, :NamedAccess, Expr(:block, 
         :(import ..LibMuJoCo),
+        :(import ..Data),
+        :(import ..Model),
         :(include("named_model.jl")),
         export_expr,
         exprs...

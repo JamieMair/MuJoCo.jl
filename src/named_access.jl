@@ -1,5 +1,7 @@
 module NamedAccess
 import ..LibMuJoCo
+import ..Data
+import ..Model
 include("named_model.jl")
 export light, cam, actuator, body, geom, jnt, sensor, site, tendon, eq, key, geom, numeric, sensor, mat, tex, actuator, site, pair, hfield, light, cam, tuple, skin, exclude, mesh, body, jnt, tendon, camera, ten, joint, camera, equality, texture, keyframe, material, joint
 struct DataActuator
