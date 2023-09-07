@@ -2,7 +2,7 @@ module NamedAccess
 import ..LibMuJoCo
 import ..Data
 import ..Model
-export light, cam, actuator, body, geom, jnt, sensor, site, tendon, eq, key, geom, numeric, sensor, mat, tex, actuator, site, pair, hfield, light, cam, tuple, skin, exclude, mesh, body, jnt, tendon
+export light, cam, actuator, body, geom, jnt, sensor, site, tendon, eq, key, geom, numeric, sensor, mat, tex, actuator, site, pair, hfield, light, cam, tuple, skin, exclude, mesh, body, jnt, tendon, camera, ten, joint, camera, equality, texture, keyframe, material, joint
 struct DataActuator
     data::Data
     index::Int
@@ -807,4 +807,13 @@ function Base.getproperty(x::ModelTendon, f::Symbol)
     f === :rgba && return view(model.tendon_rgba, index, Base.OneTo(4))
     error("Could not find the property: " * string(f))
 end
+const camera = cam
+const ten = tendon
+const joint = jnt
+const camera = cam
+const equality = eq
+const texture = tex
+const keyframe = key
+const material = mat
+const joint = jnt
 end

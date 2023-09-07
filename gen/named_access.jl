@@ -61,16 +61,6 @@ function parse_x_defs(file)
         end
     end
 
-    # for (struct_name, xaltname_dict) in xviewgroupaltnames
-    #     for (alt_identifier, xaltname) in xaltname_dict
-    #         xviewgroup = xviewgroups[struct_name]
-    #         base_xgroup = xviewgroup[xaltname.base_identifier]
-
-    #         altname_xgroup = XGroupMacroEntry(base_xgroup.name, alt_identifier, base_xgroup.size_identifier, struct_name, base_xgroup.collection_name)
-    #         xviewgroup[alt_identifier] = altname_xgroup
-    #     end
-    # end
-
     return xmacros_dict, xviewgroups, xviewgroupaltnames
 end
 
@@ -343,8 +333,19 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
             fn_sig = :(Base.getproperty(x::$(cstruct_name), f::Symbol))
             push!(exprs, Expr(:function, fn_sig, Expr(:block, fn_block_exprs...)))
         end
+    end
 
 
+    for (struct_name, xaltname_dict) in xviewgroupaltnames
+        if !haskey(available_classes, struct_name)
+            @info "Skipping alternative view names for named access for struct $struct_name"
+            continue
+        end
+
+        for (alt_identifier, xaltname) in xaltname_dict
+            push!(exports, alt_identifier)
+            push!(exprs, :(const $(alt_identifier) = $(xaltname.base_identifier)))
+        end
     end
 
     export_expr = Expr(:export, exports...)
