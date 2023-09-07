@@ -1,5 +1,6 @@
 module NamedAccess
 import ..LibMuJoCo
+using UnsafeArrays
 import ..Data
 import ..Model
 include("named_model.jl")
@@ -349,9 +350,24 @@ function Base.getproperty(x::ModelEquality, f::Symbol)
     f === :obj1id && return view(model.eq_obj1id, index, Base.OneTo(1))
     f === :obj2id && return view(model.eq_obj2id, index, Base.OneTo(1))
     f === :active && return view(model.eq_active, index, Base.OneTo(1))
-    f === :solref && return view(model.eq_solref, index, Base.OneTo(LibMuJoCo.mjNREF))
-    f === :solimp && return view(model.eq_solimp, index, Base.OneTo(LibMuJoCo.mjNIMP))
-    f === :data && return view(model.eq_data, index, Base.OneTo(LibMuJoCo.mjNEQDATA))
+    f === :solref && return begin
+                size_arr = Int(LibMuJoCo.mjNREF)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.eq_solref + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :solimp && return begin
+                size_arr = Int(LibMuJoCo.mjNIMP)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.eq_solimp + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :data && return begin
+                size_arr = Int(LibMuJoCo.mjNEQDATA)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.eq_data + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
     error("Could not find the property: " * string(f))
 end
 function key(model::NamedModel, index::Int)
@@ -405,8 +421,18 @@ function Base.getproperty(x::ModelGeom, f::Symbol)
     f === :priority && return view(model.geom_priority, index, Base.OneTo(1))
     f === :sameframe && return view(model.geom_sameframe, index, Base.OneTo(1))
     f === :solmix && return view(model.geom_solmix, index, Base.OneTo(1))
-    f === :solref && return view(model.geom_solref, index, Base.OneTo(LibMuJoCo.mjNREF))
-    f === :solimp && return view(model.geom_solimp, index, Base.OneTo(LibMuJoCo.mjNIMP))
+    f === :solref && return begin
+                size_arr = Int(LibMuJoCo.mjNREF)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.geom_solref + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :solimp && return begin
+                size_arr = Int(LibMuJoCo.mjNIMP)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.geom_solimp + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
     f === :size && return view(model.geom_size, index, Base.OneTo(3))
     f === :rbound && return view(model.geom_rbound, index, Base.OneTo(1))
     f === :pos && return view(model.geom_pos, index, Base.OneTo(3))
@@ -543,9 +569,24 @@ function Base.getproperty(x::ModelActuator, f::Symbol)
     f === :ctrllimited && return view(model.actuator_ctrllimited, index, Base.OneTo(1))
     f === :forcelimited && return view(model.actuator_forcelimited, index, Base.OneTo(1))
     f === :actlimited && return view(model.actuator_actlimited, index, Base.OneTo(1))
-    f === :dynprm && return view(model.actuator_dynprm, index, Base.OneTo(LibMuJoCo.mjNDYN))
-    f === :gainprm && return view(model.actuator_gainprm, index, Base.OneTo(LibMuJoCo.mjNGAIN))
-    f === :biasprm && return view(model.actuator_biasprm, index, Base.OneTo(LibMuJoCo.mjNBIAS))
+    f === :dynprm && return begin
+                size_arr = Int(LibMuJoCo.mjNDYN)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.actuator_dynprm + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :gainprm && return begin
+                size_arr = Int(LibMuJoCo.mjNGAIN)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.actuator_gainprm + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :biasprm && return begin
+                size_arr = Int(LibMuJoCo.mjNBIAS)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.actuator_biasprm + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
     f === :ctrlrange && return view(model.actuator_ctrlrange, index, Base.OneTo(2))
     f === :forcerange && return view(model.actuator_forcerange, index, Base.OneTo(2))
     f === :actrange && return view(model.actuator_actrange, index, Base.OneTo(2))
@@ -605,8 +646,18 @@ function Base.getproperty(x::ModelPair, f::Symbol)
     f === :geom1 && return view(model.pair_geom1, index, Base.OneTo(1))
     f === :geom2 && return view(model.pair_geom2, index, Base.OneTo(1))
     f === :signature && return view(model.pair_signature, index, Base.OneTo(1))
-    f === :solref && return view(model.pair_solref, index, Base.OneTo(LibMuJoCo.mjNREF))
-    f === :solimp && return view(model.pair_solimp, index, Base.OneTo(LibMuJoCo.mjNIMP))
+    f === :solref && return begin
+                size_arr = Int(LibMuJoCo.mjNREF)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.pair_solref + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :solimp && return begin
+                size_arr = Int(LibMuJoCo.mjNIMP)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.pair_solimp + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
     f === :margin && return view(model.pair_margin, index, Base.OneTo(1))
     f === :gap && return view(model.pair_gap, index, Base.OneTo(1))
     f === :friction && return view(model.pair_friction, index, Base.OneTo(5))
@@ -879,10 +930,30 @@ function Base.getproperty(x::ModelTendon, f::Symbol)
     f === :group && return view(model.tendon_group, index, Base.OneTo(1))
     f === :limited && return view(model.tendon_limited, index, Base.OneTo(1))
     f === :width && return view(model.tendon_width, index, Base.OneTo(1))
-    f === :solref_lim && return view(model.tendon_solref_lim, index, Base.OneTo(LibMuJoCo.mjNREF))
-    f === :solimp_lim && return view(model.tendon_solimp_lim, index, Base.OneTo(LibMuJoCo.mjNIMP))
-    f === :solref_fri && return view(model.tendon_solref_fri, index, Base.OneTo(LibMuJoCo.mjNREF))
-    f === :solimp_fri && return view(model.tendon_solimp_fri, index, Base.OneTo(LibMuJoCo.mjNIMP))
+    f === :solref_lim && return begin
+                size_arr = Int(LibMuJoCo.mjNREF)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.tendon_solref_lim + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :solimp_lim && return begin
+                size_arr = Int(LibMuJoCo.mjNIMP)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.tendon_solimp_lim + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :solref_fri && return begin
+                size_arr = Int(LibMuJoCo.mjNREF)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.tendon_solref_fri + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
+    f === :solimp_fri && return begin
+                size_arr = Int(LibMuJoCo.mjNIMP)
+                offset = (index - 1) * size_arr * sizeof(Float64)
+                arr_pointer = Ptr{Float64}(model.tendon_solimp_fri + offset)
+                UnsafeArray(arr_pointer, (size_arr,))
+            end
     f === :range && return view(model.tendon_range, index, Base.OneTo(2))
     f === :margin && return view(model.tendon_margin, index, Base.OneTo(1))
     f === :stiffness && return view(model.tendon_stiffness, index, Base.OneTo(1))

@@ -253,7 +253,7 @@ function new_propname(fieldname)
 
     return Symbol(fieldname_str[first_underscore_idx+1:end])
 end
-
+ptr_inner_type(::Type{Ptr{T}}) where {T} = T
 function named_access_wrappers_expr(index_xmacro_header_file_path)
     xmacros, xviewgroups, xviewgroupaltnames = parse_x_defs(index_xmacro_header_file_path)
     # TODO add in alt name access
@@ -262,6 +262,15 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
         :Model => Wrappers.Model,
     )
     module_name = :LibMuJoCo
+
+    sample_model_path = joinpath(@__DIR__, "..", "models", "humanoid.xml")
+    test_model = Wrappers.Model(LibMuJoCo.mj_loadXML(sample_model_path, Ptr{Cvoid}(), "", 0))
+    test_data = Wrappers.Data(Wrappers.LibMuJoCo.mj_makeData(test_model), test_model)
+
+    test_classes = Dict(
+        :Data => test_data,
+        :Model => test_model
+    )
 
     exprs = Expr[]
     exports = Symbol[]
@@ -314,19 +323,41 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                 propname = new_propname(xmacro.fieldname)
                 
                 if xmacro.numcols == xgroup.size_identifier
-                    push!(property_names, propname)
                     # return a view into the array
-                    get_array_expr = :($(lower_struct_name).$(xmacro.fieldname))
-                    second_dims = if xmacro.numrows isa Symbol && startswith(string(xmacro.numrows), "mj")
-                        :(Base.OneTo($(module_name).$(xmacro.numrows)))
-                    elseif xmacro.numrows == 1
-                        :(Base.OneTo(1))
+                    test_item = test_classes[struct_name]
+                    inferred_return_type = typeof(getproperty(test_item, xmacro.fieldname))
+                    if inferred_return_type <: AbstractArray
+                        push!(property_names, propname)
+                        get_array_expr = :($(lower_struct_name).$(xmacro.fieldname))
+                        second_dims = if xmacro.numrows isa Symbol && startswith(string(xmacro.numrows), "mj")
+                            :(Base.OneTo($(module_name).$(xmacro.numrows)))
+                        elseif xmacro.numrows == 1
+                            :(Base.OneTo(1))
+                        else
+                            Expr(:call, :(Base.OneTo), xmacro.numrows)
+                        end
+                        return_expr = Expr(:return, Expr(:call, :view, get_array_expr, :index, second_dims))
+                        entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
+                        push!(fn_block_exprs, entry_expr)
+                    elseif inferred_return_type <: Ptr
+                        push!(property_names, propname)
+                        num_elements = if xmacro.numrows isa Symbol && startswith(string(xmacro.numrows), "mj")
+                            :($(module_name).$(xmacro.numrows))
+                        else
+                            xmacro.numrows
+                        end
+                        element_type = ptr_inner_type(inferred_return_type)
+                        return_expr = Expr(:return, quote
+                            size_arr = Int($(num_elements))
+                            offset = (index-1) * size_arr * sizeof($element_type)
+                            arr_pointer = Ptr{$element_type}($(lower_struct_name).$(xmacro.fieldname) + offset)
+                            UnsafeArray(arr_pointer, (size_arr,))
+                        end)
+                        entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
+                        push!(fn_block_exprs, entry_expr)
                     else
-                        Expr(:call, :(Base.OneTo), xmacro.numrows)
+                        @info "Property $(xmacro.fieldname) of $class_def is not an array, cannot wrap."
                     end
-                    return_expr = Expr(:return, Expr(:call, :view, get_array_expr, :index, second_dims))
-                    entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
-                    push!(fn_block_exprs, entry_expr)
                 end
             end
 
@@ -356,6 +387,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
     module_expr = Expr(:module, true, :NamedAccess, Expr(:block, 
         :(import ..LibMuJoCo),
+        :(using UnsafeArrays),
         :(import ..Data),
         :(import ..Model),
         :(include("named_model.jl")),

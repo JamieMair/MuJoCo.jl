@@ -8,13 +8,17 @@ function fieldoffset(T::Type, fname::Symbol)
     end
 end
 
+
 struct NamedModel
     model::Model
     name::Symbol
     name_to_index_mappings::Dict{Symbol, Dict{Symbol, Int}}
 end
+function _raw_name_mapping(x::NamedModel)
+    return getfield(x, :name_to_index_mappings)
+end
 function NamedModel(model::Model)
-    name_fieldnames = filter(fieldnames(mjModel)) do fn
+    name_fieldnames = filter(fieldnames(LibMuJoCo.mjModel)) do fn
         fn_str = string(fn)
         startswith(fn_str, "name_") && endswith(fn_str, "adr")
     end
@@ -65,9 +69,11 @@ Base.propertynames(x::NamedData) = propertynames(getfield(x, :data))
 Base.setproperty!(x::NamedModel, f::Symbol, v) = setproperty!(getfield(x, :model), f, v)
 Base.setproperty!(x::NamedData, f::Symbol, v) = setproperty!(getfield(x, :data), f, v)
 
-function Base.cconvert(::Type{Ptr{mjModel}}, wrapper::NamedModel)
-    Base.cconvert(Ptr{mjModel}, getfield(wrapper, :model))
+function Base.cconvert(::Type{Ptr{LibMuJoCo.mjModel}}, wrapper::NamedModel)
+    Base.cconvert(Ptr{LibMuJoCo.mjModel}, getfield(wrapper, :model))
 end
-function Base.cconvert(::Type{Ptr{mjData}}, wrapper::NamedData)
-    Base.cconvert(Ptr{mjData}, getfield(wrapper, :data))
+function Base.cconvert(::Type{Ptr{LibMuJoCo.mjData}}, wrapper::NamedData)
+    Base.cconvert(Ptr{LibMuJoCo.mjData}, getfield(wrapper, :data))
 end
+
+export NamedModel, NamedData
