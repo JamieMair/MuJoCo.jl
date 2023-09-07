@@ -1,8 +1,5 @@
 # A script for generating the API from the existing LibMuJoCo files
 include("mjmacro_parsing.jl")
-include("LibMuJoCo/LibMuJoCo.jl")
-import .LibMuJoCo
-
 function ntuple_to_array_extents(::Type{NTuple{N, T}}) where {N, T}
     return (N, ntuple_to_array_extents(T)...)
 end
@@ -281,9 +278,9 @@ function insert_regular_gc_ctor!(expr, info::MutableStructInfo)
     return expr
 end
 
-parsed_macro_info = parse_macro_file(macro_file)
+function create_basic_wrappers()
+    parsed_macro_info = parse_macro_file(macro_file)
 
-begin
     struct_wrappers = Dict{Symbol, Symbol}(
         :mjData => :Data,
         :mjModel => :Model,
@@ -325,9 +322,8 @@ begin
     exprs = vcat(first_exprs, other_exprs)
 
     create_file_from_expr(joinpath(staging_dir, "wrappers.jl"), exprs)
-end
 
-begin
+
     struct_wrappers = Dict{Symbol, Symbol}(
         :mjvScene => :VisualiserScene,
         :mjvCamera => :VisualiserCamera,

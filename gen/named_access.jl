@@ -1,6 +1,3 @@
-include("LibMuJoCo/LibMuJoCo.jl")
-import .LibMuJoCo
-
 struct XMacroEntry
     type::Union{Symbol,Expr}
     fieldname::Symbol
@@ -269,10 +266,10 @@ end
 
 function named_access_wrappers_expr(index_xmacro_header_file_path)
     xmacros, xviewgroups, xviewgroupaltnames = parse_x_defs(index_xmacro_header_file_path)
-
+    # TODO add in alt name access
     available_classes = Dict(
-        :Data => LibMuJoCo.Data,
-        :Model => LibMuJoCo.Model,
+        :Data => Wrappers.Data,
+        :Model => Wrappers.Model,
     )
     module_name = :LibMuJoCo
 
@@ -354,6 +351,8 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
     module_expr = Expr(:module, true, :NamedAccess, Expr(:block, 
         :(import ..LibMuJoCo),
+        :(import ..Data),
+        :(import ..Model),
         export_expr,
         exprs...
     ))
