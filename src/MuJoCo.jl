@@ -3,18 +3,26 @@ using UnsafeArrays
 
 include("LibMuJoCo/LibMuJoCo.jl")
 include("utils.jl")
+
+using .LibMuJoCo
+module Wrappers
+    using ..LibMuJoCo
+    include("wrappers.jl")
+    include("visualiser_wrappers.jl")
+    include("named_access.jl")
+end
+
 include("visualiser.jl")
 
-import MuJoCo_jll
-using .LibMuJoCo
-import .LibMuJoCo: Model, Data
-using .Visualiser: visualise!
+using .Wrappers
+
+
+import .Visualiser: visualise!
 
 
 export init_data, step!, forward!, timestep
 export init_visualiser, install_visualiser, visualise!
 
-include("named_access.jl")
 include("io.jl")
 
 """
