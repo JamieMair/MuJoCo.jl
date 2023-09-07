@@ -273,6 +273,9 @@ begin
 end
 include("gen_api.jl")
 
+include("named_access.jl")
+generate_named_access()
+
 @info "Copying into src directory..."
 for file in readdir(staging_dir)
     staging_path = joinpath(staging_dir, file)

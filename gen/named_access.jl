@@ -1,3 +1,6 @@
+include("LibMuJoCo/LibMuJoCo.jl")
+import .LibMuJoCo
+
 struct XMacroEntry
     type::Union{Symbol,Expr}
     fieldname::Symbol
@@ -132,7 +135,7 @@ function simplify_dimension_expr(expr::Expr)
         if expr.args[1] == :MJ_M
             return Expr(:., :model, QuoteNode(expr.args[2]))
         else
-            return Expr(:call, simplify_dimension_expr.(expr.args))
+            return Expr(:call, simplify_dimension_expr.(expr.args)...)
         end
     else
         return expr
@@ -277,14 +280,14 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
     exports = Symbol[]
 
     for (struct_name, class_def) in available_classes
-        lower_struct_name = Symbol(lowercase(struct_name))
+        lower_struct_name = Symbol(lowercase(string(struct_name)))
         has_model = hasfield(class_def, :model) && fieldtype(class_def, :model) == available_classes[:Model]
 
         for collection_name in keys(xmacros[struct_name])
             # Create a struct
-            collection_struct_name = collection_struct_name(struct_name, collection_name)
+            cstruct_name = collection_struct_name(struct_name, collection_name)
             struct_expr = :(
-                struct $collection_struct_name
+                struct $cstruct_name
                     $(lower_struct_name)::$(struct_name)
                     index::Int
                 end
@@ -296,14 +299,14 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
             push!(exports, identifier)
             collection_name = xgroup.collection_name
 
-            collection_struct_name = collection_struct_name(struct_name, collection_name)
+            cstruct_name = collection_struct_name(struct_name, collection_name)
             # Create functions to create the struct objects
             push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), index::Int)
-                return $(collection_struct_name)($(lower_struct_name), index)
+                return $(cstruct_name)($(lower_struct_name), index)
             end))
             push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), name::Symbol)
                 index = index_by_name($(lower_struct_name), name)
-                return $(collection_struct_name)($(lower_struct_name), index)
+                return $(cstruct_name)($(lower_struct_name), index)
             end))
 
 
@@ -323,21 +326,25 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                     push!(property_names, propname)
                     # return a view into the array
                     get_array_expr = :($(lower_struct_name).$(xmacro.fieldname))
-                    second_dim = if xmacro.numrows isa Symbol && startswith(string(xmacro.numrows), "mj")
-                        :($(module_name).$(xmacro.numrows))
+                    second_dims = if xmacro.numrows isa Symbol && startswith(string(xmacro.numrows), "mj")
+                        :(Base.OneTo($(module_name).$(xmacro.numrows)))
+                    elseif xmacro.numrows == 1
+                        :(Base.OneTo(1))
                     else
-                        xmacro.numrows
+                        Expr(:call, :(Base.OneTo), xmacro.numrows)
                     end
-                    return_expr = :(return view($(get_array_expr), index, $(second_dim)))
-                    entry_expr = :(f == :$(propname) && $(return_expr))
+                    return_expr = Expr(:return, Expr(:call, :view, get_array_expr, :index, second_dims))
+                    entry_expr = :(f == $(QuoteNode(propname)) && $(return_expr))
                     push!(fn_block_exprs, entry_expr)
                 end
             end
+
+            push!(exprs, Expr(:function, :(Base.propertynames(::$(cstruct_name))), Expr(:block, Expr(:tuple, QuoteNode.(property_names)...))))
+
             push!(fn_block_exprs, :(error("Could not find the property: " * string(f))))
 
-            push!(exprs, :(function Base.getproperty(x::$(collection_struct_name), f::Symbol)
-                $(Expr(:block, fn_block_exprs...))
-            end))
+            fn_sig = :(Base.getproperty(x::$(cstruct_name), f::Symbol))
+            push!(exprs, Expr(:function, fn_sig, Expr(:block, fn_block_exprs...)))
         end
 
 
@@ -345,8 +352,17 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
     export_expr = Expr(:export, exports...)
 
-    return :(module NamedAccess
-        $(export_expr)
-        $(Expr(:block, exprs...))
-    end)
+    module_expr = Expr(:module, true, :NamedAccess, Expr(:block, 
+        :(import ..LibMuJoCo),
+        export_expr,
+        exprs...
+    ))
+    return module_expr
+end
+
+function generate_named_access()
+    filepath = joinpath(abspath("."), "mujoco", "python", "mujoco", "indexer_xmacro.h")
+    expr = named_access_wrappers_expr(filepath)
+    dest_filepath = joinpath(staging_dir, "named_access.jl")
+    create_file_from_expr(dest_filepath, expr)
 end
