@@ -1,8 +1,8 @@
 struct XMacroEntry
-    type::Union{Symbol, Expr}
+    type::Union{Symbol,Expr}
     fieldname::Symbol
-    numcols::Union{Expr, String, Symbol, Int}
-    numrows::Union{Expr, String, Symbol, Int}
+    numcols::Union{Expr,String,Symbol,Int}
+    numrows::Union{Expr,String,Symbol,Int}
 end
 struct XGroupMacroEntry
     name::Symbol
@@ -31,9 +31,9 @@ function standardise_symbol(input)
 end
 
 function parse_x_defs(file)
-    xmacros_dict = Dict{Symbol, Dict{Symbol, Vector{XMacroEntry}}}()
-    xviewgroups = Dict{Symbol, Dict{Symbol, XGroupMacroEntry}}()
-    xviewgroupaltnames = Dict{Symbol, Dict{Symbol, XGroupAltNamesMacroEntry}}()
+    xmacros_dict = Dict{Symbol,Dict{Symbol,Vector{XMacroEntry}}}()
+    xviewgroups = Dict{Symbol,Dict{Symbol,XGroupMacroEntry}}()
+    xviewgroupaltnames = Dict{Symbol,Dict{Symbol,XGroupAltNamesMacroEntry}}()
     open(file, "r") do io
         def_macro_regex = r"#define\s+MJ([a-zA-Z]+)\_([a-zA-Z\_]+)\s+"
         while !eof(io)
@@ -52,26 +52,26 @@ function parse_x_defs(file)
 
                     xmacros = parse_xmacro!(io)
                     if !haskey(xmacros_dict, struct_name)
-                        xmacros_dict[struct_name] = Dict{Symbol, Vector{XMacroEntry}}()
+                        xmacros_dict[struct_name] = Dict{Symbol,Vector{XMacroEntry}}()
                     end
-                    
+
                     xmacros_dict[struct_name][collection_name] = xmacros
                 end
             end
         end
     end
 
-    for (struct_name, xaltname_dict) in xviewgroupaltnames
-        for (alt_identifier, xaltname) in xaltname_dict
-            xviewgroup = xviewgroups[struct_name]
-            base_xgroup = xviewgroup[xaltname.base_identifier]
+    # for (struct_name, xaltname_dict) in xviewgroupaltnames
+    #     for (alt_identifier, xaltname) in xaltname_dict
+    #         xviewgroup = xviewgroups[struct_name]
+    #         base_xgroup = xviewgroup[xaltname.base_identifier]
 
-            altname_xgroup = XGroupMacroEntry(base_xgroup.name, alt_identifier, base_xgroup.size_identifier, struct_name, base_xgroup.collection_name)
-            xviewgroup[alt_identifier] = altname_xgroup
-        end
-    end
+    #         altname_xgroup = XGroupMacroEntry(base_xgroup.name, alt_identifier, base_xgroup.size_identifier, struct_name, base_xgroup.collection_name)
+    #         xviewgroup[alt_identifier] = altname_xgroup
+    #     end
+    # end
 
-    return xmacros_dict, xviewgroups
+    return xmacros_dict, xviewgroups, xviewgroupaltnames
 end
 
 function parse_xmacro!(io)
@@ -92,7 +92,7 @@ function parse_xmacro!(io)
     return entries
 end
 function parse_xgroup_macro!(io)
-    entries = Dict{Symbol, XGroupMacroEntry}()
+    entries = Dict{Symbol,XGroupMacroEntry}()
     while true
         info = parse_xmacro_group_entry!(io)
         if isnothing(info)
@@ -108,7 +108,7 @@ function parse_xgroup_macro!(io)
     return entries
 end
 function parse_xgroup_altnames_macro!(io)
-    entries = Dict{Symbol, XGroupAltNamesMacroEntry}()
+    entries = Dict{Symbol,XGroupAltNamesMacroEntry}()
     while true
         info = parse_xmacro_group_altnames_entry!(io)
         if isnothing(info)
@@ -145,7 +145,7 @@ function _process_line(line)
         line = line[begin:end-1] # remove trailing dash
     end
     # replace any empty args
-    line = replace(line, r",[^\S\r\n]*,"=>",\"\",")
+    line = replace(line, r",[^\S\r\n]*," => ",\"\",")
     expr = Meta.parse(line)
     return islast, expr
 end
@@ -168,7 +168,7 @@ function parse_xentry(line)
         type = Expr(:., :LibMuJoCo, QuoteNode(type))
     end
 
-    return (; islast, type, prefix, suffix, numcols, numrows)    
+    return (; islast, type, prefix, suffix, numcols, numrows)
 end
 function parse_xgroup_entry(line)
     islast, expr = _process_line(line)
@@ -246,4 +246,107 @@ function parse_xmacro_group_altnames_entry!(io)
     else
         return parse_xgroup_altnames_entry(line)
     end
+end
+
+function collection_struct_name(original_struct_name, collection_name)
+    Symbol(string(original_struct_name) * string(collection_name))
+end
+
+function new_propname(fieldname)
+    fieldname_str = string(fieldname)
+
+    first_underscore_idx = findfirst('_', fieldname_str)
+    if isnothing(first_underscore_idx)
+        # If nothing found, use original name
+        return fieldname
+    end
+
+    return Symbol(fieldname_str[first_underscore_idx+1:end])
+end
+
+function named_access_wrappers_expr(index_xmacro_header_file_path)
+    xmacros, xviewgroups, xviewgroupaltnames = parse_x_defs(index_xmacro_header_file_path)
+
+    available_classes = Dict(
+        :Data => LibMuJoCo.Data,
+        :Model => LibMuJoCo.Model,
+    )
+    module_name = :LibMuJoCo
+
+    exprs = Expr[]
+    exports = Symbol[]
+
+    for (struct_name, class_def) in available_classes
+        lower_struct_name = Symbol(lowercase(struct_name))
+        has_model = hasfield(class_def, :model) && fieldtype(class_def, :model) == available_classes[:Model]
+
+        for collection_name in keys(xmacros[struct_name])
+            # Create a struct
+            collection_struct_name = collection_struct_name(struct_name, collection_name)
+            struct_expr = :(
+                struct $collection_struct_name
+                    $(lower_struct_name)::$(struct_name)
+                    index::Int
+                end
+            )
+            push!(exprs, struct_expr)
+        end
+
+        for (identifier, xgroup) in xviewgroups[struct_name]
+            push!(exports, identifier)
+            collection_name = xgroup.collection_name
+
+            collection_struct_name = collection_struct_name(struct_name, collection_name)
+            # Create functions to create the struct objects
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), index::Int)
+                return $(collection_struct_name)($(lower_struct_name), index)
+            end))
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), name::Symbol)
+                index = index_by_name($(lower_struct_name), name)
+                return $(collection_struct_name)($(lower_struct_name), index)
+            end))
+
+
+            fn_block_exprs = Expr[]
+            push!(fn_block_exprs, :($(lower_struct_name) = x.$(lower_struct_name)))
+            if has_model
+                push!(fn_block_exprs, :(model = getfield($(lower_struct_name), :model)))
+            end
+            push!(fn_block_exprs, :(index = x.index))
+
+            property_names = Symbol[]
+
+            for xmacro in xmacros[struct_name][collection_name]
+                propname = new_propname(xmacro.fieldname)
+                
+                if xmacro.numcols == xgroup.size_identifier
+                    push!(property_names, propname)
+                    # return a view into the array
+                    get_array_expr = :($(lower_struct_name).$(xmacro.fieldname))
+                    second_dim = if xmacro.numrows isa Symbol && startswith(string(xmacro.numrows), "mj")
+                        :($(module_name).$(xmacro.numrows))
+                    else
+                        xmacro.numrows
+                    end
+                    return_expr = :(return view($(get_array_expr), index, $(second_dim)))
+                    entry_expr = :(f == :$(propname) && $(return_expr))
+                    push!(fn_block_exprs, entry_expr)
+                end
+            end
+            push!(fn_block_exprs, :(error("Could not find the property: " * string(f))))
+
+            push!(exprs, :(function Base.getproperty(x::$(collection_struct_name), f::Symbol)
+                $(Expr(:block, fn_block_exprs...))
+            end))
+        end
+
+
+    end
+
+    export_expr = Expr(:export, exports...)
+
+    return :(module NamedAccess
+        $(export_expr)
+        $(Expr(:block, exprs...))
+    end)
 end
