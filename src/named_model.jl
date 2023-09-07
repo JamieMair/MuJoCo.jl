@@ -64,3 +64,10 @@ Base.propertynames(x::NamedModel) = propertynames(getfield(x, :model))
 Base.propertynames(x::NamedData) = propertynames(getfield(x, :data))
 Base.setproperty!(x::NamedModel, f::Symbol, v) = setproperty!(getfield(x, :model), f, v)
 Base.setproperty!(x::NamedData, f::Symbol, v) = setproperty!(getfield(x, :data), f, v)
+
+function Base.cconvert(::Type{Ptr{mjModel}}, wrapper::NamedModel)
+    Base.cconvert(Ptr{mjModel}, getfield(wrapper, :model))
+end
+function Base.cconvert(::Type{Ptr{mjData}}, wrapper::NamedData)
+    Base.cconvert(Ptr{mjData}, getfield(wrapper, :data))
+end
