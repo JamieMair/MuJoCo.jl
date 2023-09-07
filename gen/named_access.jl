@@ -383,7 +383,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
         end
     end
 
-    export_expr = Expr(:export, exports...)
+    export_expr = Expr(:export, unique(exports)...)
 
     module_expr = Expr(:module, true, :NamedAccess, Expr(:block, 
         :(import ..LibMuJoCo),

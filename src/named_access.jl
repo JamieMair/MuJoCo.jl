@@ -4,7 +4,7 @@ using UnsafeArrays
 import ..Data
 import ..Model
 include("named_model.jl")
-export light, cam, actuator, body, geom, jnt, sensor, site, tendon, eq, key, geom, numeric, sensor, mat, tex, actuator, site, pair, hfield, light, cam, tuple, skin, exclude, mesh, body, jnt, tendon, camera, ten, joint, camera, equality, texture, keyframe, material, joint
+export light, cam, actuator, body, geom, jnt, sensor, site, tendon, eq, key, numeric, mat, tex, pair, hfield, tuple, skin, exclude, mesh, camera, ten, joint, equality, texture, keyframe, material
 struct DataActuator
     data::Data
     index::Int
