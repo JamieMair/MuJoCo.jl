@@ -308,11 +308,11 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
 
             fn_block_exprs = Expr[]
-            push!(fn_block_exprs, :($(lower_struct_name) = x.$(lower_struct_name)))
+            push!(fn_block_exprs, :($(lower_struct_name) = getfield(x, $(QuoteNode(lower_struct_name)))))
             if has_model
                 push!(fn_block_exprs, :(model = getfield($(lower_struct_name), :model)))
             end
-            push!(fn_block_exprs, :(index = x.index))
+            push!(fn_block_exprs, :(index = getfield(x, :index)))
 
             property_names = Symbol[]
 

@@ -10,11 +10,14 @@ module Wrappers
     include("wrappers.jl")
     include("visualiser_wrappers.jl")
     include("named_access.jl")
+    
+    using .NamedAccess
 end
+using .Wrappers
+import .Wrappers.NamedAccess
 
 include("visualiser.jl")
 
-using .Wrappers
 
 
 import .Visualiser: visualise!

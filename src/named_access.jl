@@ -50,9 +50,9 @@ function Base.propertynames(::DataLight)
     (:xpos, :xdir)
 end
 function Base.getproperty(x::DataLight, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     f == :xpos && return view(data.light_xpos, index, Base.OneTo(3))
     f == :xdir && return view(data.light_xdir, index, Base.OneTo(3))
     error("Could not find the property: " * string(f))
@@ -68,9 +68,9 @@ function Base.propertynames(::DataCamera)
     (:xpos, :xmat)
 end
 function Base.getproperty(x::DataCamera, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     f == :xpos && return view(data.cam_xpos, index, Base.OneTo(3))
     f == :xmat && return view(data.cam_xmat, index, Base.OneTo(9))
     error("Could not find the property: " * string(f))
@@ -86,9 +86,9 @@ function Base.propertynames(::DataActuator)
     (:ctrl, :length, :moment, :velocity, :force)
 end
 function Base.getproperty(x::DataActuator, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     f == :ctrl && return view(data.ctrl, index, Base.OneTo(1))
     f == :length && return view(data.actuator_length, index, Base.OneTo(1))
     f == :moment && return view(data.actuator_moment, index, Base.OneTo(model.nv))
@@ -107,9 +107,9 @@ function Base.propertynames(::DataBody)
     (:applied, :xpos, :xquat, :xmat, :xipos, :ximat, :com, :cinert, :crb, :cvel, :linvel, :angmom, :cacc, :int, :ext)
 end
 function Base.getproperty(x::DataBody, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     f == :applied && return view(data.xfrc_applied, index, Base.OneTo(6))
     f == :xpos && return view(data.xpos, index, Base.OneTo(3))
     f == :xquat && return view(data.xquat, index, Base.OneTo(4))
@@ -138,9 +138,9 @@ function Base.propertynames(::DataGeom)
     (:xpos, :xmat)
 end
 function Base.getproperty(x::DataGeom, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     f == :xpos && return view(data.geom_xpos, index, Base.OneTo(3))
     f == :xmat && return view(data.geom_xmat, index, Base.OneTo(9))
     error("Could not find the property: " * string(f))
@@ -156,9 +156,9 @@ function Base.propertynames(::DataJoint)
     (:xanchor, :xaxis)
 end
 function Base.getproperty(x::DataJoint, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     f == :xanchor && return view(data.xanchor, index, Base.OneTo(3))
     f == :xaxis && return view(data.xaxis, index, Base.OneTo(3))
     error("Could not find the property: " * string(f))
@@ -174,9 +174,9 @@ function Base.propertynames(::DataSensor)
     ()
 end
 function Base.getproperty(x::DataSensor, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     error("Could not find the property: " * string(f))
 end
 function site(data::Data, index::Int)
@@ -190,9 +190,9 @@ function Base.propertynames(::DataSite)
     (:xpos, :xmat)
 end
 function Base.getproperty(x::DataSite, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     f == :xpos && return view(data.site_xpos, index, Base.OneTo(3))
     f == :xmat && return view(data.site_xmat, index, Base.OneTo(9))
     error("Could not find the property: " * string(f))
@@ -208,9 +208,9 @@ function Base.propertynames(::DataTendon)
     (:wrapadr, :wrapnum, :J_rownnz, :J_rowadr, :J_colind, :length, :J, :velocity)
 end
 function Base.getproperty(x::DataTendon, f::Symbol)
-    data = x.data
+    data = getfield(x, :data)
     model = getfield(data, :model)
-    index = x.index
+    index = getfield(x, :index)
     f == :wrapadr && return view(data.ten_wrapadr, index, Base.OneTo(1))
     f == :wrapnum && return view(data.ten_wrapnum, index, Base.OneTo(1))
     f == :J_rownnz && return view(data.ten_J_rownnz, index, Base.OneTo(1))
@@ -312,8 +312,8 @@ function Base.propertynames(::ModelEquality)
     (:type, :obj1id, :obj2id, :active, :solref, :solimp, :data)
 end
 function Base.getproperty(x::ModelEquality, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :type && return view(model.eq_type, index, Base.OneTo(1))
     f == :obj1id && return view(model.eq_obj1id, index, Base.OneTo(1))
     f == :obj2id && return view(model.eq_obj2id, index, Base.OneTo(1))
@@ -334,8 +334,8 @@ function Base.propertynames(::ModelKeyframe)
     (:time, :qpos, :qvel, :act, :mpos, :mquat)
 end
 function Base.getproperty(x::ModelKeyframe, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :time && return view(model.key_time, index, Base.OneTo(1))
     f == :qpos && return view(model.key_qpos, index, Base.OneTo(model.nq))
     f == :qvel && return view(model.key_qvel, index, Base.OneTo(model.nv))
@@ -355,8 +355,8 @@ function Base.propertynames(::ModelGeom)
     (:type, :contype, :conaffinity, :condim, :bodyid, :dataid, :matid, :group, :priority, :sameframe, :solmix, :solref, :solimp, :size, :rbound, :pos, :quat, :friction, :margin, :gap, :user, :rgba)
 end
 function Base.getproperty(x::ModelGeom, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :type && return view(model.geom_type, index, Base.OneTo(1))
     f == :contype && return view(model.geom_contype, index, Base.OneTo(1))
     f == :conaffinity && return view(model.geom_conaffinity, index, Base.OneTo(1))
@@ -392,8 +392,8 @@ function Base.propertynames(::ModelNumeric)
     (:adr, :size)
 end
 function Base.getproperty(x::ModelNumeric, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :adr && return view(model.numeric_adr, index, Base.OneTo(1))
     f == :size && return view(model.numeric_size, index, Base.OneTo(1))
     error("Could not find the property: " * string(f))
@@ -409,8 +409,8 @@ function Base.propertynames(::ModelSensor)
     (:type, :datatype, :needstage, :objtype, :objid, :reftype, :refid, :dim, :adr, :cutoff, :noise, :user)
 end
 function Base.getproperty(x::ModelSensor, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :type && return view(model.sensor_type, index, Base.OneTo(1))
     f == :datatype && return view(model.sensor_datatype, index, Base.OneTo(1))
     f == :needstage && return view(model.sensor_needstage, index, Base.OneTo(1))
@@ -436,8 +436,8 @@ function Base.propertynames(::ModelMaterial)
     (:texid, :texuniform, :texrepeat, :emission, :specular, :shininess, :reflectance, :rgba)
 end
 function Base.getproperty(x::ModelMaterial, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :texid && return view(model.mat_texid, index, Base.OneTo(1))
     f == :texuniform && return view(model.mat_texuniform, index, Base.OneTo(1))
     f == :texrepeat && return view(model.mat_texrepeat, index, Base.OneTo(2))
@@ -459,8 +459,8 @@ function Base.propertynames(::ModelTexture)
     (:type, :height, :width, :adr)
 end
 function Base.getproperty(x::ModelTexture, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :type && return view(model.tex_type, index, Base.OneTo(1))
     f == :height && return view(model.tex_height, index, Base.OneTo(1))
     f == :width && return view(model.tex_width, index, Base.OneTo(1))
@@ -478,8 +478,8 @@ function Base.propertynames(::ModelActuator)
     (:trntype, :dyntype, :gaintype, :biastype, :trnid, :actadr, :actnum, :group, :ctrllimited, :forcelimited, :actlimited, :dynprm, :gainprm, :biasprm, :ctrlrange, :forcerange, :actrange, :gear, :cranklength, :acc0, :length0, :lengthrange, :user)
 end
 function Base.getproperty(x::ModelActuator, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :trntype && return view(model.actuator_trntype, index, Base.OneTo(1))
     f == :dyntype && return view(model.actuator_dyntype, index, Base.OneTo(1))
     f == :gaintype && return view(model.actuator_gaintype, index, Base.OneTo(1))
@@ -516,8 +516,8 @@ function Base.propertynames(::ModelSite)
     (:type, :bodyid, :matid, :group, :sameframe, :size, :pos, :quat, :user, :rgba)
 end
 function Base.getproperty(x::ModelSite, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :type && return view(model.site_type, index, Base.OneTo(1))
     f == :bodyid && return view(model.site_bodyid, index, Base.OneTo(1))
     f == :matid && return view(model.site_matid, index, Base.OneTo(1))
@@ -541,8 +541,8 @@ function Base.propertynames(::ModelPair)
     (:dim, :geom1, :geom2, :signature, :solref, :solimp, :margin, :gap, :friction)
 end
 function Base.getproperty(x::ModelPair, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :dim && return view(model.pair_dim, index, Base.OneTo(1))
     f == :geom1 && return view(model.pair_geom1, index, Base.OneTo(1))
     f == :geom2 && return view(model.pair_geom2, index, Base.OneTo(1))
@@ -565,8 +565,8 @@ function Base.propertynames(::ModelHfield)
     (:size, :nrow, :ncol, :adr)
 end
 function Base.getproperty(x::ModelHfield, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :size && return view(model.hfield_size, index, Base.OneTo(4))
     f == :nrow && return view(model.hfield_nrow, index, Base.OneTo(1))
     f == :ncol && return view(model.hfield_ncol, index, Base.OneTo(1))
@@ -584,8 +584,8 @@ function Base.propertynames(::ModelLight)
     (:mode, :bodyid, :targetbodyid, :directional, :castshadow, :active, :pos, :dir, :poscom0, :pos0, :dir0, :attenuation, :cutoff, :exponent, :ambient, :diffuse, :specular)
 end
 function Base.getproperty(x::ModelLight, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :mode && return view(model.light_mode, index, Base.OneTo(1))
     f == :bodyid && return view(model.light_bodyid, index, Base.OneTo(1))
     f == :targetbodyid && return view(model.light_targetbodyid, index, Base.OneTo(1))
@@ -616,8 +616,8 @@ function Base.propertynames(::ModelCamera)
     (:mode, :bodyid, :targetbodyid, :pos, :quat, :poscom0, :pos0, :mat0, :fovy, :ipd, :user)
 end
 function Base.getproperty(x::ModelCamera, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :mode && return view(model.cam_mode, index, Base.OneTo(1))
     f == :bodyid && return view(model.cam_bodyid, index, Base.OneTo(1))
     f == :targetbodyid && return view(model.cam_targetbodyid, index, Base.OneTo(1))
@@ -642,8 +642,8 @@ function Base.propertynames(::ModelTuple)
     (:adr, :size)
 end
 function Base.getproperty(x::ModelTuple, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :adr && return view(model.tuple_adr, index, Base.OneTo(1))
     f == :size && return view(model.tuple_size, index, Base.OneTo(1))
     error("Could not find the property: " * string(f))
@@ -659,8 +659,8 @@ function Base.propertynames(::ModelSkin)
     (:matid, :rgba, :inflate, :vertadr, :vertnum, :texcoordadr, :faceadr, :facenum, :boneadr, :bonenum)
 end
 function Base.getproperty(x::ModelSkin, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :matid && return view(model.skin_matid, index, Base.OneTo(1))
     f == :rgba && return view(model.skin_rgba, index, Base.OneTo(4))
     f == :inflate && return view(model.skin_inflate, index, Base.OneTo(1))
@@ -684,8 +684,8 @@ function Base.propertynames(::ModelExclude)
     (:signature,)
 end
 function Base.getproperty(x::ModelExclude, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :signature && return view(model.exclude_signature, index, Base.OneTo(1))
     error("Could not find the property: " * string(f))
 end
@@ -700,8 +700,8 @@ function Base.propertynames(::ModelMesh)
     (:vertadr, :vertnum, :texcoordadr, :faceadr, :facenum, :graphadr)
 end
 function Base.getproperty(x::ModelMesh, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :vertadr && return view(model.mesh_vertadr, index, Base.OneTo(1))
     f == :vertnum && return view(model.mesh_vertnum, index, Base.OneTo(1))
     f == :texcoordadr && return view(model.mesh_texcoordadr, index, Base.OneTo(1))
@@ -721,8 +721,8 @@ function Base.propertynames(::ModelBody)
     (:parentid, :rootid, :weldid, :mocapid, :jntnum, :jntadr, :dofnum, :dofadr, :geomnum, :geomadr, :simple, :sameframe, :pos, :quat, :ipos, :iquat, :mass, :subtreemass, :inertia, :invweight0, :user)
 end
 function Base.getproperty(x::ModelBody, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :parentid && return view(model.body_parentid, index, Base.OneTo(1))
     f == :rootid && return view(model.body_rootid, index, Base.OneTo(1))
     f == :weldid && return view(model.body_weldid, index, Base.OneTo(1))
@@ -757,8 +757,8 @@ function Base.propertynames(::ModelJoint)
     (:type, :qposadr, :dofadr, :group, :limited, :pos, :axis, :stiffness, :range, :margin, :user)
 end
 function Base.getproperty(x::ModelJoint, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :type && return view(model.jnt_type, index, Base.OneTo(1))
     f == :qposadr && return view(model.jnt_qposadr, index, Base.OneTo(1))
     f == :dofadr && return view(model.jnt_dofadr, index, Base.OneTo(1))
@@ -783,8 +783,8 @@ function Base.propertynames(::ModelTendon)
     (:adr, :num, :matid, :group, :limited, :width, :solref_lim, :solimp_lim, :solref_fri, :solimp_fri, :range, :margin, :stiffness, :damping, :frictionloss, :lengthspring, :length0, :invweight0, :user, :rgba)
 end
 function Base.getproperty(x::ModelTendon, f::Symbol)
-    model = x.model
-    index = x.index
+    model = getfield(x, :model)
+    index = getfield(x, :index)
     f == :adr && return view(model.tendon_adr, index, Base.OneTo(1))
     f == :num && return view(model.tendon_num, index, Base.OneTo(1))
     f == :matid && return view(model.tendon_matid, index, Base.OneTo(1))
