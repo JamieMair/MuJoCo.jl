@@ -8,8 +8,9 @@ import Base: @lock, @lock_nofail
 if isdefined(Base, :get_extension)
     using MuJoCo
     using MuJoCo_jll
-    import MuJoCo.LibMuJoCo
-    import MuJoCo.LibMuJoCo: Model, Data, mjrRect, mjr_render
+    using MuJoCo.Wrappers
+    using MuJoCo.LibMuJoCo
+    using MuJoCo.LibMuJoCo: mjrRect
     using MuJoCo.Visualiser
 
     using FFMPEG
@@ -22,8 +23,9 @@ if isdefined(Base, :get_extension)
 else
     using ..MuJoCo
     using ..MuJoCo_jll
-    import ..MuJoCo.LibMuJoCo
-    import ..MuJoCo.LibMuJoCo: Model, Data, mjrRect, mjr_render
+    using ..MuJoCo.Wrappers
+    using ..MuJoCo.LibMuJoCo
+    using ..MuJoCo.LibMuJoCo: mjrRect
     using ..MuJoCo.Visualiser
 
     using ..FFMPEG
@@ -33,7 +35,6 @@ else
     using ..Printf: @printf
     using ..StaticArrays
     using ..UnsafeArrays: UnsafeArray
-
 end
 
 

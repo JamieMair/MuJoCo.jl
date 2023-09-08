@@ -137,7 +137,7 @@ Render a frame
 function render!(e::Engine)
     w, h = GLFW.GetFramebufferSize(e.manager.state.window)
     rect = mjrRect(Cint(0), Cint(0), Cint(w), Cint(h))
-    mjr_render(rect, e.ui.scn, e.ui.con)
+    LibMuJoCo.mjr_render(rect, e.ui.scn, e.ui.con)
     e.ui.showinfo && overlay_info(rect, e)
     GLFW.SwapBuffers(e.manager.state.window)
     return nothing
