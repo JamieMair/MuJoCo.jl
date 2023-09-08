@@ -232,8 +232,6 @@ function write_content_files(destination_dir, module_content)
         push!(original_module_block_args, Expr(:call, :include, filename))
         create_file_from_expr(joinpath(destination_dir, filename), exprs)
     end
-    push!(original_module_block_args, Expr(:call, :include, "wrappers.jl"))
-    push!(original_module_block_args, Expr(:call, :include, "visualiser_wrappers.jl"))
 
     for arg in for_block_args
         push!(original_module_block_args, arg)
@@ -246,38 +244,60 @@ function write_content_files(destination_dir, module_content)
     nothing
 end
 
-staging_dir = joinpath(abspath(pwd()), "LibMuJoCo")
-dest_dir = joinpath(abspath(pwd()), "..", "src", "LibMuJoCo")
+libmujoco_dir = joinpath(abspath(pwd()), "LibMuJoCo")
+staging_dir = joinpath(abspath(pwd()), "staging")
+if !isdir(staging_dir)
+    mkdir(staging_dir)
+end
+dest_dir = joinpath(abspath(pwd()), "..", "src")
 if !isdir(dest_dir)
     mkdir(dest_dir)
 end
+dest_libmujoco_dir = joinpath(dest_dir, "LibMuJoCo")
+if !isdir(dest_libmujoco_dir)
+    mkdir(dest_libmujoco_dir)
+end
 
 @info "Writing generated files to staging directory..."
-write_content_files(staging_dir, libmujoco_text_content)
+write_content_files(libmujoco_dir, libmujoco_text_content)
 
 @info "Formatting..."
 using JuliaFormatter
-format_file(joinpath(staging_dir, "enums.jl"))
-format_file(joinpath(staging_dir, "consts.jl"))
-format_file(joinpath(staging_dir, "structs.jl"))
-format_file(joinpath(staging_dir, "LibMuJoCo.jl"))
+format_file(joinpath(libmujoco_dir, "enums.jl"))
+format_file(joinpath(libmujoco_dir, "consts.jl"))
+format_file(joinpath(libmujoco_dir, "structs.jl"))
+format_file(joinpath(libmujoco_dir, "LibMuJoCo.jl"))
 
-# Create a wrapper file as a placeholder
-begin
-    open(joinpath(staging_dir, "wrappers.jl"), "w") do io
-        println(io, "# Temporary file, should be overwritten.")
-    end
-    open(joinpath(staging_dir, "visualiser_wrappers.jl"), "w") do io
-        println(io, "# Temporary file, should be overwritten.")
-    end
-end
+include("LibMuJoCo/LibMuJoCo.jl")
+import .LibMuJoCo
+
+@info "Generating wrappers"
 include("gen_api.jl")
+create_basic_wrappers()
+module Wrappers
+    staging_dir = joinpath(abspath(pwd()), "staging")
+    using ..LibMuJoCo
+end
+@eval Wrappers include(joinpath(staging_dir, "wrappers.jl"))
+@eval Wrappers include(joinpath(staging_dir, "visualiser_wrappers.jl"))
+import .Wrappers
+
+@info "Generating named access wrappers"
+include("named_access.jl")
+generate_named_access()
 
 @info "Copying into src directory..."
-for file in readdir(staging_dir)
-    staging_path = joinpath(staging_dir, file)
-    dest_path = joinpath(dest_dir, file)
-    cp(staging_path, dest_path, force=true)
+begin
+    for file in readdir(libmujoco_dir)
+        staging_path = joinpath(libmujoco_dir, file)
+        dest_path = joinpath(dest_libmujoco_dir, file)
+        cp(staging_path, dest_path, force=true)
+    end
+    for file in readdir(staging_dir)
+        staging_path = joinpath(staging_dir, file)
+        dest_path = joinpath(dest_dir, file)
+        cp(staging_path, dest_path, force=true)
+    end
 end
 
 @info "Finished!"
