@@ -4,6 +4,7 @@ using MatrixEquations: ared
 using MuJoCo
 using MuJoCo.LibMuJoCo
 using MuJoCo.Wrappers
+using MuJoCo.NamedAccess
 
 init_visualiser()
 isplot = false
@@ -89,18 +90,20 @@ nu = model.nu
 nv = model.nv
 
 # Body IDs
-# TODO: Named access like the Python bindings would be great
-id_torso = LibMuJoCo.mj_name2id(model, LibMuJoCo.mjOBJ_XBODY, "torso")
-id_lfoot = LibMuJoCo.mj_name2id(model, LibMuJoCo.mjOBJ_XBODY, "foot_left")
+# TODO: This is still a little clunky
+named_model = NamedModel(model)
+id_torso = body(named_model, :torso).weldid[1]
+id_lfoot = body(named_model, :foot_left).weldid[1]
 
 # R-matrix just identity
 R = Matrix{Float64}(I, nu, nu)
 
 # Get Jacobian for torso CoM
+# TODO: Document row/column-major
 reset!(model, data)
 data.qpos .= qpos0
 forward!(model, data)
-jac_com = zeros(nv,3) # TODO: Document row/column-major
+jac_com = zeros(nv,3)
 LibMuJoCo.mj_jacSubtreeCom(model, data, jac_com, id_torso)
 jac_com = transpose(jac_com)
 
