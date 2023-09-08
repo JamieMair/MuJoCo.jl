@@ -3,6 +3,7 @@ using LinearAlgebra
 using MatrixEquations: ared
 using MuJoCo
 using MuJoCo.LibMuJoCo
+using MuJoCo.Wrappers
 
 init_visualiser()
 isplot = false
