@@ -5,6 +5,18 @@ include("LibMuJoCo/LibMuJoCo.jl")
 include("utils.jl")
 
 using .LibMuJoCo
+
+# Re-export non polluting symbols of LibMuJoCo
+begin
+    exported_prefixes = ["mj_", "mju_", "mjv_", "mjr_", "mjui_", "mjd_", "mjp_"]
+    for name in names(LibMuJoCo; all = true)
+        name_str = string(name)
+        if any(startswith(name_str, prefix) for prefix in exported_prefixes) && !endswith(name_str, "_")
+            @eval export $name
+        end
+    end
+end
+
 module Wrappers
     using ..LibMuJoCo
     include("wrappers.jl")
