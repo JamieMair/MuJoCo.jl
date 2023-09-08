@@ -242,6 +242,29 @@ function collection_struct_name(original_struct_name, collection_name)
     Symbol(string(original_struct_name) * string(collection_name))
 end
 
+
+
+function pretty_print_show_fn(type_expr, description)
+    fn_expr = :(function Base.show(io::IO, ::MIME"text/plain", x::$(type_expr))
+        println(io, $(description))
+        max_spaces = mapreduce(x->length(string(x)), max, propertynames(x))
+        for pname in propertynames(x)
+            prop = getproperty(x, pname)
+            print(io, pname)
+            print(io, ":")
+            num_spaces = 2 + (max_spaces-length(string(pname)))
+            print(io, " " ^ num_spaces)
+            if typeof(prop) <: AbstractArray
+                show_array(io, prop)
+            else
+                show(io, prop)
+            end
+            println(io, "")
+        end
+    end)
+    return fn_expr
+end
+
 function new_propname(fieldname)
     fieldname_str = string(fieldname)
 
@@ -357,6 +380,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                 return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
             end))
 
+            push!(exprs, pretty_print_show_fn(cstruct_name, "$cstruct_name:"))
 
             fn_block_exprs = Expr[]
             push!(fn_block_exprs, :($(lower_struct_name) = getfield(x, $(QuoteNode(lower_struct_name)))))
@@ -408,6 +432,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                     end
                 end
             end
+
             push!(fn_block_exprs, :(f === :id && return index))
             push!(fn_block_exprs, :(f === :name && return name_by_index(model, $(mjobj_expr), index)))
 
@@ -417,6 +442,10 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
             fn_sig = :(Base.getproperty(x::$(cstruct_name), f::Symbol))
             push!(exprs, Expr(:function, fn_sig, Expr(:block, fn_block_exprs...)))
+
+            fn_docs_expr = "\t$(identifier)(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n$(Expr(:tuple, property_names...))"
+            document_fn_call_expr = Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), fn_docs_expr, identifier)
+            push!(exprs, document_fn_call_expr)
         end
     end
 
@@ -437,6 +466,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
     module_expr = Expr(:module, true, :NamedAccess, Expr(:block, 
         :(import ..LibMuJoCo),
+        :(import ..Utils: show_array),
         :(using UnsafeArrays),
         :(import ..Data),
         :(import ..Model),

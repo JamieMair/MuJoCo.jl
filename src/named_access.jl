@@ -1,5 +1,6 @@
 module NamedAccess
 import ..LibMuJoCo
+import ....Utils: show_array
 using UnsafeArrays
 import ..Data
 import ..Model
@@ -55,6 +56,25 @@ function light(data::NamedData, name::Symbol)
     index = index_by_name(data, :light, name)
     return DataLight(getfield(data, :data), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::DataLight)
+    println(io, "DataLight:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::DataLight)
     (:id, :name, :xpos, :xdir)
 end
@@ -68,6 +88,7 @@ function Base.getproperty(x::DataLight, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_LIGHT, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tlight(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xpos, xdir)" light
 function cam(data::Data, index::Integer)
     return DataCamera(data, index)
 end
@@ -82,6 +103,25 @@ function cam(data::NamedData, name::Symbol)
     index = index_by_name(data, :cam, name)
     return DataCamera(getfield(data, :data), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::DataCamera)
+    println(io, "DataCamera:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::DataCamera)
     (:id, :name, :xpos, :xmat)
 end
@@ -95,6 +135,7 @@ function Base.getproperty(x::DataCamera, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_CAMERA, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tcam(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xpos, xmat)" cam
 function actuator(data::Data, index::Integer)
     return DataActuator(data, index)
 end
@@ -108,6 +149,25 @@ end
 function actuator(data::NamedData, name::Symbol)
     index = index_by_name(data, :actuator, name)
     return DataActuator(getfield(data, :data), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::DataActuator)
+    println(io, "DataActuator:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::DataActuator)
     (:id, :name, :ctrl, :length, :moment, :velocity, :force)
@@ -125,6 +185,7 @@ function Base.getproperty(x::DataActuator, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_ACTUATOR, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tactuator(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, ctrl, length, moment, velocity, force)" actuator
 function body(data::Data, index::Integer)
     return DataBody(data, index)
 end
@@ -138,6 +199,25 @@ end
 function body(data::NamedData, name::Symbol)
     index = index_by_name(data, :body, name)
     return DataBody(getfield(data, :data), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::DataBody)
+    println(io, "DataBody:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::DataBody)
     (:id, :name, :applied, :xpos, :xquat, :xmat, :xipos, :ximat, :com, :cinert, :crb, :cvel, :linvel, :angmom, :cacc, :int, :ext)
@@ -165,6 +245,7 @@ function Base.getproperty(x::DataBody, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_BODY, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tbody(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, applied, xpos, xquat, xmat, xipos, ximat, com, cinert, crb, cvel, linvel, angmom, cacc, int, ext)" body
 function geom(data::Data, index::Integer)
     return DataGeom(data, index)
 end
@@ -179,6 +260,25 @@ function geom(data::NamedData, name::Symbol)
     index = index_by_name(data, :geom, name)
     return DataGeom(getfield(data, :data), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::DataGeom)
+    println(io, "DataGeom:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::DataGeom)
     (:id, :name, :xpos, :xmat)
 end
@@ -192,6 +292,7 @@ function Base.getproperty(x::DataGeom, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_GEOM, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tgeom(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xpos, xmat)" geom
 function jnt(data::Data, index::Integer)
     return DataJoint(data, index)
 end
@@ -206,6 +307,25 @@ function jnt(data::NamedData, name::Symbol)
     index = index_by_name(data, :jnt, name)
     return DataJoint(getfield(data, :data), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::DataJoint)
+    println(io, "DataJoint:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::DataJoint)
     (:id, :name, :xanchor, :xaxis)
 end
@@ -219,6 +339,7 @@ function Base.getproperty(x::DataJoint, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_JOINT, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tjnt(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xanchor, xaxis)" jnt
 function sensor(data::Data, index::Integer)
     return DataSensor(data, index)
 end
@@ -233,6 +354,25 @@ function sensor(data::NamedData, name::Symbol)
     index = index_by_name(data, :sensor, name)
     return DataSensor(getfield(data, :data), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::DataSensor)
+    println(io, "DataSensor:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::DataSensor)
     (:id, :name)
 end
@@ -244,6 +384,7 @@ function Base.getproperty(x::DataSensor, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SENSOR, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tsensor(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name)" sensor
 function site(data::Data, index::Integer)
     return DataSite(data, index)
 end
@@ -258,6 +399,25 @@ function site(data::NamedData, name::Symbol)
     index = index_by_name(data, :site, name)
     return DataSite(getfield(data, :data), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::DataSite)
+    println(io, "DataSite:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::DataSite)
     (:id, :name, :xpos, :xmat)
 end
@@ -271,6 +431,7 @@ function Base.getproperty(x::DataSite, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SITE, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tsite(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xpos, xmat)" site
 function tendon(data::Data, index::Integer)
     return DataTendon(data, index)
 end
@@ -284,6 +445,25 @@ end
 function tendon(data::NamedData, name::Symbol)
     index = index_by_name(data, :tendon, name)
     return DataTendon(getfield(data, :data), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::DataTendon)
+    println(io, "DataTendon:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::DataTendon)
     (:id, :name, :wrapadr, :wrapnum, :J_rownnz, :J_rowadr, :J_colind, :length, :J, :velocity)
@@ -304,6 +484,7 @@ function Base.getproperty(x::DataTendon, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TENDON, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\ttendon(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, wrapadr, wrapnum, J_rownnz, J_rowadr, J_colind, length, J, velocity)" tendon
 struct ModelTexture
     model::Model
     index::Int
@@ -398,6 +579,25 @@ function eq(model::NamedModel, name::Symbol)
     index = index_by_name(model, :eq, name)
     return ModelEquality(getfield(model, :model), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelEquality)
+    println(io, "ModelEquality:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::ModelEquality)
     (:id, :name, :type, :obj1id, :obj2id, :active, :solref, :solimp, :data)
 end
@@ -430,6 +630,7 @@ function Base.getproperty(x::ModelEquality, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_EQUALITY, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\teq(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, obj1id, obj2id, active, solref, solimp, data)" eq
 function key(model::Model, index::Integer)
     return ModelKeyframe(model, index)
 end
@@ -443,6 +644,25 @@ end
 function key(model::NamedModel, name::Symbol)
     index = index_by_name(model, :key, name)
     return ModelKeyframe(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelKeyframe)
+    println(io, "ModelKeyframe:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelKeyframe)
     (:id, :name, :time, :qpos, :qvel, :act, :mpos, :mquat)
@@ -460,6 +680,7 @@ function Base.getproperty(x::ModelKeyframe, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_KEY, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tkey(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, time, qpos, qvel, act, mpos, mquat)" key
 function geom(model::Model, index::Integer)
     return ModelGeom(model, index)
 end
@@ -473,6 +694,25 @@ end
 function geom(model::NamedModel, name::Symbol)
     index = index_by_name(model, :geom, name)
     return ModelGeom(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelGeom)
+    println(io, "ModelGeom:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelGeom)
     (:id, :name, :type, :contype, :conaffinity, :condim, :bodyid, :dataid, :matid, :group, :priority, :sameframe, :solmix, :solref, :solimp, :size, :rbound, :pos, :quat, :friction, :margin, :gap, :user, :rgba)
@@ -516,6 +756,7 @@ function Base.getproperty(x::ModelGeom, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_GEOM, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tgeom(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, contype, conaffinity, condim, bodyid, dataid, matid, group, priority, sameframe, solmix, solref, solimp, size, rbound, pos, quat, friction, margin, gap, user, rgba)" geom
 function numeric(model::Model, index::Integer)
     return ModelNumeric(model, index)
 end
@@ -530,6 +771,25 @@ function numeric(model::NamedModel, name::Symbol)
     index = index_by_name(model, :numeric, name)
     return ModelNumeric(getfield(model, :model), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelNumeric)
+    println(io, "ModelNumeric:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::ModelNumeric)
     (:id, :name, :adr, :size)
 end
@@ -542,6 +802,7 @@ function Base.getproperty(x::ModelNumeric, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_NUMERIC, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tnumeric(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, adr, size)" numeric
 function sensor(model::Model, index::Integer)
     return ModelSensor(model, index)
 end
@@ -555,6 +816,25 @@ end
 function sensor(model::NamedModel, name::Symbol)
     index = index_by_name(model, :sensor, name)
     return ModelSensor(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelSensor)
+    println(io, "ModelSensor:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelSensor)
     (:id, :name, :type, :datatype, :needstage, :objtype, :objid, :reftype, :refid, :dim, :adr, :cutoff, :noise, :user)
@@ -578,6 +858,7 @@ function Base.getproperty(x::ModelSensor, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SENSOR, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tsensor(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, datatype, needstage, objtype, objid, reftype, refid, dim, adr, cutoff, noise, user)" sensor
 function mat(model::Model, index::Integer)
     return ModelMaterial(model, index)
 end
@@ -591,6 +872,25 @@ end
 function mat(model::NamedModel, name::Symbol)
     index = index_by_name(model, :mat, name)
     return ModelMaterial(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelMaterial)
+    println(io, "ModelMaterial:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelMaterial)
     (:id, :name, :texid, :texuniform, :texrepeat, :emission, :specular, :shininess, :reflectance, :rgba)
@@ -610,6 +910,7 @@ function Base.getproperty(x::ModelMaterial, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_MATERIAL, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tmat(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, texid, texuniform, texrepeat, emission, specular, shininess, reflectance, rgba)" mat
 function tex(model::Model, index::Integer)
     return ModelTexture(model, index)
 end
@@ -623,6 +924,25 @@ end
 function tex(model::NamedModel, name::Symbol)
     index = index_by_name(model, :tex, name)
     return ModelTexture(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelTexture)
+    println(io, "ModelTexture:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelTexture)
     (:id, :name, :type, :height, :width, :adr)
@@ -638,6 +958,7 @@ function Base.getproperty(x::ModelTexture, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TEXTURE, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\ttex(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, height, width, adr)" tex
 function actuator(model::Model, index::Integer)
     return ModelActuator(model, index)
 end
@@ -651,6 +972,25 @@ end
 function actuator(model::NamedModel, name::Symbol)
     index = index_by_name(model, :actuator, name)
     return ModelActuator(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelActuator)
+    println(io, "ModelActuator:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelActuator)
     (:id, :name, :trntype, :dyntype, :gaintype, :biastype, :trnid, :actadr, :actnum, :group, :ctrllimited, :forcelimited, :actlimited, :dynprm, :gainprm, :biasprm, :ctrlrange, :forcerange, :actrange, :gear, :cranklength, :acc0, :length0, :lengthrange, :user)
@@ -700,6 +1040,7 @@ function Base.getproperty(x::ModelActuator, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_ACTUATOR, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tactuator(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, trntype, dyntype, gaintype, biastype, trnid, actadr, actnum, group, ctrllimited, forcelimited, actlimited, dynprm, gainprm, biasprm, ctrlrange, forcerange, actrange, gear, cranklength, acc0, length0, lengthrange, user)" actuator
 function site(model::Model, index::Integer)
     return ModelSite(model, index)
 end
@@ -713,6 +1054,25 @@ end
 function site(model::NamedModel, name::Symbol)
     index = index_by_name(model, :site, name)
     return ModelSite(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelSite)
+    println(io, "ModelSite:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelSite)
     (:id, :name, :type, :bodyid, :matid, :group, :sameframe, :size, :pos, :quat, :user, :rgba)
@@ -734,6 +1094,7 @@ function Base.getproperty(x::ModelSite, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SITE, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tsite(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, bodyid, matid, group, sameframe, size, pos, quat, user, rgba)" site
 function pair(model::Model, index::Integer)
     return ModelPair(model, index)
 end
@@ -747,6 +1108,25 @@ end
 function pair(model::NamedModel, name::Symbol)
     index = index_by_name(model, :pair, name)
     return ModelPair(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelPair)
+    println(io, "ModelPair:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelPair)
     (:id, :name, :dim, :geom1, :geom2, :signature, :solref, :solimp, :margin, :gap, :friction)
@@ -777,6 +1157,7 @@ function Base.getproperty(x::ModelPair, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_PAIR, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tpair(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, dim, geom1, geom2, signature, solref, solimp, margin, gap, friction)" pair
 function hfield(model::Model, index::Integer)
     return ModelHfield(model, index)
 end
@@ -790,6 +1171,25 @@ end
 function hfield(model::NamedModel, name::Symbol)
     index = index_by_name(model, :hfield, name)
     return ModelHfield(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelHfield)
+    println(io, "ModelHfield:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelHfield)
     (:id, :name, :size, :nrow, :ncol, :adr)
@@ -805,6 +1205,7 @@ function Base.getproperty(x::ModelHfield, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_HFIELD, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\thfield(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, size, nrow, ncol, adr)" hfield
 function light(model::Model, index::Integer)
     return ModelLight(model, index)
 end
@@ -818,6 +1219,25 @@ end
 function light(model::NamedModel, name::Symbol)
     index = index_by_name(model, :light, name)
     return ModelLight(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelLight)
+    println(io, "ModelLight:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelLight)
     (:id, :name, :mode, :bodyid, :targetbodyid, :directional, :castshadow, :active, :pos, :dir, :poscom0, :pos0, :dir0, :attenuation, :cutoff, :exponent, :ambient, :diffuse, :specular)
@@ -846,6 +1266,7 @@ function Base.getproperty(x::ModelLight, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_LIGHT, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tlight(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, mode, bodyid, targetbodyid, directional, castshadow, active, pos, dir, poscom0, pos0, dir0, attenuation, cutoff, exponent, ambient, diffuse, specular)" light
 function cam(model::Model, index::Integer)
     return ModelCamera(model, index)
 end
@@ -859,6 +1280,25 @@ end
 function cam(model::NamedModel, name::Symbol)
     index = index_by_name(model, :cam, name)
     return ModelCamera(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelCamera)
+    println(io, "ModelCamera:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelCamera)
     (:id, :name, :mode, :bodyid, :targetbodyid, :pos, :quat, :poscom0, :pos0, :mat0, :fovy, :ipd, :user)
@@ -881,6 +1321,7 @@ function Base.getproperty(x::ModelCamera, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_CAMERA, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tcam(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, mode, bodyid, targetbodyid, pos, quat, poscom0, pos0, mat0, fovy, ipd, user)" cam
 function tuple(model::Model, index::Integer)
     return ModelTuple(model, index)
 end
@@ -895,6 +1336,25 @@ function tuple(model::NamedModel, name::Symbol)
     index = index_by_name(model, :tuple, name)
     return ModelTuple(getfield(model, :model), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelTuple)
+    println(io, "ModelTuple:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::ModelTuple)
     (:id, :name, :adr, :size)
 end
@@ -907,6 +1367,7 @@ function Base.getproperty(x::ModelTuple, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TUPLE, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\ttuple(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, adr, size)" tuple
 function skin(model::Model, index::Integer)
     return ModelSkin(model, index)
 end
@@ -920,6 +1381,25 @@ end
 function skin(model::NamedModel, name::Symbol)
     index = index_by_name(model, :skin, name)
     return ModelSkin(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelSkin)
+    println(io, "ModelSkin:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelSkin)
     (:id, :name, :matid, :rgba, :inflate, :vertadr, :vertnum, :texcoordadr, :faceadr, :facenum, :boneadr, :bonenum)
@@ -941,6 +1421,7 @@ function Base.getproperty(x::ModelSkin, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SKIN, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tskin(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, matid, rgba, inflate, vertadr, vertnum, texcoordadr, faceadr, facenum, boneadr, bonenum)" skin
 function exclude(model::Model, index::Integer)
     return ModelExclude(model, index)
 end
@@ -955,6 +1436,25 @@ function exclude(model::NamedModel, name::Symbol)
     index = index_by_name(model, :exclude, name)
     return ModelExclude(getfield(model, :model), index)
 end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelExclude)
+    println(io, "ModelExclude:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
+end
 function Base.propertynames(::ModelExclude)
     (:id, :name, :signature)
 end
@@ -966,6 +1466,7 @@ function Base.getproperty(x::ModelExclude, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_EXCLUDE, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\texclude(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, signature)" exclude
 function mesh(model::Model, index::Integer)
     return ModelMesh(model, index)
 end
@@ -979,6 +1480,25 @@ end
 function mesh(model::NamedModel, name::Symbol)
     index = index_by_name(model, :mesh, name)
     return ModelMesh(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelMesh)
+    println(io, "ModelMesh:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelMesh)
     (:id, :name, :vertadr, :vertnum, :texcoordadr, :faceadr, :facenum, :graphadr)
@@ -996,6 +1516,7 @@ function Base.getproperty(x::ModelMesh, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_MESH, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tmesh(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, vertadr, vertnum, texcoordadr, faceadr, facenum, graphadr)" mesh
 function body(model::Model, index::Integer)
     return ModelBody(model, index)
 end
@@ -1009,6 +1530,25 @@ end
 function body(model::NamedModel, name::Symbol)
     index = index_by_name(model, :body, name)
     return ModelBody(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelBody)
+    println(io, "ModelBody:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelBody)
     (:id, :name, :parentid, :rootid, :weldid, :mocapid, :jntnum, :jntadr, :dofnum, :dofadr, :geomnum, :geomadr, :simple, :sameframe, :pos, :quat, :ipos, :iquat, :mass, :subtreemass, :inertia, :invweight0, :user)
@@ -1041,6 +1581,7 @@ function Base.getproperty(x::ModelBody, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_BODY, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tbody(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, parentid, rootid, weldid, mocapid, jntnum, jntadr, dofnum, dofadr, geomnum, geomadr, simple, sameframe, pos, quat, ipos, iquat, mass, subtreemass, inertia, invweight0, user)" body
 function jnt(model::Model, index::Integer)
     return ModelJoint(model, index)
 end
@@ -1054,6 +1595,25 @@ end
 function jnt(model::NamedModel, name::Symbol)
     index = index_by_name(model, :jnt, name)
     return ModelJoint(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelJoint)
+    println(io, "ModelJoint:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelJoint)
     (:id, :name, :type, :qposadr, :dofadr, :group, :limited, :pos, :axis, :stiffness, :range, :margin, :user)
@@ -1076,6 +1636,7 @@ function Base.getproperty(x::ModelJoint, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_JOINT, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\tjnt(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, qposadr, dofadr, group, limited, pos, axis, stiffness, range, margin, user)" jnt
 function tendon(model::Model, index::Integer)
     return ModelTendon(model, index)
 end
@@ -1089,6 +1650,25 @@ end
 function tendon(model::NamedModel, name::Symbol)
     index = index_by_name(model, :tendon, name)
     return ModelTendon(getfield(model, :model), index)
+end
+function Base.show(io::IO, ::MIME"text/plain", x::ModelTendon)
+    println(io, "ModelTendon:")
+    max_spaces = mapreduce((x->begin
+                    length(string(x))
+                end), max, propertynames(x))
+    for pname = propertynames(x)
+        prop = getproperty(x, pname)
+        print(io, pname)
+        print(io, ":")
+        num_spaces = 2 + (max_spaces - length(string(pname)))
+        print(io, " " ^ num_spaces)
+        if typeof(prop) <: AbstractArray
+            show_array(io, prop)
+        else
+            show(io, prop)
+        end
+        println(io, "")
+        end
 end
 function Base.propertynames(::ModelTendon)
     (:id, :name, :adr, :num, :matid, :group, :limited, :width, :solref_lim, :solimp_lim, :solref_fri, :solimp_fri, :range, :margin, :stiffness, :damping, :frictionloss, :lengthspring, :length0, :invweight0, :user, :rgba)
@@ -1140,6 +1720,7 @@ function Base.getproperty(x::ModelTendon, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TENDON, index)
     error("Could not find the property: " * string(f))
 end
+Core.@doc "\ttendon(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, adr, num, matid, group, limited, width, solref_lim, solimp_lim, solref_fri, solimp_fri, range, margin, stiffness, damping, frictionloss, lengthspring, length0, invweight0, user, rgba)" tendon
 const camera = cam
 const ten = tendon
 const joint = jnt
