@@ -1,3 +1,24 @@
+function index_by_name(model::Model, obj_type, name::String)
+    return LibMuJoCo.mj_name2id(model, obj_type, name)
+end
+function index_by_name(data::Data, obj_type, name)
+    model = getfield(data, :model)
+    return index_by_name(model, obj_type, name)
+end
+function name_by_index(model::Model, obj_type, index)
+    name_ptr = LibMuJoCo.mj_id2name(model, obj_type, index)
+    if name_ptr == C_NULL
+        return nothing
+    else
+        return unsafe_string(name_ptr)
+    end    
+end
+function name_by_index(data::Data, obj_type, index)
+    model = getfield(data, :model)
+    return name_by_index(model, obj_type, index)
+end
+
+
 fieldoffset(T, x) = Base.fieldoffset(T, x)
 function fieldoffset(T::Type, fname::Symbol)
     idx = findfirst(x->x==fname, fieldnames(T))
@@ -35,7 +56,7 @@ function NamedModel(model::Model)
             for (i, offset) in enumerate(array_offsets)
                 matching_name = unsafe_string(Ptr{UInt8}(names_char_ptr + offset))
                 if length(matching_name) > 0 && isvalid(matching_name)
-                    m[Symbol(matching_name)] = i
+                    m[Symbol(matching_name)] = i - 1 # 0 based indexing
                 end
             end
             if length(m) > 0
@@ -60,6 +81,13 @@ end
 function index_by_name(data::NamedData, identifier::Symbol, name::Symbol)
     return index_by_name(getfield(data, :model), identifier, name)
 end
+function name_by_index(model::NamedModel, obj_type, index)
+    return name_by_index(getfield(model, :model), obj_type, index)
+end
+function name_by_index(data::NamedData, obj_type, index)
+    return name_by_index(getfield(data, :data), obj_type, index)
+end
+
 
 # Overload base functions
 Base.getproperty(x::NamedModel, f::Symbol) = getproperty(getfield(x, :model), f)

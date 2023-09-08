@@ -254,9 +254,39 @@ function new_propname(fieldname)
     return Symbol(fieldname_str[first_underscore_idx+1:end])
 end
 ptr_inner_type(::Type{Ptr{T}}) where {T} = T
+
+const obj_identifier_to_mjOBJ_map = Dict{Symbol, Expr}(
+    :light => :(LibMuJoCo.mjOBJ_LIGHT),
+    :cam => :(LibMuJoCo.mjOBJ_CAMERA),
+    :camera => :(LibMuJoCo.mjOBJ_CAMERA),
+    :actuator => :(LibMuJoCo.mjOBJ_ACTUATOR),
+    :body => :(LibMuJoCo.mjOBJ_BODY),
+    :geom => :(LibMuJoCo.mjOBJ_GEOM),
+    :jnt => :(LibMuJoCo.mjOBJ_JOINT),
+    :joint => :(LibMuJoCo.mjOBJ_JOINT),
+    :sensor => :(LibMuJoCo.mjOBJ_SENSOR),
+    :site => :(LibMuJoCo.mjOBJ_SITE),
+    :tendon => :(LibMuJoCo.mjOBJ_TENDON),
+    :ten => :(LibMuJoCo.mjOBJ_TENDON),
+    :eq => :(LibMuJoCo.mjOBJ_EQUALITY),
+    :equality => :(LibMuJoCo.mjOBJ_EQUALITY),
+    :key => :(LibMuJoCo.mjOBJ_KEY),
+    :keyframe => :(LibMuJoCo.mjOBJ_KEY),
+    :numeric => :(LibMuJoCo.mjOBJ_NUMERIC),
+    :mat => :(LibMuJoCo.mjOBJ_MATERIAL),
+    :material => :(LibMuJoCo.mjOBJ_MATERIAL),
+    :texture => :(LibMuJoCo.mjOBJ_TEXTURE),
+    :pair => :(LibMuJoCo.mjOBJ_PAIR),
+    :hfield => :(LibMuJoCo.mjOBJ_HFIELD),
+    :tuple => :(LibMuJoCo.mjOBJ_TUPLE),
+    :skin => :(LibMuJoCo.mjOBJ_SKIN),
+    :excludes => :(LibMuJoCo.mjOBJ_EXCLUDE),
+    :tex => :(LibMuJoCo.mjOBJ_TEXTURE)
+)
+
 function named_access_wrappers_expr(index_xmacro_header_file_path)
     xmacros, xviewgroups, xviewgroupaltnames = parse_x_defs(index_xmacro_header_file_path)
-    # TODO add in alt name access
+    
     available_classes = Dict(
         :Data => Wrappers.Data,
         :Model => Wrappers.Model,
@@ -294,15 +324,33 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
         for (identifier, xgroup) in xviewgroups[struct_name]
             push!(exports, identifier)
             collection_name = xgroup.collection_name
+            mjobj_expr = if haskey(obj_identifier_to_mjOBJ_map, identifier)
+                obj_identifier_to_mjOBJ_map[identifier]
+            else
+                test_mjobj_sym = Symbol("mjOBJ_$(uppercase(string(identifier)))")
+                @info "Inferring that $identifier maps to $test_mjobj_sym"
+                try
+                    getfield(LibMuJoCo, test_mjobj_sym)
+                catch
+                    error("Cannot find $test_mjobj_sym in LibMuJoCo, trying for identifier $identifier.")
+                end
+                :(LibMuJoCo.$(test_mjobj_sym))
+            end
 
             cstruct_name = collection_struct_name(struct_name, collection_name)
-            # Create functions to create the struct objects
-            named_type = Symbol("Named" * string(struct_name))
-            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), index::Int)
-                return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
-            end))
-            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), index::Int)
+            # Create functions to create the struct objects (both original and "Named" versions)
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), index::Integer)
                 return $(cstruct_name)($(lower_struct_name), index)
+            end)) 
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), name::String)
+                index = index_by_name($(lower_struct_name), $(mjobj_expr), name)
+                return $(cstruct_name)($(lower_struct_name), index)
+            end))
+
+
+            named_type = Symbol("Named" * string(struct_name))
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), index::Integer)
+                return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
             end))
             push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), name::Symbol)
                 index = index_by_name($(lower_struct_name), $(QuoteNode(identifier)), name)
@@ -317,7 +365,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
             end
             push!(fn_block_exprs, :(index = getfield(x, :index)))
 
-            property_names = Symbol[]
+            property_names = Symbol[:id, :name]
 
             for xmacro in xmacros[struct_name][collection_name]
                 propname = new_propname(xmacro.fieldname)
@@ -336,7 +384,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                         else
                             Expr(:call, :(Base.OneTo), xmacro.numrows)
                         end
-                        return_expr = Expr(:return, Expr(:call, :view, get_array_expr, :index, second_dims))
+                        return_expr = Expr(:return, Expr(:call, :view, get_array_expr, :(index + 1), second_dims))
                         entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
                         push!(fn_block_exprs, entry_expr)
                     elseif inferred_return_type <: Ptr
@@ -349,7 +397,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                         element_type = ptr_inner_type(inferred_return_type)
                         return_expr = Expr(:return, quote
                             size_arr = Int($(num_elements))
-                            offset = (index-1) * size_arr * sizeof($element_type)
+                            offset = index * size_arr * sizeof($element_type)
                             arr_pointer = Ptr{$element_type}($(lower_struct_name).$(xmacro.fieldname) + offset)
                             UnsafeArray(arr_pointer, (size_arr,))
                         end)
@@ -360,6 +408,8 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                     end
                 end
             end
+            push!(fn_block_exprs, :(f === :id && return index))
+            push!(fn_block_exprs, :(f === :name && return name_by_index(model, $(mjobj_expr), index)))
 
             push!(exprs, Expr(:function, :(Base.propertynames(::$(cstruct_name))), Expr(:block, Expr(:tuple, QuoteNode.(property_names)...))))
 
