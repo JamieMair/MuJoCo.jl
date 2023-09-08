@@ -19,6 +19,7 @@ end
 
 module Wrappers
     using ..LibMuJoCo
+    import ..Utils
     include("wrappers.jl")
     include("visualiser_wrappers.jl")
     include("named_access.jl")

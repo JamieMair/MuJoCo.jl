@@ -307,6 +307,10 @@ const obj_identifier_to_mjOBJ_map = Dict{Symbol, Expr}(
     :tex => :(LibMuJoCo.mjOBJ_TEXTURE)
 )
 
+function doc_fn(docs, fn_expr)
+    return Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), docs, fn_expr)
+end
+
 function named_access_wrappers_expr(index_xmacro_header_file_path)
     xmacros, xviewgroups, xviewgroupaltnames = parse_x_defs(index_xmacro_header_file_path)
     
@@ -327,6 +331,8 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
     exprs = Expr[]
     exports = Symbol[]
+
+    documented_fns = Set{Symbol}()
 
     for (struct_name, class_def) in available_classes
         lower_struct_name = Symbol(lowercase(string(struct_name)))
@@ -361,26 +367,6 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
             end
 
             cstruct_name = collection_struct_name(struct_name, collection_name)
-            # Create functions to create the struct objects (both original and "Named" versions)
-            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), index::Integer)
-                return $(cstruct_name)($(lower_struct_name), index)
-            end)) 
-            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), name::String)
-                index = index_by_name($(lower_struct_name), $(mjobj_expr), name)
-                return $(cstruct_name)($(lower_struct_name), index)
-            end))
-
-
-            named_type = Symbol("Named" * string(struct_name))
-            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), index::Integer)
-                return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
-            end))
-            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), name::Symbol)
-                index = index_by_name($(lower_struct_name), $(QuoteNode(identifier)), name)
-                return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
-            end))
-
-            push!(exprs, pretty_print_show_fn(cstruct_name, "$cstruct_name:"))
 
             fn_block_exprs = Expr[]
             push!(fn_block_exprs, :($(lower_struct_name) = getfield(x, $(QuoteNode(lower_struct_name)))))
@@ -433,6 +419,36 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                 end
             end
 
+            # Add function stub with some documentation
+            if !(identifier in documented_fns)
+                empty_fn_expr = :(function $(identifier) end)
+                identifier_docs = "\t$(identifier)([model, data], [name, index])\nCreates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:\n$(Expr(:tuple, property_names...))"
+                push!(exprs, doc_fn(identifier_docs, empty_fn_expr))
+                push!(documented_fns, identifier)
+            end
+
+            # Create functions to create the struct objects (both original and "Named" versions)
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), index::Integer)
+                return $(cstruct_name)($(lower_struct_name), index)
+            end))
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(struct_name), name::String)
+                index = index_by_name($(lower_struct_name), $(mjobj_expr), name)
+                return $(cstruct_name)($(lower_struct_name), index)
+            end))
+
+            named_type = Symbol("Named" * string(struct_name))
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), index::Integer)
+                return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
+            end))
+            push!(exprs, :(function $(identifier)($(lower_struct_name)::$(named_type), name::Symbol)
+                index = index_by_name($(lower_struct_name), $(QuoteNode(identifier)), name)
+                return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
+            end))
+
+            push!(exprs, pretty_print_show_fn(cstruct_name, "$cstruct_name:"))
+
+            # Finish creating the getproperty function
+
             push!(fn_block_exprs, :(f === :id && return index))
             push!(fn_block_exprs, :(f === :name && return name_by_index(model, $(mjobj_expr), index)))
 
@@ -442,10 +458,6 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
             fn_sig = :(Base.getproperty(x::$(cstruct_name), f::Symbol))
             push!(exprs, Expr(:function, fn_sig, Expr(:block, fn_block_exprs...)))
-
-            fn_docs_expr = "\t$(identifier)(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n$(Expr(:tuple, property_names...))"
-            document_fn_call_expr = Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), fn_docs_expr, identifier)
-            push!(exprs, document_fn_call_expr)
         end
     end
 

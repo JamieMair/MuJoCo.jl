@@ -1,6 +1,6 @@
 module NamedAccess
 import ..LibMuJoCo
-import ....Utils: show_array
+import ..Utils: show_array
 using UnsafeArrays
 import ..Data
 import ..Model
@@ -42,6 +42,12 @@ struct DataGeom
     data::Data
     index::Int
 end
+"""
+	light([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, xpos, xdir)
+"""
+function light end
 function light(data::Data, index::Integer)
     return DataLight(data, index)
 end
@@ -88,7 +94,12 @@ function Base.getproperty(x::DataLight, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_LIGHT, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tlight(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xpos, xdir)" light
+"""
+	cam([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, xpos, xmat)
+"""
+function cam end
 function cam(data::Data, index::Integer)
     return DataCamera(data, index)
 end
@@ -135,7 +146,12 @@ function Base.getproperty(x::DataCamera, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_CAMERA, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tcam(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xpos, xmat)" cam
+"""
+	actuator([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, ctrl, length, moment, velocity, force)
+"""
+function actuator end
 function actuator(data::Data, index::Integer)
     return DataActuator(data, index)
 end
@@ -185,7 +201,12 @@ function Base.getproperty(x::DataActuator, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_ACTUATOR, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tactuator(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, ctrl, length, moment, velocity, force)" actuator
+"""
+	body([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, applied, xpos, xquat, xmat, xipos, ximat, com, cinert, crb, cvel, linvel, angmom, cacc, int, ext)
+"""
+function body end
 function body(data::Data, index::Integer)
     return DataBody(data, index)
 end
@@ -245,7 +266,12 @@ function Base.getproperty(x::DataBody, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_BODY, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tbody(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, applied, xpos, xquat, xmat, xipos, ximat, com, cinert, crb, cvel, linvel, angmom, cacc, int, ext)" body
+"""
+	geom([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, xpos, xmat)
+"""
+function geom end
 function geom(data::Data, index::Integer)
     return DataGeom(data, index)
 end
@@ -292,7 +318,12 @@ function Base.getproperty(x::DataGeom, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_GEOM, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tgeom(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xpos, xmat)" geom
+"""
+	jnt([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, xanchor, xaxis)
+"""
+function jnt end
 function jnt(data::Data, index::Integer)
     return DataJoint(data, index)
 end
@@ -339,7 +370,12 @@ function Base.getproperty(x::DataJoint, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_JOINT, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tjnt(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xanchor, xaxis)" jnt
+"""
+	sensor([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name)
+"""
+function sensor end
 function sensor(data::Data, index::Integer)
     return DataSensor(data, index)
 end
@@ -384,7 +420,12 @@ function Base.getproperty(x::DataSensor, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SENSOR, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tsensor(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name)" sensor
+"""
+	site([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, xpos, xmat)
+"""
+function site end
 function site(data::Data, index::Integer)
     return DataSite(data, index)
 end
@@ -431,7 +472,12 @@ function Base.getproperty(x::DataSite, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SITE, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tsite(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, xpos, xmat)" site
+"""
+	tendon([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, wrapadr, wrapnum, J_rownnz, J_rowadr, J_colind, length, J, velocity)
+"""
+function tendon end
 function tendon(data::Data, index::Integer)
     return DataTendon(data, index)
 end
@@ -484,7 +530,6 @@ function Base.getproperty(x::DataTendon, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TENDON, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\ttendon(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, wrapadr, wrapnum, J_rownnz, J_rowadr, J_colind, length, J, velocity)" tendon
 struct ModelTexture
     model::Model
     index::Int
@@ -565,6 +610,12 @@ struct ModelGeom
     model::Model
     index::Int
 end
+"""
+	eq([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, type, obj1id, obj2id, active, solref, solimp, data)
+"""
+function eq end
 function eq(model::Model, index::Integer)
     return ModelEquality(model, index)
 end
@@ -630,7 +681,12 @@ function Base.getproperty(x::ModelEquality, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_EQUALITY, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\teq(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, obj1id, obj2id, active, solref, solimp, data)" eq
+"""
+	key([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, time, qpos, qvel, act, mpos, mquat)
+"""
+function key end
 function key(model::Model, index::Integer)
     return ModelKeyframe(model, index)
 end
@@ -680,7 +736,6 @@ function Base.getproperty(x::ModelKeyframe, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_KEY, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tkey(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, time, qpos, qvel, act, mpos, mquat)" key
 function geom(model::Model, index::Integer)
     return ModelGeom(model, index)
 end
@@ -756,7 +811,12 @@ function Base.getproperty(x::ModelGeom, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_GEOM, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tgeom(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, contype, conaffinity, condim, bodyid, dataid, matid, group, priority, sameframe, solmix, solref, solimp, size, rbound, pos, quat, friction, margin, gap, user, rgba)" geom
+"""
+	numeric([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, adr, size)
+"""
+function numeric end
 function numeric(model::Model, index::Integer)
     return ModelNumeric(model, index)
 end
@@ -802,7 +862,6 @@ function Base.getproperty(x::ModelNumeric, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_NUMERIC, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tnumeric(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, adr, size)" numeric
 function sensor(model::Model, index::Integer)
     return ModelSensor(model, index)
 end
@@ -858,7 +917,12 @@ function Base.getproperty(x::ModelSensor, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SENSOR, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tsensor(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, datatype, needstage, objtype, objid, reftype, refid, dim, adr, cutoff, noise, user)" sensor
+"""
+	mat([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, texid, texuniform, texrepeat, emission, specular, shininess, reflectance, rgba)
+"""
+function mat end
 function mat(model::Model, index::Integer)
     return ModelMaterial(model, index)
 end
@@ -910,7 +974,12 @@ function Base.getproperty(x::ModelMaterial, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_MATERIAL, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tmat(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, texid, texuniform, texrepeat, emission, specular, shininess, reflectance, rgba)" mat
+"""
+	tex([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, type, height, width, adr)
+"""
+function tex end
 function tex(model::Model, index::Integer)
     return ModelTexture(model, index)
 end
@@ -958,7 +1027,6 @@ function Base.getproperty(x::ModelTexture, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TEXTURE, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\ttex(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, height, width, adr)" tex
 function actuator(model::Model, index::Integer)
     return ModelActuator(model, index)
 end
@@ -1040,7 +1108,6 @@ function Base.getproperty(x::ModelActuator, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_ACTUATOR, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tactuator(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, trntype, dyntype, gaintype, biastype, trnid, actadr, actnum, group, ctrllimited, forcelimited, actlimited, dynprm, gainprm, biasprm, ctrlrange, forcerange, actrange, gear, cranklength, acc0, length0, lengthrange, user)" actuator
 function site(model::Model, index::Integer)
     return ModelSite(model, index)
 end
@@ -1094,7 +1161,12 @@ function Base.getproperty(x::ModelSite, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SITE, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tsite(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, bodyid, matid, group, sameframe, size, pos, quat, user, rgba)" site
+"""
+	pair([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, dim, geom1, geom2, signature, solref, solimp, margin, gap, friction)
+"""
+function pair end
 function pair(model::Model, index::Integer)
     return ModelPair(model, index)
 end
@@ -1157,7 +1229,12 @@ function Base.getproperty(x::ModelPair, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_PAIR, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tpair(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, dim, geom1, geom2, signature, solref, solimp, margin, gap, friction)" pair
+"""
+	hfield([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, size, nrow, ncol, adr)
+"""
+function hfield end
 function hfield(model::Model, index::Integer)
     return ModelHfield(model, index)
 end
@@ -1205,7 +1282,6 @@ function Base.getproperty(x::ModelHfield, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_HFIELD, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\thfield(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, size, nrow, ncol, adr)" hfield
 function light(model::Model, index::Integer)
     return ModelLight(model, index)
 end
@@ -1266,7 +1342,6 @@ function Base.getproperty(x::ModelLight, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_LIGHT, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tlight(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, mode, bodyid, targetbodyid, directional, castshadow, active, pos, dir, poscom0, pos0, dir0, attenuation, cutoff, exponent, ambient, diffuse, specular)" light
 function cam(model::Model, index::Integer)
     return ModelCamera(model, index)
 end
@@ -1321,7 +1396,12 @@ function Base.getproperty(x::ModelCamera, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_CAMERA, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tcam(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, mode, bodyid, targetbodyid, pos, quat, poscom0, pos0, mat0, fovy, ipd, user)" cam
+"""
+	tuple([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, adr, size)
+"""
+function tuple end
 function tuple(model::Model, index::Integer)
     return ModelTuple(model, index)
 end
@@ -1367,7 +1447,12 @@ function Base.getproperty(x::ModelTuple, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TUPLE, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\ttuple(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, adr, size)" tuple
+"""
+	skin([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, matid, rgba, inflate, vertadr, vertnum, texcoordadr, faceadr, facenum, boneadr, bonenum)
+"""
+function skin end
 function skin(model::Model, index::Integer)
     return ModelSkin(model, index)
 end
@@ -1421,7 +1506,12 @@ function Base.getproperty(x::ModelSkin, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SKIN, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tskin(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, matid, rgba, inflate, vertadr, vertnum, texcoordadr, faceadr, facenum, boneadr, bonenum)" skin
+"""
+	exclude([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, signature)
+"""
+function exclude end
 function exclude(model::Model, index::Integer)
     return ModelExclude(model, index)
 end
@@ -1466,7 +1556,12 @@ function Base.getproperty(x::ModelExclude, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_EXCLUDE, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\texclude(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, signature)" exclude
+"""
+	mesh([model, data], [name, index])
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+(id, name, vertadr, vertnum, texcoordadr, faceadr, facenum, graphadr)
+"""
+function mesh end
 function mesh(model::Model, index::Integer)
     return ModelMesh(model, index)
 end
@@ -1516,7 +1611,6 @@ function Base.getproperty(x::ModelMesh, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_MESH, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tmesh(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, vertadr, vertnum, texcoordadr, faceadr, facenum, graphadr)" mesh
 function body(model::Model, index::Integer)
     return ModelBody(model, index)
 end
@@ -1581,7 +1675,6 @@ function Base.getproperty(x::ModelBody, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_BODY, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tbody(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, parentid, rootid, weldid, mocapid, jntnum, jntadr, dofnum, dofadr, geomnum, geomadr, simple, sameframe, pos, quat, ipos, iquat, mass, subtreemass, inertia, invweight0, user)" body
 function jnt(model::Model, index::Integer)
     return ModelJoint(model, index)
 end
@@ -1636,7 +1729,6 @@ function Base.getproperty(x::ModelJoint, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_JOINT, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\tjnt(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, type, qposadr, dofadr, group, limited, pos, axis, stiffness, range, margin, user)" jnt
 function tendon(model::Model, index::Integer)
     return ModelTendon(model, index)
 end
@@ -1720,7 +1812,6 @@ function Base.getproperty(x::ModelTendon, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TENDON, index)
     error("Could not find the property: " * string(f))
 end
-Core.@doc "\ttendon(object, [index, name])\nCreates a view into the object, allowing access to the properties below:\n(id, name, adr, num, matid, group, limited, width, solref_lim, solimp_lim, solref_fri, solimp_fri, range, margin, stiffness, damping, frictionloss, lengthspring, length0, invweight0, user, rgba)" tendon
 const camera = cam
 const ten = tendon
 const joint = jnt
