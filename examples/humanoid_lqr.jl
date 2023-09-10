@@ -2,9 +2,7 @@ using CairoMakie
 using LinearAlgebra
 using MatrixEquations: ared
 using MuJoCo
-using MuJoCo.LibMuJoCo
-using MuJoCo.Wrappers
-using MuJoCo.NamedAccess
+import MuJoCo.NamedAccess as mj
 
 init_visualiser()
 isplot = false
@@ -13,8 +11,10 @@ isplot = false
 # https://colab.research.google.com/github/deepmind/mujoco/blob/main/python/LQR.ipynb
 
 # Useful functions
-reset!(m::Model, d::Data) = LibMuJoCo.mj_resetData(m, d)
-resetkey!(m::Model, d::Data) = LibMuJoCo.mj_resetDataKeyframe(m, d, 1)
+# TODO: Should we demo all the wrapper functions like step!, forward!, reset!, or should we
+#       stick to using base MuJoCo functions in this example like mj_step, mj_forward, etc?
+reset!(m::Model, d::Data) = mj_resetData(m, d)
+resetkey!(m::Model, d::Data) = mj_resetDataKeyframe(m, d, 1)
 
 # Load humanoid in specific keyframe
 model, data = MuJoCo.sample_model_and_data()
@@ -37,7 +37,7 @@ for k in eachindex(heights)
 
     # Offset the height and check required vertical forces
     data.qpos[3] += heights[k]
-    LibMuJoCo.mj_inverse(model, data)
+    mj_inverse(model, data)
     u_vert[k] = data.qfrc_inverse[3] # 3 -> z-force
 end
 
@@ -60,7 +60,7 @@ forward!(model, data)
 data.qacc .= 0
 data.qpos[3] += height
 qpos0 = vec(copy(data.qpos))
-LibMuJoCo.mj_inverse(model, data)
+mj_inverse(model, data)
 qfrc0 = vec(copy(data.qfrc_inverse))
 println("Desired forces qfrc0 acquired")
 
@@ -89,14 +89,13 @@ isplot && visualise!(model, data)
 nu = model.nu
 nv = model.nv
 
-# Body IDs
-# TODO: This is still a little clunky
-named_model = NamedModel(model)
-id_torso = body(named_model, :torso).weldid[1]
-id_lfoot = body(named_model, :foot_left).weldid[1]
-
 # R-matrix just identity
 R = Matrix{Float64}(I, nu, nu)
+
+# Body IDs
+named_model = mj.NamedModel(model)
+id_torso = mj.body(named_model, :torso).id
+id_lfoot = mj.body(named_model, :foot_left).id
 
 # Get Jacobian for torso CoM
 # TODO: Document row/column-major
@@ -104,13 +103,13 @@ reset!(model, data)
 data.qpos .= qpos0
 forward!(model, data)
 jac_com = zeros(nv,3)
-LibMuJoCo.mj_jacSubtreeCom(model, data, jac_com, id_torso)
+mj_jacSubtreeCom(model, data, jac_com, id_torso)
 jac_com = transpose(jac_com)
 
 # Get (left) foot Jacobian for balancing
 # TODO: Pass in `nothing` instead of C_NULL?
 jac_foot = zeros(nv,3)
-LibMuJoCo.mj_jacBodyCom(model, data, jac_foot, C_NULL, id_lfoot) 
+mj_jacBodyCom(model, data, jac_foot, C_NULL, id_lfoot) 
 jac_foot = transpose(jac_foot)
 
 # Design Q-matrix to balance CoM over foot
@@ -121,37 +120,28 @@ Qbalance = jac_diff' * jac_diff
 # Torso already sorted. Left leg should remain rigid. Other joints can move for balance.
 # Let's start by getting all the joint indices
 
-"""
-Python bindings do this:
-
 # Get all joint names.
-joint_names = [model.joint(i).name for i in range(model.njnt)]
+joint_names = [mj.joint(named_model, i).name for i in 0:model.njnt-1]
 
 # Get indices into relevant sets of joints.
-root_dofs = range(6)
-body_dofs = range(6, nv)
-abdomen_dofs = [
-    model.joint(name).dofadr[0]
-    for name in joint_names
-    if 'abdomen' in name
-    and not 'z' in name
-]
-left_leg_dofs = [
-    model.joint(name).dofadr[0]
-    for name in joint_names
-    if 'left' in name
-    and ('hip' in name or 'knee' in name or 'ankle' in name)
-    and not 'z' in name
-]
-balance_dofs = abdomen_dofs + left_leg_dofs
-other_dofs = np.setdiff1d(body_dofs, balance_dofs)
-"""
-
-# TODO: As a place-holder, here are the indices we need. Should get them ourselves later
 root_dofs = 1:6
 body_dofs = 7:nv
-balance_dofs = [8, 9, 16, 18, 19, 20, 21, 25, 26, 27]
-other_dofs = [1, 7, 10, 11, 12, 13, 14, 15, 17, 22, 23, 24]
+
+# TODO: I think this could still be neater but it's not so bad now.
+abdomen_dofs = []
+left_leg_dofs = []
+for name in joint_names
+    occursin("z", name) && continue # ignore the z direction
+    joint_adr = mj.joint(named_model, Symbol(name)).dofadr[1] + 1 
+    if occursin("abdomen", name)
+        push!(abdomen_dofs, joint_adr)
+    elseif occursin("left", name) && any(occursin.(["hip", "knee", "ankle"], name))
+        push!(left_leg_dofs, joint_adr)
+    end
+end
+
+balance_dofs = vcat(abdomen_dofs, left_leg_dofs)
+other_dofs = setdiff(body_dofs, balance_dofs)
 
 # Cost coefficients
 balance_cost       = 1000       # CoM units large, keep it still
@@ -177,7 +167,7 @@ A = zeros(2nv, 2nv)
 B = zeros(nu, 2nv)
 ϵ = 1e-6
 centred = true
-LibMuJoCo.mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
+mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
 A = transpose(A)
 B = transpose(B)
 
@@ -190,12 +180,11 @@ function humanoid_ctrl!(m::Model, d::Data)
 
     # Get difference in states qpos - qpos0 (this function does quaternion diff)
     Δq = zeros(nv)
-    LibMuJoCo.mj_differentiatePos(m, Δq, 1, qpos0, d.qpos)
+    mj_differentiatePos(m, Δq, 1, qpos0, d.qpos)
     Δx = vcat(Δq, data.qvel)
 
     # Compute controls with LQR
     data.ctrl .= (ctrl0 .- K*Δx)
-
     return nothing
 end
 
