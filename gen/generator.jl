@@ -118,6 +118,17 @@ function print_expr(io, expr)
         return
     end
 
+    if expr.head == :module 
+        module_name = expr.args[2]
+        module_block = expr.args[3]
+        println(io, "module $(module_name)")
+        for expr in module_block.args
+            print_expr(io, expr)
+        end
+        println(io, "end")
+        return
+    end
+
     if expr.head == :macrocall && expr.args[begin] == :(Core.var"@doc")
         # Documentation!
         println(io, "\"\"\"")
