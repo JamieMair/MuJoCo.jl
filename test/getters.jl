@@ -54,8 +54,8 @@ end
     model, data = MuJoCo.sample_model_and_data()
 
     # Test whether wrapped structs are created
-    @test model.opt isa MuJoCo.LibMuJoCo.Options
-    @test model.stat isa MuJoCo.LibMuJoCo.Statistics
+    @test model.opt isa MuJoCo.Options
+    @test model.stat isa MuJoCo.Statistics
 
     # Test chained accessing
     @test model.opt.timestep isa AbstractFloat

@@ -3,12 +3,42 @@ using UnsafeArrays
 
 include("LibMuJoCo/LibMuJoCo.jl")
 include("utils.jl")
+
+using .LibMuJoCo
+
+# Re-export non polluting symbols of LibMuJoCo
+begin
+    exported_prefixes = ["mj_", "mju_", "mjv_", "mjr_", "mjui_", "mjd_", "mjp_", "mjr", "mjt"]
+    for name in names(LibMuJoCo; all = true)
+        name_str = string(name)
+        if any(startswith(name_str, prefix) for prefix in exported_prefixes) && !endswith(name_str, "_")
+            @eval export $name
+        end
+    end
+end
+
+module Wrappers
+    using ..LibMuJoCo
+    import ..Utils
+    include("wrappers.jl")
+    include("visualiser_wrappers.jl")
+    include("named_access.jl")
+    
+    using .NamedAccess
+end
+using .Wrappers
+import .Wrappers.NamedAccess
+
+# Rexport Model and Data
+export Model, Data
+
 include("visualiser.jl")
 
-import MuJoCo_jll
-using .LibMuJoCo
-import .LibMuJoCo: Model, Data
-using .Visualiser: visualise!
+const MODEL_TYPES = Union{Model, NamedAccess.NamedModel}
+const DATA_TYPES = Union{Data, NamedAccess.NamedData}
+
+
+import .Visualiser: visualise!
 
 
 export init_data, step!, forward!, timestep
@@ -27,18 +57,22 @@ function init_data(model::Model)
     data_ptr = mj_makeData(model)
     return Data(data_ptr, model) # Requires a reference to the model to get array sizes
 end
+function init_data(model::NamedAccess.NamedModel)
+    data_ptr = mj_makeData(model)
+    return NamedAccess.NamedData(Data(data_ptr, getfield(model, :model)), model) # Requires a reference to the model to get array sizes
+end
 """
     step!(model::Model, data::Data)
 
 Runs the simulation forward one time step, modifying the underlying `data` object.
 """
-function step!(model::Model, data::Data)
+function step!(model::MODEL_TYPES, data::DATA_TYPES)
     mj_step(model, data)
 end
-function forward!(model::Model, data::Data)
+function forward!(model::MODEL_TYPES, data::DATA_TYPES)
     mj_forward(model, data)
 end
-timestep(model::Model) = model.opt.timestep # Useful
+timestep(model::MODEL_TYPES) = model.opt.timestep # Useful
 
 # Handle backwards compatibility
 if !isdefined(Base, :get_extension)
