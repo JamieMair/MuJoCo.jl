@@ -41,7 +41,7 @@ const DATA_TYPES = Union{Data, NamedAccess.NamedData}
 import .Visualiser: visualise!
 
 
-export init_data, step!, forward!, timestep
+export init_data, step!, forward!, timestep, reset!, resetkey!
 export init_visualiser, install_visualiser, visualise!
 
 include("io.jl")
@@ -72,7 +72,24 @@ end
 function forward!(model::MODEL_TYPES, data::DATA_TYPES)
     mj_forward(model, data)
 end
-timestep(model::MODEL_TYPES) = model.opt.timestep # Useful
+"""
+Resets the data values to their original state.
+"""
+reset!(m::Model, d::Data) = mj_resetData(m, d)
+"""
+Resets the data struct to values in the first key frame.
+"""
+resetkey!(m::Model, d::Data) = mj_resetDataKeyframe(m, d, 0)
+"""
+    resetkey!(m::Model, d::Data, [keyframe = 1])
+
+Resets the data struct to values in the supplied keyframe. If no keyframe is specified,
+the first keyframe is used. The keyframe is a 1-based index into the list supplied by
+the model's specification.
+"""
+resetkey!(m::Model, d::Data, keyframe::Integer) = mj_resetDataKeyframe(m, d, keyframe-1)
+timestep(model::MODEL_TYPES) = model.opt.timestep
+
 
 # Handle backwards compatibility
 if !isdefined(Base, :get_extension)

@@ -10,15 +10,11 @@ isplot = false
 # Note: follow along with the DeepMind notebook: 
 # https://colab.research.google.com/github/deepmind/mujoco/blob/main/python/LQR.ipynb
 
-# Useful functions
-# TODO: Should we demo all the wrapper functions like step!, forward!, reset!, or should we
-#       stick to using base MuJoCo functions in this example like mj_step, mj_forward, etc?
-reset!(m::Model, d::Data) = mj_resetData(m, d)
-resetkey!(m::Model, d::Data) = mj_resetDataKeyframe(m, d, 1)
-
 # Load humanoid in specific keyframe
 model, data = MuJoCo.sample_model_and_data()
-resetkey!(model, data)
+const keyframe = 2 # Stand on one leg is the second keyframe.
+resetkey!(model, data, keyframe)
+
 
 
 ################## Get control set-point ##################
@@ -31,7 +27,7 @@ u_vert = zeros(length(heights))
 for k in eachindex(heights)
 
     # Set model in position and assume qacc == 0
-    resetkey!(model, data)
+    resetkey!(model, data, keyframe)
     forward!(model, data)
     data.qacc .= 0
 
@@ -55,7 +51,7 @@ lines!(ax, [height, height]*1000, [minimum(u_vert), maximum(u_vert)], linestyle=
 isplot && display(fig)
 
 # We'll use the best-choice offset to get our required ID forces and save q0
-resetkey!(model, data)
+resetkey!(model, data, keyframe)
 forward!(model, data)
 data.qacc .= 0
 data.qpos[3] += height
