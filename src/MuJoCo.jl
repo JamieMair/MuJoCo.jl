@@ -27,7 +27,7 @@ module Wrappers
     using .NamedAccess
 end
 using .Wrappers
-import .Wrappers.NamedAccess
+using .Wrappers.NamedAccess
 
 # Rexport Model and Data
 export Model, Data

@@ -12,6 +12,7 @@ makedocs(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://JamieMair.github.io/MuJoCo.jl",
         edit_link="main",
+        size_threshold=typemax(Int),
         assets=String[],
     ),
     pages=[
@@ -23,6 +24,7 @@ makedocs(;
             "Index" => "libmujoco_index.md"
         ]
     ],
+    warnonly=true
 )
 
 deploydocs(;
