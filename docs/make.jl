@@ -17,11 +17,19 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "API" => "api.md",
-        "Index" => "api_index.md",
+        "Introduction" => Any[
+            "Getting Started" => "intro/getting_started.md",
+            "Package Overview" => "intro/overview.md"
+        ],
+        "Examples" => Any[
+            "Balancing a Cart-Pole" => "examples/cartpole_balance.md",
+            "Humanoid LQR" => "examples/humanoid_lqr.md"
+        ],
+        "API" => "library/api.md",
+        "Index" => "library/api_index.md",
         "C Bindings" => Any[
-            "API" => "libmujoco.md",
-            "Index" => "libmujoco_index.md"
+            "API" => "library/libmujoco.md",
+            "Index" => "library/libmujoco_index.md"
         ]
     ],
     warnonly=true
