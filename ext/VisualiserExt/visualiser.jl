@@ -1,37 +1,5 @@
 # Adapted from https://github.com/Lyceum/LyceumMuJoCoViz.jl
 
-"""
-    visualise!(m::Model, d::Data; controller=nothing)
-
-Starts an interactive visualization of a MuJoCo model specified by an instance of `Model` and `Data`.
-
-The visualizer has two "modes" that allow you to visualize passive dynamics or run a controller interactively. The passive dynamics mode is always available, while the controller mode is specified by the keyword argument below.
-
-Press F1 for help after running the visualiser to print the available options in a terminal.
-
-# Keywords
-
-- `controller`: a callback function with the signature `controller(m, d)`, called at each timestep, that applies a control input to the system (or does any other operation you like).
-
-# Examples
-
-```julia
-using MuJoCo
-install_visualiser() # Run this to install dependencies only once
-init_visualiser()    # Load required dependencies into session
-
-# Load a model
-model, data = MuJoCo.sample_model_and_data()
-
-# Define a controller
-function ctrl!(m,d)
-    d.ctrl .= 2*rand(m.nu) .- 1
-end
-
-# Run the visualiser
-visualise!(model, data, controller=ctrl!)
-```
-"""
 function MuJoCo.Visualiser.visualise!(
     m::Model, d::Data; 
     controller = nothing, 

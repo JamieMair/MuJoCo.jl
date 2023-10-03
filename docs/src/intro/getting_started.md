@@ -22,7 +22,7 @@ You should now be able to load in and play around with any MuJoCo model of your 
 using MuJoCo
 
 model, data = MuJoCo.sample_model_and_data()
-println(typeof(model)," ", typeof(data))
+println(typeof(model),", ", typeof(data))
 ```
 The `Model` and `Data` types encode all the information required to simulate a model in MuJoCo, and are wrappers of the `mjModel` and `mjData` structs in the C API, respectively. We can directly access any data from these structs:
 ```@example demo
@@ -56,7 +56,7 @@ println(data.qpos)
 
 ## Visulaising a Model
 
-Of course, the best way to understand what our random controller is doing is to visualise the humanoid model. To use the visualiser, simply initialise it and call [`visualise!`](@ref) with the `controller` keyword set to our `random_controller!` function.
+Of course, the best way to understand what a MuJoCo model is doing is to visualise it. To use the visualiser, simply initialise it and call [`visualise!`](@ref). We can test our controller by passing in our function via the `controller` keyword.
 ```julia
 init_visualiser()
 visualise!(model, data, controller=random_controller!)
@@ -64,7 +64,7 @@ visualise!(model, data, controller=random_controller!)
 ![](humanoid_random_demo.gif)
 
 Press F1 for help after running the visualiser to print the available options in a terminal. Some of the most interesting are:
-- Press `CTRL+RightArrow` (or `CMD` for Mac) to turn on the controller
+- Press `CTRL+RightArrow` (or `CMD` for Mac) to cycle between the passive dynamics and the controlled motion
 - Press `SPACE` to pause/un-pause
 - Double-click on an object select it
 - `CTRL+RightClick` and drag to apply a force

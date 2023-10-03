@@ -335,7 +335,7 @@ tendon velocities                                (ntendon x 1)
 ## actuator_velocity
 actuator velocities                              (nu x 1)
 ## cvel
-com-based velocity [3D rot; 3D tran]             (nbody x 6)
+com-based velocity (3D rot; 3D tran)             (nbody x 6)
 ## cdof_dot
 time-derivative of cdof                          (nv x 6)
 ## qfrc_bias
