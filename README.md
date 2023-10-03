@@ -7,7 +7,7 @@
 
 `MuJoCo.jl` aims to provide a native Julia interface to the popular [`mujoco`](https://github.com/google-deepmind/mujoco) library. When installed, `MuJoCo.jl` will automatically download the appropriate build of the C `mujoco` library and provide a wrapper to interface with this library. We have provided some native Julia wrappers for convenient use of the package, while also allowing direct use of the C library through a thin wrapper.
 
-As `MuJoCo.jl` is currently under development. While the core functionality is likely usable at this time, the API is likely to change rapidly. There will likely be some bugs and issues that are currently being worked on. All of our development is done in public, and you can check out the current status by going through the [Issues](https://github.com/JamieMair/MuJoCo.jl/issues) page.
+`MuJoCo.jl` is currently under development. While the core functionality is likely usable at this time, the API is likely to change rapidly. There will likely be some bugs and issues that are currently being worked on. All of our development is done in public, and you can check out the current status by going through the [Issues](https://github.com/JamieMair/MuJoCo.jl/issues) page.
 
 ## Getting Started
 
