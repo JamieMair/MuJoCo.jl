@@ -61,7 +61,8 @@ Of course, the best way to understand what our random controller is doing is to 
 init_visualiser()
 visualise!(model, data, controller=random_controller!)
 ```
-![](humanoid_random_demo.mp4)
+![](humanoid_random_demo.gif)
+
 Press F1 for help after running the visualiser to print the available options in a terminal. Some of the most interesting are:
 - Press `CTRL+RightArrow` (or `CMD` for Mac) to turn on the controller
 - Press `SPACE` to pause/un-pause
