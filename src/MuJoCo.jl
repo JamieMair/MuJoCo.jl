@@ -17,6 +17,9 @@ begin
     end
 end
 
+include("carray.jl")
+export mj_array, mj_zeros
+
 module Wrappers
     using ..LibMuJoCo
     import ..Utils
