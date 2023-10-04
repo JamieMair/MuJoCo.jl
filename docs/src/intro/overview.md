@@ -13,7 +13,7 @@ model, data = MJ.sample_model_and_data();
 MJ.step!(model, data);
 torso = MJ.body(data, "torso")
 ```
-For example, `torso.com` will give you a 3-dimensional vector representing the centre of mass of the torso. 
+For example, `torso.com` will give you a 3-dimensional vector of the torso's centre of mass coordinates. 
 ```@example torso
 torso.com
 ```
@@ -33,7 +33,7 @@ jac_torso = transpose(jac_torso)
 ```
 
 !!! warning "Beware the row-major order"
-    Passing a `3 x nv` array directly to `mj_jacSubtreeCom` will not raise an error. The order of elements in the Jacobian will simply be incorrect. For example:
+    Passing a `3 x nv` array directly to `mj_jacSubtreeCom` will not raise an error, but the order of elements in the Jacobian will be incorrect. For example:
     ```@example torso
     jac_torso_wrong = zeros(3, model.nv)
     MJ.mj_jacSubtreeCom(model, data, jac_torso_wrong, torso.id)
