@@ -10,6 +10,8 @@ State-Space (name/joint/parameter):
 Actuators (name/actuator/parameter):
 
 - cart      motor       force x (N)
+
+Model from dm_control: https://github.com/google-deepmind/dm_control/blob/main/dm_control/mujoco/testing/assets/cartpole.xml
 -->
 <mujoco model='test_cartpole'>
   <compiler inertiafromgeom='true' coordinate='local'/>
