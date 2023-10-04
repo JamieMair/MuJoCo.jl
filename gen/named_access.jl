@@ -311,6 +311,14 @@ function doc_fn(docs, fn_expr)
     return Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), docs, fn_expr)
 end
 
+function construct_plural(name)
+    if endswith(name, "y")
+        return name[begin:end-1] * "ies"
+    else
+        return name * "s"
+    end
+end
+
 function named_access_wrappers_expr(index_xmacro_header_file_path)
     xmacros, xviewgroups, xviewgroupaltnames = parse_x_defs(index_xmacro_header_file_path)
     
@@ -459,6 +467,28 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
             fn_sig = :(Base.getproperty(x::$(cstruct_name), f::Symbol))
             push!(exprs, Expr(:function, fn_sig, Expr(:block, fn_block_exprs...)))
         end
+
+        # Create plural getters
+        for (identifier, xgroup) in xviewgroups[struct_name]
+            lower_struct_name = Symbol(lowercase(string(struct_name)))
+            plural = Symbol(construct_plural(string(identifier)))
+
+            test_class = test_classes[struct_name]
+            entry_expr = if hasproperty(test_class, xgroup.size_identifier)
+                :(nentries = getproperty($lower_struct_name, $(QuoteNode(xgroup.size_identifier))))
+            elseif has_model && hasproperty(test_model, xgroup.size_identifier)
+                :(nentries = getproperty(getfield($(lower_struct_name), :model), $(QuoteNode(xgroup.size_identifier))))
+            else
+                @error "Cannot find $(xgroup.size_identifier) in the $(class_def) struct or in a struct which can be accessed."
+                nothing
+            end
+
+            return_expr = :(return Tuple($(identifier)($lower_struct_name, i) for i in 0:(nentries-1)))
+            fn_sig = :($(plural)($(lower_struct_name)::$(struct_name)))
+            fn_expr = Expr(:function, fn_sig, Expr(:block, entry_expr, return_expr))
+            push!(exprs, fn_expr)
+            push!(exports, plural)
+        end
     end
 
 
@@ -469,10 +499,25 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
         end
 
         for (alt_identifier, xaltname) in xaltname_dict
+            alt_plural = Symbol(construct_plural(string(alt_identifier)))
+            base_plural = Symbol(construct_plural(string(xaltname.base_identifier)))
+
             push!(exports, alt_identifier)
+            push!(exports, alt_plural)
             push!(exprs, :(const $(alt_identifier) = $(xaltname.base_identifier)))
+            push!(exprs, :(const $(alt_plural) = $(base_plural)))
         end
     end
+
+    name_fn = :(function name(x)
+        if hasproperty(x, :name) || hasfield(x, :name)
+            return x.name
+        else
+            @error "Tried to get the name of a $(typeof(x)), but no name field or property exists."
+        end
+    end)
+    push!(exprs, name_fn)
+    push!(exports, :name)
 
     export_expr = Expr(:export, unique(exports)...)
 

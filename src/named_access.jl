@@ -5,7 +5,7 @@ using UnsafeArrays
 import ..Data
 import ..Model
 include("named_model.jl")
-export light, cam, actuator, body, geom, jnt, sensor, site, tendon, eq, key, numeric, mat, tex, pair, hfield, tuple, skin, exclude, mesh, camera, ten, joint, equality, texture, keyframe, material
+export light, cam, actuator, body, geom, jnt, sensor, site, tendon, lights, cams, actuators, bodies, geoms, jnts, sensors, sites, tendons, eq, key, numeric, mat, tex, pair, hfield, tuple, skin, exclude, mesh, eqs, keies, numerics, mats, texs, pairs, hfields, tuples, skins, excludes, meshs, camera, cameras, ten, tens, joint, joints, equality, equalities, texture, textures, keyframe, keyframes, material, materials, name
 struct DataActuator
     data::Data
     index::Int
@@ -529,6 +529,42 @@ function Base.getproperty(x::DataTendon, f::Symbol)
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TENDON, index)
     error("Could not find the property: " * string(f))
+end
+function lights(data::Data)
+    nentries = getproperty(getfield(data, :model), :nlight)
+    return Tuple((light(data, i) for i = 0:nentries - 1))
+end
+function cams(data::Data)
+    nentries = getproperty(getfield(data, :model), :ncam)
+    return Tuple((cam(data, i) for i = 0:nentries - 1))
+end
+function actuators(data::Data)
+    nentries = getproperty(getfield(data, :model), :nu)
+    return Tuple((actuator(data, i) for i = 0:nentries - 1))
+end
+function bodies(data::Data)
+    nentries = getproperty(getfield(data, :model), :nbody)
+    return Tuple((body(data, i) for i = 0:nentries - 1))
+end
+function geoms(data::Data)
+    nentries = getproperty(getfield(data, :model), :ngeom)
+    return Tuple((geom(data, i) for i = 0:nentries - 1))
+end
+function jnts(data::Data)
+    nentries = getproperty(getfield(data, :model), :njnt)
+    return Tuple((jnt(data, i) for i = 0:nentries - 1))
+end
+function sensors(data::Data)
+    nentries = getproperty(getfield(data, :model), :nsensor)
+    return Tuple((sensor(data, i) for i = 0:nentries - 1))
+end
+function sites(data::Data)
+    nentries = getproperty(getfield(data, :model), :nsite)
+    return Tuple((site(data, i) for i = 0:nentries - 1))
+end
+function tendons(data::Data)
+    nentries = getproperty(getfield(data, :model), :ntendon)
+    return Tuple((tendon(data, i) for i = 0:nentries - 1))
 end
 struct ModelTexture
     model::Model
@@ -1812,13 +1848,109 @@ function Base.getproperty(x::ModelTendon, f::Symbol)
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TENDON, index)
     error("Could not find the property: " * string(f))
 end
+function eqs(model::Model)
+    nentries = getproperty(model, :neq)
+    return Tuple((eq(model, i) for i = 0:nentries - 1))
+end
+function keies(model::Model)
+    nentries = getproperty(model, :nkey)
+    return Tuple((key(model, i) for i = 0:nentries - 1))
+end
+function geoms(model::Model)
+    nentries = getproperty(model, :ngeom)
+    return Tuple((geom(model, i) for i = 0:nentries - 1))
+end
+function numerics(model::Model)
+    nentries = getproperty(model, :nnumeric)
+    return Tuple((numeric(model, i) for i = 0:nentries - 1))
+end
+function sensors(model::Model)
+    nentries = getproperty(model, :nsensor)
+    return Tuple((sensor(model, i) for i = 0:nentries - 1))
+end
+function mats(model::Model)
+    nentries = getproperty(model, :nmat)
+    return Tuple((mat(model, i) for i = 0:nentries - 1))
+end
+function texs(model::Model)
+    nentries = getproperty(model, :ntex)
+    return Tuple((tex(model, i) for i = 0:nentries - 1))
+end
+function actuators(model::Model)
+    nentries = getproperty(model, :nu)
+    return Tuple((actuator(model, i) for i = 0:nentries - 1))
+end
+function sites(model::Model)
+    nentries = getproperty(model, :nsite)
+    return Tuple((site(model, i) for i = 0:nentries - 1))
+end
+function pairs(model::Model)
+    nentries = getproperty(model, :npair)
+    return Tuple((pair(model, i) for i = 0:nentries - 1))
+end
+function hfields(model::Model)
+    nentries = getproperty(model, :nhfield)
+    return Tuple((hfield(model, i) for i = 0:nentries - 1))
+end
+function lights(model::Model)
+    nentries = getproperty(model, :nlight)
+    return Tuple((light(model, i) for i = 0:nentries - 1))
+end
+function cams(model::Model)
+    nentries = getproperty(model, :ncam)
+    return Tuple((cam(model, i) for i = 0:nentries - 1))
+end
+function tuples(model::Model)
+    nentries = getproperty(model, :ntuple)
+    return Tuple((tuple(model, i) for i = 0:nentries - 1))
+end
+function skins(model::Model)
+    nentries = getproperty(model, :nskin)
+    return Tuple((skin(model, i) for i = 0:nentries - 1))
+end
+function excludes(model::Model)
+    nentries = getproperty(model, :nexclude)
+    return Tuple((exclude(model, i) for i = 0:nentries - 1))
+end
+function meshs(model::Model)
+    nentries = getproperty(model, :nmesh)
+    return Tuple((mesh(model, i) for i = 0:nentries - 1))
+end
+function bodies(model::Model)
+    nentries = getproperty(model, :nbody)
+    return Tuple((body(model, i) for i = 0:nentries - 1))
+end
+function jnts(model::Model)
+    nentries = getproperty(model, :njnt)
+    return Tuple((jnt(model, i) for i = 0:nentries - 1))
+end
+function tendons(model::Model)
+    nentries = getproperty(model, :ntendon)
+    return Tuple((tendon(model, i) for i = 0:nentries - 1))
+end
 const camera = cam
+const cameras = cams
 const ten = tendon
+const tens = tendons
 const joint = jnt
+const joints = jnts
 const camera = cam
+const cameras = cams
 const equality = eq
+const equalities = eqs
 const texture = tex
+const textures = texs
 const keyframe = key
+const keyframes = keies
 const material = mat
+const materials = mats
 const joint = jnt
+const joints = jnts
+function name(x)
+    if hasproperty(x, :name) || hasfield(x, :name)
+        return x.name
+    else
+        @error "Tried to get the name of a $(typeof(x)), but no name field or property exists."
+    end
+end
 end
