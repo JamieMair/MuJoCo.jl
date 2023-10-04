@@ -2,7 +2,7 @@ using CairoMakie
 using LinearAlgebra
 using MatrixEquations: ared
 using MuJoCo
-import MuJoCo.NamedAccess as mj
+import MuJoCo as MJ
 
 init_visualiser()
 isplot = false
@@ -89,24 +89,21 @@ nv = model.nv
 R = Matrix{Float64}(I, nu, nu)
 
 # Body IDs
-named_model = mj.NamedModel(model)
-id_torso = mj.body(named_model, :torso).id
-id_lfoot = mj.body(named_model, :foot_left).id
+torso = MJ.body(model, "torso")
+left_foot = MJ.body(model, "foot_left")
 
 # Get Jacobian for torso CoM
 # TODO: Document row/column-major
 reset!(model, data)
 data.qpos .= qpos0
 forward!(model, data)
-jac_com = zeros(nv,3)
-mj_jacSubtreeCom(model, data, jac_com, id_torso)
-jac_com = transpose(jac_com)
+jac_com = mj_zeros(3, nv)
+mj_jacSubtreeCom(model, data, jac_com, torso.id)
 
 # Get (left) foot Jacobian for balancing
 # TODO: Pass in `nothing` instead of C_NULL?
-jac_foot = zeros(nv,3)
-mj_jacBodyCom(model, data, jac_foot, C_NULL, id_lfoot) 
-jac_foot = transpose(jac_foot)
+jac_foot = mj_zeros(3, nv)
+mj_jacBodyCom(model, data, jac_foot, C_NULL, left_foot.id)
 
 # Design Q-matrix to balance CoM over foot
 jac_diff = jac_com .- jac_foot
@@ -114,27 +111,14 @@ Qbalance = jac_diff' * jac_diff
 
 # Now we include a cost on joints deviating from the steady-state.
 # Torso already sorted. Left leg should remain rigid. Other joints can move for balance.
-# Let's start by getting all the joint indices
-
-# Get all joint names.
-joint_names = [mj.joint(named_model, i).name for i in 0:model.njnt-1]
 
 # Get indices into relevant sets of joints.
 root_dofs = 1:6
 body_dofs = 7:nv
 
-# TODO: I think this could still be neater but it's not so bad now.
-abdomen_dofs = []
-left_leg_dofs = []
-for name in joint_names
-    occursin("z", name) && continue # ignore the z direction
-    joint_adr = mj.joint(named_model, Symbol(name)).dofadr[1] + 1 
-    if occursin("abdomen", name)
-        push!(abdomen_dofs, joint_adr)
-    elseif occursin("left", name) && any(occursin.(["hip", "knee", "ankle"], name))
-        push!(left_leg_dofs, joint_adr)
-    end
-end
+# Get all the joints using a list comprehension
+abdomen_dofs = [jnt.id for jnt in MJ.joints(model) if occursin("abdomen", jnt.name)]
+left_leg_dofs = [jnt.id for jnt in MJ.joints(model) if occursin("left", jnt.name) && any(occursin(part, jnt.name) for part in ("hip", "knee", "ankle"))]
 
 balance_dofs = vcat(abdomen_dofs, left_leg_dofs)
 other_dofs = setdiff(body_dofs, balance_dofs)
@@ -159,13 +143,11 @@ reset!(model, data)
 data.ctrl .= ctrl0
 data.qpos .= qpos0
 
-A = zeros(2nv, 2nv)
-B = zeros(nu, 2nv)
+A = mj_zeros(2nv, 2nv)
+B = mj_zeros(2nv, nu)
 ϵ = 1e-6
 centred = true
 mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
-A = transpose(A)
-B = transpose(B)
 
 # Solve LQR with MatrixEquations.jl (faster than loading ControlSystems.jl)
 S = zeros(size(Q,1), size(R,1))
