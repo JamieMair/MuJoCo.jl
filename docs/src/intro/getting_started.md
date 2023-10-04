@@ -26,10 +26,8 @@ model, data = MuJoCo.sample_model_and_data()
 ```
 The `Model` and `Data` types encode all the information required to simulate a model in MuJoCo, and are wrappers of the `mjModel` and `mjData` structs in the C API, respectively. We can directly access any data from these structs:
 ```@example demo
-@show model.opt.timestep # Simulation timestep
-```
-```@example demo
-@show data.qpos          # Position of all joints
+println("Simulation timestep: ", model.opt.timestep)
+println("Positions of joints: ", data.qpos)
 ```
 We can also directly read and write from/to these fields. However, we cannot directly overwrite any arrays. Instead, we can use Julia's broadcasting to set values as we see fit. Let's write a function that inputs random control torques to the humanoid's joints.
 ```@example demo
@@ -48,12 +46,12 @@ end
 ```
 At each time-step, `random_controller!` sets the control signal to some random value, and `step!` calls the MuJoCo physics engine to simulate the response of the system. `step!` directly modifies the `data` struct. For example, looking at `data.qpos` again shows that the joints have all moved.
 ```@example demo
-@show data.qpos
+println("New joint positions: ", data.qpos)
 ```
 After finishing our initial simulations, we can re-set the model back to its starting position by calling `mj_resetData`, one of the underlying C library functions. Any of the functions listed in the [LibMuJoCo Index](@ref) can be used just as they are described in the [MuJoCo documentation](https://mujoco.readthedocs.io/en/stable/APIreference/index.html).
 ```@example demo
 mj_resetData(model, data)
-@show data.qpos
+println("Reset joint positions: ", data.qpos)
 ```
 
 ## Visualising a Model
