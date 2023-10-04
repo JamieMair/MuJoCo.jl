@@ -67,7 +67,7 @@ visualise!(model, data, controller=random_controller!)
 
 Press F1 for help after running the visualiser to print the available options in a terminal. Some of the most interesting are:
 - Press `CTRL+RightArrow` (or `CMD` for Mac) to cycle between the passive dynamics and the controlled motion
-- Press `SPACE` to pause/un-pause
+- Press `SPACE` to pause/unpause
 - Double-click on an object select it
 - `CTRL+RightClick` and drag to apply a force
 - Press `ESC` to exit the simulation
