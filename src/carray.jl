@@ -20,7 +20,7 @@ function mj_array(dims...)
     element_type=LibMuJoCo.mjtNum
     mj_array(element_type, dims...)
 end
-mj_array(element_type, dims::T) where {N, T<:NTuple{N,<:Integer}} = mj_array(element_type, dims...)
+mj_array(element_type::DataType, dims::T) where {N, T<:NTuple{N,<:Integer}} = mj_array(element_type, dims...)
 mj_array(dims::T) where {N, T<:NTuple{N,<:Integer}} = mj_array(element_type, dims...)
 
 
@@ -48,5 +48,5 @@ function mj_zeros(dims...)
     element_type=LibMuJoCo.mjtNum
     mj_zeros(element_type, dims...)
 end
-mj_zeros(element_type, dims::T) where {N, T<:NTuple{N,<:Integer}} = mj_zeros(element_type, dims...)
+mj_zeros(element_type::DataType, dims::T) where {N, T<:NTuple{N,<:Integer}} = mj_zeros(element_type, dims...)
 mj_zeros(dims::T) where {N, T<:NTuple{N,<:Integer}} = mj_zeros(element_type, dims...)
