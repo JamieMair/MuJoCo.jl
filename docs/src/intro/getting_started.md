@@ -22,12 +22,12 @@ You should now be able to load in and play around with any MuJoCo model of your 
 using MuJoCo
 
 model, data = MuJoCo.sample_model_and_data()
-println(typeof(model),", ", typeof(data))
+@show typeof(model), typeof(data)
 ```
 The `Model` and `Data` types encode all the information required to simulate a model in MuJoCo, and are wrappers of the `mjModel` and `mjData` structs in the C API, respectively. We can directly access any data from these structs:
 ```@example demo
-println(model.opt.timestep) # Simulation timestep
-println(data.qpos)          # Position of all joints
+println("Simulation timestep: ", model.opt.timestep)
+println("Positions of joints: ", data.qpos)
 ```
 We can also directly read and write from/to these fields. However, we cannot directly overwrite any arrays. Instead, we can use Julia's broadcasting to set values as we see fit. Let's write a function that inputs random control torques to the humanoid's joints.
 ```@example demo
@@ -46,12 +46,12 @@ end
 ```
 At each time-step, `random_controller!` sets the control signal to some random value, and `step!` calls the MuJoCo physics engine to simulate the response of the system. `step!` directly modifies the `data` struct. For example, looking at `data.qpos` again shows that the joints have all moved.
 ```@example demo
-println(data.qpos)
+println("New joint positions: ", data.qpos)
 ```
 After finishing our initial simulations, we can re-set the model back to its starting position by calling `mj_resetData`, one of the underlying C library functions. Any of the functions listed in the [LibMuJoCo Index](@ref) can be used just as they are described in the [MuJoCo documentation](https://mujoco.readthedocs.io/en/stable/APIreference/index.html).
 ```@example demo
 mj_resetData(model, data)
-println(data.qpos)
+println("Reset joint positions: ", data.qpos)
 ```
 
 ## Visualising a Model
@@ -65,7 +65,7 @@ visualise!(model, data, controller=random_controller!)
 
 Press F1 for help after running the visualiser to print the available options in a terminal. Some of the most interesting are:
 - Press `CTRL+RightArrow` (or `CMD` for Mac) to cycle between the passive dynamics and the controlled motion
-- Press `SPACE` to pause/un-pause
+- Press `SPACE` to pause/unpause
 - Double-click on an object select it
 - `CTRL+RightClick` and drag to apply a force
 - Press `ESC` to exit the simulation

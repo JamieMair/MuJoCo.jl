@@ -44,7 +44,7 @@ Thankfully, this last equation is a well-studied [Riccati equation](https://en.w
 
 ## Linearising the dynamics
 
-We can use the underlying C API for MuJoCo to easily linearise the dynamics for our cart-pole system. The function [`mjd_transitionFD`](https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mjd-transitionfd) numerically computes the $A$ and $B$ matrices with a finite difference through the MuJoCo simulator.
+We can use the underlying C API for MuJoCo to easily linearise the dynamics for our cart-pole system. The function [`mjd_transitionFD`](https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mjd-transitionfd) numerically computes the $A$ and $B$ matrices with a finite difference method through the MuJoCo simulator.
 ```@example cartpole
 # Number of states and controlled inputs
 nx = 2*model.nv
@@ -62,7 +62,7 @@ centred = true
 mjd_transitionFD(model, data, ϵ, centred, A_T, B_T, C_NULL, C_NULL)
 A = transpose(A_T)
 B = transpose(B_T)
-println() #hide
+nothing #hide
 ```
 In the code above, note that we initialise the *transpose* of $A,B$ to fill in with `mjd_transitionFD`, since the C API assumes all arrays are in row-major order. See [Row vs. Column-Major Arrays](@ref) for more details.
 
@@ -74,7 +74,7 @@ using LinearAlgebra
 
 Q = diagm([1, 10, 1, 5]) # Weights for the state vector
 R = diagm([1])           # Weights for the controls
-println() # hide
+nothing # hide
 ```
 To compute $K$, we could directly use the [`lqr`](https://juliacontrol.github.io/ControlSystems.jl/stable/lib/synthesis/#ControlSystemsBase.lqr-Tuple{Union{Continuous,%20Type{Continuous}},%20Any,%20Any,%20Any,%20Any,%20Vararg{Any}}) function provided in `ControlSystemsBase.jl` with `K = lqr(A,B,Q,R)`. For those who don't want to load the rather large control systems package, we can directly use [`ared`](https://andreasvarga.github.io/MatrixEquations.jl/dev/riccati.html#MatrixEquations.ared) from `MatrixEquations.jl`, which is what `lqr` calls under the hood.
 ```@example cartpole
@@ -82,7 +82,7 @@ using MatrixEquations
 
 S = zeros(nx, nu)
 _, _, K, _ = ared(A,B,R,Q,S)
-println(K)
+@show K
 ```
 
 ## Simulate and visualise
@@ -93,6 +93,7 @@ function lqr_balance!(m::Model, d::Data)
     state = vcat(d.qpos, d.qvel)
     d.ctrl .= -K * state
 end
+nothing # hide
 ```
 Now we can visualise the model and see how it goes.
 ```julia

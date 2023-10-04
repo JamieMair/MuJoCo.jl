@@ -20,11 +20,13 @@ makedocs(;
         "Introduction" => Any[
             "Getting Started" => "intro/getting_started.md",
             "Package Overview" => "intro/overview.md",
-            "Contributing to the Package" => "intro/developing.md"
         ],
         "Examples" => Any[
             "Balancing a Cart-Pole" => "examples/cartpole_balance.md",
             "Humanoid LQR" => "examples/humanoid_lqr.md"
+        ],
+        "Contributing" => Any[
+            "Contributing to the Package" => "contributing/developing.md"
         ],
         "API" => "library/api.md",
         "C Bindings" => Any[
