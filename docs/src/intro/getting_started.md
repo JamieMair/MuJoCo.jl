@@ -54,7 +54,7 @@ mj_resetData(model, data)
 println(data.qpos)
 ```
 
-## Visulaising a Model
+## Visualising a Model
 
 Of course, the best way to understand what a MuJoCo model is doing is to visualise it. To use the visualiser, simply initialise it and call [`visualise!`](@ref). We can test our controller by passing in our function via the `controller` keyword.
 ```julia
