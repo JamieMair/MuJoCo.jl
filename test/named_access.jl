@@ -101,3 +101,26 @@ end
         end
     end
 end
+
+
+@testitem "Can access all types of collections for both model and data" begin
+    model, data = MuJoCo.sample_model_and_data()
+    step!(model, data)
+    import MuJoCo as MJ
+    
+    fn_names = (:actuators, :tendons, :sites, :sensors, :bodies, :cameras, :joints, :lights, :geoms) 
+    for fn_name in fn_names
+        fn = getfield(MJ, fn_name)
+        @test typeof(fn(model)) <: Tuple
+        @test typeof(fn(data)) <: Tuple
+
+        for x in fn(model)
+            @test hasproperty(x, :name)
+            @test typeof(x.name) <: Union{Symbol, AbstractString}
+        end
+        for x in fn(data)
+            @test hasproperty(x, :name)
+            @test typeof(x.name) <: Union{Symbol, AbstractString}
+        end
+    end    
+end
