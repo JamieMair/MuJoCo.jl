@@ -46,7 +46,7 @@ More examples of working with matrices in MuJoCo are provided in the [Humanoid L
 
 1. This library is a wrapper for MuJoCo. The [documentation for MuJoCo](https://mujoco.readthedocs.io/en/stable/overview.html) is very comprehensive and should be referred to for any queries regarding usage of the simulator.
 
-2. All functions or structs beginning with `mj_` directly use the underlying C API.
+2. All functions or structs beginning with `mj` directly use the underlying C API.
 
 3. When writing code, keep a REPL open with a sample `data` and `model` object (such as generated in the above examples), and use tab-completition (double tap `tab`) to see what information is available. Check the [MuJoCo docs](https://mujoco.readthedocs.io/en/stable/overview.html) or the [LibMuJoCo Index](@ref) to read the documentation for the parameters.
 
