@@ -13,7 +13,7 @@ array in your Julia code.
 - **element_type**: Defaults to mjtNum (typically Float64).
 - **dims**: The dimensionality of output array. Can either be a tuple of integers or a series of integers.
 """
-function mj_array(element_type, dims...)
+function mj_array(element_type::DataType, dims...)
     return transpose(Array{element_type}(undef, reverse(dims)...))
 end
 function mj_array(dims...)
@@ -39,7 +39,7 @@ array in your Julia code.
 - **element_type**: The element type of the array. Defaults to mjtNum (typically Float64).
 - **dims**: The dimensionality of output array. Can either be a tuple of integers or a series of integers.
 """
-function mj_zeros(element_type, dims...)
+function mj_zeros(element_type::DataType, dims...)
     array = Array{element_type}(undef, reverse(dims)...)
     fill!(array, zero(element_type))
     return transpose(array)
