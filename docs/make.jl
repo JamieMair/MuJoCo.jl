@@ -19,7 +19,8 @@ makedocs(;
         "Home" => "index.md",
         "Introduction" => Any[
             "Getting Started" => "intro/getting_started.md",
-            "Package Overview" => "intro/overview.md"
+            "Package Overview" => "intro/overview.md",
+            "Contributing to the Package" => "intro/developing.md"
         ],
         "Examples" => Any[
             "Balancing a Cart-Pole" => "examples/cartpole_balance.md",

@@ -14,6 +14,7 @@ This wrapper aims to provide a simple, performant interface to the [MuJoCo C lib
 
 - [Getting Started](@ref)
 - [Package Overview](@ref)
+- [Contributing to the Package](@ref)
 
 ## Examples
 
