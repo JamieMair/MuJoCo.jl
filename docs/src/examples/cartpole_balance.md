@@ -44,7 +44,7 @@ Thankfully, this last equation is a well-studied [Riccati equation](https://en.w
 
 ## Linearising the dynamics
 
-We can use the underlying C API for MuJoCo to easily linearise the dynamics for our cart-pole system. The function [`mjd_transitionFD`](https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mjd-transitionfd) numerically computes the $A$ and $B$ matrices with a finite difference through the MuJoCo simulator.
+We can use the underlying C API for MuJoCo to easily linearise the dynamics for our cart-pole system. The function [`mjd_transitionFD`](https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mjd-transitionfd) numerically computes the $A$ and $B$ matrices with a finite difference method through the MuJoCo simulator.
 ```@example cartpole
 # Number of states and controlled inputs
 nx = 2*model.nv
