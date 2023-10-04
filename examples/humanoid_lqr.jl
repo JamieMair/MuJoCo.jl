@@ -116,9 +116,9 @@ Qbalance = jac_diff' * jac_diff
 root_dofs = 1:6
 body_dofs = 7:nv
 
-# Get all the joints using a list comprehension
-abdomen_dofs = [jnt.id for jnt in MJ.joints(model) if occursin("abdomen", jnt.name)]
-left_leg_dofs = [jnt.id for jnt in MJ.joints(model) if occursin("left", jnt.name) && any(occursin(part, jnt.name) for part in ("hip", "knee", "ankle"))]
+# Get all the joints using a list comprehension. We add one to the raw ID to get the Julia 1-based index of the joint.
+abdomen_dofs = [jnt.id+1 for jnt in MJ.joints(model) if occursin("abdomen", jnt.name)]
+left_leg_dofs = [jnt.id+1 for jnt in MJ.joints(model) if occursin("left", jnt.name) && any(occursin(part, jnt.name) for part in ("hip", "knee", "ankle"))]
 
 balance_dofs = vcat(abdomen_dofs, left_leg_dofs)
 other_dofs = setdiff(body_dofs, balance_dofs)
