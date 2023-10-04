@@ -1,9 +1,8 @@
-# Balancing a Cart-Pole
-
-```@example cartpole
 using MuJoCo
 using LinearAlgebra
 using MatrixEquations
+
+init_visualiser()
 
 # Get the model
 model = load_model("cartpole.xml")
@@ -12,8 +11,6 @@ data = init_data(model)
 # Make sure it's in the upright equilibrium
 println(data.qpos)
 println(data.qvel)
-
-# Get linear model
 
 # Number of states and controlled inputs
 nx = 2*model.nv
@@ -39,11 +36,10 @@ S = zeros(nx, nu)
 _, _, K, _ = ared(A,B,R,Q,S)
 
 # The controller function
-function cartpole_lqr(m::Model, d::Data)
+function lqr_balance!(m::Model, d::Data)
     state = vcat(d.qpos, d.qvel)
     d.ctrl .= -K * state
 end
 
 # Simulate it
-# visualise!(model, data; controller=cartpole_lqr)
-```
+visualise!(model, data; controller=lqr_balance!)
