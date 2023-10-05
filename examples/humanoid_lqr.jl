@@ -16,7 +16,6 @@ const keyframe = 2 # Stand on one leg is the second keyframe.
 resetkey!(model, data, keyframe)
 
 
-
 ################## Get control set-point ##################
 
 # We want to torque required to hold the humanoid in this position
@@ -93,7 +92,6 @@ torso = MJ.body(model, "torso")
 left_foot = MJ.body(model, "foot_left")
 
 # Get Jacobian for torso CoM
-# TODO: Document row/column-major
 reset!(model, data)
 data.qpos .= qpos0
 forward!(model, data)
