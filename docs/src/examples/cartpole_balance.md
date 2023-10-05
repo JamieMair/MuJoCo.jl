@@ -97,6 +97,6 @@ Now we can visualise the model and see how it goes.
 init_visualiser()
 visualise!(model, data; controller=lqr_balance!)
 ```
-![](cartpole_balance.gif)
+![](images/cartpole_balance.gif)
 
 When we apply small forces to the pole or the cart, the controller immediately responds to the perturbation and returns the system to its equilibrium position. If the force is big enough, the system will become unstable and the pole will fall down. Feel free to play around with the weights in $Q,R$ to see their effect on the system too!
