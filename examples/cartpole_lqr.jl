@@ -16,18 +16,14 @@ println(data.qvel)
 nx = 2*model.nv
 nu = model.nu
 
-# Blank state-space matrices (transposes)
-A_T = zeros(nx, nx)
-B_T = zeros(nu, nx)
-
-# Compute state-space model
+# Finite-difference parameters
 ϵ = 1e-6
 centred = true
-mjd_transitionFD(model, data, ϵ, centred, A_T, B_T, C_NULL, C_NULL)
 
-# Return transposed-matrices
-A = transpose(A_T)
-B = transpose(B_T)
+# Compute the Jacobians
+A = mj_zeros(nx, nx)
+B = mj_zeros(nx, nu)
+mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
 
 # Design LQR controller
 Q = diagm([1, 10, 1, 5])
