@@ -5,7 +5,7 @@ using MuJoCo
 import MuJoCo as MJ
 
 init_visualiser()
-isplot = false
+isplot = !false
 
 # Note: follow along with the DeepMind notebook: 
 # https://colab.research.google.com/github/deepmind/mujoco/blob/main/python/LQR.ipynb
