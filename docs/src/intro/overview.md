@@ -21,15 +21,15 @@ All other functions that generate a named wrapper around an object are documente
 
 ## Row vs. Column-Major Arrays
 
-MuJoCo's underlying C API expects arrays to be **row-major**. However, all Julia arrays are **column-major** by default. When passing arrays to any wrapped C functions, be careful about this distinction. We have plans to provide a nicer API to handle this use case in the future.
+MuJoCo's underlying C API expects arrays to be **row-major**, while by default, all Julia arrays are **column-major**. However, Julia is high level enough to allow us to mimic the use of a row-major array by changing the type of the object, while keeping the array access patterns the same.
 
-All arrays returned by our API are usually of the type `transpose(::UnsafeArray)`, which is how we represent the row-major arrays. This allows you to safely use these arrays alongside any column-major arrays in your Julia code. Keeping this type will also allow for performance specialisation on BLAS operations. 
+We have included [`mj_array`](@ref) and [`mj_zeros`](@ref) to make life easier when passing arrays to MuJoCo functions that directly mutate their arguments (eg: [`mjd_transitionFD`](@ref) and many others). An array initialised with either [`mj_array`](@ref) or [`mj_zeros`](@ref) will be a `transpose(<:AbstractArray)` and can be treated just the same as any other Julia array, but its memory will be accessed in **row-major** order. This means that the C API will correctly fill your arrays. Using these functions also still allows for performance specialisation based on the type. 
 
-We demonstrate this below. Suppose we want to compute a Jacobian for the humanoid's torso. There are `model.nv` degrees of freedom in the humanoid, and the torso's centre of mass is a 3-element vector. The Jacobian should therefore be a `3 x nv` array. To ensure the order of elements is correct, we compute it with
+Let's look at an example. Suppose we want to compute a Jacobian for the humanoid's torso. There are `model.nv` degrees of freedom in the humanoid, and the torso's centre of mass is a 3-element vector. The Jacobian should therefore be a `3 x nv` array. To ensure the order of elements is correct, we compute it with
 ```@example torso
-jac_torso = zeros(model.nv, 3)
+jac_torso = MJ.mj_zeros(3, model.nv)
 MJ.mj_jacSubtreeCom(model, data, jac_torso, torso.id)
-jac_torso = transpose(jac_torso)
+@show jac_torso
 ```
 
 !!! warning "Beware the row-major order"
@@ -37,10 +37,10 @@ jac_torso = transpose(jac_torso)
     ```@example torso
     jac_torso_wrong = zeros(3, model.nv)
     MJ.mj_jacSubtreeCom(model, data, jac_torso_wrong, torso.id)
-    jac_torso_wrong
+    @show jac_torso_wrong
     ```
 
-More examples of working with matrices in MuJoCo are provided in the [Humanoid LQR](@ref) example.
+More examples of working with matrices in MuJoCo are provided in [Balancing a Cart-Pole](@ref) and [Humanoid LQR](@ref). For more information on row-major vs column major, see the [Wikipedia page](https://en.wikipedia.org/wiki/Row-_and_column-major_order).
 
 ## Tips and Tricks
 

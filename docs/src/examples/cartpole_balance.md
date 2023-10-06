@@ -50,21 +50,18 @@ We can use the underlying C API for MuJoCo to easily linearise the dynamics for 
 nx = 2*model.nv
 nu = model.nu
 
-# Blank state-space matrices (transposes)
-A_T = zeros(nx, nx)
-B_T = zeros(nu, nx)
-
 # Finite-difference parameters
 ϵ = 1e-6
 centred = true
 
-# Compute matrices with correct dimensions
-mjd_transitionFD(model, data, ϵ, centred, A_T, B_T, C_NULL, C_NULL)
-A = transpose(A_T)
-B = transpose(B_T)
+# Compute the Jacobians
+A = mj_zeros(nx, nx)
+B = mj_zeros(nx, nu)
+mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
+@show A, B
 nothing #hide
 ```
-In the code above, note that we initialise the *transpose* of $A,B$ to fill in with `mjd_transitionFD`, since the C API assumes all arrays are in row-major order. See [Row vs. Column-Major Arrays](@ref) for more details.
+Note the use of [`mj_zeros`](@ref) to initialise $A,B$. See [Row vs. Column-Major Arrays](@ref) for more details.
 
 ## Designing a controller
 
@@ -92,14 +89,19 @@ After all that, we now have a stabilising controller for our cart-pole system! L
 function lqr_balance!(m::Model, d::Data)
     state = vcat(d.qpos, d.qvel)
     d.ctrl .= -K * state
+    nothing
 end
 nothing # hide
 ```
+!!! warning "Performance Tip"
+    This function captures non-const global variables and will take a performance hit (see [Performance Tips](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-untyped-global-variables)) for more details. To remedy the performance hit, one can use functors instead, as described at the end of the [Humanoid LQR](@ref) example.
+
+
 Now we can visualise the model and see how it goes.
 ```julia
 init_visualiser()
 visualise!(model, data; controller=lqr_balance!)
 ```
-![](cartpole_balance.gif)
+![](images/cartpole_balance.gif)
 
 When we apply small forces to the pole or the cart, the controller immediately responds to the perturbation and returns the system to its equilibrium position. If the force is big enough, the system will become unstable and the pole will fall down. Feel free to play around with the weights in $Q,R$ to see their effect on the system too!

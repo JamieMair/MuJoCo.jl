@@ -76,7 +76,9 @@ function forward!(model::MODEL_TYPES, data::DATA_TYPES)
     mj_forward(model, data)
 end
 """
-Resets the data values to their original state.
+    reset!(m::Model, d::Data)
+
+Resets the data values to their default states. You may equivalently use [`mj_resetData`](@ref).
 """
 reset!(m::Model, d::Data) = mj_resetData(m, d)
 """
