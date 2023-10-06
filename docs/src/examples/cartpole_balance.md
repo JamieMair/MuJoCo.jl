@@ -105,27 +105,3 @@ visualise!(model, data; controller=lqr_balance!)
 ![](images/cartpole_balance.gif)
 
 When we apply small forces to the pole or the cart, the controller immediately responds to the perturbation and returns the system to its equilibrium position. If the force is big enough, the system will become unstable and the pole will fall down. Feel free to play around with the weights in $Q,R$ to see their effect on the system too!
-
-## Improve performance with functors
-
-A functor in Julia can be created by defining a struct to hold any variables that may be needed by a function, and defining the function itself when the struct is called. The struct will store all the variables that are used within the function that are not accessible from the input arguments. In our cart pole example, this would be the `K` matrix that is required for the controller.
-
-```julia
-struct LQRCartpoleBalance{TK<:AbstractArray}
-    K::TK
-end
-```
-Note that the struct explicitly types the fields, and restricts the type of `K` to be a subtype of `AbstractArray`. Next, we must define the actual function body for the functor, which follows the same format as the previous controller:
-```julia
-function (functor::LQRCartpoleBalance)(model::Model, data::Data)
-    K = functor.K # access stored variables from the functor
-    state = vcat(data.qpos, data.qvel)
-    d.ctrl .= -K * state
-    nothing
-end
-```
-We can now create an instance of the functor with a specific `K`, and pass the functor in place of the function:
-```julia
-visualise!(model, data; controller=LQRCartpoleBalance(K))
-```
-The next example, [Humanoid LQR](@ref), contains a more complete optimisation enhancement using a functor for the controller.
