@@ -110,8 +110,11 @@ As a sanity check, let's verify that these control inputs actually give us the r
 data.ctrl .= ctrl0
 mj_forward(model, data)
 qfrc_test = data.qfrc_actuator
-println("Desired force match actual forces: ", all((qfrc_test .≈ qfrc0)[7:end])) # Q) Why is it only 7:end? Could you add a variable to describe what these indices refer to?
+println("Desired forces: ", qfrc0)
+println("Actual forces:  ", qfrc_test)
+println("Joint forces equal? ", all((qfrc_test .≈ qfrc0)[7:end]))
 ```
+The actuator forces are approximately equal to the desired forces `qfrc0` for all joints in the humanoid. The first six elements correspond to forces on the "root joint" (the free body of the humanoid). There is still a slight mismatch here, but it is minor.
 Let's also have a look at how the model behaves if we start it exactly at our set point.
 ```julia
 reset!(model, data)
@@ -130,7 +133,7 @@ The humanoid still falls over because we are trying to stabilise the system at a
 
 Now that we have our set point to stabilise, we'll need to design the LQR weight matrices $Q,R$ to encourage the system to remain balanced. Let's start by setting `R` equal to the identity matrix `I` and defining some useful variables.
 ```@example humanoid
-nu = model.nu # number of actuators/controls. Q) perhaps change variable name throughout to be clear what the variable means in each context?
+nu = model.nu # number of actuators/controls
 nv = model.nv # number of degrees of freedom
 R = Matrix{Float64}(I, nu, nu)
 nothing #hide
@@ -201,6 +204,7 @@ Qjoint = Matrix{Float64}(I, nv, nv)
 Qjoint[free_dofs, free_dofs] *= 0
 Qjoint[balance_dofs, balance_dofs] *= balance_joint_cost
 Qjoint[other_dofs, other_dofs] *= other_joint_cost
+nothing #hide
 ```
 
 Putting this all together with `Qbalance`, we can construct our final $Q$ matrix defining our LQR cost.
@@ -209,7 +213,7 @@ balance_cost = 1000
 
 Qpos = balance_cost*Qbalance + Qjoint
 Q = [Qpos zeros(nv,nv); zeros(nv, 2nv)]  + (1e-10) * I # Add ϵI for positive definite Q
-Q # hide
+println(Q) # hide
 ```
 Note that the `balance_cost` is quite large in comparison to `balance_joint_cost` because the units for the CoM position (metres) are typically "larger" than the units for joint angles (radians). Eg: if the CoM shifts by $0.1\,$m, the humanoid will most likely fall over, but a $0.1\,$radian change in a leg angle will probably be fine.
 
@@ -242,7 +246,7 @@ _, _, K, _ = ared(A,B,R,Q,S)
 
 ## Testing the controller
 
-We are now ready to test our controller. First, we'll write a function to set the control gains on our humanoid at each simulation time-step.
+We are now ready to test our controller. First, we'll write a function to set the control gains on our humanoid at each simulation time-step. Note the use of [`mj_differentiatePos`](@ref) to compute the position error, which uses a finite difference to calculate the difference between two positions rather than subtracting `qpos0 - data.qpos`. This is necessary because orientations of free bodies in MuJoCo are represented by 4-element quaternions, but we are interested in differences between points in 3D space. This is why `model.nq >= model.nv` for all MuJoCo models.
 ```@example humanoid
 function humanoid_ctrl!(m::Model, d::Data)
     Δq = zeros(m.nv)
@@ -256,9 +260,6 @@ nothing # hide
 ```
 !!! warning "Performance Tip"
     This function captures non-const global variables and will take a performance hit (see [Performance Tips](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-untyped-global-variables)) for more details. To remedy the performance hit, one can use functors instead, as described [below](#improve-performance-with-functors-and-cached-memory).
-
-
-Note the use of [`mj_differentiatePos`](@ref) to compute the position error, which uses a finite difference to calculate the difference between two positions rather than subtracting `qpos0 - data.qpos`. This is necessary because orientations of free bodies in MuJoCo are represented by 4-element quaternions, but we are interested in differences between points in 3D space. This is why `model.nq >= model.nv` for all MuJoCo models.
 
 Let's run the visualiser and test our controller by manually perturbing the humanoid. You can do this by double-clicking on a body to select it, then `CTRL+RightClick` and drag to apply a force.
 ```julia
@@ -289,7 +290,6 @@ Notice that we are not restricting the types of the fields for clarity, however,
 
 Next, we must define the actual function body for the functor, which follows the same format as the previous controller:
 ```@example humanoid
-using LinearAlgebra
 function (functor::LQRHumanoidBalance)(model::Model, data::Data)
     Δq = functor.Δq
     mj_differentiatePos(model, Δq, 1, functor.qpos0, data.qpos)
