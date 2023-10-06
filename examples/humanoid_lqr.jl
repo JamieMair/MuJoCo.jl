@@ -5,7 +5,7 @@ using MuJoCo
 import MuJoCo as MJ
 
 init_visualiser()
-isplot = !false
+isplot = false
 
 # Note: follow along with the DeepMind notebook: 
 # https://colab.research.google.com/github/deepmind/mujoco/blob/main/python/LQR.ipynb
@@ -111,7 +111,7 @@ Qbalance = jac_diff' * jac_diff
 # Torso already sorted. Left leg should remain rigid. Other joints can move for balance.
 
 # Get indices into relevant sets of joints.
-root_dofs = 1:6
+free_dofs = 1:6
 body_dofs = 7:nv
 
 # Get all the joints using a list comprehension. We add one to the raw ID to get the Julia 1-based index of the joint.
@@ -128,7 +128,7 @@ other_joint_cost   = 0.3        # Other joints can do whatever
 
 # Construct joint Q matrix
 Qjoint = Matrix{Float64}(I, nv, nv)
-Qjoint[root_dofs, root_dofs] *= 0
+Qjoint[free_dofs, free_dofs] *= 0
 Qjoint[balance_dofs, balance_dofs] *= balance_joint_cost
 Qjoint[other_dofs, other_dofs] *= other_joint_cost
 

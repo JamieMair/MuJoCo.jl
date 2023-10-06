@@ -2,6 +2,7 @@
 
 Our second example closely follows [DeepMind's LQR tutorial](https://colab.research.google.com/github/deepmind/mujoco/blob/main/python/LQR.ipynb) to balance a humanoid on one leg with a [*Linear Quadratic Regulator* (LQR)](https://en.wikipedia.org/wiki/Linear%E2%80%93quadratic_regulator). Users familiar with MuJoCo's [python bindings](https://mujoco.readthedocs.io/en/latest/python.html) might find it useful to compare this tutorial to the DeepMind version to see the similarities and differences with `MuJoCo.jl`.
 
+
 ## The humanoid model
 
 Let's start by having a look at the humanoid model shipped with MuJoCo. You can find a copy of the `humanoid.xml` file [here](https://github.com/google-deepmind/mujoco/blob/main/model/humanoid/humanoid.xml), or locally in the directory given by running [`example_model_files_directory`](@ref).
@@ -24,6 +25,7 @@ end
 @html_str """<p float="left"> <img src="images/humanoid_kf_squat.gif" width="400" /> <img src="images/humanoid_kf_leg.gif" width="400" /> <img src="images/humanoid_kf_stand.gif" width="400" /> </p>""" # hide
 ```
 None of these initial states are stable. In this example, we'll focus on designing a controller for the second keyframe to get the humanoid to stand and balance on one leg. 
+
 
 ## Computing the control set-point
 
@@ -110,7 +112,7 @@ mj_forward(model, data)
 qfrc_test = data.qfrc_actuator
 println("Desired force match actual forces: ", all((qfrc_test .≈ qfrc0)[7:end]))
 ```
-Let's also have a look at how the model behaves if we start it at exactly our control set-point.
+Let's also have a look at how the model behaves if we start it exactly at our set point.
 ```julia
 reset!(model, data)
 data.qpos .= qpos0
@@ -121,12 +123,143 @@ visualise!(model, data)
 
 The humanoid still falls over because we are trying to stabilise the system at an unstable equilibrium point, and the control set-point `ctrl0` is only an approximation. Even if we had found the exact controls to hold the system in `qpos0`, any slight perturbation would cause the humanoid to fall over. We therefore need a controller.
 
+
 ## Designing the LQR cost
 
 *See [A quick review of LQR](@ref) if you're in need of a refresher on linear quadratic regulators.*
 
+Now that we have our set point to stabilise, we'll need to design the LQR weight matrices $Q,R$ to encourage the system to remain balanced. Let's start by setting `R = I` and defining some useful variables.
+```@example humanoid
+nu = model.nu
+nv = model.nv
+R = Matrix{Float64}(I, nu, nu)
+nothing #hide
+```
+We'll construct the $Q$ matrix in two parts: one component to encourage the humanoid's centre of mass (CoM) to remain above its foot (helps with stability), and another component to keep the joints close to their original configuration `qpos0`.
+
+### CoM balancing cost
+
+Much like the Python bindings, `MuJoCo.jl` includes a number of useful functions to isolate and work with different parts of a MuJoCo model. Let's extract structs for the torso and left foot and have a look at one of the structs.
+```@example humanoid
+import MuJoCo as MJ
+
+torso = MJ.body(model, "torso")
+left_foot = MJ.body(model, "foot_left")
+```
+One way to keep the CoM over the left foot is to design $Q$ from the difference between the CoM and left-foot Jacobians. MuJoCo's C API comes with a number of very useful functions for computing Jacobians.
+```@example humanoid
+# Get Jacobian for torso CoM
+reset!(model, data)
+data.qpos .= qpos0
+forward!(model, data)
+jac_com = mj_zeros(3, nv)
+mj_jacSubtreeCom(model, data, jac_com, torso.id)
+
+# Get (left) foot Jacobian for balancing
+jac_foot = mj_zeros(3, nv)
+mj_jacBodyCom(model, data, jac_foot, C_NULL, left_foot.id)
+
+# Design Q-matrix to balance CoM over foot
+jac_diff = jac_com .- jac_foot
+Qbalance = jac_diff' * jac_diff
+println(Qbalance) #hide
+```
+Note the use of `mj_zeros` to initialise the Jacobians, as outlined in [Row vs. Column-Major Arrays](@ref).
+
+### Joint deviation cost
+
+We will also want to add a cost on the joints deviating from the deisred position `qpos0`. However, different parts of the humanoid will need to be treated differently. In particular:
+- The "free joints" (i.e: CoM position) should have no cost on them here, since we've already defined `Qbalance` to take care of them.
+- The joints in the left leg and lower abdomen should be held close to their original values to keep the balancing leg in place
+- Other joints, such as flailing limbs, should be allowed to move around more freely to maintain balance if the humanoid is perturbed.
+
+Let's start by finding the array indices relevant to each set of joints. We'll leverage some of the nice features of the [Named Access](@ref) tools.
+```@example humanoid
+# Get indices into relevant sets of joints.
+free_dofs = 1:6
+body_dofs = 7:nv
+
+# Get all the joints using a list comprehension. We add one to the raw ID to get the Julia 1-based index of the joint.
+abdomen_dofs = [jnt.id+1 for jnt in MJ.joints(model) if occursin("abdomen", jnt.name)]
+left_leg_dofs = [jnt.id+1 for jnt in MJ.joints(model) if occursin("left", jnt.name) && any(occursin(part, jnt.name) for part in ("hip", "knee", "ankle"))]
+
+balance_dofs = vcat(abdomen_dofs, left_leg_dofs)
+other_dofs = setdiff(body_dofs, balance_dofs)
+
+println("Balance dofs: ", balance_dofs)
+println("Other dofs:   ", other_dofs)
+```
+We can now use these indices to construct the second part of the $Q$ matrix.
+```@example humanoid
+# Cost coefficients
+balance_joint_cost = 3          # Joints can move a bit and still balance
+other_joint_cost   = 0.3        # Other joints can do whatever
+
+# Construct joint Q matrix
+Qjoint = Matrix{Float64}(I, nv, nv)
+Qjoint[free_dofs, free_dofs] *= 0
+Qjoint[balance_dofs, balance_dofs] *= balance_joint_cost
+Qjoint[other_dofs, other_dofs] *= other_joint_cost
+```
+
+Putting this all together with `Qbalance`, we can construct our final $Q$ matrix defining our LQR cost.
+```@example humanoid
+balance_cost = 1000
+
+Qpos = balance_cost*Qbalance + Qjoint
+Q = [Qpos zeros(nv,nv); zeros(nv, 2nv)]  + (1e-10)I # Add ϵI for positive definite Q
+println(Q) #hide
+```
+Note that the `balance_cost` is quite large in comparison to `balance_joint_cost` because the units for the CoM position (metres) are typically "larger" than the units for joint angles (radians). Eg: if the CoM shifts by $0.1\,$m, the humanoid will most likely fall over, but a $0.1\,$radian change in a leg angle will probably be fine.
 
 ## Computing optimal control gains
 
+With bost cost matrices defined, computing the optimal control gains is simply a matter of linearising the system dynamics about our chosen set-point `(qpos0, ctrl0)` and solving the LQR Riccati equations. We can follow the same process as our [Balancing a Cart-Pole](@ref) example. Let's start with the linear system Jacobians.
+```@example humanoid
+# Initialise the model at our set point
+reset!(model, data)
+data.ctrl .= ctrl0
+data.qpos .= qpos0
+
+# Finite-difference parameters
+ϵ = 1e-6
+centred = true
+
+# Compute the Jacobians
+A = mj_zeros(2nv, 2nv)
+B = mj_zeros(2nv, nu)
+mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
+@show A, B
+```
+Just like the cart-pole example, we'll directly use [`ared`](https://andreasvarga.github.io/MatrixEquations.jl/dev/riccati.html#MatrixEquations.ared) from `MatrixEquations.jl` to compute the LQR gain matrix $K$ as a lightweight alternative to loading `ControlSystemsCore.jl`.
+```@example humanoid
+using MatrixEquations
+
+S = zeros(2nv, nu)
+_, _, K, _ = ared(A,B,R,Q,S)
+```
 
 ## Testing the controller
+
+We are now ready to test our controller. First, we'll write a function to set the control gains on our humanoid at each simulation time-step.
+```@example humanoid
+function humanoid_ctrl!(m::Model, d::Data)
+
+    Δq = zeros(nv)
+    mj_differentiatePos(m, Δq, 1, qpos0, d.qpos)
+
+    Δx = vcat(Δq, data.qvel)
+    data.ctrl .= ctrl0 .- K*Δx
+end
+```
+Note the use of [`mj_differentiatePos`](@ref) to compute the position error, which uses a finite difference to calculate the difference between two positions rather than subtracting `qpos0 - data.qpos`. This is necessary because orientations of free bodies in MuJoCo are represented by 4-element quaternions, but we are interested in differences between points in 3D space. This is why `model.nq >= model.nv` for all MuJoCo models.
+
+Let's run the visualiser and test our controller by manually perturbing the humanoid. You can do this by double-clicking on a body to select it, then `CTRL+RightClick` and drag to apply a force.
+```julia
+reset!(model, data)
+data.qpos .= qpos0
+visualise!(model, data, controller=humanoid_ctrl!)
+```
+![](images/humanoid_lqr.gif)
+
+For small perturbations, our controller works just great! If you apply a large perturbation, you'll find that it's easy to de-stabilise the system and get the humanoid to fall over. This is to be expected from a simple LQR, but feel free to play around with the weight matrices to see if you can improve the robustness. In general, designing robust controllers for nonlinear systems is a difficult challenge and an open area of research in the control community.
