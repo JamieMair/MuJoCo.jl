@@ -89,9 +89,14 @@ After all that, we now have a stabilising controller for our cart-pole system! L
 function lqr_balance!(m::Model, d::Data)
     state = vcat(d.qpos, d.qvel)
     d.ctrl .= -K * state
+    nothing
 end
 nothing # hide
 ```
+!!! warning "Performance Tip"
+    This function captures non-const global variables and will take a performance hit (see [Performance Tips](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-untyped-global-variables)) for more details. To remedy the performance hit, one can use functors instead, as described at the end of the [Humanoid LQR](@ref) example.
+
+
 Now we can visualise the model and see how it goes.
 ```julia
 init_visualiser()
