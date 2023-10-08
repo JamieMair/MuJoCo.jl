@@ -23,7 +23,7 @@ for i in 1:3
 end
 ```
 ```@example
-@html_str """<p float="left"> <img src="images/humanoid_kf_squat.gif" width="400" /> <img src="images/humanoid_kf_leg.gif" width="400" /> <img src="images/humanoid_kf_stand.gif" width="400" /> </p>""" # hide
+@html_str """<p float="left"> <img src=$(joinpath(Main.buildpath, "images/humanoid_kf_squat.gif")) width="400" /> <img src=$(joinpath(Main.buildpath, "images/humanoid_kf_leg.gif")) width="400" /> <img src=$(joinpath(Main.buildpath, "images/humanoid_kf_stand.gif")) width="400" /> </p>""" # hide
 ```
 None of these initial states are stable. In this example, we'll focus on designing a controller for the second keyframe to get the humanoid to stand and balance on one leg. 
 

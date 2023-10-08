@@ -1,6 +1,8 @@
 using MuJoCo
 using Documenter
 
+const buildpath = haskey(ENV, "CI") ? ".." : ""
+
 DocMeta.setdocmeta!(MuJoCo, :DocTestSetup, :(using MuJoCo); recursive=true)
 
 makedocs(;
