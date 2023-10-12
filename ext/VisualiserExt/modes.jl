@@ -159,81 +159,80 @@ function modeinfo(io1, io2, ui::UIState, p::PhysicsState, m::Trajectory)
     return nothing
 end
 
-# function handlers(ui::UIState, p::PhysicsState, m::Trajectory)
-#     return let ui=ui, p=p, m=m
-#         [
-#             onscroll(MOD_CONTROL, what = "Change burst factor") do s, ev
-#                 m.bf_idx = clamp(m.bf_idx + ev.dy, 1, length(m.bf_range))
-#             end,
+function handlers(ui::UIState, p::PhysicsState, m::Trajectory)
+    return let ui=ui, p=p, m=m
+        [
+            onscroll(MOD_CONTROL, what = "Change burst factor") do s, ev
+                m.bf_idx = clamp(m.bf_idx + ev.dy, 1, length(m.bf_range))
+            end,
 
-#             onscroll(MOD_SHIFT, what = "Change burst decay rate") do s, ev
-#                 m.bg_idx = clamp(m.bg_idx + ev.dy, 1, length(m.bg_range))
-#             end,
+            onscroll(MOD_SHIFT, what = "Change burst decay rate") do s, ev
+                m.bg_idx = clamp(m.bg_idx + ev.dy, 1, length(m.bg_range))
+            end,
 
-#             onkey(GLFW.KEY_B, MOD_CONTROL, what = "Toggle burst mode") do s, ev
-#                 ispress_or_repeat(ev.action) && (m.burstmode = !m.burstmode)
-#             end,
+            onkey(GLFW.KEY_B, MOD_CONTROL, what = "Toggle burst mode") do s, ev
+                ispress_or_repeat(ev.action) && (m.burstmode = !m.burstmode)
+            end,
 
-#             onkey(GLFW.KEY_D, MOD_CONTROL, what = "Toggle burst mode doppler effect") do s, ev
-#                 ispress_or_repeat(ev.action) && (m.doppler = !m.doppler)
-#             end,
+            onkey(GLFW.KEY_D, MOD_CONTROL, what = "Toggle burst mode doppler effect") do s, ev
+                ispress_or_repeat(ev.action) && (m.doppler = !m.doppler)
+            end,
 
-#             onkey(GLFW.KEY_UP, what = "Cycle forwards through trajectories") do s, ev
-#                 if ispress_or_repeat(ev.action)
-#                     m.k = inc(m.k, 1, length(m.trajectories))
-#                     ax = axes(gettraj(m), 2)
-#                     checkbounds(Bool, ax, m.t) || (m.t = last(ax))
-#                     setburstmodeparams!(m, p)
-#                     setstate!(m, p)
-#                 end
-#             end,
+            onkey(GLFW.KEY_UP, what = "Cycle forwards through trajectories") do s, ev
+                if ispress_or_repeat(ev.action)
+                    m.k = inc(m.k, 1, length(m.trajectories))
+                    ax = axes(gettraj(m), 2)
+                    checkbounds(Bool, ax, m.t) || (m.t = last(ax))
+                    setburstmodeparams!(m, p)
+                    setstate!(m, p)
+                end
+            end,
 
-#             onkey(GLFW.KEY_DOWN, what = "Cycle backwards through trajectories") do s, ev
-#                 if ispress_or_repeat(ev.action)
-#                     m.k = dec(m.k, 1, length(m.trajectories))
-#                     ax = axes(gettraj(m), 2)
-#                     checkbounds(Bool, ax, m.t) || (m.t = last(ax))
-#                     setburstmodeparams!(m, p)
-#                     setstate!(m, p)
-#                 end
-#             end,
-#         ]
-#     end
-# end
+            onkey(GLFW.KEY_DOWN, what = "Cycle backwards through trajectories") do s, ev
+                if ispress_or_repeat(ev.action)
+                    m.k = dec(m.k, 1, length(m.trajectories))
+                    ax = axes(gettraj(m), 2)
+                    checkbounds(Bool, ax, m.t) || (m.t = last(ax))
+                    setburstmodeparams!(m, p)
+                    setstate!(m, p)
+                end
+            end,
+        ]
+    end
+end
 
-# function setburstmodeparams!(m::Trajectory, p::PhysicsState)
-#     steps = 40 # n scroll increments
+function setburstmodeparams!(m::Trajectory, p::PhysicsState)
+    steps = 40 # n scroll increments
 
-#     # Params calibrated on cartpole and scaled accordingly
-#     # Rendering up to bf0_max states for a len0 length trajectory
-#     # with a timestep of dt0 and gamma0 looks reasonalbe.
-#     len0 = 100
-#     bf0_max = 50
-#     gamma0 = 0.85
-#     dt0 = 0.01
+    # Params calibrated on cartpole and scaled accordingly
+    # Rendering up to bf0_max states for a len0 length trajectory
+    # with a timestep of dt0 and gamma0 looks reasonalbe.
+    len0 = 100
+    bf0_max = 50
+    gamma0 = 0.85
+    dt0 = 0.01
 
-#     dt = timestep(p.model)
-#     len = size(gettraj(m), 2)
+    dt = timestep(p.model)
+    len = size(gettraj(m), 2)
 
-#     bf_max = round(Int, bf0_max * (len / len0) * (dt / dt0))
-#     gamma = gamma0^(dt / dt0)
+    bf_max = round(Int, bf0_max * (len / len0) * (dt / dt0))
+    gamma = gamma0^(dt / dt0)
 
-#     m.bf_range = LinRange{Float64}(1, bf_max, steps) # render between 1 and bf_max states
-#     m.bg_range = LinRange{Float64}(gamma, 1, steps)
+    m.bf_range = LinRange{Float64}(1, bf_max, steps) # render between 1 and bf_max states
+    m.bg_range = LinRange{Float64}(gamma, 1, steps)
 
-#     m.bf_idx = round(Int, steps / 2)
-#     m.bg_idx = steps
+    m.bf_idx = round(Int, steps / 2)
+    m.bg_idx = steps
 
-#     return m
-# end
+    return m
+end
 
+# TODO: Need to define setstate! and getstate! for generic MuJoCo models.
+# Probably best to use x = (qpos, qvel, act)
 # @inline function setstate!(m::Trajectory, p::PhysicsState)
 #     LyceumMuJoCo.setstate!(p.model, view(gettraj(m), :, m.t))
 #     return m
 # end
-
-# getT(m::Trajectory) = size(m.trajectories[m.k], 2)
-# gettraj(m::Trajectory) = m.trajectories[m.k]
 
 
 # ####
