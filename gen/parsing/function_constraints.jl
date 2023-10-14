@@ -287,5 +287,6 @@ function write_function_constraints(staging_dir)
     io = IOBuffer(join(readlines(file_location), "\n"))
     extract_blocks(io, joinpath(staging_dir, "function_constraints.jl"))
     @info "Finished writing function wrappers to check array sizes."
+    # TODO: Make sure &(*point)[0] is handled correctly 
     nothing
 end
