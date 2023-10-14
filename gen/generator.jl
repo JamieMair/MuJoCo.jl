@@ -300,6 +300,7 @@ generate_named_access()
 @info "Generating function constraints"
 include("parsing/function_constraints.jl")
 write_function_constraints(staging_dir)
+format_file(joinpath(staging_dir, "function_constraints.jl"))
 
 @info "Copying into src directory..."
 begin

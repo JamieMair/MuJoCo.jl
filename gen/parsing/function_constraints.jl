@@ -272,16 +272,12 @@ function extract_blocks(io, fileloc)
         if contains(line, "Def<traits")
             fn_def = extract_normal_def(extract_text_block(io, line))
             !isnothing(fn_def) && println(fw, fn_def)
-            print("#")
         elseif contains(line, "DEF_WITH_OMITTED_PY_ARGS")
             fn_def = extract_other_def(extract_text_block(io, line))
             !isnothing(fn_def) && println(fw, fn_def)
-            print("#")
         end
     end
     close(fw)
-    println("")
-    println("Finished!")
     nothing
 end
 
@@ -290,4 +286,6 @@ function write_function_constraints(staging_dir)
     file_location = joinpath(@__DIR__, "..", "mujoco", "python", "mujoco", "functions.cc")
     io = IOBuffer(join(readlines(file_location), "\n"))
     extract_blocks(io, joinpath(staging_dir, "function_constraints.jl"))
+    @info "Finished writing function wrappers to check array sizes."
+    nothing
 end
