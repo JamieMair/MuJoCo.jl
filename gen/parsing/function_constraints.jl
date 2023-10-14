@@ -286,9 +286,8 @@ function extract_blocks(io, fileloc)
 end
 
 
-function main()
+function write_function_constraints(staging_dir)
     file_location = joinpath(@__DIR__, "..", "mujoco", "python", "mujoco", "functions.cc")
     io = IOBuffer(join(readlines(file_location), "\n"))
-    # TODO: Remove mj_saveLastXML and mj_printSchema
-    extract_blocks(io, "tmp.jl")
+    extract_blocks(io, joinpath(staging_dir, "function_constraints.jl"))
 end

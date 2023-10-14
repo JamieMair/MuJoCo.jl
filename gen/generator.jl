@@ -297,6 +297,10 @@ import .Wrappers
 include("named_access.jl")
 generate_named_access()
 
+@info "Generating function constraints"
+include("parsing/function_constraints.jl")
+write_function_constraints(staging_dir)
+
 @info "Copying into src directory..."
 begin
     for file in readdir(libmujoco_dir)
