@@ -328,7 +328,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
     )
     module_name = :LibMuJoCo
 
-    sample_model_path = joinpath(@__DIR__, "..", "models", "humanoid.xml")
+    sample_model_path = abspath(joinpath(MuJoCo_jll.artifact_dir, "share", "mujoco", "model", "humanoid.xml"))
     test_model = Wrappers.Model(LibMuJoCo.mj_loadXML(sample_model_path, Ptr{Cvoid}(), "", 0))
     test_data = Wrappers.Data(Wrappers.LibMuJoCo.mj_makeData(test_model), test_model)
 
