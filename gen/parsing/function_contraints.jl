@@ -3,6 +3,7 @@ function extract_text_block(io, starting_line)
     write(buffer, starting_line)
     bracket_num = 0;
     line = starting_line
+    should_stop = false
     while true
         for char in line
             if char == '('
@@ -11,9 +12,14 @@ function extract_text_block(io, starting_line)
                 bracket_num -= 1
             elseif char == ';'
                 if bracket_num == 0
+                    should_stop = true
                     break # stop once at the end
                 end
             end
+        end
+
+        if should_stop
+            break
         end
         line = readline(io)
         write(buffer, '\n')
@@ -36,7 +42,7 @@ function extract_anon_fn(block)
             bracket_num -= 1
         end
 
-        if bracket_num == 1
+        if bracket_num > 0
             if char == ',' && !start_collection
                 start_collection = true
             elseif start_collection && has_started_fn
@@ -51,7 +57,7 @@ function extract_anon_fn(block)
                 end
             elseif char == '['
                 has_started_fn = true
-                if length(fn_buffer) > 0
+                if fn_buffer.size > 0
                     error("Unexpected second function definition when parsing function constraints. Block:\n$block")
                 end
                 write(fn_buffer, char)
@@ -66,9 +72,13 @@ end
 
 function convert_fn_body(fn_body)
 
-    # Added below match to convert to 1 based indexing
+    # Pre-clean
     index_offset_match = r"\[([^[]+?)\s?-\s?1\s?\]"
-    fn_body = replace(fn_body, index_offset_match=>s"[\1]")
+    double_string = Regex("\"([^\"]*)\"\\n\\s*\"(([^\"]*))\"")
+    fn_body = replace(fn_body, 
+        index_offset_match=>s"[\1]",
+        double_string => s"\"\1 \2\""
+    )
 
     # Added below to replace all dimension and size extractions
     rows_regex = r"\b([a-zA-Z_][a-zA-Z0-9_]*)(?:.|->)rows\(\)"
@@ -80,7 +90,7 @@ function convert_fn_body(fn_body)
 
 
     # Change to Julia syntax
-    exception_regex = r"throw py::type_error\(([^)]*)\);"
+    exception_regex = r"throw py::type_error\(\n?(.*)\);"
     data_regex = r"\b([a-zA-Z_][a-zA-Z0-9_]*)(?:.|->)data\(\)"
     cstr_regex = r"\b([a-zA-Z_][a-zA-Z0-9_]*)(?:.|->)c_str\(\)"
     intercept_error_regex = r"InterceptMjErrors\(::\b([a-zA-Z_][a-zA-Z0-9_]*)\)"
@@ -107,9 +117,13 @@ function convert_fn_body(fn_body)
     # Modify pointer references
     pointer_access_regex = r"\b([a-zA-Z_][a-zA-Z0-9_]*)->\b([a-zA-Z_][a-zA-Z0-9_]*)"
     pointer_defref = r"&\(\*\b([a-zA-Z_][a-zA-Z0-9_]*)\)\[(\d+)\]"
+    variable_assignment = r"\b([a-zA-Z_][a-zA-Z0-9_]*)\s+\b([a-zA-Z_][a-zA-Z0-9_]*)\s*="
     fn_body = replace(fn_body,
         pointer_access_regex => s"\1.\2",
-        pointer_defref => s"\1[\2+1]" # Convert to 1-based
+        pointer_defref => s"\1[\2+1]", # Convert to 1-based
+        variable_assignment => s"\2 =",
+        "}" => "end",
+        "{" => ""
     )
 
     return fn_body
@@ -124,7 +138,7 @@ function convert_argument(argument)
         is_const = isnothing(m.captures[1])
         array_type = m.captures[2]
         identifier = m.captures[3]
-        array_size = n.captures[4]
+        array_size = m.captures[4]
     else 
         # TODO: Make sure we can parse the other argument types
         splitter_index = findlast(' ', argument)
@@ -148,7 +162,7 @@ function extract_fn_info(fn_block)
     fn_body_buffer = IOBuffer()
 
     function consume_arg()
-        if length(arg_buffer) > 0
+        if arg_buffer.size > 0
             push!(arguments, String(take!(arg_buffer)))
         end
         nothing
@@ -163,6 +177,7 @@ function extract_fn_info(fn_block)
             if bracket_num == 0 && !has_finished_args
                 has_finished_args = true
                 consume_arg()
+                continue
             end
         end
 
@@ -185,6 +200,9 @@ function extract_fn_info(fn_block)
                 end
             elseif char == '}'
                 curly_bracket_count -= 1
+                if curly_bracket_count == 0
+                    continue # go to next character                
+                end
             end
 
             write(fn_body_buffer, char)
@@ -197,6 +215,30 @@ function extract_fn_info(fn_block)
     return args, fn_body
 end
 
+function make_fn(fn_name, block)
+    if fn_name in ("mj_saveLastXML", "mj_printSchema", "mj_saveModel", "mj_setLengthRange", "mju_printMatSparse", "mjv_updateScene", "mju_standardNormal")
+        return nothing
+    end
+
+
+    anon_fn = extract_anon_fn(block)
+    if any(x->!isspace(x), anon_fn)
+
+        args, fn_body = extract_fn_info(anon_fn)
+
+        fn_buffer = IOBuffer()
+        write(fn_buffer, "function LibMuJoCo.$fn_name(")
+        write(fn_buffer, join(args, ", "))
+        write(fn_buffer, ")\n")
+        write(fn_buffer, fn_body)
+        write(fn_buffer, "\nend")
+
+        return String(take!(fn_buffer))
+    end
+
+    return nothing
+end
+
 function extract_normal_def(block)
     trait_def = r"Def<traits::([^>]+)>"
     m = match(trait_def, block)
@@ -205,18 +247,7 @@ function extract_normal_def(block)
     end
     fn_name = m.captures[begin]
 
-    anon_fn = extract_anon_fn(block)
-
-    args, fn_body = extract_fn_info(anon_fn)
-
-    fn_buffer = IOBuffer()
-    write(fn_buffer, "function LibMuJoCo.$fn_name(")
-    write(fn_buffer, join(args, ", "))
-    write(fn_buffer, ")\n")
-    write(fn_buffer, fn_body)
-    write(fn_buffer, "\nend")
-
-    return String(take!(fn_buffer))
+    fn = make_fn(fn_name, block)
 end
 function extract_other_def(block)
     trait_def = r"DEF_WITH_OMITTED_PY_ARGS\((traits)?::\b([a-zA-Z_][a-zA-Z0-9_]*)"
@@ -226,38 +257,29 @@ function extract_other_def(block)
     end
     fn_name = m.captures[2]
 
-    anon_fn = extract_anon_fn(block)
-
-    args, fn_body = extract_fn_info(anon_fn)
-
-    fn_buffer = IOBuffer()
-    write(fn_buffer, "function LibMuJoCo.$fn_name(")
-    write(fn_buffer, join(args, ", "))
-    write(fn_buffer, ")\n")
-    write(fn_buffer, fn_body)
-    write(fn_buffer, "\nend")
-
-    return String(take!(fn_buffer))
+    fn = make_fn(fn_name, block)
 end
 
 
 
 function extract_blocks(io, fileloc)
-    open(fileloc, "w") do fw
-        while !eof(io)
-            line = readline(io)
-            if startswith(strip(line), "//") # skip comments
-                continue
-            end
-            if contains(line, "Def<traits")
-                println(fw, extract_normal_def(extract_text_block(io, line)))
-                print("#")
-            elseif contains(line, "DEF_WITH_OMITTED_PY_ARGS")
-                println(fw, extract_other_def(extract_text_block(io, line)))
-                print("#")
-            end
+    fw = open(fileloc, "w")
+    while !eof(io)
+        line = readline(io)
+        if startswith(strip(line), "//") # skip comments
+            continue
+        end
+        if contains(line, "Def<traits")
+            fn_def = extract_normal_def(extract_text_block(io, line))
+            !isnothing(fn_def) && println(fw, fn_def)
+            print("#")
+        elseif contains(line, "DEF_WITH_OMITTED_PY_ARGS")
+            fn_def = extract_other_def(extract_text_block(io, line))
+            !isnothing(fn_def) && println(fw, fn_def)
+            print("#")
         end
     end
+    close(fw)
     println("")
     println("Finished!")
     nothing
@@ -266,7 +288,7 @@ end
 
 function main()
     file_location = joinpath(@__DIR__, "..", "mujoco", "python", "mujoco", "functions.cc")
-    open(file_location, "r") do io
-        extract_blocks(io, "tmp.jl")
-    end
+    io = IOBuffer(join(readlines(file_location), "\n"))
+    # TODO: Remove mj_saveLastXML and mj_printSchema
+    extract_blocks(io, "tmp.jl")
 end
