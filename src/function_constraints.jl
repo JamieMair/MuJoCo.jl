@@ -83,7 +83,7 @@ export mju_printMat,
 Print matrix to screen.
 
 # Arguments
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 """
 function mju_printMat(mat::Union{Nothing,AbstractArray{Float64,2}})
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -101,8 +101,8 @@ Solve linear system M * x = y using factorization:  x = inv(L'*D*L)*y
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- x::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- y::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- x::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- y::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 """
 function mj_solveM(
     m,
@@ -137,8 +137,8 @@ Half of linear solve:  x = sqrt(inv(D))*inv(L')*y
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- x::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- y::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- x::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- y::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 """
 function mj_solveM2(
     m,
@@ -174,7 +174,7 @@ RNE: compute M(qpos)*qacc + C(qpos,qvel); flg_acc=0 removes inertial term.
 - m::Model
 - d::Data -> Constant.
 - flg_acc::Int32
-- result::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- result::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - result should be a vector, not a matrix.
@@ -207,7 +207,7 @@ Compute efc*state, efc*force, qfrc_constraint, and (optionally) cone Hessians. I
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- jar::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- jar::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 - cost::Vector{Float64} -> A vector of size 1. Constant.
 - flg_coneHessian::Int32
 
@@ -257,7 +257,7 @@ Get state.
 # Arguments
 - m::Model
 - d::Data
-- state::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- state::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 - spec::Int32
 
 # Constraints
@@ -291,7 +291,7 @@ Set state.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- state::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- state::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 - spec::Int32
 
 # Constraints
@@ -325,8 +325,8 @@ Multiply dense or sparse constraint Jacobian by vector.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -369,8 +369,8 @@ Multiply dense or sparse constraint Jacobian transpose by vector.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -413,8 +413,8 @@ Compute 3/6-by-nv end-effector Jacobian of global point attached to given body.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 - point::Vector{Float64} -> A vector of size 3.
 - body::Int32
 
@@ -470,8 +470,8 @@ Compute body frame end-effector Jacobian.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 - body::Int32
 
 # Constraints
@@ -516,8 +516,8 @@ Compute body center-of-mass end-effector Jacobian.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 - body::Int32
 
 # Constraints
@@ -562,7 +562,7 @@ Compute subtree center-of-mass end-effector Jacobian.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 - body::Int32
 
 # Constraints
@@ -588,8 +588,8 @@ Compute geom end-effector Jacobian.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 - geom::Int32
 
 # Constraints
@@ -634,8 +634,8 @@ Compute site end-effector Jacobian.
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 - site::Int32
 
 # Constraints
@@ -680,8 +680,8 @@ Compute translation end-effector Jacobian of point, and rotation Jacobian of axi
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 - point::Vector{Float64} -> A vector of size 3.
 - axis::Vector{Float64} -> A vector of size 3.
 - body::Int32
@@ -747,8 +747,8 @@ Convert sparse inertia matrix M into full (i.e. dense) matrix.
 
 # Arguments
 - m::Model
-- dst::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- M::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- dst::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- M::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - M should be a vector, not a matrix.
@@ -785,8 +785,8 @@ Multiply vector by inertia matrix.
 # Arguments
 - m::Model
 - d::Data
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -829,8 +829,8 @@ Multiply vector by (inertia matrix)^(1/2).
 # Arguments
 - m::Model
 - d::Data
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -873,10 +873,10 @@ Add inertia matrix to destination matrix. Destination can be sparse uncompressed
 # Arguments
 - m::Model
 - d::Data -> Constant.
-- dst::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- rownnz::Vector{Int32} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- rowadr::Vector{Int32} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- colind::Vector{Int32} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- dst::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- rownnz::Vector{Int32} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- rowadr::Vector{Int32} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- colind::Vector{Int32} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - dst should be a vector, not a matrix.
@@ -945,7 +945,7 @@ Apply Cartesian force and torque (outside xfrc_applied mechanism).
 - torque::Vector{Float64} -> A vector of size 3.
 - point::Vector{Float64} -> A vector of size 3.
 - body::Int32
-- qfrc_target::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- qfrc_target::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - force should be a vector of size 3
@@ -1012,10 +1012,10 @@ Compute velocity by finite-differencing two positions.
 
 # Arguments
 - m::Model
-- qvel::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- qvel::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 - dt::Float64
-- qpos1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- qpos2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- qpos1::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- qpos2::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - qvel should be a vector, not a matrix.
@@ -1068,8 +1068,8 @@ Integrate position with given velocity.
 
 # Arguments
 - m::Model
-- qpos::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- qvel::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- qpos::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- qvel::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 - dt::Float64
 
 # Constraints
@@ -1112,7 +1112,7 @@ Normalize all quaternions in qpos-type vector.
 
 # Arguments
 - m::Model
-- qpos::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- qpos::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - qpos should be a vector, not a matrix.
@@ -1214,7 +1214,7 @@ end
 Set res = 0.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -1236,7 +1236,7 @@ end
 Set res = val.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 - val::Float64
 
 # Constraints
@@ -1262,8 +1262,8 @@ end
 Set res = vec.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- data::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- data::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -1298,7 +1298,7 @@ end
 Return sum(vec).
 
 # Arguments
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - vec should be a vector, not a matrix.
@@ -1320,7 +1320,7 @@ end
 Return L1 norm: sum(abs(vec)).
 
 # Arguments
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - vec should be a vector, not a matrix.
@@ -1342,8 +1342,8 @@ end
 Set res = vec*scl.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 - scl::Float64
 
 # Constraints
@@ -1380,9 +1380,9 @@ end
 Set res = vec1 + vec2.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -1428,9 +1428,9 @@ end
 Set res = vec1 - vec2.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -1476,8 +1476,8 @@ end
 Set res = res + vec.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -1512,8 +1512,8 @@ end
 Set res = res - vec.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -1548,8 +1548,8 @@ end
 Set res = res + vec*scl.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 - scl::Float64
 
 # Constraints
@@ -1586,9 +1586,9 @@ end
 Set res = vec1 + vec2*scl.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 - scl::Float64
 
 # Constraints
@@ -1636,7 +1636,7 @@ end
 Normalize vector, return length before normalization.
 
 # Arguments
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - vec should be a vector, not a matrix.
@@ -1658,7 +1658,7 @@ end
 Return vector length (without normalizing vector).
 
 # Arguments
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - vec should be a vector, not a matrix.
@@ -1680,8 +1680,8 @@ end
 Return dot-product of vec1 and vec2.
 
 # Arguments
-- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - vec1 should be a vector, not a matrix.
@@ -1716,9 +1716,9 @@ end
 Multiply matrix and vector: res = mat * vec.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -1759,9 +1759,9 @@ end
 Multiply transposed matrix and vector: res = mat' * vec.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -1802,9 +1802,9 @@ end
 Multiply square matrix with vectors on both sides: returns vec1' * mat * vec2.
 
 # Arguments
-- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - vec1 should be a vector, not a matrix.
@@ -1848,8 +1848,8 @@ end
 Transpose matrix: res = mat'.
 
 # Arguments
-- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- res::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 
 # Constraints
 - #columns in res should equal #rows in mat
@@ -1882,8 +1882,8 @@ end
 Symmetrize square matrix res = (mat + mat')/2.
 
 # Arguments
-- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- res::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 
 # Constraints
 - mat should be square
@@ -1916,7 +1916,7 @@ end
 Set mat to the identity matrix.
 
 # Arguments
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - mat should be square
@@ -1939,9 +1939,9 @@ end
 Multiply matrices: res = mat1 * mat2.
 
 # Arguments
-- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- mat1::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- mat2::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- res::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- mat1::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- mat2::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 
 # Constraints
 - #rows in res should equal #rows in mat1
@@ -1990,9 +1990,9 @@ end
 Multiply matrices, second argument transposed: res = mat1 * mat2'.
 
 # Arguments
-- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- mat1::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- mat2::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- res::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- mat1::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- mat2::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 
 # Constraints
 - #rows in res should equal #rows in mat1
@@ -2041,9 +2041,9 @@ end
 Multiply matrices, first argument transposed: res = mat1' * mat2.
 
 # Arguments
-- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- mat1::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- mat2::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- res::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- mat1::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- mat2::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 
 # Constraints
 - #rows in res should equal #columns in mat1
@@ -2092,9 +2092,9 @@ end
 Set res = mat' * diag * mat if diag is not NULL, and res = mat' * mat otherwise.
 
 # Arguments
-- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- diag::Vector{Float64} -> A vector of variable size. Check constaints for sizes. Constant.
+- res::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- diag::Vector{Float64} -> A vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - diag should be a vector, not a matrix.
@@ -2141,7 +2141,7 @@ end
 Cholesky decomposition: mat = L*L'; return rank, decomposition performed in-place into mat.
 
 # Arguments
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 - mindiag::Float64
 
 # Constraints
@@ -2168,9 +2168,9 @@ end
 Solve (mat*mat') * res = vec, where mat is a Cholesky factor.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -2215,8 +2215,8 @@ end
 Cholesky rank-one update: L*L' +/- x*x'; return rank.
 
 # Arguments
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- x::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- x::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 - flg_plus::Int32
 
 # Constraints
@@ -2251,7 +2251,7 @@ end
 Band-dense Cholesky decomposition.  Returns minimum value in the factorized diagonal, or 0 if rank-deficient.  mat has (ntotal-ndense) x nband + ndense x ntotal elements.  The first (ntotal-ndense) x nband store the band part, left of diagonal, inclusive.  The second ndense x ntotal store the band part as entire dense rows.  Add diagadd+diagmul*mat_ii to diagonal before factorization.
 
 # Arguments
-- mat::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- mat::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 - ntotal::Int32
 - nband::Int32
 - ndense::Int32
@@ -2289,9 +2289,9 @@ end
 Solve (mat*mat')*res = vec where mat is a band-dense Cholesky factor.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- mat::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- mat::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 - ntotal::Int32
 - nband::Int32
 - ndense::Int32
@@ -2349,8 +2349,8 @@ end
 Convert banded matrix to dense matrix, fill upper triangle if flg_sym>0.
 
 # Arguments
-- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- mat::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- mat::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 - ntotal::Int32
 - nband::Int32
 - ndense::Int32
@@ -2398,8 +2398,8 @@ end
 Convert dense matrix to banded matrix.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 - ntotal::Int32
 - nband::Int32
 - ndense::Int32
@@ -2445,9 +2445,9 @@ end
 Multiply band-diagonal matrix with nvec vectors, include upper triangle if flg_sym>0.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- vec::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- vec::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
 - ntotal::Int32
 - nband::Int32
 - ndense::Int32
@@ -2509,13 +2509,13 @@ end
 minimize 0.5*x'*H*x + x'*g  s.t. lower <= x <= upper, return rank or -1 if failed   inputs:     n           - problem dimension     H           - SPD matrix                n*n     g           - bias vector               n     lower       - lower bounds              n     upper       - upper bounds              n     res         - solution warmstart        n   return value:     nfree <= n  - rank of unconstrained subspace, -1 if failure   outputs (required):     res         - solution                  n     R           - subspace Cholesky factor  nfree*nfree    allocated: n*(n+7)   outputs (optional):     index       - set of free dimensions    nfree          allocated: n   notes:     the initial value of res is used to warmstart the solver     R must have allocatd size n*(n+7), but only nfree*nfree values are used in output     index (if given) must have allocated size n, but only nfree values are used in output     only the lower triangles of H and R and are read from and written to, respectively     the convenience function mju_boxQPmalloc allocates the required data structures
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- R::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- index::Vector{Int32} -> A vector of variable size. Check constaints for sizes. Constant.
-- H::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
-- g::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- lower::Vector{Float64} -> A vector of variable size. Check constaints for sizes.
-- upper::Vector{Float64} -> A vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- R::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- index::Vector{Int32} -> A vector of variable size. Check constraints for sizes. Constant.
+- H::Matrix{Float64} -> A matrix variable size. Check constraints for sizes.
+- g::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- lower::Vector{Float64} -> A vector of variable size. Check constraints for sizes.
+- upper::Vector{Float64} -> A vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -2601,9 +2601,9 @@ end
 Convert contact force to pyramid representation.
 
 # Arguments
-- pyramid::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- force::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- mu::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- pyramid::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- force::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- mu::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - pyramid should be a vector, not a matrix.
@@ -2647,9 +2647,9 @@ end
 Convert pyramid representation to contact force.
 
 # Arguments
-- force::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- pyramid::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
-- mu::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- force::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- pyramid::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
+- mu::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - force should be a vector, not a matrix.
@@ -2693,7 +2693,7 @@ end
 Return 1 if all elements are 0.
 
 # Arguments
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - vec should be a vector, not a matrix.
@@ -2715,8 +2715,8 @@ end
 Convert from float to mjtNum.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float32} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float32} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -2751,8 +2751,8 @@ end
 Convert from mjtNum to float.
 
 # Arguments
-- res::Vector{Float32} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float32} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -2787,8 +2787,8 @@ end
 Convert from double to mjtNum.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -2823,8 +2823,8 @@ end
 Convert from mjtNum to double.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
-- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -2859,7 +2859,7 @@ end
 Insertion sort, resulting list is in increasing order.
 
 # Arguments
-- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- res::Vector{Float64} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -2883,7 +2883,7 @@ end
 Integer insertion sort, resulting list is in increasing order.
 
 # Arguments
-- res::Vector{Int32} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- res::Vector{Int32} -> An optional vector of variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - res should be a vector, not a matrix.
@@ -2911,10 +2911,10 @@ Finite differenced transition matrices (control theory notation)   d(x_next) = A
 - d::Data -> Constant.
 - eps::Float64
 - flg_centered::UInt8
-- A::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- B::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- C::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- D::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- A::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- B::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- C::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- D::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - A should be of shape (2*nv+na, 2*nv+na)
@@ -2980,13 +2980,13 @@ Finite differenced Jacobians of (force, sensors) = mj*inverse(state, acceleratio
 - d::Data -> Constant.
 - eps::Float64
 - flg_actuation::UInt8
-- DfDq::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- DfDv::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- DfDa::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- DsDq::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- DsDv::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- DsDa::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
-- DmDq::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- DfDq::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- DfDv::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- DfDa::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- DsDq::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- DsDv::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- DsDa::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
+- DmDq::Matrix{Float64} -> A matrix variable size. Check constraints for sizes. Constant.
 
 # Constraints
 - DfDq should be of shape (nv, nv)
