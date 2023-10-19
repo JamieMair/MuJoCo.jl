@@ -1,9 +1,28 @@
-function LibMuJoCo.mju_printMat(mat)
+import LinearAlgebra
+function column_major_warning_string(variable_name)
+    return "$variable_name is stored in column-major order (Julia default), but mujoco expects arrays in row-major order. Use helper functions to generate row-major arrays and see documentation for more details."
+end
+
+function LibMuJoCo.mju_printMat(mat::Union{Nothing,AbstractArray{Float64,2}})
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     return mju_printMat(mat, size(mat, 1), size(mat, 2))
 
 end
-function LibMuJoCo.mj_solveM(m, d, x, y)
+function LibMuJoCo.mj_solveM(
+    m,
+    d,
+    x::Union{Nothing,AbstractArray{Float64,2}},
+    y::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if !isnothing(x) && !(typeof(x) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("x")
+    end
+    if !isnothing(y) && !(typeof(y) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("y")
+    end
 
     if (size(x, 1) != size(y, 1))
         throw(ArgumentError("the first dimension of x and y should be of the same size"))
@@ -17,7 +36,18 @@ function LibMuJoCo.mj_solveM(m, d, x, y)
     return mj_solveM(m, d, x, y, size(y, 1))
 
 end
-function LibMuJoCo.mj_solveM2(m, d, x, y)
+function LibMuJoCo.mj_solveM2(
+    m,
+    d,
+    x::Union{Nothing,AbstractArray{Float64,2}},
+    y::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if !isnothing(x) && !(typeof(x) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("x")
+    end
+    if !isnothing(y) && !(typeof(y) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("y")
+    end
 
     if (size(x, 1) != size(y, 1))
         throw(ArgumentError("the first dimension of x and y should be of the same size"))
@@ -31,7 +61,7 @@ function LibMuJoCo.mj_solveM2(m, d, x, y)
     return mj_solveM2(m, d, x, y, size(y, 1))
 
 end
-function LibMuJoCo.mj_rne(m, d, flg_acc, result)
+function LibMuJoCo.mj_rne(m, d, flg_acc::Int32, result)
 
     if (length(result) != m.nv)
         throw(ArgumentError("result should have length nv"))
@@ -39,7 +69,19 @@ function LibMuJoCo.mj_rne(m, d, flg_acc, result)
     return mj_rne(m, d, flg_acc, result)
 
 end
-function LibMuJoCo.mj_constraintUpdate(m, d, jar, cost, flg_coneHessian)
+function LibMuJoCo.mj_constraintUpdate(
+    m,
+    d,
+    jar,
+    cost::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    flg_coneHessian::Int32,
+)
+    if length(cost) != 1
+        error("cost should be a vector of size 1")
+    end
+    if typeof(cost) <: AbstractArray{Float64,2} && count(==(1), size(cost)) < 1
+        error("cost should be a vector of size 1.")
+    end
 
     if (length(jar) != d.nefc)
         throw(ArgumentError("size of jar should equal nefc"))
@@ -47,7 +89,7 @@ function LibMuJoCo.mj_constraintUpdate(m, d, jar, cost, flg_coneHessian)
     return mj_constraintUpdate(m, d, jar, !isnothing(cost) ? cost : C_NULL, flg_coneHessian)
 
 end
-function LibMuJoCo.mj_getState(m, d, state, spec)
+function LibMuJoCo.mj_getState(m, d, state, spec::Int32)
 
     if (length(state) != mj_stateSize(m, spec))
         throw(ArgumentError("state size should equal mj_stateSize(m, spec)"))
@@ -55,7 +97,7 @@ function LibMuJoCo.mj_getState(m, d, state, spec)
     return mj_getState(m, d, state, spec)
 
 end
-function LibMuJoCo.mj_setState(m, d, state, spec)
+function LibMuJoCo.mj_setState(m, d, state, spec::Int32)
 
     if (length(state) != mj_stateSize(m, spec))
         throw(ArgumentError("state size should equal mj_stateSize(m, spec)"))
@@ -85,7 +127,20 @@ function LibMuJoCo.mj_mulJacTVec(m, d, res, vec)
     return mj_mulJacTVec(m, d, res, vec)
 
 end
-function LibMuJoCo.mj_jac(m, d, jacp, jacr, point, body)
+function LibMuJoCo.mj_jac(
+    m,
+    d,
+    jacp::AbstractArray{Float64,2},
+    jacr::AbstractArray{Float64,2},
+    point,
+    body::Int32,
+)
+    if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacp")
+    end
+    if !(typeof(jacr) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacr")
+    end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
         throw(ArgumentError("jacp should be of shape (3, nv)"))
@@ -103,7 +158,19 @@ function LibMuJoCo.mj_jac(m, d, jacp, jacr, point, body)
     )
 
 end
-function LibMuJoCo.mj_jacBody(m, d, jacp, jacr, body)
+function LibMuJoCo.mj_jacBody(
+    m,
+    d,
+    jacp::AbstractArray{Float64,2},
+    jacr::AbstractArray{Float64,2},
+    body::Int32,
+)
+    if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacp")
+    end
+    if !(typeof(jacr) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacr")
+    end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
         throw(ArgumentError("jacp should be of shape (3, nv)"))
@@ -120,7 +187,19 @@ function LibMuJoCo.mj_jacBody(m, d, jacp, jacr, body)
     )
 
 end
-function LibMuJoCo.mj_jacBodyCom(m, d, jacp, jacr, body)
+function LibMuJoCo.mj_jacBodyCom(
+    m,
+    d,
+    jacp::AbstractArray{Float64,2},
+    jacr::AbstractArray{Float64,2},
+    body::Int32,
+)
+    if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacp")
+    end
+    if !(typeof(jacr) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacr")
+    end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
         throw(ArgumentError("jacp should be of shape (3, nv)"))
@@ -137,7 +216,10 @@ function LibMuJoCo.mj_jacBodyCom(m, d, jacp, jacr, body)
     )
 
 end
-function LibMuJoCo.mj_jacSubtreeCom(m, d, jacp, body)
+function LibMuJoCo.mj_jacSubtreeCom(m, d, jacp::AbstractArray{Float64,2}, body::Int32)
+    if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacp")
+    end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
         throw(ArgumentError("jacp should be of shape (3, nv)"))
@@ -145,7 +227,19 @@ function LibMuJoCo.mj_jacSubtreeCom(m, d, jacp, body)
     return mj_jacSubtreeCom(m, d, !isnothing(jacp) ? jacp : C_NULL, body)
 
 end
-function LibMuJoCo.mj_jacGeom(m, d, jacp, jacr, geom)
+function LibMuJoCo.mj_jacGeom(
+    m,
+    d,
+    jacp::AbstractArray{Float64,2},
+    jacr::AbstractArray{Float64,2},
+    geom::Int32,
+)
+    if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacp")
+    end
+    if !(typeof(jacr) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacr")
+    end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
         throw(ArgumentError("jacp should be of shape (3, nv)"))
@@ -162,7 +256,19 @@ function LibMuJoCo.mj_jacGeom(m, d, jacp, jacr, geom)
     )
 
 end
-function LibMuJoCo.mj_jacSite(m, d, jacp, jacr, site)
+function LibMuJoCo.mj_jacSite(
+    m,
+    d,
+    jacp::AbstractArray{Float64,2},
+    jacr::AbstractArray{Float64,2},
+    site::Int32,
+)
+    if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacp")
+    end
+    if !(typeof(jacr) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacr")
+    end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
         throw(ArgumentError("jacp should be of shape (3, nv)"))
@@ -179,7 +285,21 @@ function LibMuJoCo.mj_jacSite(m, d, jacp, jacr, site)
     )
 
 end
-function LibMuJoCo.mj_jacPointAxis(m, d, jacp, jacr, point, axis, body)
+function LibMuJoCo.mj_jacPointAxis(
+    m,
+    d,
+    jacp::AbstractArray{Float64,2},
+    jacr::AbstractArray{Float64,2},
+    point,
+    axis,
+    body::Int32,
+)
+    if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacp")
+    end
+    if !(typeof(jacr) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("jacr")
+    end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
         throw(ArgumentError("jacp should be of shape (3, nv)"))
@@ -198,7 +318,10 @@ function LibMuJoCo.mj_jacPointAxis(m, d, jacp, jacr, point, axis, body)
     )
 
 end
-function LibMuJoCo.mj_fullM(m, dst, M)
+function LibMuJoCo.mj_fullM(m, dst::Union{Nothing,AbstractArray{Float64,2}}, M)
+    if !isnothing(dst) && !(typeof(dst) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("dst")
+    end
 
     if (length(M) != m.nM)
         throw(ArgumentError("M should be of size nM"))
@@ -231,7 +354,29 @@ function LibMuJoCo.mj_mulM2(m, d, res, vec)
     return mj_mulM2(m, d, res, vec)
 
 end
-function LibMuJoCo.mj_addM(m, d, dst, rownnz, rowadr, colind)
+function LibMuJoCo.mj_addM(
+    m,
+    d,
+    dst,
+    rownnz::Union{
+        Nothing,
+        AbstractVector{Int32},
+        AbstractArray{Int32,2},
+        NTuple{Eigen::Dynamic,Int32},
+    },
+    rowadr::Union{
+        Nothing,
+        AbstractVector{Int32},
+        AbstractArray{Int32,2},
+        NTuple{Eigen::Dynamic,Int32},
+    },
+    colind::Union{
+        Nothing,
+        AbstractVector{Int32},
+        AbstractArray{Int32,2},
+        NTuple{Eigen::Dynamic,Int32},
+    },
+)
 
     if (length(dst) != m.nM)
         throw(ArgumentError("dst should be of size nM"))
@@ -248,7 +393,7 @@ function LibMuJoCo.mj_addM(m, d, dst, rownnz, rowadr, colind)
     return mj_addM(m, d, dst, rownnz, rowadr, colind)
 
 end
-function LibMuJoCo.mj_applyFT(m, d, force, torque, point, body, qfrc_target)
+function LibMuJoCo.mj_applyFT(m, d, force, torque, point, body::Int32, qfrc_target)
 
     if (length(qfrc_target) != m.nv)
         throw(ArgumentError("qfrc_target should be of size nv"))
@@ -256,7 +401,7 @@ function LibMuJoCo.mj_applyFT(m, d, force, torque, point, body, qfrc_target)
     return mj_applyFT(m, d, force[0+1], torque[0+1], point[0+1], body, qfrc_target)
 
 end
-function LibMuJoCo.mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
+function LibMuJoCo.mj_differentiatePos(m, qvel, dt::Float64, qpos1, qpos2)
 
     if (length(qvel) != m.nv)
         throw(ArgumentError("qvel should be of size nv"))
@@ -270,7 +415,7 @@ function LibMuJoCo.mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
     return mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
 
 end
-function LibMuJoCo.mj_integratePos(m, qpos, qvel, dt)
+function LibMuJoCo.mj_integratePos(m, qpos, qvel, dt::Float64)
 
     if (length(qpos) != m.nq)
         throw(ArgumentError("qpos should be of size nq"))
@@ -289,12 +434,27 @@ function LibMuJoCo.mj_normalizeQuat(m, qpos)
     return mj_normalizeQuat(m, qpos)
 
 end
-function LibMuJoCo.mj_loadAllPluginLibraries(directory)
+function LibMuJoCo.mj_loadAllPluginLibraries(directory::String)
 
     mj_loadAllPluginLibraries(directory, C_NULL)
 
 end
-function LibMuJoCo.mj_ray(m, d, pnt, vec, geomgroup, flg_static, bodyexclude, geomid)
+function LibMuJoCo.mj_ray(
+    m,
+    d,
+    pnt,
+    vec,
+    geomgroup::Union{AbstractVector{UInt8},AbstractArray{UInt8,2}},
+    flg_static::UInt8,
+    bodyexclude::Int32,
+    geomid,
+)
+    if length(geomgroup) != 6
+        error("geomgroup should be a vector of size 6")
+    end
+    if typeof(geomgroup) <: AbstractArray{UInt8,2} && count(==(1), size(geomgroup)) < 1
+        error("geomgroup should be a vector of size 6.")
+    end
 
     return mj_ray(
         m,
@@ -313,7 +473,7 @@ function LibMuJoCo.mju_zero(res)
     return mju_zero(res, length(res))
 
 end
-function LibMuJoCo.mju_fill(res, val)
+function LibMuJoCo.mju_fill(res, val::Float64)
 
     return mju_fill(res, val, length(res))
 
@@ -336,7 +496,7 @@ function LibMuJoCo.mju_L1(vec)
     return mju_L1(vec, length(vec))
 
 end
-function LibMuJoCo.mju_scl(res, vec, scl)
+function LibMuJoCo.mju_scl(res, vec, scl::Float64)
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -382,7 +542,7 @@ function LibMuJoCo.mju_subFrom(res, vec)
     return mju_subFrom(res, vec, length(res))
 
 end
-function LibMuJoCo.mju_addToScl(res, vec, scl)
+function LibMuJoCo.mju_addToScl(res, vec, scl::Float64)
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -390,7 +550,7 @@ function LibMuJoCo.mju_addToScl(res, vec, scl)
     return mju_addToScl(res, vec, scl, length(res))
 
 end
-function LibMuJoCo.mju_addScl(res, vec1, vec2, scl)
+function LibMuJoCo.mju_addScl(res, vec1, vec2, scl::Float64)
 
     if (length(res) != length(vec1))
         throw(ArgumentError("res and vec1 should have the same size"))
@@ -419,7 +579,10 @@ function LibMuJoCo.mju_dot(vec1, vec2)
     return mju_dot(vec1, vec2, length(vec1))
 
 end
-function LibMuJoCo.mju_mulMatVec(res, mat, vec)
+function LibMuJoCo.mju_mulMatVec(res, mat::Union{Nothing,AbstractArray{Float64,2}}, vec)
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (length(res) != size(mat, 1))
         throw(ArgumentError("size of res should equal the number of rows in mat"))
@@ -430,7 +593,10 @@ function LibMuJoCo.mju_mulMatVec(res, mat, vec)
     return mju_mulMatVec(res, mat, vec, size(mat, 1), size(mat, 2))
 
 end
-function LibMuJoCo.mju_mulMatTVec(res, mat, vec)
+function LibMuJoCo.mju_mulMatTVec(res, mat::Union{Nothing,AbstractArray{Float64,2}}, vec)
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (length(res) != size(mat, 2))
         throw(ArgumentError("size of res should equal the number of columns in mat"))
@@ -441,7 +607,14 @@ function LibMuJoCo.mju_mulMatTVec(res, mat, vec)
     return mju_mulMatTVec(res, mat, vec, size(mat, 1), size(mat, 2))
 
 end
-function LibMuJoCo.mju_mulVecMatVec(vec1, mat, vec2)
+function LibMuJoCo.mju_mulVecMatVec(
+    vec1,
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    vec2,
+)
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (length(vec1) != length(vec2))
         throw(ArgumentError("size of vec1 should equal the size of vec2"))
@@ -455,7 +628,16 @@ function LibMuJoCo.mju_mulVecMatVec(vec1, mat, vec2)
     return mju_mulVecMatVec(vec1, mat, vec2, length(vec1))
 
 end
-function LibMuJoCo.mju_transpose(res, mat)
+function LibMuJoCo.mju_transpose(
+    res::Union{Nothing,AbstractArray{Float64,2}},
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("res")
+    end
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (size(res, 2) != size(mat, 1))
         throw(ArgumentError("#columns in res should equal #rows in mat"))
@@ -466,7 +648,16 @@ function LibMuJoCo.mju_transpose(res, mat)
     return mju_transpose(res, mat, size(mat, 1), size(mat, 2))
 
 end
-function LibMuJoCo.mju_symmetrize(res, mat)
+function LibMuJoCo.mju_symmetrize(
+    res::Union{Nothing,AbstractArray{Float64,2}},
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("res")
+    end
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (size(mat, 2) != size(mat, 1))
         throw(ArgumentError("mat should be square"))
@@ -477,7 +668,10 @@ function LibMuJoCo.mju_symmetrize(res, mat)
     return mju_symmetrize(res, mat, size(mat, 1))
 
 end
-function LibMuJoCo.mju_eye(mat)
+function LibMuJoCo.mju_eye(mat::Union{Nothing,AbstractArray{Float64,2}})
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (size(mat, 2) != size(mat, 1))
         throw(ArgumentError("mat should be square"))
@@ -485,7 +679,22 @@ function LibMuJoCo.mju_eye(mat)
     return mju_eye(mat, size(mat, 1))
 
 end
-function LibMuJoCo.mju_mulMatMat(res, mat1, mat2)
+function LibMuJoCo.mju_mulMatMat(
+    res::Union{Nothing,AbstractArray{Float64,2}},
+    mat1::Union{Nothing,AbstractArray{Float64,2}},
+    mat2::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("res")
+    end
+    if !isnothing(mat1) &&
+       !(typeof(mat1) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat1")
+    end
+    if !isnothing(mat2) &&
+       !(typeof(mat2) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat2")
+    end
 
     if (size(res, 1) != size(mat1, 1))
         throw(ArgumentError("#rows in res should equal #rows in mat1"))
@@ -499,7 +708,22 @@ function LibMuJoCo.mju_mulMatMat(res, mat1, mat2)
     return mju_mulMatMat(res, mat1, mat2, size(mat1, 1), size(mat1, 2), size(mat2, 2))
 
 end
-function LibMuJoCo.mju_mulMatMatT(res, mat1, mat2)
+function LibMuJoCo.mju_mulMatMatT(
+    res::Union{Nothing,AbstractArray{Float64,2}},
+    mat1::Union{Nothing,AbstractArray{Float64,2}},
+    mat2::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("res")
+    end
+    if !isnothing(mat1) &&
+       !(typeof(mat1) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat1")
+    end
+    if !isnothing(mat2) &&
+       !(typeof(mat2) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat2")
+    end
 
     if (size(res, 1) != size(mat1, 1))
         throw(ArgumentError("#rows in res should equal #rows in mat1"))
@@ -513,7 +737,22 @@ function LibMuJoCo.mju_mulMatMatT(res, mat1, mat2)
     return mju_mulMatMatT(res, mat1, mat2, size(mat1, 1), size(mat1, 2), size(mat2, 1))
 
 end
-function LibMuJoCo.mju_mulMatTMat(res, mat1, mat2)
+function LibMuJoCo.mju_mulMatTMat(
+    res::Union{Nothing,AbstractArray{Float64,2}},
+    mat1::Union{Nothing,AbstractArray{Float64,2}},
+    mat2::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("res")
+    end
+    if !isnothing(mat1) &&
+       !(typeof(mat1) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat1")
+    end
+    if !isnothing(mat2) &&
+       !(typeof(mat2) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat2")
+    end
 
     if (size(res, 1) != size(mat1, 2))
         throw(ArgumentError("#rows in res should equal #columns in mat1"))
@@ -527,7 +766,17 @@ function LibMuJoCo.mju_mulMatTMat(res, mat1, mat2)
     return mju_mulMatTMat(res, mat1, mat2, size(mat1, 1), size(mat1, 2), size(mat2, 2))
 
 end
-function LibMuJoCo.mju_sqrMatTD(res, mat, diag)
+function LibMuJoCo.mju_sqrMatTD(
+    res::Union{Nothing,AbstractArray{Float64,2}},
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    diag,
+)
+    if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("res")
+    end
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (size(res, 1) != size(mat, 2))
         throw(ArgumentError("#rows in res should equal #columns in mat"))
@@ -547,7 +796,13 @@ function LibMuJoCo.mju_sqrMatTD(res, mat, diag)
     )
 
 end
-function LibMuJoCo.mju_cholFactor(mat, mindiag)
+function LibMuJoCo.mju_cholFactor(
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    mindiag::Float64,
+)
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (size(mat, 1) != size(mat, 2))
         throw(ArgumentError("mat should be a square matrix"))
@@ -555,7 +810,10 @@ function LibMuJoCo.mju_cholFactor(mat, mindiag)
     return mju_cholFactor(mat, size(mat, 1), mindiag)
 
 end
-function LibMuJoCo.mju_cholSolve(res, mat, vec)
+function LibMuJoCo.mju_cholSolve(res, mat::Union{Nothing,AbstractArray{Float64,2}}, vec)
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (size(mat, 1) != size(mat, 2))
         throw(ArgumentError("mat should be a square matrix"))
@@ -569,7 +827,14 @@ function LibMuJoCo.mju_cholSolve(res, mat, vec)
     return mju_cholSolve(res, mat, vec, size(mat, 1))
 
 end
-function LibMuJoCo.mju_cholUpdate(mat, x, flg_plus)
+function LibMuJoCo.mju_cholUpdate(
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    x,
+    flg_plus::Int32,
+)
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     if (size(mat, 1) != size(mat, 2))
         throw(ArgumentError("mat should be a square matrix"))
@@ -580,7 +845,14 @@ function LibMuJoCo.mju_cholUpdate(mat, x, flg_plus)
     return mju_cholUpdate(mat, x, size(mat, 1), flg_plus)
 
 end
-function LibMuJoCo.mju_cholFactorBand(mat, ntotal, nband, ndense, diagadd, diagmul)
+function LibMuJoCo.mju_cholFactorBand(
+    mat,
+    ntotal::Int32,
+    nband::Int32,
+    ndense::Int32,
+    diagadd::Float64,
+    diagmul::Float64,
+)
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
     if (length(mat) != nMat)
@@ -589,7 +861,14 @@ function LibMuJoCo.mju_cholFactorBand(mat, ntotal, nband, ndense, diagadd, diagm
     return mju_cholFactorBand(mat, ntotal, nband, ndense, diagadd, diagmul)
 
 end
-function LibMuJoCo.mju_cholSolveBand(res, mat, vec, ntotal, nband, ndense)
+function LibMuJoCo.mju_cholSolveBand(
+    res,
+    mat,
+    vec,
+    ntotal::Int32,
+    nband::Int32,
+    ndense::Int32,
+)
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
     if (length(mat) != nMat)
@@ -606,7 +885,17 @@ function LibMuJoCo.mju_cholSolveBand(res, mat, vec, ntotal, nband, ndense)
     return mju_cholSolveBand(res, mat, vec, ntotal, nband, ndense)
 
 end
-function LibMuJoCo.mju_band2Dense(res, mat, ntotal, nband, ndense, flg_sym)
+function LibMuJoCo.mju_band2Dense(
+    res::Union{Nothing,AbstractArray{Float64,2}},
+    mat,
+    ntotal::Int32,
+    nband::Int32,
+    ndense::Int32,
+    flg_sym::UInt8,
+)
+    if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("res")
+    end
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
     if (length(mat) != nMat)
@@ -621,7 +910,16 @@ function LibMuJoCo.mju_band2Dense(res, mat, ntotal, nband, ndense, flg_sym)
     return mju_band2Dense(res, mat, ntotal, nband, ndense, flg_sym)
 
 end
-function LibMuJoCo.mju_dense2Band(res, mat, ntotal, nband, ndense)
+function LibMuJoCo.mju_dense2Band(
+    res,
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    ntotal::Int32,
+    nband::Int32,
+    ndense::Int32,
+)
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
 
     nRes = (ntotal - ndense) * nband + ndense * ntotal
     if (length(res) != nRes)
@@ -636,7 +934,22 @@ function LibMuJoCo.mju_dense2Band(res, mat, ntotal, nband, ndense)
     return mju_dense2Band(res, mat, ntotal, nband, ndense)
 
 end
-function LibMuJoCo.mju_bandMulMatVec(res, mat, vec, ntotal, nband, ndense, nVec, flg_sym)
+function LibMuJoCo.mju_bandMulMatVec(
+    res,
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractArray{Float64,2}},
+    ntotal::Int32,
+    nband::Int32,
+    ndense::Int32,
+    nVec::Int32,
+    flg_sym::UInt8,
+)
+    if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
+    if !isnothing(vec) && !(typeof(vec) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("vec")
+    end
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
     if (length(mat) != nMat)
@@ -657,7 +970,21 @@ function LibMuJoCo.mju_bandMulMatVec(res, mat, vec, ntotal, nband, ndense, nVec,
     return mju_bandMulMatVec(res, mat, vec, ntotal, nband, ndense, nVec, flg_sym)
 
 end
-function LibMuJoCo.mju_boxQP(res, R, index, H, g, lower, upper)
+function LibMuJoCo.mju_boxQP(
+    res,
+    R::Union{Nothing,AbstractArray{Float64,2}},
+    index::Union{AbstractVector{Int32},AbstractArray{Int32,2},NTuple{Eigen::Dynamic,Int32}},
+    H::Union{Nothing,AbstractArray{Float64,2}},
+    g,
+    lower,
+    upper,
+)
+    if !isnothing(R) && !(typeof(R) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("R")
+    end
+    if !isnothing(H) && !(typeof(H) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("H")
+    end
 
     n = length(res)
     if (length(R) != n * (n + 7))
@@ -717,7 +1044,15 @@ function LibMuJoCo.mju_isZero(vec)
     return mju_isZero(vec, length(vec))
 
 end
-function LibMuJoCo.mju_f2n(res, vec)
+function LibMuJoCo.mju_f2n(
+    res,
+    vec::Union{
+        Nothing,
+        AbstractVector{Float32},
+        AbstractArray{Float32,2},
+        NTuple{Eigen::Dynamic,Float32},
+    },
+)
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -725,7 +1060,15 @@ function LibMuJoCo.mju_f2n(res, vec)
     return mju_f2n(res, vec, length(res))
 
 end
-function LibMuJoCo.mju_n2f(res, vec)
+function LibMuJoCo.mju_n2f(
+    res::Union{
+        Nothing,
+        AbstractVector{Float32},
+        AbstractArray{Float32,2},
+        NTuple{Eigen::Dynamic,Float32},
+    },
+    vec,
+)
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -733,7 +1076,15 @@ function LibMuJoCo.mju_n2f(res, vec)
     return mju_n2f(res, vec, length(res))
 
 end
-function LibMuJoCo.mju_d2n(res, vec)
+function LibMuJoCo.mju_d2n(
+    res,
+    vec::Union{
+        Nothing,
+        AbstractVector{Float64},
+        AbstractArray{Float64,2},
+        NTuple{Eigen::Dynamic,Float64},
+    },
+)
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -741,7 +1092,15 @@ function LibMuJoCo.mju_d2n(res, vec)
     return mju_d2n(res, vec, length(res))
 
 end
-function LibMuJoCo.mju_n2d(res, vec)
+function LibMuJoCo.mju_n2d(
+    res::Union{
+        Nothing,
+        AbstractVector{Float64},
+        AbstractArray{Float64,2},
+        NTuple{Eigen::Dynamic,Float64},
+    },
+    vec,
+)
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -754,12 +1113,40 @@ function LibMuJoCo.mju_insertionSort(res)
     return mju_insertionSort(res, length(res))
 
 end
-function LibMuJoCo.mju_insertionSortInt(res)
+function LibMuJoCo.mju_insertionSortInt(
+    res::Union{
+        Nothing,
+        AbstractVector{Int32},
+        AbstractArray{Int32,2},
+        NTuple{Eigen::Dynamic,Int32},
+    },
+)
 
     return mju_insertionSortInt(res, length(res))
 
 end
-function LibMuJoCo.mjd_transitionFD(m, d, eps, flg_centered, A, B, C, D)
+function LibMuJoCo.mjd_transitionFD(
+    m,
+    d,
+    eps::Float64,
+    flg_centered::UInt8,
+    A::AbstractArray{Float64,2},
+    B::AbstractArray{Float64,2},
+    C::AbstractArray{Float64,2},
+    D::AbstractArray{Float64,2},
+)
+    if !(typeof(A) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("A")
+    end
+    if !(typeof(B) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("B")
+    end
+    if !(typeof(C) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("C")
+    end
+    if !(typeof(D) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("D")
+    end
 
     if (!isnothing(A) && (size(A, 1) != 2 * m.nv + m.na || size(A, 2) != 2 * m.nv + m.na))
         throw(ArgumentError("A should be of shape (2*nv+na, 2*nv+na)"))
@@ -788,16 +1175,37 @@ end
 function LibMuJoCo.mjd_inverseFD(
     m,
     d,
-    eps,
-    flg_actuation,
-    DfDq,
-    DfDv,
-    DfDa,
-    DsDq,
-    DsDv,
-    DsDa,
-    DmDq,
+    eps::Float64,
+    flg_actuation::UInt8,
+    DfDq::AbstractArray{Float64,2},
+    DfDv::AbstractArray{Float64,2},
+    DfDa::AbstractArray{Float64,2},
+    DsDq::AbstractArray{Float64,2},
+    DsDv::AbstractArray{Float64,2},
+    DsDa::AbstractArray{Float64,2},
+    DmDq::AbstractArray{Float64,2},
 )
+    if !(typeof(DfDq) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("DfDq")
+    end
+    if !(typeof(DfDv) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("DfDv")
+    end
+    if !(typeof(DfDa) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("DfDa")
+    end
+    if !(typeof(DsDq) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("DsDq")
+    end
+    if !(typeof(DsDv) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("DsDv")
+    end
+    if !(typeof(DsDa) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("DsDa")
+    end
+    if !(typeof(DmDq) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("DmDq")
+    end
 
     if (!isnothing(DfDq) && (size(DfDq, 1) != m.nv || size(DfDq, 2) != m.nv))
         throw(ArgumentError("DfDq should be of shape (nv, nv)"))
