@@ -12,8 +12,8 @@ function LibMuJoCo.mju_printMat(mat::Union{Nothing,AbstractArray{Float64,2}})
 
 end
 function LibMuJoCo.mj_solveM(
-    m::Model,
-    d::Data,
+    m,
+    d,
     x::Union{Nothing,AbstractArray{Float64,2}},
     y::Union{Nothing,AbstractArray{Float64,2}},
 )
@@ -37,8 +37,8 @@ function LibMuJoCo.mj_solveM(
 
 end
 function LibMuJoCo.mj_solveM2(
-    m::Model,
-    d::Data,
+    m,
+    d,
     x::Union{Nothing,AbstractArray{Float64,2}},
     y::Union{Nothing,AbstractArray{Float64,2}},
 )
@@ -62,9 +62,9 @@ function LibMuJoCo.mj_solveM2(
 
 end
 function LibMuJoCo.mj_rne(
-    m::Model,
-    d::Data,
-    flg_acc::Int32,
+    m,
+    d,
+    flg_acc::Integer,
     result::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
     if !isnothing(result) &&
@@ -80,11 +80,11 @@ function LibMuJoCo.mj_rne(
 
 end
 function LibMuJoCo.mj_constraintUpdate(
-    m::Model,
-    d::Data,
+    m,
+    d,
     jar::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     cost::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    flg_coneHessian::Int32,
+    flg_coneHessian::Integer,
 )
     if !isnothing(jar) &&
        typeof(jar) <: AbstractArray{Float64,2} &&
@@ -105,10 +105,10 @@ function LibMuJoCo.mj_constraintUpdate(
 
 end
 function LibMuJoCo.mj_getState(
-    m::Model,
-    d::Data,
+    m,
+    d,
     state::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    spec::Int32,
+    spec::Integer,
 )
     if !isnothing(state) &&
        typeof(state) <: AbstractArray{Float64,2} &&
@@ -123,10 +123,10 @@ function LibMuJoCo.mj_getState(
 
 end
 function LibMuJoCo.mj_setState(
-    m::Model,
-    d::Data,
+    m,
+    d,
     state::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    spec::Int32,
+    spec::Integer,
 )
     if !isnothing(state) &&
        typeof(state) <: AbstractArray{Float64,2} &&
@@ -141,8 +141,8 @@ function LibMuJoCo.mj_setState(
 
 end
 function LibMuJoCo.mj_mulJacVec(
-    m::Model,
-    d::Data,
+    m,
+    d,
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
@@ -167,8 +167,8 @@ function LibMuJoCo.mj_mulJacVec(
 
 end
 function LibMuJoCo.mj_mulJacTVec(
-    m::Model,
-    d::Data,
+    m,
+    d,
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
@@ -193,12 +193,12 @@ function LibMuJoCo.mj_mulJacTVec(
 
 end
 function LibMuJoCo.mj_jac(
-    m::Model,
-    d::Data,
+    m,
+    d,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
     point::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    body::Int32,
+    body::Integer,
 )
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
@@ -230,11 +230,11 @@ function LibMuJoCo.mj_jac(
 
 end
 function LibMuJoCo.mj_jacBody(
-    m::Model,
-    d::Data,
+    m,
+    d,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
-    body::Int32,
+    body::Integer,
 )
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
@@ -259,11 +259,11 @@ function LibMuJoCo.mj_jacBody(
 
 end
 function LibMuJoCo.mj_jacBodyCom(
-    m::Model,
-    d::Data,
+    m,
+    d,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
-    body::Int32,
+    body::Integer,
 )
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
@@ -287,12 +287,7 @@ function LibMuJoCo.mj_jacBodyCom(
     )
 
 end
-function LibMuJoCo.mj_jacSubtreeCom(
-    m::Model,
-    d::Data,
-    jacp::AbstractArray{Float64,2},
-    body::Int32,
-)
+function LibMuJoCo.mj_jacSubtreeCom(m, d, jacp::AbstractArray{Float64,2}, body::Integer)
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
     end
@@ -304,11 +299,11 @@ function LibMuJoCo.mj_jacSubtreeCom(
 
 end
 function LibMuJoCo.mj_jacGeom(
-    m::Model,
-    d::Data,
+    m,
+    d,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
-    geom::Int32,
+    geom::Integer,
 )
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
@@ -333,11 +328,11 @@ function LibMuJoCo.mj_jacGeom(
 
 end
 function LibMuJoCo.mj_jacSite(
-    m::Model,
-    d::Data,
+    m,
+    d,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
-    site::Int32,
+    site::Integer,
 )
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
@@ -362,13 +357,13 @@ function LibMuJoCo.mj_jacSite(
 
 end
 function LibMuJoCo.mj_jacPointAxis(
-    m::Model,
-    d::Data,
+    m,
+    d,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
     point::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     axis::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    body::Int32,
+    body::Integer,
 )
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
@@ -407,7 +402,7 @@ function LibMuJoCo.mj_jacPointAxis(
 
 end
 function LibMuJoCo.mj_fullM(
-    m::Model,
+    m,
     dst::Union{Nothing,AbstractArray{Float64,2}},
     M::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
@@ -428,8 +423,8 @@ function LibMuJoCo.mj_fullM(
 
 end
 function LibMuJoCo.mj_mulM(
-    m::Model,
-    d::Data,
+    m,
+    d,
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
@@ -454,8 +449,8 @@ function LibMuJoCo.mj_mulM(
 
 end
 function LibMuJoCo.mj_mulM2(
-    m::Model,
-    d::Data,
+    m,
+    d,
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
@@ -480,8 +475,8 @@ function LibMuJoCo.mj_mulM2(
 
 end
 function LibMuJoCo.mj_addM(
-    m::Model,
-    d::Data,
+    m,
+    d,
     dst::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     rownnz::Union{Nothing,AbstractVector{Int32},AbstractArray{Int32,2}},
     rowadr::Union{Nothing,AbstractVector{Int32},AbstractArray{Int32,2}},
@@ -524,12 +519,12 @@ function LibMuJoCo.mj_addM(
 
 end
 function LibMuJoCo.mj_applyFT(
-    m::Model,
-    d::Data,
+    m,
+    d,
     force::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     torque::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     point::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    body::Int32,
+    body::Integer,
     qfrc_target::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
     if length(force) != 3
@@ -563,9 +558,9 @@ function LibMuJoCo.mj_applyFT(
 
 end
 function LibMuJoCo.mj_differentiatePos(
-    m::Model,
+    m,
     qvel::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    dt::Float64,
+    dt::AbstractFloat,
     qpos1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     qpos2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
@@ -598,10 +593,10 @@ function LibMuJoCo.mj_differentiatePos(
 
 end
 function LibMuJoCo.mj_integratePos(
-    m::Model,
+    m,
     qpos::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     qvel::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    dt::Float64,
+    dt::AbstractFloat,
 )
     if !isnothing(qpos) &&
        typeof(qpos) <: AbstractArray{Float64,2} &&
@@ -624,7 +619,7 @@ function LibMuJoCo.mj_integratePos(
 
 end
 function LibMuJoCo.mj_normalizeQuat(
-    m::Model,
+    m,
     qpos::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
     if !isnothing(qpos) &&
@@ -645,13 +640,13 @@ function LibMuJoCo.mj_loadAllPluginLibraries(directory::String)
 
 end
 function LibMuJoCo.mj_ray(
-    m::Model,
-    d::Data,
+    m,
+    d,
     pnt::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     geomgroup::Union{AbstractVector{UInt8},AbstractArray{UInt8,2}},
     flg_static::UInt8,
-    bodyexclude::Int32,
+    bodyexclude::Integer,
     geomid::Union{AbstractVector{Int32},AbstractArray{Int32,2}},
 )
     if length(pnt) != 3
@@ -705,7 +700,7 @@ function LibMuJoCo.mju_zero(
 end
 function LibMuJoCo.mju_fill(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    val::Float64,
+    val::AbstractFloat,
 )
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
@@ -764,7 +759,7 @@ end
 function LibMuJoCo.mju_scl(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    scl::Float64,
+    scl::AbstractFloat,
 )
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
@@ -888,7 +883,7 @@ end
 function LibMuJoCo.mju_addToScl(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    scl::Float64,
+    scl::AbstractFloat,
 )
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
@@ -911,7 +906,7 @@ function LibMuJoCo.mju_addScl(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    scl::Float64,
+    scl::AbstractFloat,
 )
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
@@ -1243,7 +1238,7 @@ function LibMuJoCo.mju_sqrMatTD(
 end
 function LibMuJoCo.mju_cholFactor(
     mat::Union{Nothing,AbstractArray{Float64,2}},
-    mindiag::Float64,
+    mindiag::AbstractFloat,
 )
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1289,7 +1284,7 @@ end
 function LibMuJoCo.mju_cholUpdate(
     mat::Union{Nothing,AbstractArray{Float64,2}},
     x::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    flg_plus::Int32,
+    flg_plus::Integer,
 )
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1309,11 +1304,11 @@ function LibMuJoCo.mju_cholUpdate(
 end
 function LibMuJoCo.mju_cholFactorBand(
     mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    ntotal::Int32,
-    nband::Int32,
-    ndense::Int32,
-    diagadd::Float64,
-    diagmul::Float64,
+    ntotal::Integer,
+    nband::Integer,
+    ndense::Integer,
+    diagadd::AbstractFloat,
+    diagmul::AbstractFloat,
 )
     if !isnothing(mat) &&
        typeof(mat) <: AbstractArray{Float64,2} &&
@@ -1332,9 +1327,9 @@ function LibMuJoCo.mju_cholSolveBand(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    ntotal::Int32,
-    nband::Int32,
-    ndense::Int32,
+    ntotal::Integer,
+    nband::Integer,
+    ndense::Integer,
 )
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
@@ -1370,9 +1365,9 @@ end
 function LibMuJoCo.mju_band2Dense(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
-    ntotal::Int32,
-    nband::Int32,
-    ndense::Int32,
+    ntotal::Integer,
+    nband::Integer,
+    ndense::Integer,
     flg_sym::UInt8,
 )
     if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -1400,9 +1395,9 @@ end
 function LibMuJoCo.mju_dense2Band(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
-    ntotal::Int32,
-    nband::Int32,
-    ndense::Int32,
+    ntotal::Integer,
+    nband::Integer,
+    ndense::Integer,
 )
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
@@ -1430,10 +1425,10 @@ function LibMuJoCo.mju_bandMulMatVec(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractArray{Float64,2}},
-    ntotal::Int32,
-    nband::Int32,
-    ndense::Int32,
-    nVec::Int32,
+    ntotal::Integer,
+    nband::Integer,
+    ndense::Integer,
+    nVec::Integer,
     flg_sym::UInt8,
 )
     if !isnothing(res) &&
@@ -1712,9 +1707,9 @@ function LibMuJoCo.mju_insertionSortInt(
 
 end
 function LibMuJoCo.mjd_transitionFD(
-    m::Model,
-    d::Data,
-    eps::Float64,
+    m,
+    d,
+    eps::AbstractFloat,
     flg_centered::UInt8,
     A::AbstractArray{Float64,2},
     B::AbstractArray{Float64,2},
@@ -1759,9 +1754,9 @@ function LibMuJoCo.mjd_transitionFD(
 
 end
 function LibMuJoCo.mjd_inverseFD(
-    m::Model,
-    d::Data,
-    eps::Float64,
+    m,
+    d,
+    eps::AbstractFloat,
     flg_actuation::UInt8,
     DfDq::AbstractArray{Float64,2},
     DfDv::AbstractArray{Float64,2},

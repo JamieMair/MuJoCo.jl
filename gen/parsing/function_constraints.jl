@@ -317,13 +317,27 @@ function optional_wrapper(identifier, is_optional, other_types...)
     end
 end
 
+map_to_abstract_supertype(::Type{<:Integer}) = Integer
+map_to_abstract_supertype(::Type{<:AbstractFloat}) = AbstractFloat
+map_to_abstract_supertype(::Type{<:UInt8}) = UInt8
+map_to_abstract_supertype(x) = nothing
+
+function basic_arg_transform(identifer, type)
+    mapped_type = map_to_abstract_supertype(type)
+    if !isnothing(mapped_type)
+        return "$identifer::$mapped_type"
+    else
+        return identifer
+    end
+end
+
 function convert_argument_from_info(info, fn_body, pre_body_buffer::IOBuffer, post_body_buffer::IOBuffer)
     info_types = (:basic, :string, :anomalous_vector, :variable_vector, :matrix, :mjModel, :mjData, :static_array)
     if !(info.type in info_types)
         error("Unrecognised info type $(info.type)")
     end
 
-    info.type == :basic && return "$(info.identifier)::$(info.datatype)"
+    info.type == :basic && return basic_arg_transform(info.identifier, info.datatype)
     info.type == :string && return "$(info.identifier)::String"
     if info.type == :matrix
         write_matrix_order_warning_check(pre_body_buffer, info.identifier, info.datatype, info.is_optional)
@@ -358,9 +372,8 @@ function convert_argument_from_info(info, fn_body, pre_body_buffer::IOBuffer, po
             allowed_types...            
         )
     end
-    info.type == :mjModel && return "$(info.identifier)::Model"
-    info.type == :mjData && return "$(info.identifier)::Data"
-
+    info.type == :mjModel && return info.identifier # not strictly typed
+    info.type == :mjData && return info.identifier # not strictly typed
     # Fallback
     return info.identifier
 end
