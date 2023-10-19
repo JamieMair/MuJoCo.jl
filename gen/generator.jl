@@ -299,8 +299,10 @@ generate_named_access()
 
 @info "Generating function constraints"
 include("parsing/function_constraints.jl")
-write_function_constraints(staging_dir)
+write_function_constraints(joinpath(libmujoco_dir, "LibMuJoCo.jl"), staging_dir)
 format_file(joinpath(staging_dir, "function_constraints.jl"))
+mv(joinpath(libmujoco_dir, "LibMuJoCo.jl.new"), joinpath(libmujoco_dir, "LibMuJoCo.jl"); force=true)
+format_file(joinpath(libmujoco_dir, "LibMuJoCo.jl"))
 
 @info "Copying into src directory..."
 begin
