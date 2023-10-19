@@ -169,11 +169,12 @@ function convert_argument(argument)
     end
 
     # Matches matrices (i.e. std::optional<Eigen::Ref<EigenArrayXX>> jacr)
-    two_dim_array_regex = r"(std::optional<)?Eigen::Ref<EigenArrayXX>(>)?\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
+    two_dim_array_regex = r"(std::optional<)?Eigen::Ref<(const )?\s*EigenArrayXX>(>)?\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
     two_dim_array_info = if_match(two_dim_array_regex, argument) do m
         return (;
             is_optional = isnothing(m.captures[1]),
-            identifier = m.captures[3],
+            is_inner_const = isnothing(m.captures[2]),
+            identifier = m.captures[4],
             datatype = LibMuJoCo.mjtNum,
         )
     end
@@ -182,12 +183,13 @@ function convert_argument(argument)
     end
 
     # Matches vectors (i.e. Eigen::Ref<const EigenVectorX> vec)
-    vector_regex = r"(const )?\s*Eigen::Ref<(const )?\s*EigenVectorX>\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
+    vector_regex = r"(const )?\s*(std::optional<)?Eigen::Ref<(const )?\s*EigenVectorX>(>)?\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
     vector_info = if_match(vector_regex, argument) do m
         return (;
             is_const = isnothing(m.captures[1]),
-            is_inner_const = isnothing(m.captures[2]),
-            identifier = m.captures[3],
+            is_optional = isnothing(m.captures[2]),
+            is_inner_const = isnothing(m.captures[3]),
+            identifier = m.captures[5],
             datatype = LibMuJoCo.mjtNum,
         )
     end
@@ -195,7 +197,7 @@ function convert_argument(argument)
         return vector_info.identifier
     end
 
-
+    # Matches vectors of various types (e.g. std::optional<Eigen::Ref<Eigen::Vector<int, Eigen::Dynamic>>> index)
     anomalous_vector_regex = r"(std::optional<)?Eigen::Ref<(const )?\s*Eigen::Vector<\s*\b([a-zA-Z_][a-zA-Z0-9_:]*)\s*,\s*\b(Eigen::Dynamic|[a-zA-Z0-9_]*)\s*>>(>)?\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
     anomalous_vector_info = if_match(anomalous_vector_regex, argument) do m
         return (;
@@ -203,14 +205,27 @@ function convert_argument(argument)
             is_inner_const = isnothing(m.captures[2]),
             datatype = m.captures[3],
             size_vector = m.captures[4],
-            identifier = m.captures[5],
+            identifier = m.captures[6],
         )
     end
     if !isnothing(anomalous_vector_info)
         return anomalous_vector_info.identifier
     end
 
-    basic_argument_regex = r"(int|float|mjtByte) \b([a-zA-Z_][a-zA-Z0-9_]*)"
+    string_regex = r"(const )?\s*std::string&\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
+    string_info = if_match(string_regex, argument) do m
+        return (;
+            is_const = isnothing(m.captures[1]),
+            identifier = m.captures[2],
+            datatype = String,
+        )
+    end
+    if !isnothing(string_info)
+        return string_info.identifier
+    end
+
+
+    basic_argument_regex = r"(int|float|mjtByte|mjtNum) \b([a-zA-Z_][a-zA-Z0-9_]*)"
     basic_argument_info = if_match(basic_argument_regex, argument) do m
         return (;
             datatype = m.captures[1],
