@@ -129,25 +129,102 @@ function convert_fn_body(fn_body)
     return fn_body
 end
 
+function if_match(fn, regex, text)
+    m = match(regex, text)
+    if !isnothing(m)
+        return fn(m)
+    end
+    return nothing
+end
+
 function convert_argument(argument)
     argument = strip(argument)
-    static_array_regex = r"(const )?\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\*\s*\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\)\s*\[\s*(\d+)\s*\]"
-    m = match(static_array_regex, argument)
-    identifier = ""
-    if !isnothing(m)
-        is_const = isnothing(m.captures[1])
-        array_type = m.captures[2]
-        identifier = m.captures[3]
-        array_size = m.captures[4]
-    else 
-        # TODO: Make sure we can parse the other argument types
-        splitter_index = findlast(' ', argument)
-        if isnothing(splitter_index)
-            error("Could not parse argument: $argument")
-        end
-        identifier = argument[splitter_index+1:end]
+
+    # Static Arrays (e.g. const mjtNum (*axis)[3])
+    static_array_regex = r"(const )?\s*\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\*\s*\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\)\s*\[\s*(\d+)\s*\]"
+    static_array_info = if_match(static_array_regex, argument) do m
+        return (;
+            is_const = isnothing(m.captures[1]),
+            array_type = m.captures[2],
+            identifier = m.captures[3],
+            array_size = m.captures[4]
+        )
     end
-    return identifier
+    if !isnothing(static_array_info)
+        return static_array_info.identifier
+    end
+
+    # Pointer to either MjModel or MjData
+    const_pointer_regex = r"(const )?\s*(\w+::)?(MjModel|MjData)\*\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
+    const_pointer_info = if_match(const_pointer_regex, argument) do m
+        return (;
+            is_const = isnothing(m.captures[1]),
+            namespace_prefix = m.captures[2],
+            datatype = m.captures[3],
+            identifier = m.captures[4]
+        )
+    end
+    if !isnothing(const_pointer_info)
+        return static_array_match.identifier
+    end
+
+    # Matches matrices (i.e. std::optional<Eigen::Ref<EigenArrayXX>> jacr)
+    two_dim_array_regex = r"(std::optional<)?Eigen::Ref<EigenArrayXX>(>)?\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
+    two_dim_array_info = if_match(two_dim_array_regex, argument) do m
+        return (;
+            is_optional = isnothing(m.captures[1]),
+            identifier = m.captures[3],
+            datatype = LibMuJoCo.mjtNum,
+        )
+    end
+    if !isnothing(two_dim_array_info)
+        return two_dim_array_info.identifier
+    end
+
+    # Matches vectors (i.e. Eigen::Ref<const EigenVectorX> vec)
+    vector_regex = r"(const )?\s*Eigen::Ref<(const )?\s*EigenVectorX>\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
+    vector_info = if_match(vector_regex, argument) do m
+        return (;
+            is_const = isnothing(m.captures[1]),
+            is_inner_const = isnothing(m.captures[2]),
+            identifier = m.captures[3],
+            datatype = LibMuJoCo.mjtNum,
+        )
+    end
+    if !isnothing(vector_info)
+        return vector_info.identifier
+    end
+
+
+    anomalous_vector_regex = r"(std::optional<)?Eigen::Ref<(const )?\s*Eigen::Vector<\s*\b([a-zA-Z_][a-zA-Z0-9_:]*)\s*,\s*\b(Eigen::Dynamic|[a-zA-Z0-9_]*)\s*>>(>)?\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
+    anomalous_vector_info = if_match(anomalous_vector_regex, argument) do m
+        return (;
+            is_optional = isnothing(m.captures[1]),
+            is_inner_const = isnothing(m.captures[2]),
+            datatype = m.captures[3],
+            size_vector = m.captures[4],
+            identifier = m.captures[5],
+        )
+    end
+    if !isnothing(anomalous_vector_info)
+        return anomalous_vector_info.identifier
+    end
+
+    basic_argument_regex = r"(int|float|mjtByte) \b([a-zA-Z_][a-zA-Z0-9_]*)"
+    basic_argument_info = if_match(basic_argument_regex, argument) do m
+        return (;
+            datatype = m.captures[1],
+            identifier = m.captures[2],
+        )
+    end
+    if !isnothing(basic_argument_info)
+        return basic_argument_info.identifier
+    else
+        @error "Could not parse $argument"
+    end
+
+    # Should not reach this point
+    return nothing
 end
 
 function extract_fn_info(fn_block)
