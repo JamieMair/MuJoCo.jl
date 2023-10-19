@@ -77,6 +77,14 @@ export mju_printMat,
     mjd_inverseFD
 
 
+"""
+    mju_printMat(mat)
+
+Print matrix to screen.
+
+# Arguments
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+"""
 function mju_printMat(mat::Union{Nothing,AbstractArray{Float64,2}})
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -85,6 +93,17 @@ function mju_printMat(mat::Union{Nothing,AbstractArray{Float64,2}})
     return LibMuJoCo.mju_printMat(mat, size(mat, 1), size(mat, 2))
 
 end
+"""
+    mj_solveM(m, d, x, y)
+
+Solve linear system M * x = y using factorization:  x = inv(L'*D*L)*y
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- x::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- y::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+"""
 function mj_solveM(
     m,
     d,
@@ -110,6 +129,17 @@ function mj_solveM(
     return LibMuJoCo.mj_solveM(m, d, x, y, size(y, 1))
 
 end
+"""
+    mj_solveM2(m, d, x, y)
+
+Half of linear solve:  x = sqrt(inv(D))*inv(L')*y
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- x::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- y::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+"""
 function mj_solveM2(
     m,
     d,
@@ -135,6 +165,22 @@ function mj_solveM2(
     return LibMuJoCo.mj_solveM2(m, d, x, y, size(y, 1))
 
 end
+"""
+    mj_rne(m, d, flg_acc, result)
+
+RNE: compute M(qpos)*qacc + C(qpos,qvel); flg_acc=0 removes inertial term.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- flg_acc::Int32
+- result::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- result should be a vector, not a matrix.
+- result should have length nv
+
+"""
 function mj_rne(
     m,
     d,
@@ -144,7 +190,7 @@ function mj_rne(
     if !isnothing(result) &&
        typeof(result) <: AbstractArray{Float64,2} &&
        count(==(1), size(result)) < 1
-        error("result should be a vector, not a matrix.")
+        throw(ArgumentError("result should be a vector, not a matrix."))
     end
 
     if (length(result) != m.nv)
@@ -153,6 +199,25 @@ function mj_rne(
     return LibMuJoCo.mj_rne(m, d, flg_acc, result)
 
 end
+"""
+    mj_constraintUpdate(m, d, jar, cost, flg_coneHessian)
+
+Compute efc*state, efc*force, qfrc_constraint, and (optionally) cone Hessians. If cost is not NULL, set *cost = s(jar) where jar = Jac*qacc-aref.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- jar::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- cost::Vector{Float64} -> A vector of size 1. Constant.
+- flg_coneHessian::Int32
+
+# Constraints
+- jar should be a vector, not a matrix.
+- cost should be a vector of size 1
+- cost should be a vector of size 1.
+- size of jar should equal nefc
+
+"""
 function mj_constraintUpdate(
     m,
     d,
@@ -163,13 +228,13 @@ function mj_constraintUpdate(
     if !isnothing(jar) &&
        typeof(jar) <: AbstractArray{Float64,2} &&
        count(==(1), size(jar)) < 1
-        error("jar should be a vector, not a matrix.")
+        throw(ArgumentError("jar should be a vector, not a matrix."))
     end
     if length(cost) != 1
-        error("cost should be a vector of size 1")
+        throw(ArgumentError("cost should be a vector of size 1"))
     end
     if typeof(cost) <: AbstractArray{Float64,2} && count(==(1), size(cost)) < 1
-        error("cost should be a vector of size 1.")
+        throw(ArgumentError("cost should be a vector of size 1."))
     end
 
     if (length(jar) != d.nefc)
@@ -184,6 +249,22 @@ function mj_constraintUpdate(
     )
 
 end
+"""
+    mj_getState(m, d, state, spec)
+
+Get state.
+
+# Arguments
+- m::Model
+- d::Data
+- state::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- spec::Int32
+
+# Constraints
+- state should be a vector, not a matrix.
+- state size should equal mj_stateSize(m, spec)
+
+"""
 function mj_getState(
     m,
     d,
@@ -193,7 +274,7 @@ function mj_getState(
     if !isnothing(state) &&
        typeof(state) <: AbstractArray{Float64,2} &&
        count(==(1), size(state)) < 1
-        error("state should be a vector, not a matrix.")
+        throw(ArgumentError("state should be a vector, not a matrix."))
     end
 
     if (length(state) != mj_stateSize(m, spec))
@@ -202,6 +283,22 @@ function mj_getState(
     return LibMuJoCo.mj_getState(m, d, state, spec)
 
 end
+"""
+    mj_setState(m, d, state, spec)
+
+Set state.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- state::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- spec::Int32
+
+# Constraints
+- state should be a vector, not a matrix.
+- state size should equal mj_stateSize(m, spec)
+
+"""
 function mj_setState(
     m,
     d,
@@ -211,7 +308,7 @@ function mj_setState(
     if !isnothing(state) &&
        typeof(state) <: AbstractArray{Float64,2} &&
        count(==(1), size(state)) < 1
-        error("state should be a vector, not a matrix.")
+        throw(ArgumentError("state should be a vector, not a matrix."))
     end
 
     if (length(state) != mj_stateSize(m, spec))
@@ -220,6 +317,24 @@ function mj_setState(
     return LibMuJoCo.mj_setState(m, d, state, spec)
 
 end
+"""
+    mj_mulJacVec(m, d, res, vec)
+
+Multiply dense or sparse constraint Jacobian by vector.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res should be of length nefc
+- vec should be of length nv
+
+"""
 function mj_mulJacVec(
     m,
     d,
@@ -229,12 +344,12 @@ function mj_mulJacVec(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != d.nefc)
@@ -246,6 +361,24 @@ function mj_mulJacVec(
     return LibMuJoCo.mj_mulJacVec(m, d, res, vec)
 
 end
+"""
+    mj_mulJacTVec(m, d, res, vec)
+
+Multiply dense or sparse constraint Jacobian transpose by vector.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res should be of length nv
+- vec should be of length nefc
+
+"""
 function mj_mulJacTVec(
     m,
     d,
@@ -255,12 +388,12 @@ function mj_mulJacTVec(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != m.nv)
@@ -272,6 +405,26 @@ function mj_mulJacTVec(
     return LibMuJoCo.mj_mulJacTVec(m, d, res, vec)
 
 end
+"""
+    mj_jac(m, d, jacp, jacr, point, body)
+
+Compute 3/6-by-nv end-effector Jacobian of global point attached to given body.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- point::Vector{Float64} -> A vector of size 3.
+- body::Int32
+
+# Constraints
+- point should be a vector of size 3
+- point should be a vector of size 3.
+- jacp should be of shape (3, nv)
+- jacr should be of shape (3, nv)
+
+"""
 function mj_jac(
     m,
     d,
@@ -287,10 +440,10 @@ function mj_jac(
         @warn column_major_warning_string("jacr")
     end
     if length(point) != 3
-        error("point should be a vector of size 3")
+        throw(ArgumentError("point should be a vector of size 3"))
     end
     if typeof(point) <: AbstractArray{Float64,2} && count(==(1), size(point)) < 1
-        error("point should be a vector of size 3.")
+        throw(ArgumentError("point should be a vector of size 3."))
     end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
@@ -309,6 +462,23 @@ function mj_jac(
     )
 
 end
+"""
+    mj_jacBody(m, d, jacp, jacr, body)
+
+Compute body frame end-effector Jacobian.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- body::Int32
+
+# Constraints
+- jacp should be of shape (3, nv)
+- jacr should be of shape (3, nv)
+
+"""
 function mj_jacBody(
     m,
     d,
@@ -338,6 +508,23 @@ function mj_jacBody(
     )
 
 end
+"""
+    mj_jacBodyCom(m, d, jacp, jacr, body)
+
+Compute body center-of-mass end-effector Jacobian.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- body::Int32
+
+# Constraints
+- jacp should be of shape (3, nv)
+- jacr should be of shape (3, nv)
+
+"""
 function mj_jacBodyCom(
     m,
     d,
@@ -367,6 +554,21 @@ function mj_jacBodyCom(
     )
 
 end
+"""
+    mj_jacSubtreeCom(m, d, jacp, body)
+
+Compute subtree center-of-mass end-effector Jacobian.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- body::Int32
+
+# Constraints
+- jacp should be of shape (3, nv)
+
+"""
 function mj_jacSubtreeCom(m, d, jacp::AbstractArray{Float64,2}, body::Integer)
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
@@ -378,6 +580,23 @@ function mj_jacSubtreeCom(m, d, jacp::AbstractArray{Float64,2}, body::Integer)
     return LibMuJoCo.mj_jacSubtreeCom(m, d, !isnothing(jacp) ? jacp : C_NULL, body)
 
 end
+"""
+    mj_jacGeom(m, d, jacp, jacr, geom)
+
+Compute geom end-effector Jacobian.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- geom::Int32
+
+# Constraints
+- jacp should be of shape (3, nv)
+- jacr should be of shape (3, nv)
+
+"""
 function mj_jacGeom(
     m,
     d,
@@ -407,6 +626,23 @@ function mj_jacGeom(
     )
 
 end
+"""
+    mj_jacSite(m, d, jacp, jacr, site)
+
+Compute site end-effector Jacobian.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- site::Int32
+
+# Constraints
+- jacp should be of shape (3, nv)
+- jacr should be of shape (3, nv)
+
+"""
 function mj_jacSite(
     m,
     d,
@@ -436,6 +672,29 @@ function mj_jacSite(
     )
 
 end
+"""
+    mj_jacPointAxis(m, d, jacp, jacr, point, axis, body)
+
+Compute translation end-effector Jacobian of point, and rotation Jacobian of axis.
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- jacp::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- jacr::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- point::Vector{Float64} -> A vector of size 3.
+- axis::Vector{Float64} -> A vector of size 3.
+- body::Int32
+
+# Constraints
+- point should be a vector of size 3
+- point should be a vector of size 3.
+- axis should be a vector of size 3
+- axis should be a vector of size 3.
+- jacp should be of shape (3, nv)
+- jacr should be of shape (3, nv)
+
+"""
 function mj_jacPointAxis(
     m,
     d,
@@ -452,16 +711,16 @@ function mj_jacPointAxis(
         @warn column_major_warning_string("jacr")
     end
     if length(point) != 3
-        error("point should be a vector of size 3")
+        throw(ArgumentError("point should be a vector of size 3"))
     end
     if typeof(point) <: AbstractArray{Float64,2} && count(==(1), size(point)) < 1
-        error("point should be a vector of size 3.")
+        throw(ArgumentError("point should be a vector of size 3."))
     end
     if length(axis) != 3
-        error("axis should be a vector of size 3")
+        throw(ArgumentError("axis should be a vector of size 3"))
     end
     if typeof(axis) <: AbstractArray{Float64,2} && count(==(1), size(axis)) < 1
-        error("axis should be a vector of size 3.")
+        throw(ArgumentError("axis should be a vector of size 3."))
     end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
@@ -481,6 +740,22 @@ function mj_jacPointAxis(
     )
 
 end
+"""
+    mj_fullM(m, dst, M)
+
+Convert sparse inertia matrix M into full (i.e. dense) matrix.
+
+# Arguments
+- m::Model
+- dst::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- M::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- M should be a vector, not a matrix.
+- M should be of size nM
+- dst should be of shape (nv, nv)
+
+"""
 function mj_fullM(
     m,
     dst::Union{Nothing,AbstractArray{Float64,2}},
@@ -490,7 +765,7 @@ function mj_fullM(
         @warn column_major_warning_string("dst")
     end
     if !isnothing(M) && typeof(M) <: AbstractArray{Float64,2} && count(==(1), size(M)) < 1
-        error("M should be a vector, not a matrix.")
+        throw(ArgumentError("M should be a vector, not a matrix."))
     end
 
     if (length(M) != m.nM)
@@ -502,6 +777,24 @@ function mj_fullM(
     return LibMuJoCo.mj_fullM(m, dst, M)
 
 end
+"""
+    mj_mulM(m, d, res, vec)
+
+Multiply vector by inertia matrix.
+
+# Arguments
+- m::Model
+- d::Data
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res should be of size nv
+- vec should be of size nv
+
+"""
 function mj_mulM(
     m,
     d,
@@ -511,12 +804,12 @@ function mj_mulM(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != m.nv)
@@ -528,6 +821,24 @@ function mj_mulM(
     return LibMuJoCo.mj_mulM(m, d, res, vec)
 
 end
+"""
+    mj_mulM2(m, d, res, vec)
+
+Multiply vector by (inertia matrix)^(1/2).
+
+# Arguments
+- m::Model
+- d::Data
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res should be of size nv
+- vec should be of size nv
+
+"""
 function mj_mulM2(
     m,
     d,
@@ -537,12 +848,12 @@ function mj_mulM2(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != m.nv)
@@ -554,6 +865,30 @@ function mj_mulM2(
     return LibMuJoCo.mj_mulM2(m, d, res, vec)
 
 end
+"""
+    mj_addM(m, d, dst, rownnz, rowadr, colind)
+
+Add inertia matrix to destination matrix. Destination can be sparse uncompressed, or dense when all int* are NULL
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- dst::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- rownnz::Vector{Int32} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- rowadr::Vector{Int32} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- colind::Vector{Int32} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- dst should be a vector, not a matrix.
+- rownnz should be a vector, not a matrix.
+- rowadr should be a vector, not a matrix.
+- colind should be a vector, not a matrix.
+- dst should be of size nM
+- rownnz should be of size nv
+- rowadr should be of size nv
+- colind should be of size nM
+
+"""
 function mj_addM(
     m,
     d,
@@ -565,22 +900,22 @@ function mj_addM(
     if !isnothing(dst) &&
        typeof(dst) <: AbstractArray{Float64,2} &&
        count(==(1), size(dst)) < 1
-        error("dst should be a vector, not a matrix.")
+        throw(ArgumentError("dst should be a vector, not a matrix."))
     end
     if !isnothing(rownnz) &&
        typeof(rownnz) <: AbstractArray{Int32,2} &&
        count(==(1), size(rownnz)) < 1
-        error("rownnz should be a vector, not a matrix.")
+        throw(ArgumentError("rownnz should be a vector, not a matrix."))
     end
     if !isnothing(rowadr) &&
        typeof(rowadr) <: AbstractArray{Int32,2} &&
        count(==(1), size(rowadr)) < 1
-        error("rowadr should be a vector, not a matrix.")
+        throw(ArgumentError("rowadr should be a vector, not a matrix."))
     end
     if !isnothing(colind) &&
        typeof(colind) <: AbstractArray{Int32,2} &&
        count(==(1), size(colind)) < 1
-        error("colind should be a vector, not a matrix.")
+        throw(ArgumentError("colind should be a vector, not a matrix."))
     end
 
     if (length(dst) != m.nM)
@@ -598,6 +933,31 @@ function mj_addM(
     return LibMuJoCo.mj_addM(m, d, dst, rownnz, rowadr, colind)
 
 end
+"""
+    mj_applyFT(m, d, force, torque, point, body, qfrc_target)
+
+Apply Cartesian force and torque (outside xfrc_applied mechanism).
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- force::Vector{Float64} -> A vector of size 3.
+- torque::Vector{Float64} -> A vector of size 3.
+- point::Vector{Float64} -> A vector of size 3.
+- body::Int32
+- qfrc_target::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- force should be a vector of size 3
+- force should be a vector of size 3.
+- torque should be a vector of size 3
+- torque should be a vector of size 3.
+- point should be a vector of size 3
+- point should be a vector of size 3.
+- qfrc_target should be a vector, not a matrix.
+- qfrc_target should be of size nv
+
+"""
 function mj_applyFT(
     m,
     d,
@@ -608,27 +968,27 @@ function mj_applyFT(
     qfrc_target::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
     if length(force) != 3
-        error("force should be a vector of size 3")
+        throw(ArgumentError("force should be a vector of size 3"))
     end
     if typeof(force) <: AbstractArray{Float64,2} && count(==(1), size(force)) < 1
-        error("force should be a vector of size 3.")
+        throw(ArgumentError("force should be a vector of size 3."))
     end
     if length(torque) != 3
-        error("torque should be a vector of size 3")
+        throw(ArgumentError("torque should be a vector of size 3"))
     end
     if typeof(torque) <: AbstractArray{Float64,2} && count(==(1), size(torque)) < 1
-        error("torque should be a vector of size 3.")
+        throw(ArgumentError("torque should be a vector of size 3."))
     end
     if length(point) != 3
-        error("point should be a vector of size 3")
+        throw(ArgumentError("point should be a vector of size 3"))
     end
     if typeof(point) <: AbstractArray{Float64,2} && count(==(1), size(point)) < 1
-        error("point should be a vector of size 3.")
+        throw(ArgumentError("point should be a vector of size 3."))
     end
     if !isnothing(qfrc_target) &&
        typeof(qfrc_target) <: AbstractArray{Float64,2} &&
        count(==(1), size(qfrc_target)) < 1
-        error("qfrc_target should be a vector, not a matrix.")
+        throw(ArgumentError("qfrc_target should be a vector, not a matrix."))
     end
 
     if (length(qfrc_target) != m.nv)
@@ -645,6 +1005,27 @@ function mj_applyFT(
     )
 
 end
+"""
+    mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
+
+Compute velocity by finite-differencing two positions.
+
+# Arguments
+- m::Model
+- qvel::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- dt::Float64
+- qpos1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- qpos2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- qvel should be a vector, not a matrix.
+- qpos1 should be a vector, not a matrix.
+- qpos2 should be a vector, not a matrix.
+- qvel should be of size nv
+- qpos1 should be of size nq
+- qpos2 should be of size nq
+
+"""
 function mj_differentiatePos(
     m,
     qvel::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -655,17 +1036,17 @@ function mj_differentiatePos(
     if !isnothing(qvel) &&
        typeof(qvel) <: AbstractArray{Float64,2} &&
        count(==(1), size(qvel)) < 1
-        error("qvel should be a vector, not a matrix.")
+        throw(ArgumentError("qvel should be a vector, not a matrix."))
     end
     if !isnothing(qpos1) &&
        typeof(qpos1) <: AbstractArray{Float64,2} &&
        count(==(1), size(qpos1)) < 1
-        error("qpos1 should be a vector, not a matrix.")
+        throw(ArgumentError("qpos1 should be a vector, not a matrix."))
     end
     if !isnothing(qpos2) &&
        typeof(qpos2) <: AbstractArray{Float64,2} &&
        count(==(1), size(qpos2)) < 1
-        error("qpos2 should be a vector, not a matrix.")
+        throw(ArgumentError("qpos2 should be a vector, not a matrix."))
     end
 
     if (length(qvel) != m.nv)
@@ -680,6 +1061,24 @@ function mj_differentiatePos(
     return LibMuJoCo.mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
 
 end
+"""
+    mj_integratePos(m, qpos, qvel, dt)
+
+Integrate position with given velocity.
+
+# Arguments
+- m::Model
+- qpos::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- qvel::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- dt::Float64
+
+# Constraints
+- qpos should be a vector, not a matrix.
+- qvel should be a vector, not a matrix.
+- qpos should be of size nq
+- qvel should be of size nv
+
+"""
 function mj_integratePos(
     m,
     qpos::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -689,12 +1088,12 @@ function mj_integratePos(
     if !isnothing(qpos) &&
        typeof(qpos) <: AbstractArray{Float64,2} &&
        count(==(1), size(qpos)) < 1
-        error("qpos should be a vector, not a matrix.")
+        throw(ArgumentError("qpos should be a vector, not a matrix."))
     end
     if !isnothing(qvel) &&
        typeof(qvel) <: AbstractArray{Float64,2} &&
        count(==(1), size(qvel)) < 1
-        error("qvel should be a vector, not a matrix.")
+        throw(ArgumentError("qvel should be a vector, not a matrix."))
     end
 
     if (length(qpos) != m.nq)
@@ -706,6 +1105,20 @@ function mj_integratePos(
     return LibMuJoCo.mj_integratePos(m, qpos, qvel, dt)
 
 end
+"""
+    mj_normalizeQuat(m, qpos)
+
+Normalize all quaternions in qpos-type vector.
+
+# Arguments
+- m::Model
+- qpos::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- qpos should be a vector, not a matrix.
+- qpos should be of size nq
+
+"""
 function mj_normalizeQuat(
     m,
     qpos::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -713,7 +1126,7 @@ function mj_normalizeQuat(
     if !isnothing(qpos) &&
        typeof(qpos) <: AbstractArray{Float64,2} &&
        count(==(1), size(qpos)) < 1
-        error("qpos should be a vector, not a matrix.")
+        throw(ArgumentError("qpos should be a vector, not a matrix."))
     end
 
     if (length(qpos) != m.nq)
@@ -722,6 +1135,32 @@ function mj_normalizeQuat(
     return LibMuJoCo.mj_normalizeQuat(m, qpos)
 
 end
+"""
+    mj_ray(m, d, pnt, vec, geomgroup, flg_static, bodyexclude, geomid)
+
+Intersect ray (pnt+x*vec, x>=0) with visible geoms, except geoms in bodyexclude. Return distance (x) to nearest surface, or -1 if no intersection and output geomid. geomgroup, flg_static are as in mjvOption; geomgroup==NULL skips group exclusion.
+
+# Arguments
+- m::Model
+- d::Data
+- pnt::Vector{Float64} -> A vector of size 3.
+- vec::Vector{Float64} -> A vector of size 3.
+- geomgroup::Vector{UInt8} -> A vector of size 6.
+- flg_static::UInt8
+- bodyexclude::Int32
+- geomid::Vector{Int32} -> A vector of size 1. Constant.
+
+# Constraints
+- pnt should be a vector of size 3
+- pnt should be a vector of size 3.
+- vec should be a vector of size 3
+- vec should be a vector of size 3.
+- geomgroup should be a vector of size 6
+- geomgroup should be a vector of size 6.
+- geomid should be a vector of size 1
+- geomid should be a vector of size 1.
+
+"""
 function mj_ray(
     m,
     d,
@@ -733,28 +1172,28 @@ function mj_ray(
     geomid::Union{AbstractVector{Int32},AbstractArray{Int32,2}},
 )
     if length(pnt) != 3
-        error("pnt should be a vector of size 3")
+        throw(ArgumentError("pnt should be a vector of size 3"))
     end
     if typeof(pnt) <: AbstractArray{Float64,2} && count(==(1), size(pnt)) < 1
-        error("pnt should be a vector of size 3.")
+        throw(ArgumentError("pnt should be a vector of size 3."))
     end
     if length(vec) != 3
-        error("vec should be a vector of size 3")
+        throw(ArgumentError("vec should be a vector of size 3"))
     end
     if typeof(vec) <: AbstractArray{Float64,2} && count(==(1), size(vec)) < 1
-        error("vec should be a vector of size 3.")
+        throw(ArgumentError("vec should be a vector of size 3."))
     end
     if length(geomgroup) != 6
-        error("geomgroup should be a vector of size 6")
+        throw(ArgumentError("geomgroup should be a vector of size 6"))
     end
     if typeof(geomgroup) <: AbstractArray{UInt8,2} && count(==(1), size(geomgroup)) < 1
-        error("geomgroup should be a vector of size 6.")
+        throw(ArgumentError("geomgroup should be a vector of size 6."))
     end
     if length(geomid) != 1
-        error("geomid should be a vector of size 1")
+        throw(ArgumentError("geomid should be a vector of size 1"))
     end
     if typeof(geomid) <: AbstractArray{Int32,2} && count(==(1), size(geomid)) < 1
-        error("geomid should be a vector of size 1.")
+        throw(ArgumentError("geomid should be a vector of size 1."))
     end
 
     return LibMuJoCo.mj_ray(
@@ -769,16 +1208,41 @@ function mj_ray(
     )
 
 end
+"""
+    mju_zero(res)
+
+Set res = 0.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- res should be a vector, not a matrix.
+
+"""
 function mju_zero(res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_zero(res, length(res))
 
 end
+"""
+    mju_fill(res, val)
+
+Set res = val.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- val::Float64
+
+# Constraints
+- res should be a vector, not a matrix.
+
+"""
 function mju_fill(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     val::AbstractFloat,
@@ -786,12 +1250,27 @@ function mju_fill(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_fill(res, val, length(res))
 
 end
+"""
+    mju_copy(res, data)
+
+Set res = vec.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- data::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- data should be a vector, not a matrix.
+- res and data should have the same size
+
+"""
 function mju_copy(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     data::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -799,12 +1278,12 @@ function mju_copy(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(data) &&
        typeof(data) <: AbstractArray{Float64,2} &&
        count(==(1), size(data)) < 1
-        error("data should be a vector, not a matrix.")
+        throw(ArgumentError("data should be a vector, not a matrix."))
     end
 
     if (length(res) != length(data))
@@ -813,26 +1292,66 @@ function mju_copy(
     return LibMuJoCo.mju_copy(res, data, length(res))
 
 end
+"""
+    mju_sum(vec)
+
+Return sum(vec).
+
+# Arguments
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- vec should be a vector, not a matrix.
+
+"""
 function mju_sum(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_sum(vec, length(vec))
 
 end
+"""
+    mju_L1(vec)
+
+Return L1 norm: sum(abs(vec)).
+
+# Arguments
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- vec should be a vector, not a matrix.
+
+"""
 function mju_L1(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_L1(vec, length(vec))
 
 end
+"""
+    mju_scl(res, vec, scl)
+
+Set res = vec*scl.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- scl::Float64
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res and vec should have the same size
+
+"""
 function mju_scl(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -841,12 +1360,12 @@ function mju_scl(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec))
@@ -855,6 +1374,24 @@ function mju_scl(
     return LibMuJoCo.mju_scl(res, vec, scl, length(res))
 
 end
+"""
+    mju_add(res, vec1, vec2)
+
+Set res = vec1 + vec2.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec1 should be a vector, not a matrix.
+- vec2 should be a vector, not a matrix.
+- res and vec1 should have the same size
+- res and vec2 should have the same size
+
+"""
 function mju_add(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -863,17 +1400,17 @@ function mju_add(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec1) &&
        typeof(vec1) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec1)) < 1
-        error("vec1 should be a vector, not a matrix.")
+        throw(ArgumentError("vec1 should be a vector, not a matrix."))
     end
     if !isnothing(vec2) &&
        typeof(vec2) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec2)) < 1
-        error("vec2 should be a vector, not a matrix.")
+        throw(ArgumentError("vec2 should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec1))
@@ -885,6 +1422,24 @@ function mju_add(
     return LibMuJoCo.mju_add(res, vec1, vec2, length(res))
 
 end
+"""
+    mju_sub(res, vec1, vec2)
+
+Set res = vec1 - vec2.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec1 should be a vector, not a matrix.
+- vec2 should be a vector, not a matrix.
+- res and vec1 should have the same size
+- res and vec2 should have the same size
+
+"""
 function mju_sub(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -893,17 +1448,17 @@ function mju_sub(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec1) &&
        typeof(vec1) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec1)) < 1
-        error("vec1 should be a vector, not a matrix.")
+        throw(ArgumentError("vec1 should be a vector, not a matrix."))
     end
     if !isnothing(vec2) &&
        typeof(vec2) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec2)) < 1
-        error("vec2 should be a vector, not a matrix.")
+        throw(ArgumentError("vec2 should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec1))
@@ -915,6 +1470,21 @@ function mju_sub(
     return LibMuJoCo.mju_sub(res, vec1, vec2, length(res))
 
 end
+"""
+    mju_addTo(res, vec)
+
+Set res = res + vec.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res and vec should have the same size
+
+"""
 function mju_addTo(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -922,12 +1492,12 @@ function mju_addTo(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec))
@@ -936,6 +1506,21 @@ function mju_addTo(
     return LibMuJoCo.mju_addTo(res, vec, length(res))
 
 end
+"""
+    mju_subFrom(res, vec)
+
+Set res = res - vec.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res and vec should have the same size
+
+"""
 function mju_subFrom(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -943,12 +1528,12 @@ function mju_subFrom(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec))
@@ -957,6 +1542,22 @@ function mju_subFrom(
     return LibMuJoCo.mju_subFrom(res, vec, length(res))
 
 end
+"""
+    mju_addToScl(res, vec, scl)
+
+Set res = res + vec*scl.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- scl::Float64
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res and vec should have the same size
+
+"""
 function mju_addToScl(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -965,12 +1566,12 @@ function mju_addToScl(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec))
@@ -979,6 +1580,25 @@ function mju_addToScl(
     return LibMuJoCo.mju_addToScl(res, vec, scl, length(res))
 
 end
+"""
+    mju_addScl(res, vec1, vec2, scl)
+
+Set res = vec1 + vec2*scl.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- scl::Float64
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec1 should be a vector, not a matrix.
+- vec2 should be a vector, not a matrix.
+- res and vec1 should have the same size
+- res and vec2 should have the same size
+
+"""
 function mju_addScl(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -988,17 +1608,17 @@ function mju_addScl(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec1) &&
        typeof(vec1) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec1)) < 1
-        error("vec1 should be a vector, not a matrix.")
+        throw(ArgumentError("vec1 should be a vector, not a matrix."))
     end
     if !isnothing(vec2) &&
        typeof(vec2) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec2)) < 1
-        error("vec2 should be a vector, not a matrix.")
+        throw(ArgumentError("vec2 should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec1))
@@ -1010,26 +1630,65 @@ function mju_addScl(
     return LibMuJoCo.mju_addScl(res, vec1, vec2, scl, length(res))
 
 end
+"""
+    mju_normalize(vec)
+
+Normalize vector, return length before normalization.
+
+# Arguments
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- vec should be a vector, not a matrix.
+
+"""
 function mju_normalize(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_normalize(vec, length(vec))
 
 end
+"""
+    mju_norm(vec)
+
+Return vector length (without normalizing vector).
+
+# Arguments
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- vec should be a vector, not a matrix.
+
+"""
 function mju_norm(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_norm(vec, length(vec))
 
 end
+"""
+    mju_dot(vec1, vec2)
+
+Return dot-product of vec1 and vec2.
+
+# Arguments
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- vec1 should be a vector, not a matrix.
+- vec2 should be a vector, not a matrix.
+- vec1 and vec2 should have the same size
+
+"""
 function mju_dot(
     vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1037,12 +1696,12 @@ function mju_dot(
     if !isnothing(vec1) &&
        typeof(vec1) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec1)) < 1
-        error("vec1 should be a vector, not a matrix.")
+        throw(ArgumentError("vec1 should be a vector, not a matrix."))
     end
     if !isnothing(vec2) &&
        typeof(vec2) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec2)) < 1
-        error("vec2 should be a vector, not a matrix.")
+        throw(ArgumentError("vec2 should be a vector, not a matrix."))
     end
 
     if (length(vec1) != length(vec2))
@@ -1051,6 +1710,21 @@ function mju_dot(
     return LibMuJoCo.mju_dot(vec1, vec2, length(vec1))
 
 end
+"""
+    mju_mulMatVec(res, mat, vec)
+
+Multiply matrix and vector: res = mat * vec.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+
+"""
 function mju_mulMatVec(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1059,7 +1733,7 @@ function mju_mulMatVec(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1067,7 +1741,7 @@ function mju_mulMatVec(
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != size(mat, 1))
@@ -1079,6 +1753,21 @@ function mju_mulMatVec(
     return LibMuJoCo.mju_mulMatVec(res, mat, vec, size(mat, 1), size(mat, 2))
 
 end
+"""
+    mju_mulMatTVec(res, mat, vec)
+
+Multiply transposed matrix and vector: res = mat' * vec.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+
+"""
 function mju_mulMatTVec(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1087,7 +1776,7 @@ function mju_mulMatTVec(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1095,7 +1784,7 @@ function mju_mulMatTVec(
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != size(mat, 2))
@@ -1107,6 +1796,21 @@ function mju_mulMatTVec(
     return LibMuJoCo.mju_mulMatTVec(res, mat, vec, size(mat, 1), size(mat, 2))
 
 end
+"""
+    mju_mulVecMatVec(vec1, mat, vec2)
+
+Multiply square matrix with vectors on both sides: returns vec1' * mat * vec2.
+
+# Arguments
+- vec1::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- vec2::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- vec1 should be a vector, not a matrix.
+- vec2 should be a vector, not a matrix.
+
+"""
 function mju_mulVecMatVec(
     vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1115,7 +1819,7 @@ function mju_mulVecMatVec(
     if !isnothing(vec1) &&
        typeof(vec1) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec1)) < 1
-        error("vec1 should be a vector, not a matrix.")
+        throw(ArgumentError("vec1 should be a vector, not a matrix."))
     end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1123,7 +1827,7 @@ function mju_mulVecMatVec(
     if !isnothing(vec2) &&
        typeof(vec2) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec2)) < 1
-        error("vec2 should be a vector, not a matrix.")
+        throw(ArgumentError("vec2 should be a vector, not a matrix."))
     end
 
     if (length(vec1) != length(vec2))
@@ -1138,6 +1842,20 @@ function mju_mulVecMatVec(
     return LibMuJoCo.mju_mulVecMatVec(vec1, mat, vec2, length(vec1))
 
 end
+"""
+    mju_transpose(res, mat)
+
+Transpose matrix: res = mat'.
+
+# Arguments
+- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+
+# Constraints
+- #columns in res should equal #rows in mat
+- #rows in res should equal #columns in mat
+
+"""
 function mju_transpose(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1158,6 +1876,20 @@ function mju_transpose(
     return LibMuJoCo.mju_transpose(res, mat, size(mat, 1), size(mat, 2))
 
 end
+"""
+    mju_symmetrize(res, mat)
+
+Symmetrize square matrix res = (mat + mat')/2.
+
+# Arguments
+- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+
+# Constraints
+- mat should be square
+- res and mat should have the same shape
+
+"""
 function mju_symmetrize(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1178,6 +1910,18 @@ function mju_symmetrize(
     return LibMuJoCo.mju_symmetrize(res, mat, size(mat, 1))
 
 end
+"""
+    mju_eye(mat)
+
+Set mat to the identity matrix.
+
+# Arguments
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- mat should be square
+
+"""
 function mju_eye(mat::Union{Nothing,AbstractArray{Float64,2}})
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1189,6 +1933,21 @@ function mju_eye(mat::Union{Nothing,AbstractArray{Float64,2}})
     return LibMuJoCo.mju_eye(mat, size(mat, 1))
 
 end
+"""
+    mju_mulMatMat(res, mat1, mat2)
+
+Multiply matrices: res = mat1 * mat2.
+
+# Arguments
+- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat1::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- mat2::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+
+# Constraints
+- #rows in res should equal #rows in mat1
+- #columns in mat1 should equal #rows in mat2
+
+"""
 function mju_mulMatMat(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat1::Union{Nothing,AbstractArray{Float64,2}},
@@ -1225,6 +1984,21 @@ function mju_mulMatMat(
     )
 
 end
+"""
+    mju_mulMatMatT(res, mat1, mat2)
+
+Multiply matrices, second argument transposed: res = mat1 * mat2'.
+
+# Arguments
+- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat1::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- mat2::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+
+# Constraints
+- #rows in res should equal #rows in mat1
+- #columns in res should equal #rows in mat2
+
+"""
 function mju_mulMatMatT(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat1::Union{Nothing,AbstractArray{Float64,2}},
@@ -1261,6 +2035,21 @@ function mju_mulMatMatT(
     )
 
 end
+"""
+    mju_mulMatTMat(res, mat1, mat2)
+
+Multiply matrices, first argument transposed: res = mat1' * mat2.
+
+# Arguments
+- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat1::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- mat2::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+
+# Constraints
+- #rows in res should equal #columns in mat1
+- #rows in mat1 should equal #rows in mat2
+
+"""
 function mju_mulMatTMat(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat1::Union{Nothing,AbstractArray{Float64,2}},
@@ -1297,6 +2086,22 @@ function mju_mulMatTMat(
     )
 
 end
+"""
+    mju_sqrMatTD(res, mat, diag)
+
+Set res = mat' * diag * mat if diag is not NULL, and res = mat' * mat otherwise.
+
+# Arguments
+- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- diag::Vector{Float64} -> A vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- diag should be a vector, not a matrix.
+- #rows in res should equal #columns in mat
+- #rows in res should equal #columns in mat
+
+"""
 function mju_sqrMatTD(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1309,7 +2114,7 @@ function mju_sqrMatTD(
         @warn column_major_warning_string("mat")
     end
     if typeof(diag) <: AbstractArray{Float64,2} && count(==(1), size(diag)) < 1
-        error("diag should be a vector, not a matrix.")
+        throw(ArgumentError("diag should be a vector, not a matrix."))
     end
 
     if (size(res, 1) != size(mat, 2))
@@ -1330,6 +2135,19 @@ function mju_sqrMatTD(
     )
 
 end
+"""
+    mju_cholFactor(mat, mindiag)
+
+Cholesky decomposition: mat = L*L'; return rank, decomposition performed in-place into mat.
+
+# Arguments
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mindiag::Float64
+
+# Constraints
+- mat should be a square matrix
+
+"""
 function mju_cholFactor(
     mat::Union{Nothing,AbstractArray{Float64,2}},
     mindiag::AbstractFloat,
@@ -1344,6 +2162,22 @@ function mju_cholFactor(
     return LibMuJoCo.mju_cholFactor(mat, size(mat, 1), mindiag)
 
 end
+"""
+    mju_cholSolve(res, mat, vec)
+
+Solve (mat*mat') * res = vec, where mat is a Cholesky factor.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- mat should be a square matrix
+
+"""
 function mju_cholSolve(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1352,7 +2186,7 @@ function mju_cholSolve(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1360,7 +2194,7 @@ function mju_cholSolve(
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (size(mat, 1) != size(mat, 2))
@@ -1375,6 +2209,21 @@ function mju_cholSolve(
     return LibMuJoCo.mju_cholSolve(res, mat, vec, size(mat, 1))
 
 end
+"""
+    mju_cholUpdate(mat, x, flg_plus)
+
+Cholesky rank-one update: L*L' +/- x*x'; return rank.
+
+# Arguments
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- x::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- flg_plus::Int32
+
+# Constraints
+- x should be a vector, not a matrix.
+- mat should be a square matrix
+
+"""
 function mju_cholUpdate(
     mat::Union{Nothing,AbstractArray{Float64,2}},
     x::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1384,7 +2233,7 @@ function mju_cholUpdate(
         @warn column_major_warning_string("mat")
     end
     if !isnothing(x) && typeof(x) <: AbstractArray{Float64,2} && count(==(1), size(x)) < 1
-        error("x should be a vector, not a matrix.")
+        throw(ArgumentError("x should be a vector, not a matrix."))
     end
 
     if (size(mat, 1) != size(mat, 2))
@@ -1396,6 +2245,23 @@ function mju_cholUpdate(
     return LibMuJoCo.mju_cholUpdate(mat, x, size(mat, 1), flg_plus)
 
 end
+"""
+    mju_cholFactorBand(mat, ntotal, nband, ndense, diagadd, diagmul)
+
+Band-dense Cholesky decomposition.  Returns minimum value in the factorized diagonal, or 0 if rank-deficient.  mat has (ntotal-ndense) x nband + ndense x ntotal elements.  The first (ntotal-ndense) x nband store the band part, left of diagonal, inclusive.  The second ndense x ntotal store the band part as entire dense rows.  Add diagadd+diagmul*mat_ii to diagonal before factorization.
+
+# Arguments
+- mat::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- ntotal::Int32
+- nband::Int32
+- ndense::Int32
+- diagadd::Float64
+- diagmul::Float64
+
+# Constraints
+- mat should be a vector, not a matrix.
+
+"""
 function mju_cholFactorBand(
     mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     ntotal::Integer,
@@ -1407,7 +2273,7 @@ function mju_cholFactorBand(
     if !isnothing(mat) &&
        typeof(mat) <: AbstractArray{Float64,2} &&
        count(==(1), size(mat)) < 1
-        error("mat should be a vector, not a matrix.")
+        throw(ArgumentError("mat should be a vector, not a matrix."))
     end
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
@@ -1417,6 +2283,27 @@ function mju_cholFactorBand(
     return LibMuJoCo.mju_cholFactorBand(mat, ntotal, nband, ndense, diagadd, diagmul)
 
 end
+"""
+    mju_cholSolveBand(res, mat, vec, ntotal, nband, ndense)
+
+Solve (mat*mat')*res = vec where mat is a band-dense Cholesky factor.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- mat::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- ntotal::Int32
+- nband::Int32
+- ndense::Int32
+
+# Constraints
+- res should be a vector, not a matrix.
+- mat should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- size of res should equal ntotal
+- size of vec should equal ntotal
+
+"""
 function mju_cholSolveBand(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1428,17 +2315,17 @@ function mju_cholSolveBand(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(mat) &&
        typeof(mat) <: AbstractArray{Float64,2} &&
        count(==(1), size(mat)) < 1
-        error("mat should be a vector, not a matrix.")
+        throw(ArgumentError("mat should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
@@ -1456,6 +2343,25 @@ function mju_cholSolveBand(
     return LibMuJoCo.mju_cholSolveBand(res, mat, vec, ntotal, nband, ndense)
 
 end
+"""
+    mju_band2Dense(res, mat, ntotal, nband, ndense, flg_sym)
+
+Convert banded matrix to dense matrix, fill upper triangle if flg_sym>0.
+
+# Arguments
+- res::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- mat::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- ntotal::Int32
+- nband::Int32
+- ndense::Int32
+- flg_sym::UInt8
+
+# Constraints
+- mat should be a vector, not a matrix.
+- res should have ntotal rows
+- res should have ntotal columns
+
+"""
 function mju_band2Dense(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1470,7 +2376,7 @@ function mju_band2Dense(
     if !isnothing(mat) &&
        typeof(mat) <: AbstractArray{Float64,2} &&
        count(==(1), size(mat)) < 1
-        error("mat should be a vector, not a matrix.")
+        throw(ArgumentError("mat should be a vector, not a matrix."))
     end
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
@@ -1486,6 +2392,24 @@ function mju_band2Dense(
     return LibMuJoCo.mju_band2Dense(res, mat, ntotal, nband, ndense, flg_sym)
 
 end
+"""
+    mju_dense2Band(res, mat, ntotal, nband, ndense)
+
+Convert dense matrix to banded matrix.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- ntotal::Int32
+- nband::Int32
+- ndense::Int32
+
+# Constraints
+- res should be a vector, not a matrix.
+- mat should have ntotal rows
+- mat should have ntotal columns
+
+"""
 function mju_dense2Band(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1496,7 +2420,7 @@ function mju_dense2Band(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1515,6 +2439,29 @@ function mju_dense2Band(
     return LibMuJoCo.mju_dense2Band(res, mat, ntotal, nband, ndense)
 
 end
+"""
+    mju_bandMulMatVec(res, mat, vec, ntotal, nband, ndense, nVec, flg_sym)
+
+Multiply band-diagonal matrix with nvec vectors, include upper triangle if flg_sym>0.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- mat::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- vec::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- ntotal::Int32
+- nband::Int32
+- ndense::Int32
+- nVec::Int32
+- flg_sym::UInt8
+
+# Constraints
+- res should be a vector, not a matrix.
+- res should have ntotal rows
+- res should have nVec columns
+- vec should have ntotal rows
+- vec should have nVec columns
+
+"""
 function mju_bandMulMatVec(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
@@ -1528,7 +2475,7 @@ function mju_bandMulMatVec(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
@@ -1556,6 +2503,34 @@ function mju_bandMulMatVec(
     return LibMuJoCo.mju_bandMulMatVec(res, mat, vec, ntotal, nband, ndense, nVec, flg_sym)
 
 end
+"""
+    mju_boxQP(res, R, index, H, g, lower, upper)
+
+minimize 0.5*x'*H*x + x'*g  s.t. lower <= x <= upper, return rank or -1 if failed   inputs:     n           - problem dimension     H           - SPD matrix                n*n     g           - bias vector               n     lower       - lower bounds              n     upper       - upper bounds              n     res         - solution warmstart        n   return value:     nfree <= n  - rank of unconstrained subspace, -1 if failure   outputs (required):     res         - solution                  n     R           - subspace Cholesky factor  nfree*nfree    allocated: n*(n+7)   outputs (optional):     index       - set of free dimensions    nfree          allocated: n   notes:     the initial value of res is used to warmstart the solver     R must have allocatd size n*(n+7), but only nfree*nfree values are used in output     index (if given) must have allocated size n, but only nfree values are used in output     only the lower triangles of H and R and are read from and written to, respectively     the convenience function mju_boxQPmalloc allocates the required data structures
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- R::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- index::Vector{Int32} -> A vector of variable size. Check constaints for sizes. Constant.
+- H::Matrix{Float64} -> A matrix variable size. Check constaints for sizes.
+- g::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- lower::Vector{Float64} -> A vector of variable size. Check constaints for sizes.
+- upper::Vector{Float64} -> A vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- index should be a vector, not a matrix.
+- g should be a vector, not a matrix.
+- lower should be a vector, not a matrix.
+- upper should be a vector, not a matrix.
+- size of R should be n*(n+7)
+- size of index should equal n
+- H should be of shape (n, n)
+- size of g should equal n
+- size of lower should equal n
+- size of upper should equal n
+
+"""
 function mju_boxQP(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     R::Union{Nothing,AbstractArray{Float64,2}},
@@ -1568,25 +2543,25 @@ function mju_boxQP(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(R) && !(typeof(R) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("R")
     end
     if typeof(index) <: AbstractArray{Int32,2} && count(==(1), size(index)) < 1
-        error("index should be a vector, not a matrix.")
+        throw(ArgumentError("index should be a vector, not a matrix."))
     end
     if !isnothing(H) && !(typeof(H) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("H")
     end
     if !isnothing(g) && typeof(g) <: AbstractArray{Float64,2} && count(==(1), size(g)) < 1
-        error("g should be a vector, not a matrix.")
+        throw(ArgumentError("g should be a vector, not a matrix."))
     end
     if typeof(lower) <: AbstractArray{Float64,2} && count(==(1), size(lower)) < 1
-        error("lower should be a vector, not a matrix.")
+        throw(ArgumentError("lower should be a vector, not a matrix."))
     end
     if typeof(upper) <: AbstractArray{Float64,2} && count(==(1), size(upper)) < 1
-        error("upper should be a vector, not a matrix.")
+        throw(ArgumentError("upper should be a vector, not a matrix."))
     end
 
     n = length(res)
@@ -1620,6 +2595,22 @@ function mju_boxQP(
     )
 
 end
+"""
+    mju_encodePyramid(pyramid, force, mu)
+
+Convert contact force to pyramid representation.
+
+# Arguments
+- pyramid::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- force::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- mu::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- pyramid should be a vector, not a matrix.
+- force should be a vector, not a matrix.
+- mu should be a vector, not a matrix.
+
+"""
 function mju_encodePyramid(
     pyramid::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     force::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1628,17 +2619,17 @@ function mju_encodePyramid(
     if !isnothing(pyramid) &&
        typeof(pyramid) <: AbstractArray{Float64,2} &&
        count(==(1), size(pyramid)) < 1
-        error("pyramid should be a vector, not a matrix.")
+        throw(ArgumentError("pyramid should be a vector, not a matrix."))
     end
     if !isnothing(force) &&
        typeof(force) <: AbstractArray{Float64,2} &&
        count(==(1), size(force)) < 1
-        error("force should be a vector, not a matrix.")
+        throw(ArgumentError("force should be a vector, not a matrix."))
     end
     if !isnothing(mu) &&
        typeof(mu) <: AbstractArray{Float64,2} &&
        count(==(1), size(mu)) < 1
-        error("mu should be a vector, not a matrix.")
+        throw(ArgumentError("mu should be a vector, not a matrix."))
     end
 
     if (length(pyramid) != 2 * length(mu))
@@ -1650,6 +2641,22 @@ function mju_encodePyramid(
     return LibMuJoCo.mju_encodePyramid(pyramid, force, mu, length(mu))
 
 end
+"""
+    mju_decodePyramid(force, pyramid, mu)
+
+Convert pyramid representation to contact force.
+
+# Arguments
+- force::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- pyramid::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+- mu::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- force should be a vector, not a matrix.
+- pyramid should be a vector, not a matrix.
+- mu should be a vector, not a matrix.
+
+"""
 function mju_decodePyramid(
     force::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     pyramid::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1658,17 +2665,17 @@ function mju_decodePyramid(
     if !isnothing(force) &&
        typeof(force) <: AbstractArray{Float64,2} &&
        count(==(1), size(force)) < 1
-        error("force should be a vector, not a matrix.")
+        throw(ArgumentError("force should be a vector, not a matrix."))
     end
     if !isnothing(pyramid) &&
        typeof(pyramid) <: AbstractArray{Float64,2} &&
        count(==(1), size(pyramid)) < 1
-        error("pyramid should be a vector, not a matrix.")
+        throw(ArgumentError("pyramid should be a vector, not a matrix."))
     end
     if !isnothing(mu) &&
        typeof(mu) <: AbstractArray{Float64,2} &&
        count(==(1), size(mu)) < 1
-        error("mu should be a vector, not a matrix.")
+        throw(ArgumentError("mu should be a vector, not a matrix."))
     end
 
     if (length(pyramid) != 2 * length(mu))
@@ -1680,16 +2687,43 @@ function mju_decodePyramid(
     return LibMuJoCo.mju_decodePyramid(force, pyramid, mu, length(mu))
 
 end
+"""
+    mju_isZero(vec)
+
+Return 1 if all elements are 0.
+
+# Arguments
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- vec should be a vector, not a matrix.
+
+"""
 function mju_isZero(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_isZero(vec, length(vec))
 
 end
+"""
+    mju_f2n(res, vec)
+
+Convert from float to mjtNum.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float32} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res and vec should have the same size
+
+"""
 function mju_f2n(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float32},AbstractArray{Float32,2}},
@@ -1697,12 +2731,12 @@ function mju_f2n(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float32,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec))
@@ -1711,6 +2745,21 @@ function mju_f2n(
     return LibMuJoCo.mju_f2n(res, vec, length(res))
 
 end
+"""
+    mju_n2f(res, vec)
+
+Convert from mjtNum to float.
+
+# Arguments
+- res::Vector{Float32} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res and vec should have the same size
+
+"""
 function mju_n2f(
     res::Union{Nothing,AbstractVector{Float32},AbstractArray{Float32,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1718,12 +2767,12 @@ function mju_n2f(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float32,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec))
@@ -1732,6 +2781,21 @@ function mju_n2f(
     return LibMuJoCo.mju_n2f(res, vec, length(res))
 
 end
+"""
+    mju_d2n(res, vec)
+
+Convert from double to mjtNum.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res and vec should have the same size
+
+"""
 function mju_d2n(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1739,12 +2803,12 @@ function mju_d2n(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec))
@@ -1753,6 +2817,21 @@ function mju_d2n(
     return LibMuJoCo.mju_d2n(res, vec, length(res))
 
 end
+"""
+    mju_n2d(res, vec)
+
+Convert from mjtNum to double.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+- vec::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes.
+
+# Constraints
+- res should be a vector, not a matrix.
+- vec should be a vector, not a matrix.
+- res and vec should have the same size
+
+"""
 function mju_n2d(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
@@ -1760,12 +2839,12 @@ function mju_n2d(
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
     if !isnothing(vec) &&
        typeof(vec) <: AbstractArray{Float64,2} &&
        count(==(1), size(vec)) < 1
-        error("vec should be a vector, not a matrix.")
+        throw(ArgumentError("vec should be a vector, not a matrix."))
     end
 
     if (length(res) != length(vec))
@@ -1774,30 +2853,76 @@ function mju_n2d(
     return LibMuJoCo.mju_n2d(res, vec, length(res))
 
 end
+"""
+    mju_insertionSort(res)
+
+Insertion sort, resulting list is in increasing order.
+
+# Arguments
+- res::Vector{Float64} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- res should be a vector, not a matrix.
+
+"""
 function mju_insertionSort(
     res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Float64,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_insertionSort(res, length(res))
 
 end
+"""
+    mju_insertionSortInt(res)
+
+Integer insertion sort, resulting list is in increasing order.
+
+# Arguments
+- res::Vector{Int32} -> An optional vector of variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- res should be a vector, not a matrix.
+
+"""
 function mju_insertionSortInt(
     res::Union{Nothing,AbstractVector{Int32},AbstractArray{Int32,2}},
 )
     if !isnothing(res) &&
        typeof(res) <: AbstractArray{Int32,2} &&
        count(==(1), size(res)) < 1
-        error("res should be a vector, not a matrix.")
+        throw(ArgumentError("res should be a vector, not a matrix."))
     end
 
     return LibMuJoCo.mju_insertionSortInt(res, length(res))
 
 end
+"""
+    mjd_transitionFD(m, d, eps, flg_centered, A, B, C, D)
+
+Finite differenced transition matrices (control theory notation)   d(x_next) = A*dx + B*du   d(sensor) = C*dx + D*du   required output matrix dimensions:      A: (2*nv+na x 2*nv+na)      B: (2*nv+na x nu)      D: (nsensordata x 2*nv+na)      C: (nsensordata x nu)
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- eps::Float64
+- flg_centered::UInt8
+- A::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- B::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- C::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- D::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- A should be of shape (2*nv+na, 2*nv+na)
+- B should be of shape (2*nv+na, nu)
+- C should be of shape (nsensordata, 2*nv+na)
+- D should be of shape (nsensordata, nu)
+
+"""
 function mjd_transitionFD(
     m,
     d,
@@ -1845,6 +2970,34 @@ function mjd_transitionFD(
     )
 
 end
+"""
+    mjd_inverseFD(m, d, eps, flg_actuation, DfDq, DfDv, DfDa, DsDq, DsDv, DsDa, DmDq)
+
+Finite differenced Jacobians of (force, sensors) = mj*inverse(state, acceleration)   All outputs are optional. Output dimensions (transposed w.r.t Control Theory convention):     DfDq: (nv x nv)     DfDv: (nv x nv)     DfDa: (nv x nv)     DsDq: (nv x nsensordata)     DsDv: (nv x nsensordata)     DsDa: (nv x nsensordata)     DmDq: (nv x nM)   single-letter shortcuts:     inputs: q=qpos, v=qvel, a=qacc     outputs: f=qfrc*inverse, s=sensordata, m=qM   notes:     optionally computes mass matrix Jacobian DmDq     flg*actuation specifies whether to subtract qfrc*actuator from qfrc_inverse
+
+# Arguments
+- m::Model
+- d::Data -> Constant.
+- eps::Float64
+- flg_actuation::UInt8
+- DfDq::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- DfDv::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- DfDa::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- DsDq::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- DsDv::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- DsDa::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+- DmDq::Matrix{Float64} -> A matrix variable size. Check constaints for sizes. Constant.
+
+# Constraints
+- DfDq should be of shape (nv, nv)
+- DfDv should be of shape (nv, nv)
+- DfDa should be of shape (nv, nv)
+- DsDq should be of shape (nv, nsensordata)
+- DsDv should be of shape (nv, nsensordata)
+- DsDa should be of shape (nv, nsensordata)
+- DmDq should be of shape (nv, nM)
+
+"""
 function mjd_inverseFD(
     m,
     d,

@@ -281,7 +281,7 @@ function write_matrix_order_warning_check(buffer::IOBuffer, variable_name, datat
     else
         write(buffer, "if !(typeof($variable_name) <: $row_major_type)\n")
     end
-    write(buffer, "\t@warn column_major_warning_string(\"$variable_name\")")
+    write(buffer, "    @warn column_major_warning_string(\"$variable_name\")")
     write(buffer, "end\n")
 end
 function write_vector_size_check(buffer::IOBuffer, variable_name, datatype, expected_length, is_optional)
@@ -292,7 +292,7 @@ function write_vector_size_check(buffer::IOBuffer, variable_name, datatype, expe
         else
             write(buffer, "if $size_check\n")
         end
-        write(buffer, "\terror(\"$variable_name should be a vector of size $expected_length\")")
+        write(buffer, "    throw(ArgumentError(\"$variable_name should be a vector of size $expected_length\"))")
         write(buffer, "end\n")
     end
 
@@ -303,9 +303,9 @@ function write_vector_size_check(buffer::IOBuffer, variable_name, datatype, expe
         write(buffer, "if $vector_type_check\n")
     end
     if !isnothing(expected_length)
-        write(buffer, "\terror(\"$variable_name should be a vector of size $expected_length.\")")
+        write(buffer, "    throw(ArgumentError(\"$variable_name should be a vector of size $expected_length.\"))")
     else
-        write(buffer, "\terror(\"$variable_name should be a vector, not a matrix.\")")
+        write(buffer, "    throw(ArgumentError(\"$variable_name should be a vector, not a matrix.\"))")
     end
     write(buffer, "end\n")
 end
@@ -384,6 +384,89 @@ function convert_argument_from_info(info, pre_body_buffer::IOBuffer)
     return info.identifier
 end
 
+function extract_constraints(fn_body)
+    type_error = r"""throw\(ArgumentError\(\n?"(.*)"\)\)"""
+
+    return map(eachmatch(type_error, fn_body)) do m
+        m.captures[begin]
+    end
+end
+
+function argument_doc_description(arg_info)
+    if arg_info.type == :basic
+        return "- $(arg_info.identifier)::$(arg_info.datatype)"
+    elseif arg_info.type == :string
+        return "- $(arg_info.identifier)::String" * (arg_info.is_const ? " -> Constant." : "")
+    elseif arg_info.type == :mjModel
+        return "- $(arg_info.identifier)::Model" * (arg_info.is_const ? " -> Constant." : "")
+    elseif arg_info.type == :mjData
+        return "- $(arg_info.identifier)::Data" * (arg_info.is_const ? " -> Constant." : "")
+    elseif arg_info.type == :anomalous_vector
+        opt = arg_info.is_optional ? "An optional" : "A"
+        if arg_info.is_dynamic_size
+            return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of variable size. Check constaints for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+        else
+            return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of size $(arg_info.size_vector)." * (arg_info.is_inner_const ? " Constant." : "")
+        end
+    elseif arg_info.type == :variable_vector
+        opt = arg_info.is_optional ? "An optional" : "A"
+        return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of variable size. Check constaints for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+    elseif arg_info.type == :static_array
+        return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> A vector of size $(arg_info.array_size)." * (arg_info.is_const ? " Constant." : "")
+    elseif arg_info.type == :matrix
+        return "- $(arg_info.identifier)::Matrix{$(arg_info.datatype)} -> A matrix variable size. Check constaints for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+    else
+        error("Unrecognised argument info for variable $(arg_info)")
+    end
+end
+
+function write_argument_doc_description!(io, argument_infos)
+    if length(argument_infos) == 0
+        return
+    end
+
+    println(io, "# Arguments")
+    for arg_info in argument_infos
+        println(io, argument_doc_description(arg_info))
+    end
+    nothing
+end
+
+
+function create_wrapped_docstring(fn_name, fn_body, argument_infos)
+    # original_fn = getproperty(LibMuJoCo, Symbol(fn_name))
+    original_documentation = string(eval(:(@doc LibMuJoCo.$(Symbol(fn_name)))))
+
+    io = IOBuffer()
+
+    write(io, "\"\"\"\n")
+    # Write function signature
+    write(io, "    ")
+    write(io, fn_name)
+    write(io, "(")
+    write(io, join(map(x->x.identifier, argument_infos), ", "))
+    write(io, ")\n\n")
+
+    println(io, original_documentation)
+
+    write_argument_doc_description!(io, argument_infos)
+
+    constraints = extract_constraints(fn_body)
+    if length(constraints) > 0
+        write(io, "\n# Constraints\n")
+        for constraint in constraints
+            write(io, "- ")
+            write(io, constraint)
+            write(io, "\n")
+        end
+        write(io, "\n")
+    end
+
+    write(io, "\"\"\"\n")
+
+    return String(take!(io))
+end
+
 function extract_fn_info(fn_block)
     bracket_num = 0
     angle_bracket_count = 0
@@ -458,7 +541,7 @@ function extract_fn_info(fn_block)
     # Overwrite function with new fn
     fn_body = String(take!(pre_body_buffer))
 
-    return args, fn_body
+    return args, arg_infos, fn_body
 end
 
 function make_fn(fn_name, block)
@@ -470,9 +553,12 @@ function make_fn(fn_name, block)
     anon_fn = extract_anon_fn(block)
     if any(x->!isspace(x), anon_fn)
 
-        args, fn_body = extract_fn_info(anon_fn)
+        args, arg_infos, fn_body = extract_fn_info(anon_fn)
 
         fn_buffer = IOBuffer()
+
+        write(fn_buffer, create_wrapped_docstring(fn_name, fn_body, arg_infos))
+
         write(fn_buffer, "function $fn_name(")
         write(fn_buffer, join(args, ", "))
         write(fn_buffer, ")\n")

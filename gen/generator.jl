@@ -298,6 +298,8 @@ include("named_access.jl")
 generate_named_access()
 
 @info "Generating function constraints"
+include("LibMuJoCo/LibMuJoCo.jl")
+import .LibMuJoCo
 include("parsing/function_constraints.jl")
 write_function_constraints(joinpath(libmujoco_dir, "LibMuJoCo.jl"), staging_dir)
 format_file(joinpath(staging_dir, "function_constraints.jl"))
