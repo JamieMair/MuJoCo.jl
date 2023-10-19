@@ -29,7 +29,6 @@ export mju_printMat,
     mj_differentiatePos,
     mj_integratePos,
     mj_normalizeQuat,
-    mj_loadAllPluginLibraries,
     mj_ray,
     mju_zero,
     mju_fill,
@@ -108,7 +107,7 @@ function mj_solveM(
     if (size(y, 2) != m.nv)
         throw(ArgumentError("the last dimension of y should be of size nv"))
     end
-    return mj_solveM(m, d, x, y, size(y, 1))
+    return LibMuJoCo.mj_solveM(m, d, x, y, size(y, 1))
 
 end
 function mj_solveM2(
@@ -133,7 +132,7 @@ function mj_solveM2(
     if (size(y, 2) != m.nv)
         throw(ArgumentError("the last dimension of y should be of size nv"))
     end
-    return mj_solveM2(m, d, x, y, size(y, 1))
+    return LibMuJoCo.mj_solveM2(m, d, x, y, size(y, 1))
 
 end
 function mj_rne(
@@ -151,7 +150,7 @@ function mj_rne(
     if (length(result) != m.nv)
         throw(ArgumentError("result should have length nv"))
     end
-    return mj_rne(m, d, flg_acc, result)
+    return LibMuJoCo.mj_rne(m, d, flg_acc, result)
 
 end
 function mj_constraintUpdate(
@@ -176,7 +175,13 @@ function mj_constraintUpdate(
     if (length(jar) != d.nefc)
         throw(ArgumentError("size of jar should equal nefc"))
     end
-    return mj_constraintUpdate(m, d, jar, !isnothing(cost) ? cost : C_NULL, flg_coneHessian)
+    return LibMuJoCo.mj_constraintUpdate(
+        m,
+        d,
+        jar,
+        !isnothing(cost) ? cost : C_NULL,
+        flg_coneHessian,
+    )
 
 end
 function mj_getState(
@@ -194,7 +199,7 @@ function mj_getState(
     if (length(state) != mj_stateSize(m, spec))
         throw(ArgumentError("state size should equal mj_stateSize(m, spec)"))
     end
-    return mj_getState(m, d, state, spec)
+    return LibMuJoCo.mj_getState(m, d, state, spec)
 
 end
 function mj_setState(
@@ -212,7 +217,7 @@ function mj_setState(
     if (length(state) != mj_stateSize(m, spec))
         throw(ArgumentError("state size should equal mj_stateSize(m, spec)"))
     end
-    return mj_setState(m, d, state, spec)
+    return LibMuJoCo.mj_setState(m, d, state, spec)
 
 end
 function mj_mulJacVec(
@@ -238,7 +243,7 @@ function mj_mulJacVec(
     if (length(vec) != m.nv)
         throw(ArgumentError("vec should be of length nv"))
     end
-    return mj_mulJacVec(m, d, res, vec)
+    return LibMuJoCo.mj_mulJacVec(m, d, res, vec)
 
 end
 function mj_mulJacTVec(
@@ -264,7 +269,7 @@ function mj_mulJacTVec(
     if (length(vec) != d.nefc)
         throw(ArgumentError("vec should be of length nefc"))
     end
-    return mj_mulJacTVec(m, d, res, vec)
+    return LibMuJoCo.mj_mulJacTVec(m, d, res, vec)
 
 end
 function mj_jac(
@@ -294,7 +299,7 @@ function mj_jac(
     if (!isnothing(jacr) && (size(jacr, 1) != 3 || size(jacr, 2) != m.nv))
         throw(ArgumentError("jacr should be of shape (3, nv)"))
     end
-    return mj_jac(
+    return LibMuJoCo.mj_jac(
         m,
         d,
         !isnothing(jacp) ? jacp : C_NULL,
@@ -324,7 +329,7 @@ function mj_jacBody(
     if (!isnothing(jacr) && (size(jacr, 1) != 3 || size(jacr, 2) != m.nv))
         throw(ArgumentError("jacr should be of shape (3, nv)"))
     end
-    return mj_jacBody(
+    return LibMuJoCo.mj_jacBody(
         m,
         d,
         !isnothing(jacp) ? jacp : C_NULL,
@@ -353,7 +358,7 @@ function mj_jacBodyCom(
     if (!isnothing(jacr) && (size(jacr, 1) != 3 || size(jacr, 2) != m.nv))
         throw(ArgumentError("jacr should be of shape (3, nv)"))
     end
-    return mj_jacBodyCom(
+    return LibMuJoCo.mj_jacBodyCom(
         m,
         d,
         !isnothing(jacp) ? jacp : C_NULL,
@@ -370,7 +375,7 @@ function mj_jacSubtreeCom(m, d, jacp::AbstractArray{Float64,2}, body::Integer)
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
         throw(ArgumentError("jacp should be of shape (3, nv)"))
     end
-    return mj_jacSubtreeCom(m, d, !isnothing(jacp) ? jacp : C_NULL, body)
+    return LibMuJoCo.mj_jacSubtreeCom(m, d, !isnothing(jacp) ? jacp : C_NULL, body)
 
 end
 function mj_jacGeom(
@@ -393,7 +398,7 @@ function mj_jacGeom(
     if (!isnothing(jacr) && (size(jacr, 1) != 3 || size(jacr, 2) != m.nv))
         throw(ArgumentError("jacr should be of shape (3, nv)"))
     end
-    return mj_jacGeom(
+    return LibMuJoCo.mj_jacGeom(
         m,
         d,
         !isnothing(jacp) ? jacp : C_NULL,
@@ -422,7 +427,7 @@ function mj_jacSite(
     if (!isnothing(jacr) && (size(jacr, 1) != 3 || size(jacr, 2) != m.nv))
         throw(ArgumentError("jacr should be of shape (3, nv)"))
     end
-    return mj_jacSite(
+    return LibMuJoCo.mj_jacSite(
         m,
         d,
         !isnothing(jacp) ? jacp : C_NULL,
@@ -465,7 +470,7 @@ function mj_jacPointAxis(
     if (!isnothing(jacr) && (size(jacr, 1) != 3 || size(jacr, 2) != m.nv))
         throw(ArgumentError("jacr should be of shape (3, nv)"))
     end
-    return mj_jacPointAxis(
+    return LibMuJoCo.mj_jacPointAxis(
         m,
         d,
         !isnothing(jacp) ? jacp : C_NULL,
@@ -520,7 +525,7 @@ function mj_mulM(
     if (length(vec) != m.nv)
         throw(ArgumentError("vec should be of size nv"))
     end
-    return mj_mulM(m, d, res, vec)
+    return LibMuJoCo.mj_mulM(m, d, res, vec)
 
 end
 function mj_mulM2(
@@ -546,7 +551,7 @@ function mj_mulM2(
     if (length(vec) != m.nv)
         throw(ArgumentError("vec should be of size nv"))
     end
-    return mj_mulM2(m, d, res, vec)
+    return LibMuJoCo.mj_mulM2(m, d, res, vec)
 
 end
 function mj_addM(
@@ -590,7 +595,7 @@ function mj_addM(
     if (length(colind) != m.nM)
         throw(ArgumentError("colind should be of size nM"))
     end
-    return mj_addM(m, d, dst, rownnz, rowadr, colind)
+    return LibMuJoCo.mj_addM(m, d, dst, rownnz, rowadr, colind)
 
 end
 function mj_applyFT(
@@ -629,7 +634,15 @@ function mj_applyFT(
     if (length(qfrc_target) != m.nv)
         throw(ArgumentError("qfrc_target should be of size nv"))
     end
-    return mj_applyFT(m, d, force[0+1], torque[0+1], point[0+1], body, qfrc_target)
+    return LibMuJoCo.mj_applyFT(
+        m,
+        d,
+        force[0+1],
+        torque[0+1],
+        point[0+1],
+        body,
+        qfrc_target,
+    )
 
 end
 function mj_differentiatePos(
@@ -664,7 +677,7 @@ function mj_differentiatePos(
     if (length(qpos2) != m.nq)
         throw(ArgumentError("qpos2 should be of size nq"))
     end
-    return mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
+    return LibMuJoCo.mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
 
 end
 function mj_integratePos(
@@ -690,7 +703,7 @@ function mj_integratePos(
     if (length(qvel) != m.nv)
         throw(ArgumentError("qvel should be of size nv"))
     end
-    return mj_integratePos(m, qpos, qvel, dt)
+    return LibMuJoCo.mj_integratePos(m, qpos, qvel, dt)
 
 end
 function mj_normalizeQuat(
@@ -706,12 +719,7 @@ function mj_normalizeQuat(
     if (length(qpos) != m.nq)
         throw(ArgumentError("qpos should be of size nq"))
     end
-    return mj_normalizeQuat(m, qpos)
-
-end
-function mj_loadAllPluginLibraries(directory::String)
-
-    mj_loadAllPluginLibraries(directory, C_NULL)
+    return LibMuJoCo.mj_normalizeQuat(m, qpos)
 
 end
 function mj_ray(
@@ -749,7 +757,7 @@ function mj_ray(
         error("geomid should be a vector of size 1.")
     end
 
-    return mj_ray(
+    return LibMuJoCo.mj_ray(
         m,
         d,
         pnt[0+1],
@@ -768,7 +776,7 @@ function mju_zero(res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float
         error("res should be a vector, not a matrix.")
     end
 
-    return mju_zero(res, length(res))
+    return LibMuJoCo.mju_zero(res, length(res))
 
 end
 function mju_fill(
@@ -781,7 +789,7 @@ function mju_fill(
         error("res should be a vector, not a matrix.")
     end
 
-    return mju_fill(res, val, length(res))
+    return LibMuJoCo.mju_fill(res, val, length(res))
 
 end
 function mju_copy(
@@ -802,7 +810,7 @@ function mju_copy(
     if (length(res) != length(data))
         throw(ArgumentError("res and data should have the same size"))
     end
-    return mju_copy(res, data, length(res))
+    return LibMuJoCo.mju_copy(res, data, length(res))
 
 end
 function mju_sum(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -822,7 +830,7 @@ function mju_L1(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64
         error("vec should be a vector, not a matrix.")
     end
 
-    return mju_L1(vec, length(vec))
+    return LibMuJoCo.mju_L1(vec, length(vec))
 
 end
 function mju_scl(
@@ -844,7 +852,7 @@ function mju_scl(
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
     end
-    return mju_scl(res, vec, scl, length(res))
+    return LibMuJoCo.mju_scl(res, vec, scl, length(res))
 
 end
 function mju_add(
@@ -904,7 +912,7 @@ function mju_sub(
     if (length(res) != length(vec2))
         throw(ArgumentError("res and vec2 should have the same size"))
     end
-    return mju_sub(res, vec1, vec2, length(res))
+    return LibMuJoCo.mju_sub(res, vec1, vec2, length(res))
 
 end
 function mju_addTo(
@@ -925,7 +933,7 @@ function mju_addTo(
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
     end
-    return mju_addTo(res, vec, length(res))
+    return LibMuJoCo.mju_addTo(res, vec, length(res))
 
 end
 function mju_subFrom(
@@ -946,7 +954,7 @@ function mju_subFrom(
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
     end
-    return mju_subFrom(res, vec, length(res))
+    return LibMuJoCo.mju_subFrom(res, vec, length(res))
 
 end
 function mju_addToScl(
@@ -999,7 +1007,7 @@ function mju_addScl(
     if (length(res) != length(vec2))
         throw(ArgumentError("res and vec2 should have the same size"))
     end
-    return mju_addScl(res, vec1, vec2, scl, length(res))
+    return LibMuJoCo.mju_addScl(res, vec1, vec2, scl, length(res))
 
 end
 function mju_normalize(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1009,7 +1017,7 @@ function mju_normalize(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{
         error("vec should be a vector, not a matrix.")
     end
 
-    return mju_normalize(vec, length(vec))
+    return LibMuJoCo.mju_normalize(vec, length(vec))
 
 end
 function mju_norm(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1019,7 +1027,7 @@ function mju_norm(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float
         error("vec should be a vector, not a matrix.")
     end
 
-    return mju_norm(vec, length(vec))
+    return LibMuJoCo.mju_norm(vec, length(vec))
 
 end
 function mju_dot(
@@ -1040,7 +1048,7 @@ function mju_dot(
     if (length(vec1) != length(vec2))
         throw(ArgumentError("vec1 and vec2 should have the same size"))
     end
-    return mju_dot(vec1, vec2, length(vec1))
+    return LibMuJoCo.mju_dot(vec1, vec2, length(vec1))
 
 end
 function mju_mulMatVec(
@@ -1068,7 +1076,7 @@ function mju_mulMatVec(
     if (length(vec) != size(mat, 2))
         throw(ArgumentError("size of vec should equal the number of columns in mat"))
     end
-    return mju_mulMatVec(res, mat, vec, size(mat, 1), size(mat, 2))
+    return LibMuJoCo.mju_mulMatVec(res, mat, vec, size(mat, 1), size(mat, 2))
 
 end
 function mju_mulMatTVec(
@@ -1096,7 +1104,7 @@ function mju_mulMatTVec(
     if (length(vec) != size(mat, 1))
         throw(ArgumentError("size of vec should equal the number of rows in mat"))
     end
-    return mju_mulMatTVec(res, mat, vec, size(mat, 1), size(mat, 2))
+    return LibMuJoCo.mju_mulMatTVec(res, mat, vec, size(mat, 1), size(mat, 2))
 
 end
 function mju_mulVecMatVec(
@@ -1127,7 +1135,7 @@ function mju_mulVecMatVec(
     if (length(vec1) != size(mat, 1))
         throw(ArgumentError("size of vectors should equal the number of rows in mat"))
     end
-    return mju_mulVecMatVec(vec1, mat, vec2, length(vec1))
+    return LibMuJoCo.mju_mulVecMatVec(vec1, mat, vec2, length(vec1))
 
 end
 function mju_transpose(
@@ -1147,7 +1155,7 @@ function mju_transpose(
     if (size(res, 1) != size(mat, 2))
         throw(ArgumentError("#rows in res should equal #columns in mat"))
     end
-    return mju_transpose(res, mat, size(mat, 1), size(mat, 2))
+    return LibMuJoCo.mju_transpose(res, mat, size(mat, 1), size(mat, 2))
 
 end
 function mju_symmetrize(
@@ -1167,7 +1175,7 @@ function mju_symmetrize(
     if (size(res, 2) != size(mat, 2) || size(res, 1) != size(mat, 1))
         throw(ArgumentError("res and mat should have the same shape"))
     end
-    return mju_symmetrize(res, mat, size(mat, 1))
+    return LibMuJoCo.mju_symmetrize(res, mat, size(mat, 1))
 
 end
 function mju_eye(mat::Union{Nothing,AbstractArray{Float64,2}})
@@ -1178,7 +1186,7 @@ function mju_eye(mat::Union{Nothing,AbstractArray{Float64,2}})
     if (size(mat, 2) != size(mat, 1))
         throw(ArgumentError("mat should be square"))
     end
-    return mju_eye(mat, size(mat, 1))
+    return LibMuJoCo.mju_eye(mat, size(mat, 1))
 
 end
 function mju_mulMatMat(
@@ -1207,7 +1215,14 @@ function mju_mulMatMat(
     if (size(mat1, 2) != size(mat2, 1))
         throw(ArgumentError("#columns in mat1 should equal #rows in mat2"))
     end
-    return mju_mulMatMat(res, mat1, mat2, size(mat1, 1), size(mat1, 2), size(mat2, 2))
+    return LibMuJoCo.mju_mulMatMat(
+        res,
+        mat1,
+        mat2,
+        size(mat1, 1),
+        size(mat1, 2),
+        size(mat2, 2),
+    )
 
 end
 function mju_mulMatMatT(
@@ -1236,7 +1251,14 @@ function mju_mulMatMatT(
     if (size(mat1, 2) != size(mat2, 2))
         throw(ArgumentError("#columns in mat1 should equal #columns in mat2"))
     end
-    return mju_mulMatMatT(res, mat1, mat2, size(mat1, 1), size(mat1, 2), size(mat2, 1))
+    return LibMuJoCo.mju_mulMatMatT(
+        res,
+        mat1,
+        mat2,
+        size(mat1, 1),
+        size(mat1, 2),
+        size(mat2, 1),
+    )
 
 end
 function mju_mulMatTMat(
@@ -1299,7 +1321,7 @@ function mju_sqrMatTD(
     if (!isnothing(diag) && length(diag) != size(mat, 1))
         throw(ArgumentError("size of diag should equal the number of rows in mat"))
     end
-    return mju_sqrMatTD(
+    return LibMuJoCo.mju_sqrMatTD(
         res,
         mat,
         !isnothing(diag) ? diag : C_NULL,
@@ -1319,7 +1341,7 @@ function mju_cholFactor(
     if (size(mat, 1) != size(mat, 2))
         throw(ArgumentError("mat should be a square matrix"))
     end
-    return mju_cholFactor(mat, size(mat, 1), mindiag)
+    return LibMuJoCo.mju_cholFactor(mat, size(mat, 1), mindiag)
 
 end
 function mju_cholSolve(
@@ -1350,7 +1372,7 @@ function mju_cholSolve(
     if (length(vec) != size(mat, 2))
         throw(ArgumentError("size of vec should equal the number of rows in mat"))
     end
-    return mju_cholSolve(res, mat, vec, size(mat, 1))
+    return LibMuJoCo.mju_cholSolve(res, mat, vec, size(mat, 1))
 
 end
 function mju_cholUpdate(
@@ -1371,7 +1393,7 @@ function mju_cholUpdate(
     if (length(x) != size(mat, 1))
         throw(ArgumentError("size of x should equal the number of rows in mat"))
     end
-    return mju_cholUpdate(mat, x, size(mat, 1), flg_plus)
+    return LibMuJoCo.mju_cholUpdate(mat, x, size(mat, 1), flg_plus)
 
 end
 function mju_cholFactorBand(
@@ -1392,7 +1414,7 @@ function mju_cholFactorBand(
     if (length(mat) != nMat)
         throw(ArgumentError("mat must have size (ntotal-ndense)*nband + ndense*ntotal"))
     end
-    return mju_cholFactorBand(mat, ntotal, nband, ndense, diagadd, diagmul)
+    return LibMuJoCo.mju_cholFactorBand(mat, ntotal, nband, ndense, diagadd, diagmul)
 
 end
 function mju_cholSolveBand(
@@ -1431,7 +1453,7 @@ function mju_cholSolveBand(
     if (length(vec) != ntotal)
         throw(ArgumentError("size of vec should equal ntotal"))
     end
-    return mju_cholSolveBand(res, mat, vec, ntotal, nband, ndense)
+    return LibMuJoCo.mju_cholSolveBand(res, mat, vec, ntotal, nband, ndense)
 
 end
 function mju_band2Dense(
@@ -1461,7 +1483,7 @@ function mju_band2Dense(
     if (size(res, 2) != ntotal)
         throw(ArgumentError("res should have ntotal columns"))
     end
-    return mju_band2Dense(res, mat, ntotal, nband, ndense, flg_sym)
+    return LibMuJoCo.mju_band2Dense(res, mat, ntotal, nband, ndense, flg_sym)
 
 end
 function mju_dense2Band(
@@ -1490,7 +1512,7 @@ function mju_dense2Band(
     if (size(mat, 2) != ntotal)
         throw(ArgumentError("mat should have ntotal columns"))
     end
-    return mju_dense2Band(res, mat, ntotal, nband, ndense)
+    return LibMuJoCo.mju_dense2Band(res, mat, ntotal, nband, ndense)
 
 end
 function mju_bandMulMatVec(
@@ -1531,7 +1553,7 @@ function mju_bandMulMatVec(
     if (size(vec, 2) != nVec)
         throw(ArgumentError("vec should have nVec columns"))
     end
-    return mju_bandMulMatVec(res, mat, vec, ntotal, nband, ndense, nVec, flg_sym)
+    return LibMuJoCo.mju_bandMulMatVec(res, mat, vec, ntotal, nband, ndense, nVec, flg_sym)
 
 end
 function mju_boxQP(
@@ -1586,7 +1608,7 @@ function mju_boxQP(
     if (!isnothing(upper) && (length(upper) != n))
         throw(ArgumentError("size of upper should equal n"))
     end
-    return mju_boxQP(
+    return LibMuJoCo.mju_boxQP(
         res,
         R,
         !isnothing(index) ? index : C_NULL,
@@ -1625,7 +1647,7 @@ function mju_encodePyramid(
     if (length(force) != length(mu) + 1)
         throw(ArgumentError("size of force should be exactly one larger than size of mu"))
     end
-    return mju_encodePyramid(pyramid, force, mu, length(mu))
+    return LibMuJoCo.mju_encodePyramid(pyramid, force, mu, length(mu))
 
 end
 function mju_decodePyramid(
@@ -1655,7 +1677,7 @@ function mju_decodePyramid(
     if (length(force) != length(mu) + 1)
         throw(ArgumentError("size of force should be exactly one larger than size of mu"))
     end
-    return mju_decodePyramid(force, pyramid, mu, length(mu))
+    return LibMuJoCo.mju_decodePyramid(force, pyramid, mu, length(mu))
 
 end
 function mju_isZero(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1665,7 +1687,7 @@ function mju_isZero(vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Flo
         error("vec should be a vector, not a matrix.")
     end
 
-    return mju_isZero(vec, length(vec))
+    return LibMuJoCo.mju_isZero(vec, length(vec))
 
 end
 function mju_f2n(
@@ -1686,7 +1708,7 @@ function mju_f2n(
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
     end
-    return mju_f2n(res, vec, length(res))
+    return LibMuJoCo.mju_f2n(res, vec, length(res))
 
 end
 function mju_n2f(
@@ -1707,7 +1729,7 @@ function mju_n2f(
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
     end
-    return mju_n2f(res, vec, length(res))
+    return LibMuJoCo.mju_n2f(res, vec, length(res))
 
 end
 function mju_d2n(
@@ -1728,7 +1750,7 @@ function mju_d2n(
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
     end
-    return mju_d2n(res, vec, length(res))
+    return LibMuJoCo.mju_d2n(res, vec, length(res))
 
 end
 function mju_n2d(
@@ -1749,7 +1771,7 @@ function mju_n2d(
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
     end
-    return mju_n2d(res, vec, length(res))
+    return LibMuJoCo.mju_n2d(res, vec, length(res))
 
 end
 function mju_insertionSort(
@@ -1761,7 +1783,7 @@ function mju_insertionSort(
         error("res should be a vector, not a matrix.")
     end
 
-    return mju_insertionSort(res, length(res))
+    return LibMuJoCo.mju_insertionSort(res, length(res))
 
 end
 function mju_insertionSortInt(
@@ -1773,7 +1795,7 @@ function mju_insertionSortInt(
         error("res should be a vector, not a matrix.")
     end
 
-    return mju_insertionSortInt(res, length(res))
+    return LibMuJoCo.mju_insertionSortInt(res, length(res))
 
 end
 function mjd_transitionFD(
@@ -1811,7 +1833,7 @@ function mjd_transitionFD(
     if (!isnothing(D) && (size(D, 1) != m.nsensordata || size(D, 2) != m.nu))
         throw(ArgumentError("D should be of shape (nsensordata, nu)"))
     end
-    return mjd_transitionFD(
+    return LibMuJoCo.mjd_transitionFD(
         m,
         d,
         eps,
@@ -1879,7 +1901,7 @@ function mjd_inverseFD(
     if (!isnothing(DmDq) && (size(DmDq, 1) != m.nv || size(DmDq, 2) != m.nM))
         throw(ArgumentError("DmDq should be of shape (nv, nM)"))
     end
-    return mjd_inverseFD(
+    return LibMuJoCo.mjd_inverseFD(
         m,
         d,
         eps,
@@ -1921,7 +1943,6 @@ const _wrapped_fns = (
     :mj_differentiatePos,
     :mj_integratePos,
     :mj_normalizeQuat,
-    :mj_loadAllPluginLibraries,
     :mj_ray,
     :mju_zero,
     :mju_fill,

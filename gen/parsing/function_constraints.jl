@@ -107,23 +107,29 @@ function convert_fn_body(fn_body)
         data_regex => s"\1",
         cstr_regex => s"\1",
         intercept_error_regex=> s"\1",
-        return_fn_regex => s"return LibMuJoCo.\1(",
+        return_fn_regex => s"return \1(",
         error_regex => s"error(String(\1))",
         other_exception => s"error(\1)",
         has_value_regex => s"!isnothing(\1)",
         "nullptr"=>"C_NULL"
     )
 
+
+    
+
     # Modify pointer references
     pointer_access_regex = r"\b([a-zA-Z_][a-zA-Z0-9_]*)->\b([a-zA-Z_][a-zA-Z0-9_]*)"
     pointer_defref = r"&\(\*\b([a-zA-Z_][a-zA-Z0-9_]*)\)\[(\d+)\]"
     variable_assignment = r"\b([a-zA-Z_][a-zA-Z0-9_]*)\s+\b([a-zA-Z_][a-zA-Z0-9_]*)\s*="
+    # Misc
+    return_non_module_fn_regex = r"return \b([a-zA-Z_][a-zA-Z0-9_]*)\("
     fn_body = replace(fn_body,
         pointer_access_regex => s"\1.\2",
         pointer_defref => s"\1[\2+1]", # Convert to 1-based
         variable_assignment => s"\2 =",
         "}" => "end",
-        "{" => ""
+        "{" => "",
+        return_non_module_fn_regex => s"return LibMuJoCo.\1(",
     )
 
     return fn_body
@@ -458,7 +464,7 @@ function extract_fn_info(fn_block)
 end
 
 function make_fn(fn_name, block)
-    if fn_name in ("mj_saveLastXML", "mj_printSchema", "mj_saveModel", "mj_setLengthRange", "mju_printMatSparse", "mjv_updateScene", "mju_standardNormal")
+    if fn_name in ("mj_saveLastXML", "mj_printSchema", "mj_saveModel", "mj_setLengthRange", "mju_printMatSparse", "mjv_updateScene", "mju_standardNormal", "mj_loadAllPluginLibraries")
         return nothing
     end
 

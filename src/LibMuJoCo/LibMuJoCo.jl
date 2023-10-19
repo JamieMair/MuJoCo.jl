@@ -31,7 +31,6 @@ const export_blacklist = (
     :mj_differentiatePos,
     :mj_integratePos,
     :mj_normalizeQuat,
-    :mj_loadAllPluginLibraries,
     :mj_ray,
     :mju_zero,
     :mju_fill,
