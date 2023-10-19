@@ -337,7 +337,7 @@ function basic_arg_transform(identifer, type)
     end
 end
 
-function convert_argument_from_info(info, fn_body, pre_body_buffer::IOBuffer, post_body_buffer::IOBuffer)
+function convert_argument_from_info(info, pre_body_buffer::IOBuffer)
     info_types = (:basic, :string, :anomalous_vector, :variable_vector, :matrix, :mjModel, :mjData, :static_array)
     if !(info.type in info_types)
         error("Unrecognised info type $(info.type)")
@@ -448,14 +448,12 @@ function extract_fn_info(fn_block)
 
     args = String[]
     pre_body_buffer = IOBuffer()
-    post_body_buffer = IOBuffer()
     for arg_info in arg_infos
-        arg = convert_argument_from_info(arg_info, fn_body, pre_body_buffer, post_body_buffer)
+        arg = convert_argument_from_info(arg_info, pre_body_buffer)
         push!(args, arg)
     end
     
     write(pre_body_buffer, fn_body)
-    write(pre_body_buffer, String(take!(post_body_buffer)))
 
     # Overwrite function with new fn
     fn_body = String(take!(pre_body_buffer))
