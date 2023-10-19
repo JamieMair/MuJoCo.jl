@@ -666,7 +666,7 @@ function write_function_constraints(libmujoco_filepath, staging_dir)
     @info "Finished writing function wrappers to check array sizes."
 
     alter_libmujoco_exports(libmujoco_filepath, Symbol.(info.exports_to_remove))
-
+    # TODO: Some constraints like mju_encodePyramid are not being extracted now
     # TODO: Make sure &(*point)[0] is handled correctly 
     nothing
 end
