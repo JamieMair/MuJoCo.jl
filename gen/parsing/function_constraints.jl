@@ -165,7 +165,7 @@ function convert_argument(argument)
         )
     end
     if !isnothing(const_pointer_info)
-        return static_array_match.identifier
+        return const_pointer_info.identifier
     end
 
     # Matches matrices (i.e. std::optional<Eigen::Ref<EigenArrayXX>> jacr)
