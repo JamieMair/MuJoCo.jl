@@ -174,7 +174,7 @@ function extract_arg_info(argument)
         return (;
             type = :static_array,
             is_const = isnothing(m.captures[1]),
-            array_type = convert_datatype(m.captures[2]),
+            datatype = convert_datatype(m.captures[2]),
             identifier = m.captures[3],
             array_size = convert_size(m.captures[4])
         )
@@ -279,14 +279,16 @@ function write_matrix_order_warning_check(buffer::IOBuffer, variable_name, datat
     write(buffer, "end\n")
 end
 function write_vector_size_check(buffer::IOBuffer, variable_name, datatype, expected_length, is_optional)
-    size_check = "length($variable_name) != $(expected_length)"
-    if is_optional
-        write(buffer, "if !isnothing($variable_name) && $size_check\n")
-    else
-        write(buffer, "if $size_check\n")
+    if !isnothing(expected_length)
+        size_check = "length($variable_name) != $(expected_length)"
+        if is_optional
+            write(buffer, "if !isnothing($variable_name) && $size_check\n")
+        else
+            write(buffer, "if $size_check\n")
+        end
+        write(buffer, "\terror(\"$variable_name should be a vector of size $expected_length\")")
+        write(buffer, "end\n")
     end
-    write(buffer, "\terror(\"$variable_name should be a vector of size $expected_length\")")
-    write(buffer, "end\n")
 
     vector_type_check = "typeof($variable_name) <: AbstractArray{$datatype, 2} && count(==(1), size($variable_name)) < 1"
     if is_optional
@@ -294,7 +296,11 @@ function write_vector_size_check(buffer::IOBuffer, variable_name, datatype, expe
     else
         write(buffer, "if $vector_type_check\n")
     end
-    write(buffer, "\terror(\"$variable_name should be a vector of size $expected_length.\")")
+    if !isnothing(expected_length)
+        write(buffer, "\terror(\"$variable_name should be a vector of size $expected_length.\")")
+    else
+        write(buffer, "\terror(\"$variable_name should be a vector, not a matrix.\")")
+    end
     write(buffer, "end\n")
 end
 function optional_wrapper(identifier, is_optional, other_types...)
@@ -325,11 +331,7 @@ function convert_argument_from_info(info, fn_body, pre_body_buffer::IOBuffer, po
     end
     if info.type == :anomalous_vector
         allowed_types = ("AbstractVector{$(info.datatype)}", "AbstractArray{$(info.datatype), 2}")
-        if !info.is_dynamic_size
-            write_vector_size_check(pre_body_buffer, info.identifier, info.datatype, info.size_vector, info.is_optional)
-        else
-            allowed_types = (allowed_types..., "NTuple{$(info.size_vector), $(info.datatype)}")
-        end
+        write_vector_size_check(pre_body_buffer, info.identifier, info.datatype, !info.is_dynamic_size ? info.size_vector : nothing, info.is_optional)
 
         return optional_wrapper(
             info.identifier,
@@ -337,7 +339,27 @@ function convert_argument_from_info(info, fn_body, pre_body_buffer::IOBuffer, po
             allowed_types...            
         )
     end
+    if info.type == :variable_vector
+        allowed_types = ("AbstractVector{$(info.datatype)}", "AbstractArray{$(info.datatype), 2}")
+        write_vector_size_check(pre_body_buffer, info.identifier, info.datatype, nothing, info.is_optional)
 
+        return optional_wrapper(
+            info.identifier,
+            info.is_optional,
+            allowed_types...            
+        )
+    end
+    if info.type == :static_array
+        allowed_types = ("AbstractVector{$(info.datatype)}", "AbstractArray{$(info.datatype), 2}")
+        write_vector_size_check(pre_body_buffer, info.identifier, info.datatype, info.array_size, false)
+        return optional_wrapper(
+            info.identifier,
+            false,
+            allowed_types...            
+        )
+    end
+    info.type == :mjModel && return "$(info.identifier)::Model"
+    info.type == :mjData && return "$(info.identifier)::Data"
 
     # Fallback
     return info.identifier

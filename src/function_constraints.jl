@@ -12,8 +12,8 @@ function LibMuJoCo.mju_printMat(mat::Union{Nothing,AbstractArray{Float64,2}})
 
 end
 function LibMuJoCo.mj_solveM(
-    m,
-    d,
+    m::Model,
+    d::Data,
     x::Union{Nothing,AbstractArray{Float64,2}},
     y::Union{Nothing,AbstractArray{Float64,2}},
 )
@@ -37,8 +37,8 @@ function LibMuJoCo.mj_solveM(
 
 end
 function LibMuJoCo.mj_solveM2(
-    m,
-    d,
+    m::Model,
+    d::Data,
     x::Union{Nothing,AbstractArray{Float64,2}},
     y::Union{Nothing,AbstractArray{Float64,2}},
 )
@@ -61,7 +61,17 @@ function LibMuJoCo.mj_solveM2(
     return mj_solveM2(m, d, x, y, size(y, 1))
 
 end
-function LibMuJoCo.mj_rne(m, d, flg_acc::Int32, result)
+function LibMuJoCo.mj_rne(
+    m::Model,
+    d::Data,
+    flg_acc::Int32,
+    result::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(result) &&
+       typeof(result) <: AbstractArray{Float64,2} &&
+       count(==(1), size(result)) < 1
+        error("result should be a vector, not a matrix.")
+    end
 
     if (length(result) != m.nv)
         throw(ArgumentError("result should have length nv"))
@@ -70,12 +80,17 @@ function LibMuJoCo.mj_rne(m, d, flg_acc::Int32, result)
 
 end
 function LibMuJoCo.mj_constraintUpdate(
-    m,
-    d,
-    jar,
+    m::Model,
+    d::Data,
+    jar::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     cost::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     flg_coneHessian::Int32,
 )
+    if !isnothing(jar) &&
+       typeof(jar) <: AbstractArray{Float64,2} &&
+       count(==(1), size(jar)) < 1
+        error("jar should be a vector, not a matrix.")
+    end
     if length(cost) != 1
         error("cost should be a vector of size 1")
     end
@@ -89,7 +104,17 @@ function LibMuJoCo.mj_constraintUpdate(
     return mj_constraintUpdate(m, d, jar, !isnothing(cost) ? cost : C_NULL, flg_coneHessian)
 
 end
-function LibMuJoCo.mj_getState(m, d, state, spec::Int32)
+function LibMuJoCo.mj_getState(
+    m::Model,
+    d::Data,
+    state::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    spec::Int32,
+)
+    if !isnothing(state) &&
+       typeof(state) <: AbstractArray{Float64,2} &&
+       count(==(1), size(state)) < 1
+        error("state should be a vector, not a matrix.")
+    end
 
     if (length(state) != mj_stateSize(m, spec))
         throw(ArgumentError("state size should equal mj_stateSize(m, spec)"))
@@ -97,7 +122,17 @@ function LibMuJoCo.mj_getState(m, d, state, spec::Int32)
     return mj_getState(m, d, state, spec)
 
 end
-function LibMuJoCo.mj_setState(m, d, state, spec::Int32)
+function LibMuJoCo.mj_setState(
+    m::Model,
+    d::Data,
+    state::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    spec::Int32,
+)
+    if !isnothing(state) &&
+       typeof(state) <: AbstractArray{Float64,2} &&
+       count(==(1), size(state)) < 1
+        error("state should be a vector, not a matrix.")
+    end
 
     if (length(state) != mj_stateSize(m, spec))
         throw(ArgumentError("state size should equal mj_stateSize(m, spec)"))
@@ -105,7 +140,22 @@ function LibMuJoCo.mj_setState(m, d, state, spec::Int32)
     return mj_setState(m, d, state, spec)
 
 end
-function LibMuJoCo.mj_mulJacVec(m, d, res, vec)
+function LibMuJoCo.mj_mulJacVec(
+    m::Model,
+    d::Data,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != d.nefc)
         throw(ArgumentError("res should be of length nefc"))
@@ -116,7 +166,22 @@ function LibMuJoCo.mj_mulJacVec(m, d, res, vec)
     return mj_mulJacVec(m, d, res, vec)
 
 end
-function LibMuJoCo.mj_mulJacTVec(m, d, res, vec)
+function LibMuJoCo.mj_mulJacTVec(
+    m::Model,
+    d::Data,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != m.nv)
         throw(ArgumentError("res should be of length nv"))
@@ -128,11 +193,11 @@ function LibMuJoCo.mj_mulJacTVec(m, d, res, vec)
 
 end
 function LibMuJoCo.mj_jac(
-    m,
-    d,
+    m::Model,
+    d::Data,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
-    point,
+    point::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     body::Int32,
 )
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -140,6 +205,12 @@ function LibMuJoCo.mj_jac(
     end
     if !(typeof(jacr) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacr")
+    end
+    if length(point) != 3
+        error("point should be a vector of size 3")
+    end
+    if typeof(point) <: AbstractArray{Float64,2} && count(==(1), size(point)) < 1
+        error("point should be a vector of size 3.")
     end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
@@ -159,8 +230,8 @@ function LibMuJoCo.mj_jac(
 
 end
 function LibMuJoCo.mj_jacBody(
-    m,
-    d,
+    m::Model,
+    d::Data,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
     body::Int32,
@@ -188,8 +259,8 @@ function LibMuJoCo.mj_jacBody(
 
 end
 function LibMuJoCo.mj_jacBodyCom(
-    m,
-    d,
+    m::Model,
+    d::Data,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
     body::Int32,
@@ -216,7 +287,12 @@ function LibMuJoCo.mj_jacBodyCom(
     )
 
 end
-function LibMuJoCo.mj_jacSubtreeCom(m, d, jacp::AbstractArray{Float64,2}, body::Int32)
+function LibMuJoCo.mj_jacSubtreeCom(
+    m::Model,
+    d::Data,
+    jacp::AbstractArray{Float64,2},
+    body::Int32,
+)
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacp")
     end
@@ -228,8 +304,8 @@ function LibMuJoCo.mj_jacSubtreeCom(m, d, jacp::AbstractArray{Float64,2}, body::
 
 end
 function LibMuJoCo.mj_jacGeom(
-    m,
-    d,
+    m::Model,
+    d::Data,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
     geom::Int32,
@@ -257,8 +333,8 @@ function LibMuJoCo.mj_jacGeom(
 
 end
 function LibMuJoCo.mj_jacSite(
-    m,
-    d,
+    m::Model,
+    d::Data,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
     site::Int32,
@@ -286,12 +362,12 @@ function LibMuJoCo.mj_jacSite(
 
 end
 function LibMuJoCo.mj_jacPointAxis(
-    m,
-    d,
+    m::Model,
+    d::Data,
     jacp::AbstractArray{Float64,2},
     jacr::AbstractArray{Float64,2},
-    point,
-    axis,
+    point::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    axis::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     body::Int32,
 )
     if !(typeof(jacp) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -299,6 +375,18 @@ function LibMuJoCo.mj_jacPointAxis(
     end
     if !(typeof(jacr) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("jacr")
+    end
+    if length(point) != 3
+        error("point should be a vector of size 3")
+    end
+    if typeof(point) <: AbstractArray{Float64,2} && count(==(1), size(point)) < 1
+        error("point should be a vector of size 3.")
+    end
+    if length(axis) != 3
+        error("axis should be a vector of size 3")
+    end
+    if typeof(axis) <: AbstractArray{Float64,2} && count(==(1), size(axis)) < 1
+        error("axis should be a vector of size 3.")
     end
 
     if (!isnothing(jacp) && (size(jacp, 1) != 3 || size(jacp, 2) != m.nv))
@@ -318,9 +406,16 @@ function LibMuJoCo.mj_jacPointAxis(
     )
 
 end
-function LibMuJoCo.mj_fullM(m, dst::Union{Nothing,AbstractArray{Float64,2}}, M)
+function LibMuJoCo.mj_fullM(
+    m::Model,
+    dst::Union{Nothing,AbstractArray{Float64,2}},
+    M::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
     if !isnothing(dst) && !(typeof(dst) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("dst")
+    end
+    if !isnothing(M) && typeof(M) <: AbstractArray{Float64,2} && count(==(1), size(M)) < 1
+        error("M should be a vector, not a matrix.")
     end
 
     if (length(M) != m.nM)
@@ -332,7 +427,22 @@ function LibMuJoCo.mj_fullM(m, dst::Union{Nothing,AbstractArray{Float64,2}}, M)
     return mj_fullM(m, dst, M)
 
 end
-function LibMuJoCo.mj_mulM(m, d, res, vec)
+function LibMuJoCo.mj_mulM(
+    m::Model,
+    d::Data,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != m.nv)
         throw(ArgumentError("res should be of size nv"))
@@ -343,7 +453,22 @@ function LibMuJoCo.mj_mulM(m, d, res, vec)
     return mj_mulM(m, d, res, vec)
 
 end
-function LibMuJoCo.mj_mulM2(m, d, res, vec)
+function LibMuJoCo.mj_mulM2(
+    m::Model,
+    d::Data,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != m.nv)
         throw(ArgumentError("res should be of size nv"))
@@ -355,28 +480,33 @@ function LibMuJoCo.mj_mulM2(m, d, res, vec)
 
 end
 function LibMuJoCo.mj_addM(
-    m,
-    d,
-    dst,
-    rownnz::Union{
-        Nothing,
-        AbstractVector{Int32},
-        AbstractArray{Int32,2},
-        NTuple{Eigen::Dynamic,Int32},
-    },
-    rowadr::Union{
-        Nothing,
-        AbstractVector{Int32},
-        AbstractArray{Int32,2},
-        NTuple{Eigen::Dynamic,Int32},
-    },
-    colind::Union{
-        Nothing,
-        AbstractVector{Int32},
-        AbstractArray{Int32,2},
-        NTuple{Eigen::Dynamic,Int32},
-    },
+    m::Model,
+    d::Data,
+    dst::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    rownnz::Union{Nothing,AbstractVector{Int32},AbstractArray{Int32,2}},
+    rowadr::Union{Nothing,AbstractVector{Int32},AbstractArray{Int32,2}},
+    colind::Union{Nothing,AbstractVector{Int32},AbstractArray{Int32,2}},
 )
+    if !isnothing(dst) &&
+       typeof(dst) <: AbstractArray{Float64,2} &&
+       count(==(1), size(dst)) < 1
+        error("dst should be a vector, not a matrix.")
+    end
+    if !isnothing(rownnz) &&
+       typeof(rownnz) <: AbstractArray{Int32,2} &&
+       count(==(1), size(rownnz)) < 1
+        error("rownnz should be a vector, not a matrix.")
+    end
+    if !isnothing(rowadr) &&
+       typeof(rowadr) <: AbstractArray{Int32,2} &&
+       count(==(1), size(rowadr)) < 1
+        error("rowadr should be a vector, not a matrix.")
+    end
+    if !isnothing(colind) &&
+       typeof(colind) <: AbstractArray{Int32,2} &&
+       count(==(1), size(colind)) < 1
+        error("colind should be a vector, not a matrix.")
+    end
 
     if (length(dst) != m.nM)
         throw(ArgumentError("dst should be of size nM"))
@@ -393,7 +523,38 @@ function LibMuJoCo.mj_addM(
     return mj_addM(m, d, dst, rownnz, rowadr, colind)
 
 end
-function LibMuJoCo.mj_applyFT(m, d, force, torque, point, body::Int32, qfrc_target)
+function LibMuJoCo.mj_applyFT(
+    m::Model,
+    d::Data,
+    force::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    torque::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    point::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    body::Int32,
+    qfrc_target::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if length(force) != 3
+        error("force should be a vector of size 3")
+    end
+    if typeof(force) <: AbstractArray{Float64,2} && count(==(1), size(force)) < 1
+        error("force should be a vector of size 3.")
+    end
+    if length(torque) != 3
+        error("torque should be a vector of size 3")
+    end
+    if typeof(torque) <: AbstractArray{Float64,2} && count(==(1), size(torque)) < 1
+        error("torque should be a vector of size 3.")
+    end
+    if length(point) != 3
+        error("point should be a vector of size 3")
+    end
+    if typeof(point) <: AbstractArray{Float64,2} && count(==(1), size(point)) < 1
+        error("point should be a vector of size 3.")
+    end
+    if !isnothing(qfrc_target) &&
+       typeof(qfrc_target) <: AbstractArray{Float64,2} &&
+       count(==(1), size(qfrc_target)) < 1
+        error("qfrc_target should be a vector, not a matrix.")
+    end
 
     if (length(qfrc_target) != m.nv)
         throw(ArgumentError("qfrc_target should be of size nv"))
@@ -401,7 +562,28 @@ function LibMuJoCo.mj_applyFT(m, d, force, torque, point, body::Int32, qfrc_targ
     return mj_applyFT(m, d, force[0+1], torque[0+1], point[0+1], body, qfrc_target)
 
 end
-function LibMuJoCo.mj_differentiatePos(m, qvel, dt::Float64, qpos1, qpos2)
+function LibMuJoCo.mj_differentiatePos(
+    m::Model,
+    qvel::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    dt::Float64,
+    qpos1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    qpos2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(qvel) &&
+       typeof(qvel) <: AbstractArray{Float64,2} &&
+       count(==(1), size(qvel)) < 1
+        error("qvel should be a vector, not a matrix.")
+    end
+    if !isnothing(qpos1) &&
+       typeof(qpos1) <: AbstractArray{Float64,2} &&
+       count(==(1), size(qpos1)) < 1
+        error("qpos1 should be a vector, not a matrix.")
+    end
+    if !isnothing(qpos2) &&
+       typeof(qpos2) <: AbstractArray{Float64,2} &&
+       count(==(1), size(qpos2)) < 1
+        error("qpos2 should be a vector, not a matrix.")
+    end
 
     if (length(qvel) != m.nv)
         throw(ArgumentError("qvel should be of size nv"))
@@ -415,7 +597,22 @@ function LibMuJoCo.mj_differentiatePos(m, qvel, dt::Float64, qpos1, qpos2)
     return mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
 
 end
-function LibMuJoCo.mj_integratePos(m, qpos, qvel, dt::Float64)
+function LibMuJoCo.mj_integratePos(
+    m::Model,
+    qpos::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    qvel::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    dt::Float64,
+)
+    if !isnothing(qpos) &&
+       typeof(qpos) <: AbstractArray{Float64,2} &&
+       count(==(1), size(qpos)) < 1
+        error("qpos should be a vector, not a matrix.")
+    end
+    if !isnothing(qvel) &&
+       typeof(qvel) <: AbstractArray{Float64,2} &&
+       count(==(1), size(qvel)) < 1
+        error("qvel should be a vector, not a matrix.")
+    end
 
     if (length(qpos) != m.nq)
         throw(ArgumentError("qpos should be of size nq"))
@@ -426,7 +623,15 @@ function LibMuJoCo.mj_integratePos(m, qpos, qvel, dt::Float64)
     return mj_integratePos(m, qpos, qvel, dt)
 
 end
-function LibMuJoCo.mj_normalizeQuat(m, qpos)
+function LibMuJoCo.mj_normalizeQuat(
+    m::Model,
+    qpos::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(qpos) &&
+       typeof(qpos) <: AbstractArray{Float64,2} &&
+       count(==(1), size(qpos)) < 1
+        error("qpos should be a vector, not a matrix.")
+    end
 
     if (length(qpos) != m.nq)
         throw(ArgumentError("qpos should be of size nq"))
@@ -440,20 +645,38 @@ function LibMuJoCo.mj_loadAllPluginLibraries(directory::String)
 
 end
 function LibMuJoCo.mj_ray(
-    m,
-    d,
-    pnt,
-    vec,
+    m::Model,
+    d::Data,
+    pnt::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     geomgroup::Union{AbstractVector{UInt8},AbstractArray{UInt8,2}},
     flg_static::UInt8,
     bodyexclude::Int32,
-    geomid,
+    geomid::Union{AbstractVector{Int32},AbstractArray{Int32,2}},
 )
+    if length(pnt) != 3
+        error("pnt should be a vector of size 3")
+    end
+    if typeof(pnt) <: AbstractArray{Float64,2} && count(==(1), size(pnt)) < 1
+        error("pnt should be a vector of size 3.")
+    end
+    if length(vec) != 3
+        error("vec should be a vector of size 3")
+    end
+    if typeof(vec) <: AbstractArray{Float64,2} && count(==(1), size(vec)) < 1
+        error("vec should be a vector of size 3.")
+    end
     if length(geomgroup) != 6
         error("geomgroup should be a vector of size 6")
     end
     if typeof(geomgroup) <: AbstractArray{UInt8,2} && count(==(1), size(geomgroup)) < 1
         error("geomgroup should be a vector of size 6.")
+    end
+    if length(geomid) != 1
+        error("geomid should be a vector of size 1")
+    end
+    if typeof(geomid) <: AbstractArray{Int32,2} && count(==(1), size(geomid)) < 1
+        error("geomid should be a vector of size 1.")
     end
 
     return mj_ray(
@@ -468,17 +691,45 @@ function LibMuJoCo.mj_ray(
     )
 
 end
-function LibMuJoCo.mju_zero(res)
+function LibMuJoCo.mju_zero(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
 
     return mju_zero(res, length(res))
 
 end
-function LibMuJoCo.mju_fill(res, val::Float64)
+function LibMuJoCo.mju_fill(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    val::Float64,
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
 
     return mju_fill(res, val, length(res))
 
 end
-function LibMuJoCo.mju_copy(res, data)
+function LibMuJoCo.mju_copy(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    data::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(data) &&
+       typeof(data) <: AbstractArray{Float64,2} &&
+       count(==(1), size(data)) < 1
+        error("data should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(data))
         throw(ArgumentError("res and data should have the same size"))
@@ -486,17 +737,45 @@ function LibMuJoCo.mju_copy(res, data)
     return mju_copy(res, data, length(res))
 
 end
-function LibMuJoCo.mju_sum(vec)
+function LibMuJoCo.mju_sum(
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     return mju_sum(vec, length(vec))
 
 end
-function LibMuJoCo.mju_L1(vec)
+function LibMuJoCo.mju_L1(
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     return mju_L1(vec, length(vec))
 
 end
-function LibMuJoCo.mju_scl(res, vec, scl::Float64)
+function LibMuJoCo.mju_scl(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    scl::Float64,
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -504,7 +783,26 @@ function LibMuJoCo.mju_scl(res, vec, scl::Float64)
     return mju_scl(res, vec, scl, length(res))
 
 end
-function LibMuJoCo.mju_add(res, vec1, vec2)
+function LibMuJoCo.mju_add(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec1) &&
+       typeof(vec1) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec1)) < 1
+        error("vec1 should be a vector, not a matrix.")
+    end
+    if !isnothing(vec2) &&
+       typeof(vec2) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec2)) < 1
+        error("vec2 should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec1))
         throw(ArgumentError("res and vec1 should have the same size"))
@@ -515,7 +813,26 @@ function LibMuJoCo.mju_add(res, vec1, vec2)
     return mju_add(res, vec1, vec2, length(res))
 
 end
-function LibMuJoCo.mju_sub(res, vec1, vec2)
+function LibMuJoCo.mju_sub(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec1) &&
+       typeof(vec1) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec1)) < 1
+        error("vec1 should be a vector, not a matrix.")
+    end
+    if !isnothing(vec2) &&
+       typeof(vec2) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec2)) < 1
+        error("vec2 should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec1))
         throw(ArgumentError("res and vec1 should have the same size"))
@@ -526,7 +843,20 @@ function LibMuJoCo.mju_sub(res, vec1, vec2)
     return mju_sub(res, vec1, vec2, length(res))
 
 end
-function LibMuJoCo.mju_addTo(res, vec)
+function LibMuJoCo.mju_addTo(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -534,7 +864,20 @@ function LibMuJoCo.mju_addTo(res, vec)
     return mju_addTo(res, vec, length(res))
 
 end
-function LibMuJoCo.mju_subFrom(res, vec)
+function LibMuJoCo.mju_subFrom(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -542,7 +885,21 @@ function LibMuJoCo.mju_subFrom(res, vec)
     return mju_subFrom(res, vec, length(res))
 
 end
-function LibMuJoCo.mju_addToScl(res, vec, scl::Float64)
+function LibMuJoCo.mju_addToScl(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    scl::Float64,
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -550,7 +907,27 @@ function LibMuJoCo.mju_addToScl(res, vec, scl::Float64)
     return mju_addToScl(res, vec, scl, length(res))
 
 end
-function LibMuJoCo.mju_addScl(res, vec1, vec2, scl::Float64)
+function LibMuJoCo.mju_addScl(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    scl::Float64,
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec1) &&
+       typeof(vec1) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec1)) < 1
+        error("vec1 should be a vector, not a matrix.")
+    end
+    if !isnothing(vec2) &&
+       typeof(vec2) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec2)) < 1
+        error("vec2 should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec1))
         throw(ArgumentError("res and vec1 should have the same size"))
@@ -561,17 +938,44 @@ function LibMuJoCo.mju_addScl(res, vec1, vec2, scl::Float64)
     return mju_addScl(res, vec1, vec2, scl, length(res))
 
 end
-function LibMuJoCo.mju_normalize(vec)
+function LibMuJoCo.mju_normalize(
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     return mju_normalize(vec, length(vec))
 
 end
-function LibMuJoCo.mju_norm(vec)
+function LibMuJoCo.mju_norm(
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     return mju_norm(vec, length(vec))
 
 end
-function LibMuJoCo.mju_dot(vec1, vec2)
+function LibMuJoCo.mju_dot(
+    vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(vec1) &&
+       typeof(vec1) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec1)) < 1
+        error("vec1 should be a vector, not a matrix.")
+    end
+    if !isnothing(vec2) &&
+       typeof(vec2) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec2)) < 1
+        error("vec2 should be a vector, not a matrix.")
+    end
 
     if (length(vec1) != length(vec2))
         throw(ArgumentError("vec1 and vec2 should have the same size"))
@@ -579,9 +983,23 @@ function LibMuJoCo.mju_dot(vec1, vec2)
     return mju_dot(vec1, vec2, length(vec1))
 
 end
-function LibMuJoCo.mju_mulMatVec(res, mat::Union{Nothing,AbstractArray{Float64,2}}, vec)
+function LibMuJoCo.mju_mulMatVec(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
     end
 
     if (length(res) != size(mat, 1))
@@ -593,9 +1011,23 @@ function LibMuJoCo.mju_mulMatVec(res, mat::Union{Nothing,AbstractArray{Float64,2
     return mju_mulMatVec(res, mat, vec, size(mat, 1), size(mat, 2))
 
 end
-function LibMuJoCo.mju_mulMatTVec(res, mat::Union{Nothing,AbstractArray{Float64,2}}, vec)
+function LibMuJoCo.mju_mulMatTVec(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
     end
 
     if (length(res) != size(mat, 2))
@@ -608,12 +1040,22 @@ function LibMuJoCo.mju_mulMatTVec(res, mat::Union{Nothing,AbstractArray{Float64,
 
 end
 function LibMuJoCo.mju_mulVecMatVec(
-    vec1,
+    vec1::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
-    vec2,
+    vec2::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
+    if !isnothing(vec1) &&
+       typeof(vec1) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec1)) < 1
+        error("vec1 should be a vector, not a matrix.")
+    end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
+    end
+    if !isnothing(vec2) &&
+       typeof(vec2) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec2)) < 1
+        error("vec2 should be a vector, not a matrix.")
     end
 
     if (length(vec1) != length(vec2))
@@ -769,13 +1211,16 @@ end
 function LibMuJoCo.mju_sqrMatTD(
     res::Union{Nothing,AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
-    diag,
+    diag::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
 )
     if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("res")
     end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
+    end
+    if typeof(diag) <: AbstractArray{Float64,2} && count(==(1), size(diag)) < 1
+        error("diag should be a vector, not a matrix.")
     end
 
     if (size(res, 1) != size(mat, 2))
@@ -810,9 +1255,23 @@ function LibMuJoCo.mju_cholFactor(
     return mju_cholFactor(mat, size(mat, 1), mindiag)
 
 end
-function LibMuJoCo.mju_cholSolve(res, mat::Union{Nothing,AbstractArray{Float64,2}}, vec)
+function LibMuJoCo.mju_cholSolve(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    mat::Union{Nothing,AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
     end
 
     if (size(mat, 1) != size(mat, 2))
@@ -829,11 +1288,14 @@ function LibMuJoCo.mju_cholSolve(res, mat::Union{Nothing,AbstractArray{Float64,2
 end
 function LibMuJoCo.mju_cholUpdate(
     mat::Union{Nothing,AbstractArray{Float64,2}},
-    x,
+    x::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     flg_plus::Int32,
 )
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
+    end
+    if !isnothing(x) && typeof(x) <: AbstractArray{Float64,2} && count(==(1), size(x)) < 1
+        error("x should be a vector, not a matrix.")
     end
 
     if (size(mat, 1) != size(mat, 2))
@@ -846,13 +1308,18 @@ function LibMuJoCo.mju_cholUpdate(
 
 end
 function LibMuJoCo.mju_cholFactorBand(
-    mat,
+    mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     ntotal::Int32,
     nband::Int32,
     ndense::Int32,
     diagadd::Float64,
     diagmul::Float64,
 )
+    if !isnothing(mat) &&
+       typeof(mat) <: AbstractArray{Float64,2} &&
+       count(==(1), size(mat)) < 1
+        error("mat should be a vector, not a matrix.")
+    end
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
     if (length(mat) != nMat)
@@ -862,13 +1329,28 @@ function LibMuJoCo.mju_cholFactorBand(
 
 end
 function LibMuJoCo.mju_cholSolveBand(
-    res,
-    mat,
-    vec,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     ntotal::Int32,
     nband::Int32,
     ndense::Int32,
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(mat) &&
+       typeof(mat) <: AbstractArray{Float64,2} &&
+       count(==(1), size(mat)) < 1
+        error("mat should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
     if (length(mat) != nMat)
@@ -887,7 +1369,7 @@ function LibMuJoCo.mju_cholSolveBand(
 end
 function LibMuJoCo.mju_band2Dense(
     res::Union{Nothing,AbstractArray{Float64,2}},
-    mat,
+    mat::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     ntotal::Int32,
     nband::Int32,
     ndense::Int32,
@@ -895,6 +1377,11 @@ function LibMuJoCo.mju_band2Dense(
 )
     if !isnothing(res) && !(typeof(res) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("res")
+    end
+    if !isnothing(mat) &&
+       typeof(mat) <: AbstractArray{Float64,2} &&
+       count(==(1), size(mat)) < 1
+        error("mat should be a vector, not a matrix.")
     end
 
     nMat = (ntotal - ndense) * nband + ndense * ntotal
@@ -911,12 +1398,17 @@ function LibMuJoCo.mju_band2Dense(
 
 end
 function LibMuJoCo.mju_dense2Band(
-    res,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
     ntotal::Int32,
     nband::Int32,
     ndense::Int32,
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
     end
@@ -935,7 +1427,7 @@ function LibMuJoCo.mju_dense2Band(
 
 end
 function LibMuJoCo.mju_bandMulMatVec(
-    res,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     mat::Union{Nothing,AbstractArray{Float64,2}},
     vec::Union{Nothing,AbstractArray{Float64,2}},
     ntotal::Int32,
@@ -944,6 +1436,11 @@ function LibMuJoCo.mju_bandMulMatVec(
     nVec::Int32,
     flg_sym::UInt8,
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
     if !isnothing(mat) && !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
     end
@@ -971,19 +1468,36 @@ function LibMuJoCo.mju_bandMulMatVec(
 
 end
 function LibMuJoCo.mju_boxQP(
-    res,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
     R::Union{Nothing,AbstractArray{Float64,2}},
-    index::Union{AbstractVector{Int32},AbstractArray{Int32,2},NTuple{Eigen::Dynamic,Int32}},
+    index::Union{AbstractVector{Int32},AbstractArray{Int32,2}},
     H::Union{Nothing,AbstractArray{Float64,2}},
-    g,
-    lower,
-    upper,
+    g::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    lower::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    upper::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
     if !isnothing(R) && !(typeof(R) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("R")
     end
+    if typeof(index) <: AbstractArray{Int32,2} && count(==(1), size(index)) < 1
+        error("index should be a vector, not a matrix.")
+    end
     if !isnothing(H) && !(typeof(H) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("H")
+    end
+    if !isnothing(g) && typeof(g) <: AbstractArray{Float64,2} && count(==(1), size(g)) < 1
+        error("g should be a vector, not a matrix.")
+    end
+    if typeof(lower) <: AbstractArray{Float64,2} && count(==(1), size(lower)) < 1
+        error("lower should be a vector, not a matrix.")
+    end
+    if typeof(upper) <: AbstractArray{Float64,2} && count(==(1), size(upper)) < 1
+        error("upper should be a vector, not a matrix.")
     end
 
     n = length(res)
@@ -1017,7 +1531,26 @@ function LibMuJoCo.mju_boxQP(
     )
 
 end
-function LibMuJoCo.mju_encodePyramid(pyramid, force, mu)
+function LibMuJoCo.mju_encodePyramid(
+    pyramid::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    force::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    mu::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(pyramid) &&
+       typeof(pyramid) <: AbstractArray{Float64,2} &&
+       count(==(1), size(pyramid)) < 1
+        error("pyramid should be a vector, not a matrix.")
+    end
+    if !isnothing(force) &&
+       typeof(force) <: AbstractArray{Float64,2} &&
+       count(==(1), size(force)) < 1
+        error("force should be a vector, not a matrix.")
+    end
+    if !isnothing(mu) &&
+       typeof(mu) <: AbstractArray{Float64,2} &&
+       count(==(1), size(mu)) < 1
+        error("mu should be a vector, not a matrix.")
+    end
 
     if (length(pyramid) != 2 * length(mu))
         throw(ArgumentError("size of pyramid should be twice as large as size of mu"))
@@ -1028,7 +1561,26 @@ function LibMuJoCo.mju_encodePyramid(pyramid, force, mu)
     return mju_encodePyramid(pyramid, force, mu, length(mu))
 
 end
-function LibMuJoCo.mju_decodePyramid(force, pyramid, mu)
+function LibMuJoCo.mju_decodePyramid(
+    force::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    pyramid::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    mu::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(force) &&
+       typeof(force) <: AbstractArray{Float64,2} &&
+       count(==(1), size(force)) < 1
+        error("force should be a vector, not a matrix.")
+    end
+    if !isnothing(pyramid) &&
+       typeof(pyramid) <: AbstractArray{Float64,2} &&
+       count(==(1), size(pyramid)) < 1
+        error("pyramid should be a vector, not a matrix.")
+    end
+    if !isnothing(mu) &&
+       typeof(mu) <: AbstractArray{Float64,2} &&
+       count(==(1), size(mu)) < 1
+        error("mu should be a vector, not a matrix.")
+    end
 
     if (length(pyramid) != 2 * length(mu))
         throw(ArgumentError("size of pyramid should be twice as large as size of mu"))
@@ -1039,20 +1591,32 @@ function LibMuJoCo.mju_decodePyramid(force, pyramid, mu)
     return mju_decodePyramid(force, pyramid, mu, length(mu))
 
 end
-function LibMuJoCo.mju_isZero(vec)
+function LibMuJoCo.mju_isZero(
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     return mju_isZero(vec, length(vec))
 
 end
 function LibMuJoCo.mju_f2n(
-    res,
-    vec::Union{
-        Nothing,
-        AbstractVector{Float32},
-        AbstractArray{Float32,2},
-        NTuple{Eigen::Dynamic,Float32},
-    },
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float32},AbstractArray{Float32,2}},
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float32,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -1061,14 +1625,19 @@ function LibMuJoCo.mju_f2n(
 
 end
 function LibMuJoCo.mju_n2f(
-    res::Union{
-        Nothing,
-        AbstractVector{Float32},
-        AbstractArray{Float32,2},
-        NTuple{Eigen::Dynamic,Float32},
-    },
-    vec,
+    res::Union{Nothing,AbstractVector{Float32},AbstractArray{Float32,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float32,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -1077,14 +1646,19 @@ function LibMuJoCo.mju_n2f(
 
 end
 function LibMuJoCo.mju_d2n(
-    res,
-    vec::Union{
-        Nothing,
-        AbstractVector{Float64},
-        AbstractArray{Float64,2},
-        NTuple{Eigen::Dynamic,Float64},
-    },
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -1093,14 +1667,19 @@ function LibMuJoCo.mju_d2n(
 
 end
 function LibMuJoCo.mju_n2d(
-    res::Union{
-        Nothing,
-        AbstractVector{Float64},
-        AbstractArray{Float64,2},
-        NTuple{Eigen::Dynamic,Float64},
-    },
-    vec,
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
+    if !isnothing(vec) &&
+       typeof(vec) <: AbstractArray{Float64,2} &&
+       count(==(1), size(vec)) < 1
+        error("vec should be a vector, not a matrix.")
+    end
 
     if (length(res) != length(vec))
         throw(ArgumentError("res and vec should have the same size"))
@@ -1108,26 +1687,33 @@ function LibMuJoCo.mju_n2d(
     return mju_n2d(res, vec, length(res))
 
 end
-function LibMuJoCo.mju_insertionSort(res)
+function LibMuJoCo.mju_insertionSort(
+    res::Union{Nothing,AbstractVector{Float64},AbstractArray{Float64,2}},
+)
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Float64,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
 
     return mju_insertionSort(res, length(res))
 
 end
 function LibMuJoCo.mju_insertionSortInt(
-    res::Union{
-        Nothing,
-        AbstractVector{Int32},
-        AbstractArray{Int32,2},
-        NTuple{Eigen::Dynamic,Int32},
-    },
+    res::Union{Nothing,AbstractVector{Int32},AbstractArray{Int32,2}},
 )
+    if !isnothing(res) &&
+       typeof(res) <: AbstractArray{Int32,2} &&
+       count(==(1), size(res)) < 1
+        error("res should be a vector, not a matrix.")
+    end
 
     return mju_insertionSortInt(res, length(res))
 
 end
 function LibMuJoCo.mjd_transitionFD(
-    m,
-    d,
+    m::Model,
+    d::Data,
     eps::Float64,
     flg_centered::UInt8,
     A::AbstractArray{Float64,2},
@@ -1173,8 +1759,8 @@ function LibMuJoCo.mjd_transitionFD(
 
 end
 function LibMuJoCo.mjd_inverseFD(
-    m,
-    d,
+    m::Model,
+    d::Data,
     eps::Float64,
     flg_actuation::UInt8,
     DfDq::AbstractArray{Float64,2},
