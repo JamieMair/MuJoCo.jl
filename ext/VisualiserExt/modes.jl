@@ -32,7 +32,7 @@ end
 nameof(m::EngineMode) = string(Base.nameof(typeof(m)))
 setup!(ui, p, ::EngineMode) = ui
 teardown!(ui, p, ::EngineMode) = ui
-reset!(p, ::EngineMode) = (reset!(p.model, p.data); p)
+reset!(p, ::EngineMode) = (MuJoCo.reset!(p.model, p.data); p)
 pausestep!(p, ::EngineMode) = pausestep!(p)
 prepare!(ui, p, ::EngineMode) = ui
 modeinfo(io1, io2, ui, p, ::EngineMode) = nothing
