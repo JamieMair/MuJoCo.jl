@@ -30,6 +30,7 @@ function init_figsensor!(figsensor::VisualiserFigure)
     return figsensor
 end
 
+# Useful for trajectory mode
 @inline inc(x::Integer, min::Integer, max::Integer) = ifelse(x == max, min, x + 1)
 @inline dec(x::Integer, min::Integer, max::Integer) = ifelse(x == min, max, x - 1)
 
@@ -84,7 +85,3 @@ function get_terminalsize()
         displaysize(stdout)
     end
 end
-
-# Useful for trajectory mode
-@inline inc(x::Integer, min::Integer, max::Integer) = ifelse(x == max, min, x + 1)
-@inline dec(x::Integer, min::Integer, max::Integer) = ifelse(x == min, max, x - 1)

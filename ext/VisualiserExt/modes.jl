@@ -16,12 +16,6 @@ function forwardstep!(p::PhysicsState)
     return p
 end
 
-supportsreverse(::EngineMode) = false
-function reversestep!(p, m::EngineMode)
-    supportsreverse(m) && error("supportsreverse was true but reversestep! undefined")
-    return p
-end
-
 
 ############ EngineMode ############
 
@@ -38,7 +32,7 @@ end
 nameof(m::EngineMode) = string(Base.nameof(typeof(m)))
 setup!(ui, p, ::EngineMode) = ui
 teardown!(ui, p, ::EngineMode) = ui
-reset!(p, ::EngineMode) = (reset!(p.model); p)
+reset!(p, ::EngineMode) = (reset!(p.model, p.data); p)
 pausestep!(p, ::EngineMode) = pausestep!(p)
 prepare!(ui, p, ::EngineMode) = ui
 modeinfo(io1, io2, ui, p, ::EngineMode) = nothing
@@ -82,7 +76,7 @@ end
 
 ############ Trajectory ############
 
-mutable struct Trajectory{TR<:AbsVec{<:AbsMat}} <: EngineMode
+mutable struct Trajectory{TR<:AbstractVector{<:AbstractMatrix}} <: EngineMode
     trajectories::TR
     k::Int
     t::Int
@@ -94,14 +88,14 @@ mutable struct Trajectory{TR<:AbsVec{<:AbsMat}} <: EngineMode
     bg_range::LinRange{Float64}
     doppler::Bool
 end
-function Trajectory{TR}(trajectories) where {TR<:AbsVec{<:AbsMat}}
+function Trajectory{TR}(trajectories) where {TR<:AbstractVector{<:AbstractMatrix}}
     Trajectory{TR}(
         trajectories, 1, 1, 
         false, 1, LinRange(0, 1, 2), 1, LinRange(0, 1, 2), false
     )
 end
-Trajectory(trajectories::AbsVec{<:AbsMat}) = Trajectory{typeof(trajectories)}(trajectories)
-Trajectory(trajectories::AbsMat) = Trajectory([trajectories])
+Trajectory(trajectories::AbstractVector{<:AbstractMatrix}) = Trajectory{typeof(trajectories)}(trajectories)
+Trajectory(trajectories::AbstractMatrix) = Trajectory([trajectories])
 
 getT(m::Trajectory) = size(m.trajectories[m.k], 2)
 gettraj(m::Trajectory) = m.trajectories[m.k]
@@ -228,14 +222,13 @@ function setburstmodeparams!(m::Trajectory, p::PhysicsState)
 end
 
 @inline function setstate!(m::Trajectory, p::PhysicsState)
-    set_physics_state!(p.model, view(gettraj(m), :, m.t))
+    set_physics_state!(p.model, p.data, view(gettraj(m), :, m.t))
     return m
 end
 
+############ Util ############
 
-# ####
-# #### Util
-# ####
+# TODO: Add in burst mode
 
 # function burst!(
 #     ui::UIState,
@@ -248,18 +241,18 @@ end
 #     alphamax::Real = 0.55,
 #     doppler::Bool = true,
 # )
-#     T = size(states, 2)
 
-#     T >= n > 0 || error("n must be in range [1, size(states, 2)]")
-#     0 < t || error("t must be > 0")
-#     0 < gamma <= 1|| error("gamma must be in range (0, 1)")
-#     0 < alphamin <= 1 || error("alphamin must be in range (0, 1]")
-#     0 < alphamax <= 1 || error("alphamin must be in range (0, 1]")
+#     # Check inputs
+#     T = size(states, 2)
+#     (T >= n > 0) || error("n must be in range [1, size(states, 2)]")
+#     (0 < t) || error("t must be >= 0")
+#     (0 < gamma <= 1) || error("gamma must be in range (0, 1)")
+#     (0 < alphamin <= 1) || error("alphamin must be in range (0, 1]")
+#     (0 < alphamax <= 1) || error("alphamin must be in range (0, 1]")
 
 #     scn = ui.scn
-#     sim = getsim(p.model)
-#     n = min(n, fld(MAXGEOM, sim.m.ngeom))
-#     geoms = unsafe_wrap(Array, scn[].geoms, scn[].maxgeom)
+#     n = min(n, fld(MAXGEOM, p.model.ngeom))
+#     geoms = unsafe_wrap(Array, scn.geoms, scn.maxgeom)
 
 #     function color!(tprime, from)
 #         for i = from:scn[].ngeom
