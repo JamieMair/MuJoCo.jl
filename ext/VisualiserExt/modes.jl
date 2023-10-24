@@ -156,20 +156,25 @@ end
 function handlers(ui::UIState, p::PhysicsState, m::Trajectory)
     return let ui=ui, p=p, m=m
         [
-            onscroll(MOD_CONTROL, what = "Change burst factor") do s, ev
-                m.bf_idx = clamp(m.bf_idx + ev.dy, 1, length(m.bf_range))
+            onkey(GLFW.KEY_R, MOD_CONTROL, what = "Toggle reverse") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.reversed = !ui.reversed
+                    p.timer.rate *= -1
+                    resettime!(p)
+                end
             end,
 
-            onscroll(MOD_SHIFT, what = "Change burst decay rate") do s, ev
-                m.bg_idx = clamp(m.bg_idx + ev.dy, 1, length(m.bg_range))
-            end,
-
-            onkey(GLFW.KEY_B, MOD_CONTROL, what = "Toggle burst mode") do s, ev
-                ispress_or_repeat(ev.action) && (m.burstmode = !m.burstmode)
-            end,
-
-            onkey(GLFW.KEY_D, MOD_CONTROL, what = "Toggle burst mode doppler effect") do s, ev
-                ispress_or_repeat(ev.action) && (m.doppler = !m.doppler)
+            onevent(
+                KeyEvent,
+                when = describe(GLFW.KEY_LEFT),
+                what = "Step backwards when paused (hold SHIFT for $(SHIFTSTEPSPERKEY) steps)"
+            ) do s, ev
+                if ui.paused && ev.key === GLFW.KEY_LEFT && ispress_or_repeat(ev.action)
+                    steps = s.shift ? 50 : 1
+                    for _ = 1:steps
+                        reversestep!(p, m)
+                    end
+                end
             end,
 
             onkey(GLFW.KEY_UP, what = "Cycle forwards through trajectories") do s, ev
@@ -190,6 +195,22 @@ function handlers(ui::UIState, p::PhysicsState, m::Trajectory)
                     setburstmodeparams!(m, p)
                     setstate!(m, p)
                 end
+            end,
+
+            onkey(GLFW.KEY_B, MOD_CONTROL, what = "Toggle burst mode") do s, ev
+                ispress_or_repeat(ev.action) && (m.burstmode = !m.burstmode)
+            end,
+
+            onkey(GLFW.KEY_D, MOD_CONTROL, what = "Toggle burst mode doppler effect") do s, ev
+                ispress_or_repeat(ev.action) && (m.doppler = !m.doppler)
+            end,
+
+            onscroll(MOD_CONTROL, what = "Change burst factor") do s, ev
+                m.bf_idx = clamp(m.bf_idx + ev.dy, 1, length(m.bf_range))
+            end,
+
+            onscroll(MOD_SHIFT, what = "Change burst decay rate") do s, ev
+                m.bg_idx = clamp(m.bg_idx + ev.dy, 1, length(m.bg_range))
             end,
         ]
     end

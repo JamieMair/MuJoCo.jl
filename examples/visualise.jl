@@ -16,6 +16,15 @@ for t in 1:tmax
     step!(model, data)
 end
 
+# Simulate with a controller
+reset!(model, data)
+ctrl_states = zeros(nx, tmax)
+for t in 1:tmax
+    ctrl_states[:,t] = get_physics_state(model, data)
+    data.ctrl .= 2*randn()
+    step!(model, data)
+end
+
 # Try trajectory mode
 reset!(model, data)
-visualise!(model, data, trajectories = states)
+visualise!(model, data, trajectories = [states, ctrl_states])
