@@ -229,10 +229,10 @@ end
 
 # TODO: Need to define setstate! and getstate! for generic MuJoCo models.
 # Probably best to use x = (qpos, qvel, act)
-# @inline function setstate!(m::Trajectory, p::PhysicsState)
-#     LyceumMuJoCo.setstate!(p.model, view(gettraj(m), :, m.t))
-#     return m
-# end
+@inline function setstate!(m::Trajectory, p::PhysicsState)
+    setstate!(p.model, view(gettraj(m), :, m.t))
+    return m
+end
 
 
 # ####

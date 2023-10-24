@@ -44,7 +44,7 @@ const DATA_TYPES = Union{Data, NamedAccess.NamedData}
 import .Visualiser: visualise!
 
 
-export init_data, step!, forward!, timestep, reset!, resetkey!
+export init_data, step!, forward!, timestep, reset!, resetkey!, getstate, setstate!
 export init_visualiser, install_visualiser, visualise!
 
 include("io.jl")
@@ -60,10 +60,12 @@ function init_data(model::Model)
     data_ptr = mj_makeData(model)
     return Data(data_ptr, model) # Requires a reference to the model to get array sizes
 end
+
 function init_data(model::NamedAccess.NamedModel)
     data_ptr = mj_makeData(model)
     return NamedAccess.NamedData(Data(data_ptr, getfield(model, :model)), model) # Requires a reference to the model to get array sizes
 end
+
 """
     step!(model::Model, data::Data)
 
@@ -72,29 +74,73 @@ Runs the simulation forward one time step, modifying the underlying `data` objec
 function step!(model::MODEL_TYPES, data::DATA_TYPES)
     mj_step(model, data)
 end
+
+"""
+    forward!(model::MODEL_TYPES, data::DATA_TYPES)
+
+Same as [`step!`](@ref) but without integrating in time.
+"""
 function forward!(model::MODEL_TYPES, data::DATA_TYPES)
     mj_forward(model, data)
 end
+
 """
     reset!(m::Model, d::Data)
 
 Resets the data values to their default states. You may equivalently use [`mj_resetData`](@ref).
 """
 reset!(m::Model, d::Data) = mj_resetData(m, d)
+
 """
 Resets the data struct to values in the first key frame.
 """
 resetkey!(m::Model, d::Data) = mj_resetDataKeyframe(m, d, 0)
+
 """
     resetkey!(m::Model, d::Data, [keyframe = 1])
 
-Resets the data struct to values in the supplied keyframe. If no keyframe is specified,
-the first keyframe is used. The keyframe is a 1-based index into the list supplied by
-the model's specification.
+Resets the data struct to values in the supplied keyframe. 
+    
+If no keyframe is specified, the first keyframe is used. The keyframe is a 1-based index into the list supplied by the model's specification.
 """
 resetkey!(m::Model, d::Data, keyframe::Integer) = mj_resetDataKeyframe(m, d, keyframe-1)
+
+"""
+    timestep(model::MODEL_TYPES)
+
+Extract the solver time-step for the given model.
+"""
 timestep(model::MODEL_TYPES) = model.opt.timestep
 
+"""
+
+    getstate(m::Model, d::Data)
+
+Extract the state vector of a MuJoCo model.
+
+The state vector is [joint positions, joint velocities, actuator states] with dimension (nq, nv, na). 
+
+See also [`mj_getState`](@ref) and [`setstate!`](@ref).
+"""
+function getstate(m::Model, d::Data)
+    x = mj_zeros(m.nq+m.nv+m.na)
+    mj_getState(m, d, x, LibMuJoCo.mjSTATE_PHYSICS)
+    return transpose(x)
+end
+
+"""
+
+    setstate!(m::Model, d::Data, x::AbstractVector)
+
+Set the state vector of a MuJoCo model.
+
+The state vector is [joint positions, joint velocities, actuator states] with dimension (nq, nv, na). 
+
+See also [`mj_setState`](@ref) and [`getstate`](@ref).
+"""
+function setstate!(m::Model, d::Data, x::AbstractVector)
+    mj_setState(m, d, transpose(x), LibMuJoCo.mjSTATE_PHYSICS)
+end
 
 # Handle backwards compatibility
 if !isdefined(Base, :get_extension)
@@ -123,6 +169,7 @@ function init_visualiser()
         @eval Main Base.retry_load_extensions()
     end
 end
+
 """
     install_visualiser()
 
