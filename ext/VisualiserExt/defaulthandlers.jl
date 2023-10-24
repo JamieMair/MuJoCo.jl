@@ -199,7 +199,17 @@ function handlers(e::Engine)
                 end
             end,
 
-            # TODO: see https://github.com/JamieMair/MuJoCo.jl/issues/43
+            onkey(GLFW.KEY_BACKSPACE, what = "Reset model") do s, ev
+                ispress_or_repeat(ev.action) && reset!(p, mode(e))
+            end,
+
+            onkey(GLFW.KEY_R, MOD_CONTROL, what = "Toggle reverse") do s, ev
+                if ispress_or_repeat(ev.action)
+                    ui.reversed = !ui.reversed
+                    p.timer.rate *= -1
+                    resettime!(p)
+                end
+            end,
 
             onkey(GLFW.KEY_SPACE, what = "Pause") do s, ev
                 ispress_or_repeat(ev.action) && setpause!(ui, p, !ui.paused)
@@ -218,7 +228,18 @@ function handlers(e::Engine)
                 end
             end,
 
-            # TODO: see https://github.com/JamieMair/MuJoCo.jl/issues/42
+            onevent(
+                KeyEvent,
+                when = describe(GLFW.KEY_LEFT),
+                what = "Step backwards when paused (hold SHIFT for $(SHIFTSTEPSPERKEY) steps)"
+            ) do s, ev
+                if ui.paused && ev.key === GLFW.KEY_LEFT && ispress_or_repeat(ev.action)
+                    steps = s.shift ? 50 : 1
+                    for _ = 1:steps
+                        reversestep!(p, mode(e))
+                    end
+                end
+            end,
 
             onkey(GLFW.KEY_ENTER, what = "Toggle speed mode") do s, ev
                 if ispress_or_repeat(ev.action)
