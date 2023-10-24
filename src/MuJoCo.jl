@@ -44,7 +44,7 @@ const DATA_TYPES = Union{Data, NamedAccess.NamedData}
 import .Visualiser: visualise!
 
 
-export init_data, step!, forward!, timestep, reset!, resetkey!, getstate, setstate!
+export init_data, step!, forward!, timestep, reset!, resetkey!, get_physics_state, set_physics_state!
 export init_visualiser, install_visualiser, visualise!
 
 include("io.jl")
@@ -114,15 +114,15 @@ timestep(model::MODEL_TYPES) = model.opt.timestep
 
 """
 
-    getstate(m::Model, d::Data)
+    get_physics_state(m::Model, d::Data)
 
 Extract the state vector of a MuJoCo model.
 
 The state vector is [joint positions, joint velocities, actuator states] with dimension (nq, nv, na). 
 
-See also [`mj_getState`](@ref) and [`setstate!`](@ref).
+See also [`mj_getState`](@ref) and [`set_physics_state!`](@ref).
 """
-function getstate(m::Model, d::Data)
+function get_physics_state(m::Model, d::Data)
     x = mj_zeros(m.nq+m.nv+m.na)
     mj_getState(m, d, x, LibMuJoCo.mjSTATE_PHYSICS)
     return transpose(x)
@@ -130,15 +130,15 @@ end
 
 """
 
-    setstate!(m::Model, d::Data, x::AbstractVector)
+    set_physics_state!(m::Model, d::Data, x::AbstractVector)
 
 Set the state vector of a MuJoCo model.
 
 The state vector is [joint positions, joint velocities, actuator states] with dimension (nq, nv, na). 
 
-See also [`mj_setState`](@ref) and [`getstate`](@ref).
+See also [`mj_setState`](@ref) and [`get_physics_state`](@ref).
 """
-function setstate!(m::Model, d::Data, x::AbstractVector)
+function set_physics_state!(m::Model, d::Data, x::AbstractVector)
     mj_setState(m, d, transpose(x), LibMuJoCo.mjSTATE_PHYSICS)
 end
 
