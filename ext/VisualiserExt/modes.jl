@@ -223,6 +223,7 @@ end
 
 @inline function setstate!(m::Trajectory, p::PhysicsState)
     set_physics_state!(p.model, p.data, view(gettraj(m), :, m.t))
+    forward!(p.model, p.data)
     return m
 end
 
