@@ -137,7 +137,7 @@ end
 function modeinfo(io1, io2, ui::UIState, p::PhysicsState, m::Trajectory)
     println(io1, "t")
     println(io2, "$(m.t)/$(getT(m))")
-    println(io1, "k")
+    println(io1, "Trajectory ID")
     println(io2, "$(m.k)/$(length(m.trajectories))")
 
     n = length(m.bf_range)
