@@ -237,7 +237,7 @@ function setburstmodeparams!(m::Trajectory, p::PhysicsState)
     m.bg_range = LinRange{Float64}(gamma, 1, steps)
 
     m.bf_idx = round(Int, steps / 2)
-    m.bg_idx = steps
+    m.bg_idx = round(Int, steps / 2)
 
     return m
 end
@@ -250,94 +250,96 @@ end
 
 ############ Util ############
 
-# TODO: Add in burst mode
 
-# function burst!(
-#     ui::UIState,
-#     p::PhysicsState,
-#     states::AbstractMatrix,
-#     n::Integer,
-#     t::Integer;
-#     gamma::Real = 0.9995,
-#     alphamin::Real = 0.05,
-#     alphamax::Real = 0.55,
-#     doppler::Bool = true,
-# )
+function burst!(
+    ui::UIState,
+    p::PhysicsState,
+    states::AbstractMatrix,
+    n::Integer,
+    t::Integer;
+    gamma::Real = 0.9995,
+    alphamin::Real = 0.05,
+    alphamax::Real = 0.55,
+    doppler::Bool = true,
+)
 
-#     # Check inputs
-#     T = size(states, 2)
-#     (T >= n > 0) || error("n must be in range [1, size(states, 2)]")
-#     (0 < t) || error("t must be >= 0")
-#     (0 < gamma <= 1) || error("gamma must be in range (0, 1)")
-#     (0 < alphamin <= 1) || error("alphamin must be in range (0, 1]")
-#     (0 < alphamax <= 1) || error("alphamin must be in range (0, 1]")
+    # Check inputs
+    T = size(states, 2)
+    (T >= n > 0) || error("n must be in range [1, size(states, 2)]")
+    (0 < t) || error("t must be >= 0")
+    (0 < gamma <= 1) || error("gamma must be in range (0, 1)")
+    (0 < alphamin <= 1) || error("alphamin must be in range (0, 1]")
+    (0 < alphamax <= 1) || error("alphamin must be in range (0, 1]")
 
-#     scn = ui.scn
-#     n = min(n, fld(MAXGEOM, p.model.ngeom))
-#     geoms = unsafe_wrap(Array, scn.geoms, scn.maxgeom)
+    scn = ui.scn
+    n = min(n, fld(MAXGEOM, p.model.ngeom))
+    geoms = unsafe_wrap(Array, scn.geoms, scn.maxgeom)
 
-#     function color!(tprime, from)
-#         for i = from:scn[].ngeom
-#             geom = @inbounds geoms[i]
-#             if geom.category == Int(MJCore.mjCAT_DYNAMIC)
-#                 dist = abs(tprime - t)
-#                 r, g, b, alpha0 = geom.rgba
+    function color!(tprime, from)
+        for i = from:scn.ngeom
+            geom = @inbounds geoms[i]
+            if geom.category == Int(LibMuJoCo.mjCAT_DYNAMIC)
+                dist = abs(tprime - t)
+                r, g, b, alpha0 = geom.rgba
 
-#                 alpha = alpha0 * gamma^dist
+                alpha = alpha0 * gamma^dist
 
-#                 if doppler
-#                     g = 0
-#                     if tprime < t
-#                         beta = (dist + 1) / t / 2 + 0.5
-#                         r = beta * r
-#                         b = (1 - beta) * b
-#                     else
-#                         beta = dist / (T - t) / 2 + 0.5
-#                         r = (1 - beta) * r
-#                         b = beta * b
-#                     end
-#                     r = clamp(r, 0, 1)
-#                     b = clamp(b, 0, 1)
-#                 end
+                if doppler
+                    g = 0
+                    if tprime < t
+                        beta = (dist + 1) / t / 2 + 0.5
+                        r = beta * r
+                        b = (1 - beta) * b
+                    else
+                        beta = dist / (T - t) / 2 + 0.5
+                        r = (1 - beta) * r
+                        b = beta * b
+                    end
+                    r = clamp(r, 0, 1)
+                    b = clamp(b, 0, 1)
+                end
 
-#                 geoms[i] = @set!! geom.rgba = SVector{4,Cfloat}(r, g, b, alpha)
-#             end
-#         end
-#     end
+                @set!! geom.rgba = NTuple{4,Cfloat}((r, g, b, alpha))
+                geoms[i] = geom
+            end
+        end
+    end
 
-#     LyceumMuJoCo.setstate!(p.model, view(states, :, t))
-#     mjv_updateScene(
-#         sim.m,
-#         sim.d,
-#         ui.vopt,
-#         p.pert,
-#         ui.cam,
-#         MJCore.mjCAT_ALL,
-#         scn,
-#     )
+    set_physics_state!(p.model, p.data, view(states, :, t))
+    forward!(p.model, p.data)
+    mjv_updateScene(
+        p.model,
+        p.data,
+        ui.vopt,
+        p.pert,
+        ui.cam,
+        LibMuJoCo.mjCAT_ALL,
+        scn,
+    )
 
-#     if n > 1
-#         fromidx = scn[].ngeom + 1
-#         from = scn[].ngeom + 1
-#         for tprime in Iterators.map(x -> round(Int, x), LinRange(1, T, n))
-#             if tprime != t
-#                 LyceumMuJoCo.setstate!(p.model, view(states, :, tprime))
-#                 mjv_addGeoms(
-#                     sim.m,
-#                     sim.d,
-#                     ui.vopt,
-#                     p.pert,
-#                     MJCore.mjCAT_DYNAMIC,
-#                     scn,
-#                 )
-#                 color!(tprime, from)
-#             end
-#             from = scn[].ngeom + 1
-#         end
-#     end
+    if n > 1
+        from = scn.ngeom + 1
+        for tprime in Iterators.map(x -> round(Int, x), LinRange(1, T, n))
+            if tprime != t
+                set_physics_state!(p.model, p.data, view(states, :, tprime))
+                forward!(p.model, p.data)
+                mjv_addGeoms(
+                    p.model,
+                    p.data,
+                    ui.vopt,
+                    p.pert,
+                    LibMuJoCo.mjCAT_DYNAMIC,
+                    scn,
+                )
+                color!(tprime, from)
+            end
+            from = scn.ngeom + 1
+        end
+    end
 
-#     # reset the model to the state it had when it was passed in
-#     LyceumMuJoCo.setstate!(p.model, view(states, :, t))
+    # Reset the model to the state it had when it was passed in
+    set_physics_state!(p.model, p.data, view(states, :, t))
+    forward!(p.model, p.data)
 
-#     return ui
-# end
+    return ui
+end

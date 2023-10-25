@@ -134,7 +134,7 @@ end
 
 Set the state vector of a MuJoCo model.
 
-The state vector is [joint positions, joint velocities, actuator states] with dimension (nq, nv, na). 
+The state vector is [joint positions, joint velocities, actuator states] with dimension (nq, nv, na). Call [`forward!`](@ref) after setting the state to compute all derived quantities in the `Data` object according to the new state.
 
 See also [`mj_setState`](@ref) and [`get_physics_state`](@ref).
 """
@@ -156,6 +156,7 @@ Add the following packages to your project to be able to use
 the visualisation features, or run "install_visualiser()".
 
 # Packages:
+- BangBang
 - FFMPEG
 - GLFW
 - Observables
@@ -164,7 +165,7 @@ the visualisation features, or run "install_visualiser()".
 - StaticArrays
 """
 function init_visualiser()
-    @eval Main using FFMPEG, GLFW, Observables, PrettyTables, Printf, StaticArrays
+    @eval Main using BangBang, FFMPEG, GLFW, Observables, PrettyTables, Printf, StaticArrays
     if isdefined(Base, :get_extension)
         @eval Main Base.retry_load_extensions()
     end
@@ -177,6 +178,7 @@ Installs the necessary packages for the running the visualiser
 into the current running environment.
 
 # Packages:
+- BangBang
 - FFMPEG
 - GLFW
 - Observables
@@ -186,19 +188,21 @@ into the current running environment.
 """
 function install_visualiser()
     @eval Main import Pkg
-    @eval Main Pkg.add(["FFMPEG", "GLFW", "Observables", "PrettyTables", "Printf", "StaticArrays"])
+    @eval Main Pkg.add(["BangBang", "FFMPEG", "GLFW", "Observables", "PrettyTables", "Printf", "StaticArrays"])
 end
 
 @static if !isdefined(Base, :get_extension)
 function __init__()
     @static if !isdefined(Base, :get_extension)
-        @require FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a" begin
-            @require GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98" begin
-                @require Observables = "510215fc-4207-5dde-b226-833fc4488ee2" begin
-                    @require PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d" begin
-                        @require Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7" begin
-                            @require StaticArrays = "90137ffa-7385-5640-81b9-e52037218182" begin
-                                include("../ext/VisualiserExt/VisualiserExt.jl")
+        @require BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66" begin 
+            @require FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a" begin
+                @require GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98" begin
+                    @require Observables = "510215fc-4207-5dde-b226-833fc4488ee2" begin
+                        @require PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d" begin
+                            @require Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7" begin
+                                @require StaticArrays = "90137ffa-7385-5640-81b9-e52037218182" begin
+                                    include("../ext/VisualiserExt/VisualiserExt.jl")
+                                end
                             end
                         end
                     end
