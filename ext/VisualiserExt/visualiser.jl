@@ -6,8 +6,8 @@ function MuJoCo.Visualiser.visualise!(
     trajectories = nothing
 )
     modes = EngineMode[PassiveDynamics()]
-    !isnothing(trajectories) && push!(modes, Trajectory(trajectories))
     !isnothing(controller) && push!(modes, Controller(controller))
+    !isnothing(trajectories) && push!(modes, Trajectory(trajectories))
 
     run!(Engine(default_windowsize(), m, d, Tuple(modes)))
     return nothing

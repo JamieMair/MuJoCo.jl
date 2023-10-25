@@ -45,13 +45,15 @@ function test_visualiser end
 
 Starts an interactive visualization of a MuJoCo model specified by an instance of `Model` and `Data`.
 
-The visualizer has two "modes" that allow you to visualize passive dynamics or run a controller interactively. The passive dynamics mode is always available, while the controller mode is specified by the keyword argument below.
+The visualizer has three "modes" that allow you to visualize passive dynamics, run a controller interactively, or play back recorded trajectories. The passive dynamics mode is always available, while the controller and trajectory modes are specified by the keyword arguments below.
 
-Press F1 for help after running the visualiser to print the available options in a terminal.
+Press F1 for help after running the visualiser to print the available mouse/button options in the terminal.
 
 # Keywords
 
 - `controller`: a callback function with the signature `controller(m, d)`, called at each timestep, that applies a control input to the system (or does any other operation you like).
+
+- `trajectories`: a single trajectory or `Vector` of trajectories, where each trajectory is an `AbstractMatrix` of states with size `(nx, T)` where `nx = model.nq + model.nv + model.na` and `T` is the length of the trajectory. Note that each trajectory can have a different length.
 
 # Examples
 
@@ -63,14 +65,26 @@ init_visualiser()    # Load required dependencies into session
 # Load a model
 model, data = MuJoCo.sample_model_and_data()
 
+# Simulate and record a trajectory
+T = 200
+nx = model.nq + model.nv + model.na
+states = zeros(nx, T)
+for t in 1:T
+    states[:,t] = get_physics_state(model, data)
+    step!(model, data)
+end
+
 # Define a controller
 function ctrl!(m,d)
     d.ctrl .= 2*rand(m.nu) .- 1
 end
 
 # Run the visualiser
-visualise!(model, data, controller=ctrl!)
+reset!(model, data)
+visualise!(model, data, controller=ctrl!, trajectories = states)
 ```
+
+See also [`get_physics_state`](@ref) and [`reset!`](@ref).
 """
 function visualise! end
 
