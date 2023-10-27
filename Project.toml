@@ -7,7 +7,6 @@ version = "0.1.0"
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 MuJoCo_jll = "32af7c3b-80ec-5621-8194-2f6cb2280831"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
-TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
 
 [weakdeps]
@@ -25,9 +24,12 @@ VisualiserExt = ["BangBang", "FFMPEG", "GLFW", "Observables", "PrettyTables", "P
 
 [compat]
 julia = "1.6"
+MuJoCo_jll = "2.3.7"
+UnsafeArrays = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
-test = ["Test"]
+test = ["Test", "TestItemRunner"]
