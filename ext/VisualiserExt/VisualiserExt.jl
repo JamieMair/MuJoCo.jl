@@ -13,6 +13,7 @@ if isdefined(Base, :get_extension)
     using MuJoCo.LibMuJoCo: mjrRect
     using MuJoCo.Visualiser
 
+    using BangBang
     using FFMPEG
     using GLFW: GLFW, Window, Key, Action, MouseButton, GetKey, RELEASE, PRESS, REPEAT
     using Observables: Observable, on, off
@@ -28,6 +29,7 @@ else
     using ..MuJoCo.LibMuJoCo: mjrRect
     using ..MuJoCo.Visualiser
 
+    using ..BangBang
     using ..FFMPEG
     using ..GLFW: GLFW, Window, Key, Action, MouseButton, GetKey, RELEASE, PRESS, REPEAT
     using ..Observables: Observable, on, off

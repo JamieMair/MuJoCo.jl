@@ -199,7 +199,9 @@ function handlers(e::Engine)
                 end
             end,
 
-            # TODO: see https://github.com/JamieMair/MuJoCo.jl/issues/43
+            onkey(GLFW.KEY_BACKSPACE, what = "Reset model") do s, ev
+                ispress_or_repeat(ev.action) && reset!(p, mode(e))
+            end,
 
             onkey(GLFW.KEY_SPACE, what = "Pause") do s, ev
                 ispress_or_repeat(ev.action) && setpause!(ui, p, !ui.paused)
@@ -217,8 +219,6 @@ function handlers(e::Engine)
                     end
                 end
             end,
-
-            # TODO: see https://github.com/JamieMair/MuJoCo.jl/issues/42
 
             onkey(GLFW.KEY_ENTER, what = "Toggle speed mode") do s, ev
                 if ispress_or_repeat(ev.action)

@@ -3,12 +3,13 @@
 function MuJoCo.Visualiser.visualise!(
     m::Model, d::Data; 
     controller = nothing, 
-    # trajectories = nothing
+    trajectories = nothing
 )
     modes = EngineMode[PassiveDynamics()]
     !isnothing(controller) && push!(modes, Controller(controller))
-    e = Engine(default_windowsize(), m, d, Tuple(modes))
-    run!(e)
+    !isnothing(trajectories) && push!(modes, Trajectory(trajectories))
+
+    run!(Engine(default_windowsize(), m, d, Tuple(modes)))
     return nothing
 end
 
