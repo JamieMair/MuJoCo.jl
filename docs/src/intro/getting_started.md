@@ -5,7 +5,7 @@
 To install `MuJoCo.jl`, simply run the following code in a Julia REPL:
 ```julia
 import Pkg
-Pkg.add(url="https://github.com/JamieMair/MuJoCo.jl")
+Pkg.add("MuJoCo.jl")
 ```
 This will download and install the package, along with the underlying C library. We highly recommend activating a project to manage dependencies - see the [docs](https://docs.julialang.org/en/v1/stdlib/Pkg/) for more information.
 
