@@ -40,9 +40,7 @@ include("visualiser.jl")
 const MODEL_TYPES = Union{Model, NamedAccess.NamedModel}
 const DATA_TYPES = Union{Data, NamedAccess.NamedData}
 
-
 import .Visualiser: visualise!
-
 
 export init_data, step!, forward!, timestep, reset!, resetkey!, get_physics_state, set_physics_state!
 export init_visualiser, install_visualiser, visualise!

@@ -47,7 +47,11 @@ Starts an interactive visualization of a MuJoCo model specified by an instance o
 
 The visualizer has three "modes" that allow you to visualize passive dynamics, run a controller interactively, or play back recorded trajectories. The passive dynamics mode is always available, while the controller and trajectory modes are specified by the keyword arguments below.
 
-Press F1 for help after running the visualiser to print the available mouse/button options in the terminal.
+Press `F1` for help after running the visualiser to print the available mouse/button options in the terminal. Switch between modes with `CTRL+RightArrow` and `CTRL+LeftArrow` (or `CMD` for Mac). The different visualiser modes are ordered as follows:
+    
+1. Controller mode (if `controller` keyword is provided)
+2. Trajectory mode (if `trajectories` keyword is provided)
+3. Passive mode (always available)
 
 # Keywords
 
@@ -83,8 +87,6 @@ end
 reset!(model, data)
 visualise!(model, data, controller=ctrl!, trajectories = states)
 ```
-
-See also [`get_physics_state`](@ref) and [`reset!`](@ref).
 """
 function visualise! end
 
