@@ -8,10 +8,10 @@ CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MuJoCo_jll = "32af7c3b-80ec-5621-8194-2f6cb2280831"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
-TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
 
 [weakdeps]
+BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
 FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
 Observables = "510215fc-4207-5dde-b226-833fc4488ee2"
@@ -21,13 +21,18 @@ Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [extensions]
-VisualiserExt = ["FFMPEG", "GLFW", "Observables", "PrettyTables", "Printf", "StaticArrays"]
+VisualiserExt = ["BangBang", "FFMPEG", "GLFW", "Observables", "PrettyTables", "Printf", "StaticArrays"]
 
 [compat]
+CEnum = "0.3, 0.4, 0.5"
+MuJoCo_jll = "2.3.7"
+UnsafeArrays = "1"
+Requires = "1"
 julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
-test = ["Test"]
+test = ["Test", "TestItemRunner"]

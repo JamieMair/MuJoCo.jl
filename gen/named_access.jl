@@ -328,7 +328,10 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
     )
     module_name = :LibMuJoCo
 
-    sample_model_path = abspath(joinpath(MuJoCo_jll.artifact_dir, "share", "mujoco", "model", "humanoid.xml"))
+    # Get sample filepath to humanoid
+    root_path = abspath(joinpath(MuJoCo_jll.artifact_dir, "share", "mujoco", "model"))
+    sample_model_path = joinpath(root_path, "humanoid.xml")
+
     test_model = Wrappers.Model(LibMuJoCo.mj_loadXML(sample_model_path, Ptr{Cvoid}(), "", 0))
     test_data = Wrappers.Data(Wrappers.LibMuJoCo.mj_makeData(test_model), test_model)
 
@@ -430,7 +433,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
             # Add function stub with some documentation
             if !(identifier in documented_fns)
                 empty_fn_expr = :(function $(identifier) end)
-                identifier_docs = "\t$(identifier)([model, data], [name, index])\nCreates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:\n$(Expr(:tuple, property_names...))"
+                identifier_docs = "\t$(identifier)([model, data], [name, index])\nCreates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:\n$(Expr(:tuple, property_names...))"
                 push!(exprs, doc_fn(identifier_docs, empty_fn_expr))
                 push!(documented_fns, identifier)
             end

@@ -5,7 +5,7 @@
 To install `MuJoCo.jl`, simply run the following code in a Julia REPL:
 ```julia
 import Pkg
-Pkg.add(url="https://github.com/JamieMair/MuJoCo.jl")
+Pkg.add("MuJoCo.jl")
 ```
 This will download and install the package, along with the underlying C library. We highly recommend activating a project to manage dependencies - see the [docs](https://docs.julialang.org/en/v1/stdlib/Pkg/) for more information.
 
@@ -63,11 +63,62 @@ visualise!(model, data, controller=random_controller!)
 ```
 ![](humanoid_random_demo.gif)
 
-Press F1 for help after running the visualiser to print the available options in a terminal. Some of the most interesting are:
+Press `F1` for help after running the visualiser to print the available options in a terminal. Some of the most interesting are:
 - Press `CTRL+RightArrow` (or `CMD` for Mac) to cycle between the passive dynamics and the controlled motion
 - Press `SPACE` to pause/unpause
 - Double-click on an object select it
 - `CTRL+RightClick` and drag to apply a force
+- Press `Backspace` to reset the model
 - Press `ESC` to exit the simulation
+
+## Visualising a Trajectory
+
+Sometimes it will be more convenient to simulate the motion of a MuJoCo model and save its response for later analysis. The visualiser includes a `Trajectory` mode to enable this. Let's [`reset!`](@ref) our humanoid model and set its initial height to 2 metres above the ground.
+
+```@example demo
+reset!(model, data)
+data.qpos[3] = 2
+forward!(model, data) # Propagate the physics forward 
+```
+
+The motion of every MuJoCo model can be described by some physical [state vector](https://mujoco.readthedocs.io/en/stable/computation/index.html#physics-state) consisting of the positions and velocities of its components, and the state of its actuators. We have included [`get_physics_state`](@ref) and [`set_physics_state!`](@ref) to allow users to record (and set) the states of a model during simulation. Let's simulate our humanoid for another 100 timesteps and record its state.
+
+```@example demo
+tmax = 400
+nx = model.nq + model.nv + model.na # State vector dimension
+states = zeros(nx, tmax)
+for t in 1:tmax
+    states[:,t] = get_physics_state(model, data)
+    step!(model, data)
+end
+```
+
+We'll also go back and save the humanoid states under our random controller. 
+```@example demo
+reset!(model, data)
+ctrl_states = zeros(nx, tmax)
+for t in 1:tmax
+    ctrl_states[:,t] = get_physics_state(model, data)
+    random_controller!(model, data)
+    step!(model, data)
+end
+```
+
+We can now play back either the passive or controlled humanoid motion whenever we like using the `Trajectory` mode in the visualiser. This allows us to re-wind the simulation, simulate it backwards, skip forward/backwards a few frames, and add some cool visualisation features.
+
+```julia
+visualise!(model, data, trajectories = [states, ctrl_states])
+```
+![](humanoid_trajectories.gif)
+
+You might find the following tips useful:
+- Press `CTRL+RightArrow` (or `CMD` for Mac) to cycle between the passive dynamics and the saved trajectories
+- Press `F1` to see the new `Trajectory` mode button and mouse options, including:
+    - Press `UP` or `DOWN` to cycle between trajectories
+    - PRESS `CTRL+R` for reverse mode
+    - Press `CTRL+B` to turn burst-mode on
+    - Press `CTRL+D` to add a doppler shift
+
+We strongly recommend saving trajectories for later visualisation if you're simulating any particularly complicated tasks in MuJoCo. You can start up the visualiser with all three of the passive dynamics, controlled dynamics, and saved trajectories. See [`visualise!`](@ref) for details.
 
 Happy visualising!
