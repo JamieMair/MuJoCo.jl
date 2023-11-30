@@ -324,7 +324,7 @@ function optional_wrapper(identifier, is_optional, other_types...)
 end
 
 map_to_abstract_supertype(::Type{<:Integer}) = Integer
-map_to_abstract_supertype(::Type{<:AbstractFloat}) = Number
+map_to_abstract_supertype(::Type{<:AbstractFloat}) = Real
 map_to_abstract_supertype(::Type{<:UInt8}) = UInt8
 map_to_abstract_supertype(x) = nothing
 
