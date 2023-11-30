@@ -42,6 +42,21 @@ MJ.mj_jacSubtreeCom(model, data, jac_torso, torso.id)
 
 More examples of working with matrices in MuJoCo are provided in [Balancing a Cart-Pole](@ref) and [Humanoid LQR](@ref). For more information on row-major vs column major, see the [Wikipedia page](https://en.wikipedia.org/wiki/Row-_and_column-major_order).
 
+## Wrapped Functions
+
+Similar to the [Python API](https://mujoco.readthedocs.io/en/stable/python.html#functions), we have wrapped several functions to allow the use of native Julia arrays. The majority of functions that take arrays as arguments have been wrapped to apply some basic bounds checks for the size of the arrays, along with a restriction of the type that can be passed in. 
+
+Some of the function signatures have been changed to remove superfluous arguments that can be inferred by the data stored in the Julia arrays, for example:
+```@example torso
+println(methods(MJ.mju_add).ms[1])
+```
+vs the original:
+```@example torso
+println(methods(MJ.LibMuJoCo.mju_add).ms[1])
+```
+
+The `mj_` functions that have been wrapped are the defaults and can be found in `src/function_constraints.jl` and are documented in the [MuJoCo API](@ref). If required, the original functions can be accessed inside the submodule `LibMuJoCo`.
+
 ## Tips and Tricks
 
 1. This library is a wrapper for MuJoCo. The [documentation for MuJoCo](https://mujoco.readthedocs.io/en/stable/overview.html) is very comprehensive and should be referred to for any queries regarding usage of the simulator.

@@ -57,7 +57,7 @@ centred = true
 # Compute the Jacobians
 A = mj_zeros(nx, nx)
 B = mj_zeros(nx, nu)
-mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
+mjd_transitionFD(model, data, ϵ, centred, A, B, nothing, nothing)
 @show A, B
 nothing #hide
 ```
