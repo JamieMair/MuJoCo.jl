@@ -124,7 +124,7 @@ See also [`mj_getState`](@ref) and [`set_physics_state!`](@ref).
 """
 function get_physics_state(m::Model, d::Data)
     x = mj_zeros(m.nq+m.nv+m.na)
-    mj_getState(m, d, x, LibMuJoCo.mjSTATE_PHYSICS)
+    mj_getState(m, d, x, Int(LibMuJoCo.mjSTATE_PHYSICS))
     return transpose(x)
 end
 
@@ -139,7 +139,7 @@ The state vector is [joint positions, joint velocities, actuator states] with di
 See also [`mj_setState`](@ref) and [`get_physics_state`](@ref).
 """
 function set_physics_state!(m::Model, d::Data, x::AbstractVector)
-    mj_setState(m, d, transpose(x), LibMuJoCo.mjSTATE_PHYSICS)
+    mj_setState(m, d, transpose(x), Int(LibMuJoCo.mjSTATE_PHYSICS))
 end
 
 # Handle backwards compatibility

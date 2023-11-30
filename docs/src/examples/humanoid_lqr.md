@@ -160,7 +160,7 @@ mj_jacSubtreeCom(model, data, jac_com, torso.id)
 
 # Get (left) foot Jacobian for balancing
 jac_foot = mj_zeros(3, nv)
-mj_jacBodyCom(model, data, jac_foot, C_NULL, left_foot.id)
+mj_jacBodyCom(model, data, jac_foot, nothing, left_foot.id)
 
 # Design Q-matrix to balance CoM over foot
 jac_diff = jac_com .- jac_foot
@@ -233,7 +233,7 @@ centred = true
 # Compute the Jacobians
 A = mj_zeros(2nv, 2nv)
 B = mj_zeros(2nv, nu)
-mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
+mjd_transitionFD(model, data, ϵ, centred, A, B, nothing, nothing)
 @show A, B
 ```
 Just like the cart-pole example, we'll directly use [`ared`](https://andreasvarga.github.io/MatrixEquations.jl/dev/riccati.html#MatrixEquations.ared) from `MatrixEquations.jl` to compute the LQR gain matrix $K$ as a lightweight alternative to loading `ControlSystemsCore.jl`.

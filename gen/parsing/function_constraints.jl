@@ -325,7 +325,7 @@ end
 
 map_to_abstract_supertype(::Type{<:Integer}) = Integer
 map_to_abstract_supertype(::Type{<:AbstractFloat}) = Real
-map_to_abstract_supertype(::Type{<:UInt8}) = UInt8
+map_to_abstract_supertype(::Type{<:UInt8}) = Union{UInt8, Bool}
 map_to_abstract_supertype(x) = nothing
 
 function basic_arg_transform(identifer, type)
@@ -404,17 +404,17 @@ function argument_doc_description(arg_info)
     elseif arg_info.type == :anomalous_vector
         opt = arg_info.is_optional ? "An optional" : "A"
         if arg_info.is_dynamic_size
-            return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of variable size. Check constraints for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+            return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
         else
             return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of size $(arg_info.size_vector)." * (arg_info.is_inner_const ? " Constant." : "")
         end
     elseif arg_info.type == :variable_vector
         opt = arg_info.is_optional ? "An optional" : "A"
-        return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of variable size. Check constraints for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+        return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
     elseif arg_info.type == :static_array
         return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> A vector of size $(arg_info.array_size)." * (arg_info.is_const ? " Constant." : "")
     elseif arg_info.type == :matrix
-        return "- $(arg_info.identifier)::Matrix{$(arg_info.datatype)} -> A matrix variable size. Check constraints for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+        return "- $(arg_info.identifier)::Matrix{$(arg_info.datatype)} -> A matrix variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
     else
         error("Unrecognised argument info for variable $(arg_info)")
     end
@@ -453,7 +453,7 @@ function create_wrapped_docstring(fn_name, fn_body, argument_infos)
 
     constraints = extract_constraints(fn_body)
     if length(constraints) > 0
-        write(io, "\n# Constraints\n")
+        write(io, "\n# Additional Info\n")
         for constraint in constraints
             write(io, "- ")
             write(io, constraint)

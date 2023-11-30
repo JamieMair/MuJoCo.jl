@@ -99,9 +99,8 @@ jac_com = mj_zeros(3, nv)
 mj_jacSubtreeCom(model, data, jac_com, torso.id)
 
 # Get (left) foot Jacobian for balancing
-# TODO: Pass in `nothing` instead of C_NULL?
 jac_foot = mj_zeros(3, nv)
-mj_jacBodyCom(model, data, jac_foot, C_NULL, left_foot.id)
+mj_jacBodyCom(model, data, jac_foot, nothing, left_foot.id)
 
 # Design Q-matrix to balance CoM over foot
 jac_diff = jac_com .- jac_foot
@@ -145,7 +144,7 @@ A = mj_zeros(2nv, 2nv)
 B = mj_zeros(2nv, nu)
 ϵ = 1e-6
 centred = true
-mjd_transitionFD(model, data, ϵ, centred, A, B, C_NULL, C_NULL)
+mjd_transitionFD(model, data, ϵ, centred, A, B, nothing, nothing)
 
 # Solve LQR with MatrixEquations.jl (faster than loading ControlSystems.jl)
 S = zeros(size(Q,1), size(R,1))
