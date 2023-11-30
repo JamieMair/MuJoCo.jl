@@ -1,13 +1,13 @@
 # A script for generating the API from the existing LibMuJoCo files
 include("mjmacro_parsing.jl")
-function ntuple_to_array_extents(::Type{NTuple{N, T}}) where {N, T}
+function ntuple_to_array_extents(::Type{NTuple{N,T}}) where {N,T}
     return (N, ntuple_to_array_extents(T)...)
 end
 function ntuple_to_array_extents(::Type{<:Any})
     return () # Return empty tuple
 end
 
-function ntuple_type(::Type{NTuple{N, T}}) where {N, T}
+function ntuple_type(::Type{NTuple{N,T}}) where {N,T}
     return ntuple_type(T)
 end
 function ntuple_type(::Type{T}) where {T}
@@ -28,7 +28,7 @@ end
 function try_wrap_pointer(::Type{Ptr{T}}, expr, mapping) where {T}
     try_wrap_pointer(T, expr, mapping)
 end
-structinfo(T) = [(fieldoffset(T,i), fieldname(T,i), fieldtype(T,i)) for i = 1:fieldcount(T)];
+structinfo(T) = [(fieldoffset(T, i), fieldname(T, i), fieldtype(T, i)) for i = 1:fieldcount(T)];
 
 
 function gen_auto_cconvert_fn(mj_struct_name, new_name)
@@ -41,7 +41,7 @@ end
 
 
 function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, match_macroinfo)
-    struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn)=>s for (sn, s) in all_wrappers)
+    struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn) => s for (sn, s) in all_wrappers)
     get_property_lines = Expr[]
     offset = 0
 
@@ -64,12 +64,12 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
     # Allow the struct to reference internal pointer, overriding any internal names
     push!(get_property_lines, Expr(:(&&), Expr(:call, :(===), :f, QuoteNode(:internal_pointer)), Expr(:return, :internal_pointer)))
 
-    
-    
+
+
     for (foffset, fname, ftype) in structinfo(mj_struct)
         @assert fname != :internal_pointer "Struct field cannot be accessed as it conflicts with an internal name."
         cmp_expr = Expr(:call, :(===), :f, QuoteNode(fname))
-        
+
         foffset = Int64(foffset) # convert to Int64 for readability
 
         rtn_expr = if ftype <: NTuple # Specially wrap array type
@@ -129,8 +129,27 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
             else
                 # Transpose for row-major order
                 dims_expr = Expr(:tuple, Iterators.reverse(converted_array_sizes)...)
+                non_integer_array_sizes = filter(converted_array_sizes) do _arr_size_expr
+                    if (_arr_size_expr isa Expr)
+                        if (_arr_size_expr.head == :call)
+                            if (length(_arr_size_expr.args) == 2)
+                                if (_arr_size_expr.args[1] == :Int) && (_arr_size_expr.args[2] isa Integer) && _arr_size_expr.args[2] != 0
+                                    return false
+                                end
+                            end
+                        end
+                    end
+                    return true
+                end
+                dims_expr = Expr(:tuple, Iterators.reverse(converted_array_sizes)...)
+
+                all_non_zero_expr = Expr(:call, :all, Expr(:call, :!=, 0), Expr(:tuple, non_integer_array_sizes...))
+
                 pointer_to_pointer = Expr(:call, :unsafe_load, Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset)))
-                Expr(:return, Expr(:call, :transpose, Expr(:call, :UnsafeArray, pointer_to_pointer, dims_expr)))
+                pointer_load = Expr(:(=), :_ptr, pointer_to_pointer)
+                arr_return_expr = Expr(:block, pointer_load, Expr(:if, :(_ptr == C_NULL), nothing, Expr(:call, :transpose, Expr(:call, :UnsafeArray, :_ptr, dims_expr))))
+                if_expr = Expr(:if, all_non_zero_expr, arr_return_expr, nothing)
+                Expr(:return, if_expr)
             end
         else
             ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset))
@@ -148,7 +167,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
     expected_struct_size = sizeof(mj_struct)
     if offset != expected_struct_size
         num_padded_bytes = expected_struct_size - offset
-        @warn "Padding of $num_padded_bytes bytes in $(nameof(mj_struct)) detected.\nExpected $expected_struct_size bytes, but only accounted for $offset bytes."  
+        @warn "Padding of $num_padded_bytes bytes in $(nameof(mj_struct)) detected.\nExpected $expected_struct_size bytes, but only accounted for $offset bytes."
     end
 
     push!(get_property_lines, :(error("Could not find property $f")))
@@ -162,7 +181,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
 end
 
 function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
-    struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn)=>s for (sn, s) in all_wrappers)
+    struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn) => s for (sn, s) in all_wrappers)
     set_property_lines = Expr[]
     offset = 0
 
@@ -170,7 +189,7 @@ function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
     push!(set_property_lines, Expr(:(=), :internal_pointer, Expr(:call, :getfield, :x, QuoteNode(:internal_pointer))))
     # Allow the struct to reference internal pointer, overriding any internal names
     push!(set_property_lines, Expr(:(&&), Expr(:call, :(===), :f, QuoteNode(:internal_pointer)), :(error("Cannot set the internal pointer, create a new struct instead."))))
-    
+
     pointer_field_symbols = Symbol[]
     array_field_symbols = Symbol[]
 
@@ -193,7 +212,7 @@ function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
             Expr(:block, local_var_expr, store_expr, return_expr)
         end
         push!(set_property_lines, Expr(:if, cmp_expr, set_block))
-        
+
         offset += sizeof(ftype)
     end
 
@@ -209,7 +228,7 @@ function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
     end
 
     push!(set_property_lines, :(error("Could not find property $f to set.")))
-    
+
     fn_block = Expr(:block, set_property_lines...)
     fn_expr = Expr(:function, Expr(:call, :(Base.setproperty!), Expr(:(::), :x, new_name), Expr(:(::), :f, :Symbol), :value), fn_block)
 
@@ -224,7 +243,7 @@ function generate_propertynames_fn(mj_struct, new_name::Symbol)
 end
 
 
-function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrappers::Dict{Symbol, Symbol}, parsed_macro_info_dict)
+function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrappers::Dict{Symbol,Symbol}, parsed_macro_info_dict)
     mj_struct = Base.getglobal(LibMuJoCo, struct_name)
     field_info_dict = nothing
     extra_deps, match_macroinfo = if !haskey(parsed_macro_info_dict, struct_name)
@@ -243,19 +262,19 @@ function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrapper
         end
         other_deps, (fieldinfo_dict, deps)
     end
-    
+
     wrapped_struct = Expr(:struct, false, new_name, Expr(:block, Expr(:(::), :internal_pointer, Expr(:curly, :Ptr, struct_name)), extra_deps...))
-    
+
     fn_expr = generate_getproperty_fn(mj_struct, new_name, all_wrappers, match_macroinfo)
     propnames_expr = generate_propertynames_fn(mj_struct, new_name)
     set_prop_fn_expr = generate_setproperty_fn(mj_struct, new_name, all_wrappers)
     auto_convert_fn_expr = gen_auto_cconvert_fn(struct_name, new_name)
-    
+
     return (wrapped_struct, fn_expr, propnames_expr, set_prop_fn_expr, auto_convert_fn_expr)
 end
 
 struct MutableStructInfo
-    finalizer_expr::Union{Expr, Symbol}
+    finalizer_expr::Union{Expr,Symbol}
     args::Vector{Union{Symbol,Expr,<:Number,<:AbstractString}}
 end
 conv_internal_ref(struct_name) = Symbol("__" * lowercase(string(struct_name)))
@@ -281,7 +300,7 @@ end
 function create_basic_wrappers()
     parsed_macro_info = parse_macro_file(macro_file)
 
-    struct_wrappers = Dict{Symbol, Symbol}(
+    struct_wrappers = Dict{Symbol,Symbol}(
         :mjData => :Data,
         :mjModel => :Model,
         :mjStatistic => :Statistics,
@@ -291,7 +310,7 @@ function create_basic_wrappers()
     first_exprs = Expr[]
     push!(first_exprs, :(using UnsafeArrays))
     push!(first_exprs, Expr(:export, values(struct_wrappers)...))
-    
+
     for (k, v) in struct_wrappers
         ws, fe, pn, spfn, ac = build_struct_wrapper(k, v, struct_wrappers, parsed_macro_info)
         push!(first_exprs, ws)
@@ -301,7 +320,7 @@ function create_basic_wrappers()
         push!(other_exprs, ac)
     end
 
-    mutable_struct_info = Dict{Symbol, MutableStructInfo}(
+    mutable_struct_info = Dict{Symbol,MutableStructInfo}(
         :Data => MutableStructInfo(:mj_deleteData, [Expr(:., conv_internal_ref(:Data), QuoteNode(:internal_pointer))]),
         :Model => MutableStructInfo(:mj_deleteModel, [Expr(:., conv_internal_ref(:Model), QuoteNode(:internal_pointer))])
     )
@@ -324,7 +343,7 @@ function create_basic_wrappers()
     create_file_from_expr(joinpath(staging_dir, "wrappers.jl"), exprs)
 
 
-    struct_wrappers = Dict{Symbol, Symbol}(
+    struct_wrappers = Dict{Symbol,Symbol}(
         :mjvScene => :VisualiserScene,
         :mjvCamera => :VisualiserCamera,
         :mjvOption => :VisualiserOption,
@@ -336,7 +355,7 @@ function create_basic_wrappers()
     first_exprs = Expr[]
     push!(first_exprs, :(using UnsafeArrays))
     push!(first_exprs, Expr(:export, values(struct_wrappers)...))
-    
+
     for (k, v) in struct_wrappers
         ws, fe, pn, spfn, ac = build_struct_wrapper(k, v, struct_wrappers, parsed_macro_info)
         push!(first_exprs, ws)
@@ -346,7 +365,7 @@ function create_basic_wrappers()
         push!(other_exprs, ac)
     end
 
-    mutable_struct_info = Dict{Symbol, MutableStructInfo}(
+    mutable_struct_info = Dict{Symbol,MutableStructInfo}(
         :VisualiserScene => MutableStructInfo(:mjv_freeScene, [Expr(:., conv_internal_ref(:VisualiserScene), QuoteNode(:internal_pointer))]),
         :RendererContext => MutableStructInfo(:mjr_freeContext, [Expr(:., conv_internal_ref(:RendererContext), QuoteNode(:internal_pointer))]),
         :VisualiserCamera => MutableStructInfo(Expr(:., :Libc, QuoteNode(:free)), [Expr(:., conv_internal_ref(:VisualiserCamera), QuoteNode(:internal_pointer))]),

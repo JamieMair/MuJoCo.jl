@@ -102,8 +102,16 @@ function Base.getproperty(x::DataLight, f::Symbol)
     data = getfield(x, :data)
     model = getfield(data, :model)
     index = getfield(x, :index)
-    f === :xpos && return view(data.light_xpos, index + 1, Base.OneTo(3))
-    f === :xdir && return view(data.light_xdir, index + 1, Base.OneTo(3))
+    f === :xpos && return if isnothing(data.light_xpos)
+                nothing
+            else
+                view(data.light_xpos, index + 1, Base.OneTo(3))
+            end
+    f === :xdir && return if isnothing(data.light_xdir)
+                nothing
+            else
+                view(data.light_xdir, index + 1, Base.OneTo(3))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_LIGHT, index)
     error("Could not find the property: " * string(f))
@@ -165,8 +173,16 @@ function Base.getproperty(x::DataCamera, f::Symbol)
     data = getfield(x, :data)
     model = getfield(data, :model)
     index = getfield(x, :index)
-    f === :xpos && return view(data.cam_xpos, index + 1, Base.OneTo(3))
-    f === :xmat && return view(data.cam_xmat, index + 1, Base.OneTo(9))
+    f === :xpos && return if isnothing(data.cam_xpos)
+                nothing
+            else
+                view(data.cam_xpos, index + 1, Base.OneTo(3))
+            end
+    f === :xmat && return if isnothing(data.cam_xmat)
+                nothing
+            else
+                view(data.cam_xmat, index + 1, Base.OneTo(9))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_CAMERA, index)
     error("Could not find the property: " * string(f))
@@ -228,11 +244,31 @@ function Base.getproperty(x::DataActuator, f::Symbol)
     data = getfield(x, :data)
     model = getfield(data, :model)
     index = getfield(x, :index)
-    f === :ctrl && return view(data.ctrl, index + 1, Base.OneTo(1))
-    f === :length && return view(data.actuator_length, index + 1, Base.OneTo(1))
-    f === :moment && return view(data.actuator_moment, index + 1, Base.OneTo(model.nv))
-    f === :velocity && return view(data.actuator_velocity, index + 1, Base.OneTo(1))
-    f === :force && return view(data.actuator_force, index + 1, Base.OneTo(1))
+    f === :ctrl && return if isnothing(data.ctrl)
+                nothing
+            else
+                view(data.ctrl, index + 1, Base.OneTo(1))
+            end
+    f === :length && return if isnothing(data.actuator_length)
+                nothing
+            else
+                view(data.actuator_length, index + 1, Base.OneTo(1))
+            end
+    f === :moment && return if isnothing(data.actuator_moment)
+                nothing
+            else
+                view(data.actuator_moment, index + 1, Base.OneTo(model.nv))
+            end
+    f === :velocity && return if isnothing(data.actuator_velocity)
+                nothing
+            else
+                view(data.actuator_velocity, index + 1, Base.OneTo(1))
+            end
+    f === :force && return if isnothing(data.actuator_force)
+                nothing
+            else
+                view(data.actuator_force, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_ACTUATOR, index)
     error("Could not find the property: " * string(f))
@@ -294,21 +330,81 @@ function Base.getproperty(x::DataBody, f::Symbol)
     data = getfield(x, :data)
     model = getfield(data, :model)
     index = getfield(x, :index)
-    f === :applied && return view(data.xfrc_applied, index + 1, Base.OneTo(6))
-    f === :xpos && return view(data.xpos, index + 1, Base.OneTo(3))
-    f === :xquat && return view(data.xquat, index + 1, Base.OneTo(4))
-    f === :xmat && return view(data.xmat, index + 1, Base.OneTo(9))
-    f === :xipos && return view(data.xipos, index + 1, Base.OneTo(3))
-    f === :ximat && return view(data.ximat, index + 1, Base.OneTo(9))
-    f === :com && return view(data.subtree_com, index + 1, Base.OneTo(3))
-    f === :cinert && return view(data.cinert, index + 1, Base.OneTo(10))
-    f === :crb && return view(data.crb, index + 1, Base.OneTo(10))
-    f === :cvel && return view(data.cvel, index + 1, Base.OneTo(6))
-    f === :linvel && return view(data.subtree_linvel, index + 1, Base.OneTo(3))
-    f === :angmom && return view(data.subtree_angmom, index + 1, Base.OneTo(3))
-    f === :cacc && return view(data.cacc, index + 1, Base.OneTo(6))
-    f === :int && return view(data.cfrc_int, index + 1, Base.OneTo(6))
-    f === :ext && return view(data.cfrc_ext, index + 1, Base.OneTo(6))
+    f === :applied && return if isnothing(data.xfrc_applied)
+                nothing
+            else
+                view(data.xfrc_applied, index + 1, Base.OneTo(6))
+            end
+    f === :xpos && return if isnothing(data.xpos)
+                nothing
+            else
+                view(data.xpos, index + 1, Base.OneTo(3))
+            end
+    f === :xquat && return if isnothing(data.xquat)
+                nothing
+            else
+                view(data.xquat, index + 1, Base.OneTo(4))
+            end
+    f === :xmat && return if isnothing(data.xmat)
+                nothing
+            else
+                view(data.xmat, index + 1, Base.OneTo(9))
+            end
+    f === :xipos && return if isnothing(data.xipos)
+                nothing
+            else
+                view(data.xipos, index + 1, Base.OneTo(3))
+            end
+    f === :ximat && return if isnothing(data.ximat)
+                nothing
+            else
+                view(data.ximat, index + 1, Base.OneTo(9))
+            end
+    f === :com && return if isnothing(data.subtree_com)
+                nothing
+            else
+                view(data.subtree_com, index + 1, Base.OneTo(3))
+            end
+    f === :cinert && return if isnothing(data.cinert)
+                nothing
+            else
+                view(data.cinert, index + 1, Base.OneTo(10))
+            end
+    f === :crb && return if isnothing(data.crb)
+                nothing
+            else
+                view(data.crb, index + 1, Base.OneTo(10))
+            end
+    f === :cvel && return if isnothing(data.cvel)
+                nothing
+            else
+                view(data.cvel, index + 1, Base.OneTo(6))
+            end
+    f === :linvel && return if isnothing(data.subtree_linvel)
+                nothing
+            else
+                view(data.subtree_linvel, index + 1, Base.OneTo(3))
+            end
+    f === :angmom && return if isnothing(data.subtree_angmom)
+                nothing
+            else
+                view(data.subtree_angmom, index + 1, Base.OneTo(3))
+            end
+    f === :cacc && return if isnothing(data.cacc)
+                nothing
+            else
+                view(data.cacc, index + 1, Base.OneTo(6))
+            end
+    f === :int && return if isnothing(data.cfrc_int)
+                nothing
+            else
+                view(data.cfrc_int, index + 1, Base.OneTo(6))
+            end
+    f === :ext && return if isnothing(data.cfrc_ext)
+                nothing
+            else
+                view(data.cfrc_ext, index + 1, Base.OneTo(6))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_BODY, index)
     error("Could not find the property: " * string(f))
@@ -370,8 +466,16 @@ function Base.getproperty(x::DataGeom, f::Symbol)
     data = getfield(x, :data)
     model = getfield(data, :model)
     index = getfield(x, :index)
-    f === :xpos && return view(data.geom_xpos, index + 1, Base.OneTo(3))
-    f === :xmat && return view(data.geom_xmat, index + 1, Base.OneTo(9))
+    f === :xpos && return if isnothing(data.geom_xpos)
+                nothing
+            else
+                view(data.geom_xpos, index + 1, Base.OneTo(3))
+            end
+    f === :xmat && return if isnothing(data.geom_xmat)
+                nothing
+            else
+                view(data.geom_xmat, index + 1, Base.OneTo(9))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_GEOM, index)
     error("Could not find the property: " * string(f))
@@ -433,8 +537,16 @@ function Base.getproperty(x::DataJoint, f::Symbol)
     data = getfield(x, :data)
     model = getfield(data, :model)
     index = getfield(x, :index)
-    f === :xanchor && return view(data.xanchor, index + 1, Base.OneTo(3))
-    f === :xaxis && return view(data.xaxis, index + 1, Base.OneTo(3))
+    f === :xanchor && return if isnothing(data.xanchor)
+                nothing
+            else
+                view(data.xanchor, index + 1, Base.OneTo(3))
+            end
+    f === :xaxis && return if isnothing(data.xaxis)
+                nothing
+            else
+                view(data.xaxis, index + 1, Base.OneTo(3))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_JOINT, index)
     error("Could not find the property: " * string(f))
@@ -557,8 +669,16 @@ function Base.getproperty(x::DataSite, f::Symbol)
     data = getfield(x, :data)
     model = getfield(data, :model)
     index = getfield(x, :index)
-    f === :xpos && return view(data.site_xpos, index + 1, Base.OneTo(3))
-    f === :xmat && return view(data.site_xmat, index + 1, Base.OneTo(9))
+    f === :xpos && return if isnothing(data.site_xpos)
+                nothing
+            else
+                view(data.site_xpos, index + 1, Base.OneTo(3))
+            end
+    f === :xmat && return if isnothing(data.site_xmat)
+                nothing
+            else
+                view(data.site_xmat, index + 1, Base.OneTo(9))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SITE, index)
     error("Could not find the property: " * string(f))
@@ -620,14 +740,46 @@ function Base.getproperty(x::DataTendon, f::Symbol)
     data = getfield(x, :data)
     model = getfield(data, :model)
     index = getfield(x, :index)
-    f === :wrapadr && return view(data.ten_wrapadr, index + 1, Base.OneTo(1))
-    f === :wrapnum && return view(data.ten_wrapnum, index + 1, Base.OneTo(1))
-    f === :J_rownnz && return view(data.ten_J_rownnz, index + 1, Base.OneTo(1))
-    f === :J_rowadr && return view(data.ten_J_rowadr, index + 1, Base.OneTo(1))
-    f === :J_colind && return view(data.ten_J_colind, index + 1, Base.OneTo(model.nv))
-    f === :length && return view(data.ten_length, index + 1, Base.OneTo(1))
-    f === :J && return view(data.ten_J, index + 1, Base.OneTo(model.nv))
-    f === :velocity && return view(data.ten_velocity, index + 1, Base.OneTo(1))
+    f === :wrapadr && return if isnothing(data.ten_wrapadr)
+                nothing
+            else
+                view(data.ten_wrapadr, index + 1, Base.OneTo(1))
+            end
+    f === :wrapnum && return if isnothing(data.ten_wrapnum)
+                nothing
+            else
+                view(data.ten_wrapnum, index + 1, Base.OneTo(1))
+            end
+    f === :J_rownnz && return if isnothing(data.ten_J_rownnz)
+                nothing
+            else
+                view(data.ten_J_rownnz, index + 1, Base.OneTo(1))
+            end
+    f === :J_rowadr && return if isnothing(data.ten_J_rowadr)
+                nothing
+            else
+                view(data.ten_J_rowadr, index + 1, Base.OneTo(1))
+            end
+    f === :J_colind && return if isnothing(data.ten_J_colind)
+                nothing
+            else
+                view(data.ten_J_colind, index + 1, Base.OneTo(model.nv))
+            end
+    f === :length && return if isnothing(data.ten_length)
+                nothing
+            else
+                view(data.ten_length, index + 1, Base.OneTo(1))
+            end
+    f === :J && return if isnothing(data.ten_J)
+                nothing
+            else
+                view(data.ten_J, index + 1, Base.OneTo(model.nv))
+            end
+    f === :velocity && return if isnothing(data.ten_velocity)
+                nothing
+            else
+                view(data.ten_velocity, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TENDON, index)
     error("Could not find the property: " * string(f))
@@ -804,27 +956,55 @@ end
 function Base.getproperty(x::ModelEquality, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :type && return view(model.eq_type, index + 1, Base.OneTo(1))
-    f === :obj1id && return view(model.eq_obj1id, index + 1, Base.OneTo(1))
-    f === :obj2id && return view(model.eq_obj2id, index + 1, Base.OneTo(1))
-    f === :active && return view(model.eq_active, index + 1, Base.OneTo(1))
+    f === :type && return if isnothing(model.eq_type)
+                nothing
+            else
+                view(model.eq_type, index + 1, Base.OneTo(1))
+            end
+    f === :obj1id && return if isnothing(model.eq_obj1id)
+                nothing
+            else
+                view(model.eq_obj1id, index + 1, Base.OneTo(1))
+            end
+    f === :obj2id && return if isnothing(model.eq_obj2id)
+                nothing
+            else
+                view(model.eq_obj2id, index + 1, Base.OneTo(1))
+            end
+    f === :active && return if isnothing(model.eq_active)
+                nothing
+            else
+                view(model.eq_active, index + 1, Base.OneTo(1))
+            end
     f === :solref && return begin
                 size_arr = Int(LibMuJoCo.mjNREF)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.eq_solref + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :solimp && return begin
                 size_arr = Int(LibMuJoCo.mjNIMP)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.eq_solimp + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :data && return begin
                 size_arr = Int(LibMuJoCo.mjNEQDATA)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.eq_data + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_EQUALITY, index)
@@ -886,12 +1066,36 @@ end
 function Base.getproperty(x::ModelKeyframe, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :time && return view(model.key_time, index + 1, Base.OneTo(1))
-    f === :qpos && return view(model.key_qpos, index + 1, Base.OneTo(model.nq))
-    f === :qvel && return view(model.key_qvel, index + 1, Base.OneTo(model.nv))
-    f === :act && return view(model.key_act, index + 1, Base.OneTo(model.na))
-    f === :mpos && return view(model.key_mpos, index + 1, Base.OneTo(model.nmocap * 3))
-    f === :mquat && return view(model.key_mquat, index + 1, Base.OneTo(model.nmocap * 4))
+    f === :time && return if isnothing(model.key_time)
+                nothing
+            else
+                view(model.key_time, index + 1, Base.OneTo(1))
+            end
+    f === :qpos && return if isnothing(model.key_qpos)
+                nothing
+            else
+                view(model.key_qpos, index + 1, Base.OneTo(model.nq))
+            end
+    f === :qvel && return if isnothing(model.key_qvel)
+                nothing
+            else
+                view(model.key_qvel, index + 1, Base.OneTo(model.nv))
+            end
+    f === :act && return if isnothing(model.key_act)
+                nothing
+            else
+                view(model.key_act, index + 1, Base.OneTo(model.na))
+            end
+    f === :mpos && return if isnothing(model.key_mpos)
+                nothing
+            else
+                view(model.key_mpos, index + 1, Base.OneTo(model.nmocap * 3))
+            end
+    f === :mquat && return if isnothing(model.key_mquat)
+                nothing
+            else
+                view(model.key_mquat, index + 1, Base.OneTo(model.nmocap * 4))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_KEY, index)
     error("Could not find the property: " * string(f))
@@ -946,38 +1150,126 @@ end
 function Base.getproperty(x::ModelGeom, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :type && return view(model.geom_type, index + 1, Base.OneTo(1))
-    f === :contype && return view(model.geom_contype, index + 1, Base.OneTo(1))
-    f === :conaffinity && return view(model.geom_conaffinity, index + 1, Base.OneTo(1))
-    f === :condim && return view(model.geom_condim, index + 1, Base.OneTo(1))
-    f === :bodyid && return view(model.geom_bodyid, index + 1, Base.OneTo(1))
-    f === :dataid && return view(model.geom_dataid, index + 1, Base.OneTo(1))
-    f === :matid && return view(model.geom_matid, index + 1, Base.OneTo(1))
-    f === :group && return view(model.geom_group, index + 1, Base.OneTo(1))
-    f === :priority && return view(model.geom_priority, index + 1, Base.OneTo(1))
-    f === :sameframe && return view(model.geom_sameframe, index + 1, Base.OneTo(1))
-    f === :solmix && return view(model.geom_solmix, index + 1, Base.OneTo(1))
+    f === :type && return if isnothing(model.geom_type)
+                nothing
+            else
+                view(model.geom_type, index + 1, Base.OneTo(1))
+            end
+    f === :contype && return if isnothing(model.geom_contype)
+                nothing
+            else
+                view(model.geom_contype, index + 1, Base.OneTo(1))
+            end
+    f === :conaffinity && return if isnothing(model.geom_conaffinity)
+                nothing
+            else
+                view(model.geom_conaffinity, index + 1, Base.OneTo(1))
+            end
+    f === :condim && return if isnothing(model.geom_condim)
+                nothing
+            else
+                view(model.geom_condim, index + 1, Base.OneTo(1))
+            end
+    f === :bodyid && return if isnothing(model.geom_bodyid)
+                nothing
+            else
+                view(model.geom_bodyid, index + 1, Base.OneTo(1))
+            end
+    f === :dataid && return if isnothing(model.geom_dataid)
+                nothing
+            else
+                view(model.geom_dataid, index + 1, Base.OneTo(1))
+            end
+    f === :matid && return if isnothing(model.geom_matid)
+                nothing
+            else
+                view(model.geom_matid, index + 1, Base.OneTo(1))
+            end
+    f === :group && return if isnothing(model.geom_group)
+                nothing
+            else
+                view(model.geom_group, index + 1, Base.OneTo(1))
+            end
+    f === :priority && return if isnothing(model.geom_priority)
+                nothing
+            else
+                view(model.geom_priority, index + 1, Base.OneTo(1))
+            end
+    f === :sameframe && return if isnothing(model.geom_sameframe)
+                nothing
+            else
+                view(model.geom_sameframe, index + 1, Base.OneTo(1))
+            end
+    f === :solmix && return if isnothing(model.geom_solmix)
+                nothing
+            else
+                view(model.geom_solmix, index + 1, Base.OneTo(1))
+            end
     f === :solref && return begin
                 size_arr = Int(LibMuJoCo.mjNREF)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.geom_solref + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :solimp && return begin
                 size_arr = Int(LibMuJoCo.mjNIMP)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.geom_solimp + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
-    f === :size && return view(model.geom_size, index + 1, Base.OneTo(3))
-    f === :rbound && return view(model.geom_rbound, index + 1, Base.OneTo(1))
-    f === :pos && return view(model.geom_pos, index + 1, Base.OneTo(3))
-    f === :quat && return view(model.geom_quat, index + 1, Base.OneTo(4))
-    f === :friction && return view(model.geom_friction, index + 1, Base.OneTo(3))
-    f === :margin && return view(model.geom_margin, index + 1, Base.OneTo(1))
-    f === :gap && return view(model.geom_gap, index + 1, Base.OneTo(1))
-    f === :user && return view(model.geom_user, index + 1, Base.OneTo(model.nuser_geom))
-    f === :rgba && return view(model.geom_rgba, index + 1, Base.OneTo(4))
+    f === :size && return if isnothing(model.geom_size)
+                nothing
+            else
+                view(model.geom_size, index + 1, Base.OneTo(3))
+            end
+    f === :rbound && return if isnothing(model.geom_rbound)
+                nothing
+            else
+                view(model.geom_rbound, index + 1, Base.OneTo(1))
+            end
+    f === :pos && return if isnothing(model.geom_pos)
+                nothing
+            else
+                view(model.geom_pos, index + 1, Base.OneTo(3))
+            end
+    f === :quat && return if isnothing(model.geom_quat)
+                nothing
+            else
+                view(model.geom_quat, index + 1, Base.OneTo(4))
+            end
+    f === :friction && return if isnothing(model.geom_friction)
+                nothing
+            else
+                view(model.geom_friction, index + 1, Base.OneTo(3))
+            end
+    f === :margin && return if isnothing(model.geom_margin)
+                nothing
+            else
+                view(model.geom_margin, index + 1, Base.OneTo(1))
+            end
+    f === :gap && return if isnothing(model.geom_gap)
+                nothing
+            else
+                view(model.geom_gap, index + 1, Base.OneTo(1))
+            end
+    f === :user && return if isnothing(model.geom_user)
+                nothing
+            else
+                view(model.geom_user, index + 1, Base.OneTo(model.nuser_geom))
+            end
+    f === :rgba && return if isnothing(model.geom_rgba)
+                nothing
+            else
+                view(model.geom_rgba, index + 1, Base.OneTo(4))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_GEOM, index)
     error("Could not find the property: " * string(f))
@@ -1038,8 +1330,16 @@ end
 function Base.getproperty(x::ModelNumeric, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :adr && return view(model.numeric_adr, index + 1, Base.OneTo(1))
-    f === :size && return view(model.numeric_size, index + 1, Base.OneTo(1))
+    f === :adr && return if isnothing(model.numeric_adr)
+                nothing
+            else
+                view(model.numeric_adr, index + 1, Base.OneTo(1))
+            end
+    f === :size && return if isnothing(model.numeric_size)
+                nothing
+            else
+                view(model.numeric_size, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_NUMERIC, index)
     error("Could not find the property: " * string(f))
@@ -1094,18 +1394,66 @@ end
 function Base.getproperty(x::ModelSensor, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :type && return view(model.sensor_type, index + 1, Base.OneTo(1))
-    f === :datatype && return view(model.sensor_datatype, index + 1, Base.OneTo(1))
-    f === :needstage && return view(model.sensor_needstage, index + 1, Base.OneTo(1))
-    f === :objtype && return view(model.sensor_objtype, index + 1, Base.OneTo(1))
-    f === :objid && return view(model.sensor_objid, index + 1, Base.OneTo(1))
-    f === :reftype && return view(model.sensor_reftype, index + 1, Base.OneTo(1))
-    f === :refid && return view(model.sensor_refid, index + 1, Base.OneTo(1))
-    f === :dim && return view(model.sensor_dim, index + 1, Base.OneTo(1))
-    f === :adr && return view(model.sensor_adr, index + 1, Base.OneTo(1))
-    f === :cutoff && return view(model.sensor_cutoff, index + 1, Base.OneTo(1))
-    f === :noise && return view(model.sensor_noise, index + 1, Base.OneTo(1))
-    f === :user && return view(model.sensor_user, index + 1, Base.OneTo(model.nuser_sensor))
+    f === :type && return if isnothing(model.sensor_type)
+                nothing
+            else
+                view(model.sensor_type, index + 1, Base.OneTo(1))
+            end
+    f === :datatype && return if isnothing(model.sensor_datatype)
+                nothing
+            else
+                view(model.sensor_datatype, index + 1, Base.OneTo(1))
+            end
+    f === :needstage && return if isnothing(model.sensor_needstage)
+                nothing
+            else
+                view(model.sensor_needstage, index + 1, Base.OneTo(1))
+            end
+    f === :objtype && return if isnothing(model.sensor_objtype)
+                nothing
+            else
+                view(model.sensor_objtype, index + 1, Base.OneTo(1))
+            end
+    f === :objid && return if isnothing(model.sensor_objid)
+                nothing
+            else
+                view(model.sensor_objid, index + 1, Base.OneTo(1))
+            end
+    f === :reftype && return if isnothing(model.sensor_reftype)
+                nothing
+            else
+                view(model.sensor_reftype, index + 1, Base.OneTo(1))
+            end
+    f === :refid && return if isnothing(model.sensor_refid)
+                nothing
+            else
+                view(model.sensor_refid, index + 1, Base.OneTo(1))
+            end
+    f === :dim && return if isnothing(model.sensor_dim)
+                nothing
+            else
+                view(model.sensor_dim, index + 1, Base.OneTo(1))
+            end
+    f === :adr && return if isnothing(model.sensor_adr)
+                nothing
+            else
+                view(model.sensor_adr, index + 1, Base.OneTo(1))
+            end
+    f === :cutoff && return if isnothing(model.sensor_cutoff)
+                nothing
+            else
+                view(model.sensor_cutoff, index + 1, Base.OneTo(1))
+            end
+    f === :noise && return if isnothing(model.sensor_noise)
+                nothing
+            else
+                view(model.sensor_noise, index + 1, Base.OneTo(1))
+            end
+    f === :user && return if isnothing(model.sensor_user)
+                nothing
+            else
+                view(model.sensor_user, index + 1, Base.OneTo(model.nuser_sensor))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SENSOR, index)
     error("Could not find the property: " * string(f))
@@ -1166,14 +1514,46 @@ end
 function Base.getproperty(x::ModelMaterial, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :texid && return view(model.mat_texid, index + 1, Base.OneTo(1))
-    f === :texuniform && return view(model.mat_texuniform, index + 1, Base.OneTo(1))
-    f === :texrepeat && return view(model.mat_texrepeat, index + 1, Base.OneTo(2))
-    f === :emission && return view(model.mat_emission, index + 1, Base.OneTo(1))
-    f === :specular && return view(model.mat_specular, index + 1, Base.OneTo(1))
-    f === :shininess && return view(model.mat_shininess, index + 1, Base.OneTo(1))
-    f === :reflectance && return view(model.mat_reflectance, index + 1, Base.OneTo(1))
-    f === :rgba && return view(model.mat_rgba, index + 1, Base.OneTo(4))
+    f === :texid && return if isnothing(model.mat_texid)
+                nothing
+            else
+                view(model.mat_texid, index + 1, Base.OneTo(1))
+            end
+    f === :texuniform && return if isnothing(model.mat_texuniform)
+                nothing
+            else
+                view(model.mat_texuniform, index + 1, Base.OneTo(1))
+            end
+    f === :texrepeat && return if isnothing(model.mat_texrepeat)
+                nothing
+            else
+                view(model.mat_texrepeat, index + 1, Base.OneTo(2))
+            end
+    f === :emission && return if isnothing(model.mat_emission)
+                nothing
+            else
+                view(model.mat_emission, index + 1, Base.OneTo(1))
+            end
+    f === :specular && return if isnothing(model.mat_specular)
+                nothing
+            else
+                view(model.mat_specular, index + 1, Base.OneTo(1))
+            end
+    f === :shininess && return if isnothing(model.mat_shininess)
+                nothing
+            else
+                view(model.mat_shininess, index + 1, Base.OneTo(1))
+            end
+    f === :reflectance && return if isnothing(model.mat_reflectance)
+                nothing
+            else
+                view(model.mat_reflectance, index + 1, Base.OneTo(1))
+            end
+    f === :rgba && return if isnothing(model.mat_rgba)
+                nothing
+            else
+                view(model.mat_rgba, index + 1, Base.OneTo(4))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_MATERIAL, index)
     error("Could not find the property: " * string(f))
@@ -1234,10 +1614,26 @@ end
 function Base.getproperty(x::ModelTexture, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :type && return view(model.tex_type, index + 1, Base.OneTo(1))
-    f === :height && return view(model.tex_height, index + 1, Base.OneTo(1))
-    f === :width && return view(model.tex_width, index + 1, Base.OneTo(1))
-    f === :adr && return view(model.tex_adr, index + 1, Base.OneTo(1))
+    f === :type && return if isnothing(model.tex_type)
+                nothing
+            else
+                view(model.tex_type, index + 1, Base.OneTo(1))
+            end
+    f === :height && return if isnothing(model.tex_height)
+                nothing
+            else
+                view(model.tex_height, index + 1, Base.OneTo(1))
+            end
+    f === :width && return if isnothing(model.tex_width)
+                nothing
+            else
+                view(model.tex_width, index + 1, Base.OneTo(1))
+            end
+    f === :adr && return if isnothing(model.tex_adr)
+                nothing
+            else
+                view(model.tex_adr, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TEXTURE, index)
     error("Could not find the property: " * string(f))
@@ -1292,44 +1688,136 @@ end
 function Base.getproperty(x::ModelActuator, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :trntype && return view(model.actuator_trntype, index + 1, Base.OneTo(1))
-    f === :dyntype && return view(model.actuator_dyntype, index + 1, Base.OneTo(1))
-    f === :gaintype && return view(model.actuator_gaintype, index + 1, Base.OneTo(1))
-    f === :biastype && return view(model.actuator_biastype, index + 1, Base.OneTo(1))
-    f === :trnid && return view(model.actuator_trnid, index + 1, Base.OneTo(2))
-    f === :actadr && return view(model.actuator_actadr, index + 1, Base.OneTo(1))
-    f === :actnum && return view(model.actuator_actnum, index + 1, Base.OneTo(1))
-    f === :group && return view(model.actuator_group, index + 1, Base.OneTo(1))
-    f === :ctrllimited && return view(model.actuator_ctrllimited, index + 1, Base.OneTo(1))
-    f === :forcelimited && return view(model.actuator_forcelimited, index + 1, Base.OneTo(1))
-    f === :actlimited && return view(model.actuator_actlimited, index + 1, Base.OneTo(1))
+    f === :trntype && return if isnothing(model.actuator_trntype)
+                nothing
+            else
+                view(model.actuator_trntype, index + 1, Base.OneTo(1))
+            end
+    f === :dyntype && return if isnothing(model.actuator_dyntype)
+                nothing
+            else
+                view(model.actuator_dyntype, index + 1, Base.OneTo(1))
+            end
+    f === :gaintype && return if isnothing(model.actuator_gaintype)
+                nothing
+            else
+                view(model.actuator_gaintype, index + 1, Base.OneTo(1))
+            end
+    f === :biastype && return if isnothing(model.actuator_biastype)
+                nothing
+            else
+                view(model.actuator_biastype, index + 1, Base.OneTo(1))
+            end
+    f === :trnid && return if isnothing(model.actuator_trnid)
+                nothing
+            else
+                view(model.actuator_trnid, index + 1, Base.OneTo(2))
+            end
+    f === :actadr && return if isnothing(model.actuator_actadr)
+                nothing
+            else
+                view(model.actuator_actadr, index + 1, Base.OneTo(1))
+            end
+    f === :actnum && return if isnothing(model.actuator_actnum)
+                nothing
+            else
+                view(model.actuator_actnum, index + 1, Base.OneTo(1))
+            end
+    f === :group && return if isnothing(model.actuator_group)
+                nothing
+            else
+                view(model.actuator_group, index + 1, Base.OneTo(1))
+            end
+    f === :ctrllimited && return if isnothing(model.actuator_ctrllimited)
+                nothing
+            else
+                view(model.actuator_ctrllimited, index + 1, Base.OneTo(1))
+            end
+    f === :forcelimited && return if isnothing(model.actuator_forcelimited)
+                nothing
+            else
+                view(model.actuator_forcelimited, index + 1, Base.OneTo(1))
+            end
+    f === :actlimited && return if isnothing(model.actuator_actlimited)
+                nothing
+            else
+                view(model.actuator_actlimited, index + 1, Base.OneTo(1))
+            end
     f === :dynprm && return begin
                 size_arr = Int(LibMuJoCo.mjNDYN)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.actuator_dynprm + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :gainprm && return begin
                 size_arr = Int(LibMuJoCo.mjNGAIN)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.actuator_gainprm + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :biasprm && return begin
                 size_arr = Int(LibMuJoCo.mjNBIAS)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.actuator_biasprm + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
-    f === :ctrlrange && return view(model.actuator_ctrlrange, index + 1, Base.OneTo(2))
-    f === :forcerange && return view(model.actuator_forcerange, index + 1, Base.OneTo(2))
-    f === :actrange && return view(model.actuator_actrange, index + 1, Base.OneTo(2))
-    f === :gear && return view(model.actuator_gear, index + 1, Base.OneTo(6))
-    f === :cranklength && return view(model.actuator_cranklength, index + 1, Base.OneTo(1))
-    f === :acc0 && return view(model.actuator_acc0, index + 1, Base.OneTo(1))
-    f === :length0 && return view(model.actuator_length0, index + 1, Base.OneTo(1))
-    f === :lengthrange && return view(model.actuator_lengthrange, index + 1, Base.OneTo(2))
-    f === :user && return view(model.actuator_user, index + 1, Base.OneTo(model.nuser_actuator))
+    f === :ctrlrange && return if isnothing(model.actuator_ctrlrange)
+                nothing
+            else
+                view(model.actuator_ctrlrange, index + 1, Base.OneTo(2))
+            end
+    f === :forcerange && return if isnothing(model.actuator_forcerange)
+                nothing
+            else
+                view(model.actuator_forcerange, index + 1, Base.OneTo(2))
+            end
+    f === :actrange && return if isnothing(model.actuator_actrange)
+                nothing
+            else
+                view(model.actuator_actrange, index + 1, Base.OneTo(2))
+            end
+    f === :gear && return if isnothing(model.actuator_gear)
+                nothing
+            else
+                view(model.actuator_gear, index + 1, Base.OneTo(6))
+            end
+    f === :cranklength && return if isnothing(model.actuator_cranklength)
+                nothing
+            else
+                view(model.actuator_cranklength, index + 1, Base.OneTo(1))
+            end
+    f === :acc0 && return if isnothing(model.actuator_acc0)
+                nothing
+            else
+                view(model.actuator_acc0, index + 1, Base.OneTo(1))
+            end
+    f === :length0 && return if isnothing(model.actuator_length0)
+                nothing
+            else
+                view(model.actuator_length0, index + 1, Base.OneTo(1))
+            end
+    f === :lengthrange && return if isnothing(model.actuator_lengthrange)
+                nothing
+            else
+                view(model.actuator_lengthrange, index + 1, Base.OneTo(2))
+            end
+    f === :user && return if isnothing(model.actuator_user)
+                nothing
+            else
+                view(model.actuator_user, index + 1, Base.OneTo(model.nuser_actuator))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_ACTUATOR, index)
     error("Could not find the property: " * string(f))
@@ -1384,16 +1872,56 @@ end
 function Base.getproperty(x::ModelSite, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :type && return view(model.site_type, index + 1, Base.OneTo(1))
-    f === :bodyid && return view(model.site_bodyid, index + 1, Base.OneTo(1))
-    f === :matid && return view(model.site_matid, index + 1, Base.OneTo(1))
-    f === :group && return view(model.site_group, index + 1, Base.OneTo(1))
-    f === :sameframe && return view(model.site_sameframe, index + 1, Base.OneTo(1))
-    f === :size && return view(model.site_size, index + 1, Base.OneTo(3))
-    f === :pos && return view(model.site_pos, index + 1, Base.OneTo(3))
-    f === :quat && return view(model.site_quat, index + 1, Base.OneTo(4))
-    f === :user && return view(model.site_user, index + 1, Base.OneTo(model.nuser_site))
-    f === :rgba && return view(model.site_rgba, index + 1, Base.OneTo(4))
+    f === :type && return if isnothing(model.site_type)
+                nothing
+            else
+                view(model.site_type, index + 1, Base.OneTo(1))
+            end
+    f === :bodyid && return if isnothing(model.site_bodyid)
+                nothing
+            else
+                view(model.site_bodyid, index + 1, Base.OneTo(1))
+            end
+    f === :matid && return if isnothing(model.site_matid)
+                nothing
+            else
+                view(model.site_matid, index + 1, Base.OneTo(1))
+            end
+    f === :group && return if isnothing(model.site_group)
+                nothing
+            else
+                view(model.site_group, index + 1, Base.OneTo(1))
+            end
+    f === :sameframe && return if isnothing(model.site_sameframe)
+                nothing
+            else
+                view(model.site_sameframe, index + 1, Base.OneTo(1))
+            end
+    f === :size && return if isnothing(model.site_size)
+                nothing
+            else
+                view(model.site_size, index + 1, Base.OneTo(3))
+            end
+    f === :pos && return if isnothing(model.site_pos)
+                nothing
+            else
+                view(model.site_pos, index + 1, Base.OneTo(3))
+            end
+    f === :quat && return if isnothing(model.site_quat)
+                nothing
+            else
+                view(model.site_quat, index + 1, Base.OneTo(4))
+            end
+    f === :user && return if isnothing(model.site_user)
+                nothing
+            else
+                view(model.site_user, index + 1, Base.OneTo(model.nuser_site))
+            end
+    f === :rgba && return if isnothing(model.site_rgba)
+                nothing
+            else
+                view(model.site_rgba, index + 1, Base.OneTo(4))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SITE, index)
     error("Could not find the property: " * string(f))
@@ -1454,25 +1982,61 @@ end
 function Base.getproperty(x::ModelPair, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :dim && return view(model.pair_dim, index + 1, Base.OneTo(1))
-    f === :geom1 && return view(model.pair_geom1, index + 1, Base.OneTo(1))
-    f === :geom2 && return view(model.pair_geom2, index + 1, Base.OneTo(1))
-    f === :signature && return view(model.pair_signature, index + 1, Base.OneTo(1))
+    f === :dim && return if isnothing(model.pair_dim)
+                nothing
+            else
+                view(model.pair_dim, index + 1, Base.OneTo(1))
+            end
+    f === :geom1 && return if isnothing(model.pair_geom1)
+                nothing
+            else
+                view(model.pair_geom1, index + 1, Base.OneTo(1))
+            end
+    f === :geom2 && return if isnothing(model.pair_geom2)
+                nothing
+            else
+                view(model.pair_geom2, index + 1, Base.OneTo(1))
+            end
+    f === :signature && return if isnothing(model.pair_signature)
+                nothing
+            else
+                view(model.pair_signature, index + 1, Base.OneTo(1))
+            end
     f === :solref && return begin
                 size_arr = Int(LibMuJoCo.mjNREF)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.pair_solref + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :solimp && return begin
                 size_arr = Int(LibMuJoCo.mjNIMP)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.pair_solimp + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
-    f === :margin && return view(model.pair_margin, index + 1, Base.OneTo(1))
-    f === :gap && return view(model.pair_gap, index + 1, Base.OneTo(1))
-    f === :friction && return view(model.pair_friction, index + 1, Base.OneTo(5))
+    f === :margin && return if isnothing(model.pair_margin)
+                nothing
+            else
+                view(model.pair_margin, index + 1, Base.OneTo(1))
+            end
+    f === :gap && return if isnothing(model.pair_gap)
+                nothing
+            else
+                view(model.pair_gap, index + 1, Base.OneTo(1))
+            end
+    f === :friction && return if isnothing(model.pair_friction)
+                nothing
+            else
+                view(model.pair_friction, index + 1, Base.OneTo(5))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_PAIR, index)
     error("Could not find the property: " * string(f))
@@ -1533,10 +2097,26 @@ end
 function Base.getproperty(x::ModelHfield, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :size && return view(model.hfield_size, index + 1, Base.OneTo(4))
-    f === :nrow && return view(model.hfield_nrow, index + 1, Base.OneTo(1))
-    f === :ncol && return view(model.hfield_ncol, index + 1, Base.OneTo(1))
-    f === :adr && return view(model.hfield_adr, index + 1, Base.OneTo(1))
+    f === :size && return if isnothing(model.hfield_size)
+                nothing
+            else
+                view(model.hfield_size, index + 1, Base.OneTo(4))
+            end
+    f === :nrow && return if isnothing(model.hfield_nrow)
+                nothing
+            else
+                view(model.hfield_nrow, index + 1, Base.OneTo(1))
+            end
+    f === :ncol && return if isnothing(model.hfield_ncol)
+                nothing
+            else
+                view(model.hfield_ncol, index + 1, Base.OneTo(1))
+            end
+    f === :adr && return if isnothing(model.hfield_adr)
+                nothing
+            else
+                view(model.hfield_adr, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_HFIELD, index)
     error("Could not find the property: " * string(f))
@@ -1591,23 +2171,91 @@ end
 function Base.getproperty(x::ModelLight, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :mode && return view(model.light_mode, index + 1, Base.OneTo(1))
-    f === :bodyid && return view(model.light_bodyid, index + 1, Base.OneTo(1))
-    f === :targetbodyid && return view(model.light_targetbodyid, index + 1, Base.OneTo(1))
-    f === :directional && return view(model.light_directional, index + 1, Base.OneTo(1))
-    f === :castshadow && return view(model.light_castshadow, index + 1, Base.OneTo(1))
-    f === :active && return view(model.light_active, index + 1, Base.OneTo(1))
-    f === :pos && return view(model.light_pos, index + 1, Base.OneTo(3))
-    f === :dir && return view(model.light_dir, index + 1, Base.OneTo(3))
-    f === :poscom0 && return view(model.light_poscom0, index + 1, Base.OneTo(3))
-    f === :pos0 && return view(model.light_pos0, index + 1, Base.OneTo(3))
-    f === :dir0 && return view(model.light_dir0, index + 1, Base.OneTo(3))
-    f === :attenuation && return view(model.light_attenuation, index + 1, Base.OneTo(3))
-    f === :cutoff && return view(model.light_cutoff, index + 1, Base.OneTo(1))
-    f === :exponent && return view(model.light_exponent, index + 1, Base.OneTo(1))
-    f === :ambient && return view(model.light_ambient, index + 1, Base.OneTo(3))
-    f === :diffuse && return view(model.light_diffuse, index + 1, Base.OneTo(3))
-    f === :specular && return view(model.light_specular, index + 1, Base.OneTo(3))
+    f === :mode && return if isnothing(model.light_mode)
+                nothing
+            else
+                view(model.light_mode, index + 1, Base.OneTo(1))
+            end
+    f === :bodyid && return if isnothing(model.light_bodyid)
+                nothing
+            else
+                view(model.light_bodyid, index + 1, Base.OneTo(1))
+            end
+    f === :targetbodyid && return if isnothing(model.light_targetbodyid)
+                nothing
+            else
+                view(model.light_targetbodyid, index + 1, Base.OneTo(1))
+            end
+    f === :directional && return if isnothing(model.light_directional)
+                nothing
+            else
+                view(model.light_directional, index + 1, Base.OneTo(1))
+            end
+    f === :castshadow && return if isnothing(model.light_castshadow)
+                nothing
+            else
+                view(model.light_castshadow, index + 1, Base.OneTo(1))
+            end
+    f === :active && return if isnothing(model.light_active)
+                nothing
+            else
+                view(model.light_active, index + 1, Base.OneTo(1))
+            end
+    f === :pos && return if isnothing(model.light_pos)
+                nothing
+            else
+                view(model.light_pos, index + 1, Base.OneTo(3))
+            end
+    f === :dir && return if isnothing(model.light_dir)
+                nothing
+            else
+                view(model.light_dir, index + 1, Base.OneTo(3))
+            end
+    f === :poscom0 && return if isnothing(model.light_poscom0)
+                nothing
+            else
+                view(model.light_poscom0, index + 1, Base.OneTo(3))
+            end
+    f === :pos0 && return if isnothing(model.light_pos0)
+                nothing
+            else
+                view(model.light_pos0, index + 1, Base.OneTo(3))
+            end
+    f === :dir0 && return if isnothing(model.light_dir0)
+                nothing
+            else
+                view(model.light_dir0, index + 1, Base.OneTo(3))
+            end
+    f === :attenuation && return if isnothing(model.light_attenuation)
+                nothing
+            else
+                view(model.light_attenuation, index + 1, Base.OneTo(3))
+            end
+    f === :cutoff && return if isnothing(model.light_cutoff)
+                nothing
+            else
+                view(model.light_cutoff, index + 1, Base.OneTo(1))
+            end
+    f === :exponent && return if isnothing(model.light_exponent)
+                nothing
+            else
+                view(model.light_exponent, index + 1, Base.OneTo(1))
+            end
+    f === :ambient && return if isnothing(model.light_ambient)
+                nothing
+            else
+                view(model.light_ambient, index + 1, Base.OneTo(3))
+            end
+    f === :diffuse && return if isnothing(model.light_diffuse)
+                nothing
+            else
+                view(model.light_diffuse, index + 1, Base.OneTo(3))
+            end
+    f === :specular && return if isnothing(model.light_specular)
+                nothing
+            else
+                view(model.light_specular, index + 1, Base.OneTo(3))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_LIGHT, index)
     error("Could not find the property: " * string(f))
@@ -1662,17 +2310,61 @@ end
 function Base.getproperty(x::ModelCamera, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :mode && return view(model.cam_mode, index + 1, Base.OneTo(1))
-    f === :bodyid && return view(model.cam_bodyid, index + 1, Base.OneTo(1))
-    f === :targetbodyid && return view(model.cam_targetbodyid, index + 1, Base.OneTo(1))
-    f === :pos && return view(model.cam_pos, index + 1, Base.OneTo(3))
-    f === :quat && return view(model.cam_quat, index + 1, Base.OneTo(4))
-    f === :poscom0 && return view(model.cam_poscom0, index + 1, Base.OneTo(3))
-    f === :pos0 && return view(model.cam_pos0, index + 1, Base.OneTo(3))
-    f === :mat0 && return view(model.cam_mat0, index + 1, Base.OneTo(9))
-    f === :fovy && return view(model.cam_fovy, index + 1, Base.OneTo(1))
-    f === :ipd && return view(model.cam_ipd, index + 1, Base.OneTo(1))
-    f === :user && return view(model.cam_user, index + 1, Base.OneTo(model.nuser_cam))
+    f === :mode && return if isnothing(model.cam_mode)
+                nothing
+            else
+                view(model.cam_mode, index + 1, Base.OneTo(1))
+            end
+    f === :bodyid && return if isnothing(model.cam_bodyid)
+                nothing
+            else
+                view(model.cam_bodyid, index + 1, Base.OneTo(1))
+            end
+    f === :targetbodyid && return if isnothing(model.cam_targetbodyid)
+                nothing
+            else
+                view(model.cam_targetbodyid, index + 1, Base.OneTo(1))
+            end
+    f === :pos && return if isnothing(model.cam_pos)
+                nothing
+            else
+                view(model.cam_pos, index + 1, Base.OneTo(3))
+            end
+    f === :quat && return if isnothing(model.cam_quat)
+                nothing
+            else
+                view(model.cam_quat, index + 1, Base.OneTo(4))
+            end
+    f === :poscom0 && return if isnothing(model.cam_poscom0)
+                nothing
+            else
+                view(model.cam_poscom0, index + 1, Base.OneTo(3))
+            end
+    f === :pos0 && return if isnothing(model.cam_pos0)
+                nothing
+            else
+                view(model.cam_pos0, index + 1, Base.OneTo(3))
+            end
+    f === :mat0 && return if isnothing(model.cam_mat0)
+                nothing
+            else
+                view(model.cam_mat0, index + 1, Base.OneTo(9))
+            end
+    f === :fovy && return if isnothing(model.cam_fovy)
+                nothing
+            else
+                view(model.cam_fovy, index + 1, Base.OneTo(1))
+            end
+    f === :ipd && return if isnothing(model.cam_ipd)
+                nothing
+            else
+                view(model.cam_ipd, index + 1, Base.OneTo(1))
+            end
+    f === :user && return if isnothing(model.cam_user)
+                nothing
+            else
+                view(model.cam_user, index + 1, Base.OneTo(model.nuser_cam))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_CAMERA, index)
     error("Could not find the property: " * string(f))
@@ -1733,8 +2425,16 @@ end
 function Base.getproperty(x::ModelTuple, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :adr && return view(model.tuple_adr, index + 1, Base.OneTo(1))
-    f === :size && return view(model.tuple_size, index + 1, Base.OneTo(1))
+    f === :adr && return if isnothing(model.tuple_adr)
+                nothing
+            else
+                view(model.tuple_adr, index + 1, Base.OneTo(1))
+            end
+    f === :size && return if isnothing(model.tuple_size)
+                nothing
+            else
+                view(model.tuple_size, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TUPLE, index)
     error("Could not find the property: " * string(f))
@@ -1795,16 +2495,56 @@ end
 function Base.getproperty(x::ModelSkin, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :matid && return view(model.skin_matid, index + 1, Base.OneTo(1))
-    f === :rgba && return view(model.skin_rgba, index + 1, Base.OneTo(4))
-    f === :inflate && return view(model.skin_inflate, index + 1, Base.OneTo(1))
-    f === :vertadr && return view(model.skin_vertadr, index + 1, Base.OneTo(1))
-    f === :vertnum && return view(model.skin_vertnum, index + 1, Base.OneTo(1))
-    f === :texcoordadr && return view(model.skin_texcoordadr, index + 1, Base.OneTo(1))
-    f === :faceadr && return view(model.skin_faceadr, index + 1, Base.OneTo(1))
-    f === :facenum && return view(model.skin_facenum, index + 1, Base.OneTo(1))
-    f === :boneadr && return view(model.skin_boneadr, index + 1, Base.OneTo(1))
-    f === :bonenum && return view(model.skin_bonenum, index + 1, Base.OneTo(1))
+    f === :matid && return if isnothing(model.skin_matid)
+                nothing
+            else
+                view(model.skin_matid, index + 1, Base.OneTo(1))
+            end
+    f === :rgba && return if isnothing(model.skin_rgba)
+                nothing
+            else
+                view(model.skin_rgba, index + 1, Base.OneTo(4))
+            end
+    f === :inflate && return if isnothing(model.skin_inflate)
+                nothing
+            else
+                view(model.skin_inflate, index + 1, Base.OneTo(1))
+            end
+    f === :vertadr && return if isnothing(model.skin_vertadr)
+                nothing
+            else
+                view(model.skin_vertadr, index + 1, Base.OneTo(1))
+            end
+    f === :vertnum && return if isnothing(model.skin_vertnum)
+                nothing
+            else
+                view(model.skin_vertnum, index + 1, Base.OneTo(1))
+            end
+    f === :texcoordadr && return if isnothing(model.skin_texcoordadr)
+                nothing
+            else
+                view(model.skin_texcoordadr, index + 1, Base.OneTo(1))
+            end
+    f === :faceadr && return if isnothing(model.skin_faceadr)
+                nothing
+            else
+                view(model.skin_faceadr, index + 1, Base.OneTo(1))
+            end
+    f === :facenum && return if isnothing(model.skin_facenum)
+                nothing
+            else
+                view(model.skin_facenum, index + 1, Base.OneTo(1))
+            end
+    f === :boneadr && return if isnothing(model.skin_boneadr)
+                nothing
+            else
+                view(model.skin_boneadr, index + 1, Base.OneTo(1))
+            end
+    f === :bonenum && return if isnothing(model.skin_bonenum)
+                nothing
+            else
+                view(model.skin_bonenum, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_SKIN, index)
     error("Could not find the property: " * string(f))
@@ -1865,7 +2605,11 @@ end
 function Base.getproperty(x::ModelExclude, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :signature && return view(model.exclude_signature, index + 1, Base.OneTo(1))
+    f === :signature && return if isnothing(model.exclude_signature)
+                nothing
+            else
+                view(model.exclude_signature, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_EXCLUDE, index)
     error("Could not find the property: " * string(f))
@@ -1926,12 +2670,36 @@ end
 function Base.getproperty(x::ModelMesh, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :vertadr && return view(model.mesh_vertadr, index + 1, Base.OneTo(1))
-    f === :vertnum && return view(model.mesh_vertnum, index + 1, Base.OneTo(1))
-    f === :texcoordadr && return view(model.mesh_texcoordadr, index + 1, Base.OneTo(1))
-    f === :faceadr && return view(model.mesh_faceadr, index + 1, Base.OneTo(1))
-    f === :facenum && return view(model.mesh_facenum, index + 1, Base.OneTo(1))
-    f === :graphadr && return view(model.mesh_graphadr, index + 1, Base.OneTo(1))
+    f === :vertadr && return if isnothing(model.mesh_vertadr)
+                nothing
+            else
+                view(model.mesh_vertadr, index + 1, Base.OneTo(1))
+            end
+    f === :vertnum && return if isnothing(model.mesh_vertnum)
+                nothing
+            else
+                view(model.mesh_vertnum, index + 1, Base.OneTo(1))
+            end
+    f === :texcoordadr && return if isnothing(model.mesh_texcoordadr)
+                nothing
+            else
+                view(model.mesh_texcoordadr, index + 1, Base.OneTo(1))
+            end
+    f === :faceadr && return if isnothing(model.mesh_faceadr)
+                nothing
+            else
+                view(model.mesh_faceadr, index + 1, Base.OneTo(1))
+            end
+    f === :facenum && return if isnothing(model.mesh_facenum)
+                nothing
+            else
+                view(model.mesh_facenum, index + 1, Base.OneTo(1))
+            end
+    f === :graphadr && return if isnothing(model.mesh_graphadr)
+                nothing
+            else
+                view(model.mesh_graphadr, index + 1, Base.OneTo(1))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_MESH, index)
     error("Could not find the property: " * string(f))
@@ -1986,27 +2754,111 @@ end
 function Base.getproperty(x::ModelBody, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :parentid && return view(model.body_parentid, index + 1, Base.OneTo(1))
-    f === :rootid && return view(model.body_rootid, index + 1, Base.OneTo(1))
-    f === :weldid && return view(model.body_weldid, index + 1, Base.OneTo(1))
-    f === :mocapid && return view(model.body_mocapid, index + 1, Base.OneTo(1))
-    f === :jntnum && return view(model.body_jntnum, index + 1, Base.OneTo(1))
-    f === :jntadr && return view(model.body_jntadr, index + 1, Base.OneTo(1))
-    f === :dofnum && return view(model.body_dofnum, index + 1, Base.OneTo(1))
-    f === :dofadr && return view(model.body_dofadr, index + 1, Base.OneTo(1))
-    f === :geomnum && return view(model.body_geomnum, index + 1, Base.OneTo(1))
-    f === :geomadr && return view(model.body_geomadr, index + 1, Base.OneTo(1))
-    f === :simple && return view(model.body_simple, index + 1, Base.OneTo(1))
-    f === :sameframe && return view(model.body_sameframe, index + 1, Base.OneTo(1))
-    f === :pos && return view(model.body_pos, index + 1, Base.OneTo(3))
-    f === :quat && return view(model.body_quat, index + 1, Base.OneTo(4))
-    f === :ipos && return view(model.body_ipos, index + 1, Base.OneTo(3))
-    f === :iquat && return view(model.body_iquat, index + 1, Base.OneTo(4))
-    f === :mass && return view(model.body_mass, index + 1, Base.OneTo(1))
-    f === :subtreemass && return view(model.body_subtreemass, index + 1, Base.OneTo(1))
-    f === :inertia && return view(model.body_inertia, index + 1, Base.OneTo(3))
-    f === :invweight0 && return view(model.body_invweight0, index + 1, Base.OneTo(2))
-    f === :user && return view(model.body_user, index + 1, Base.OneTo(model.nuser_body))
+    f === :parentid && return if isnothing(model.body_parentid)
+                nothing
+            else
+                view(model.body_parentid, index + 1, Base.OneTo(1))
+            end
+    f === :rootid && return if isnothing(model.body_rootid)
+                nothing
+            else
+                view(model.body_rootid, index + 1, Base.OneTo(1))
+            end
+    f === :weldid && return if isnothing(model.body_weldid)
+                nothing
+            else
+                view(model.body_weldid, index + 1, Base.OneTo(1))
+            end
+    f === :mocapid && return if isnothing(model.body_mocapid)
+                nothing
+            else
+                view(model.body_mocapid, index + 1, Base.OneTo(1))
+            end
+    f === :jntnum && return if isnothing(model.body_jntnum)
+                nothing
+            else
+                view(model.body_jntnum, index + 1, Base.OneTo(1))
+            end
+    f === :jntadr && return if isnothing(model.body_jntadr)
+                nothing
+            else
+                view(model.body_jntadr, index + 1, Base.OneTo(1))
+            end
+    f === :dofnum && return if isnothing(model.body_dofnum)
+                nothing
+            else
+                view(model.body_dofnum, index + 1, Base.OneTo(1))
+            end
+    f === :dofadr && return if isnothing(model.body_dofadr)
+                nothing
+            else
+                view(model.body_dofadr, index + 1, Base.OneTo(1))
+            end
+    f === :geomnum && return if isnothing(model.body_geomnum)
+                nothing
+            else
+                view(model.body_geomnum, index + 1, Base.OneTo(1))
+            end
+    f === :geomadr && return if isnothing(model.body_geomadr)
+                nothing
+            else
+                view(model.body_geomadr, index + 1, Base.OneTo(1))
+            end
+    f === :simple && return if isnothing(model.body_simple)
+                nothing
+            else
+                view(model.body_simple, index + 1, Base.OneTo(1))
+            end
+    f === :sameframe && return if isnothing(model.body_sameframe)
+                nothing
+            else
+                view(model.body_sameframe, index + 1, Base.OneTo(1))
+            end
+    f === :pos && return if isnothing(model.body_pos)
+                nothing
+            else
+                view(model.body_pos, index + 1, Base.OneTo(3))
+            end
+    f === :quat && return if isnothing(model.body_quat)
+                nothing
+            else
+                view(model.body_quat, index + 1, Base.OneTo(4))
+            end
+    f === :ipos && return if isnothing(model.body_ipos)
+                nothing
+            else
+                view(model.body_ipos, index + 1, Base.OneTo(3))
+            end
+    f === :iquat && return if isnothing(model.body_iquat)
+                nothing
+            else
+                view(model.body_iquat, index + 1, Base.OneTo(4))
+            end
+    f === :mass && return if isnothing(model.body_mass)
+                nothing
+            else
+                view(model.body_mass, index + 1, Base.OneTo(1))
+            end
+    f === :subtreemass && return if isnothing(model.body_subtreemass)
+                nothing
+            else
+                view(model.body_subtreemass, index + 1, Base.OneTo(1))
+            end
+    f === :inertia && return if isnothing(model.body_inertia)
+                nothing
+            else
+                view(model.body_inertia, index + 1, Base.OneTo(3))
+            end
+    f === :invweight0 && return if isnothing(model.body_invweight0)
+                nothing
+            else
+                view(model.body_invweight0, index + 1, Base.OneTo(2))
+            end
+    f === :user && return if isnothing(model.body_user)
+                nothing
+            else
+                view(model.body_user, index + 1, Base.OneTo(model.nuser_body))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_BODY, index)
     error("Could not find the property: " * string(f))
@@ -2061,17 +2913,61 @@ end
 function Base.getproperty(x::ModelJoint, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :type && return view(model.jnt_type, index + 1, Base.OneTo(1))
-    f === :qposadr && return view(model.jnt_qposadr, index + 1, Base.OneTo(1))
-    f === :dofadr && return view(model.jnt_dofadr, index + 1, Base.OneTo(1))
-    f === :group && return view(model.jnt_group, index + 1, Base.OneTo(1))
-    f === :limited && return view(model.jnt_limited, index + 1, Base.OneTo(1))
-    f === :pos && return view(model.jnt_pos, index + 1, Base.OneTo(3))
-    f === :axis && return view(model.jnt_axis, index + 1, Base.OneTo(3))
-    f === :stiffness && return view(model.jnt_stiffness, index + 1, Base.OneTo(1))
-    f === :range && return view(model.jnt_range, index + 1, Base.OneTo(2))
-    f === :margin && return view(model.jnt_margin, index + 1, Base.OneTo(1))
-    f === :user && return view(model.jnt_user, index + 1, Base.OneTo(model.nuser_jnt))
+    f === :type && return if isnothing(model.jnt_type)
+                nothing
+            else
+                view(model.jnt_type, index + 1, Base.OneTo(1))
+            end
+    f === :qposadr && return if isnothing(model.jnt_qposadr)
+                nothing
+            else
+                view(model.jnt_qposadr, index + 1, Base.OneTo(1))
+            end
+    f === :dofadr && return if isnothing(model.jnt_dofadr)
+                nothing
+            else
+                view(model.jnt_dofadr, index + 1, Base.OneTo(1))
+            end
+    f === :group && return if isnothing(model.jnt_group)
+                nothing
+            else
+                view(model.jnt_group, index + 1, Base.OneTo(1))
+            end
+    f === :limited && return if isnothing(model.jnt_limited)
+                nothing
+            else
+                view(model.jnt_limited, index + 1, Base.OneTo(1))
+            end
+    f === :pos && return if isnothing(model.jnt_pos)
+                nothing
+            else
+                view(model.jnt_pos, index + 1, Base.OneTo(3))
+            end
+    f === :axis && return if isnothing(model.jnt_axis)
+                nothing
+            else
+                view(model.jnt_axis, index + 1, Base.OneTo(3))
+            end
+    f === :stiffness && return if isnothing(model.jnt_stiffness)
+                nothing
+            else
+                view(model.jnt_stiffness, index + 1, Base.OneTo(1))
+            end
+    f === :range && return if isnothing(model.jnt_range)
+                nothing
+            else
+                view(model.jnt_range, index + 1, Base.OneTo(2))
+            end
+    f === :margin && return if isnothing(model.jnt_margin)
+                nothing
+            else
+                view(model.jnt_margin, index + 1, Base.OneTo(1))
+            end
+    f === :user && return if isnothing(model.jnt_user)
+                nothing
+            else
+                view(model.jnt_user, index + 1, Base.OneTo(model.nuser_jnt))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_JOINT, index)
     error("Could not find the property: " * string(f))
@@ -2126,46 +3022,126 @@ end
 function Base.getproperty(x::ModelTendon, f::Symbol)
     model = getfield(x, :model)
     index = getfield(x, :index)
-    f === :adr && return view(model.tendon_adr, index + 1, Base.OneTo(1))
-    f === :num && return view(model.tendon_num, index + 1, Base.OneTo(1))
-    f === :matid && return view(model.tendon_matid, index + 1, Base.OneTo(1))
-    f === :group && return view(model.tendon_group, index + 1, Base.OneTo(1))
-    f === :limited && return view(model.tendon_limited, index + 1, Base.OneTo(1))
-    f === :width && return view(model.tendon_width, index + 1, Base.OneTo(1))
+    f === :adr && return if isnothing(model.tendon_adr)
+                nothing
+            else
+                view(model.tendon_adr, index + 1, Base.OneTo(1))
+            end
+    f === :num && return if isnothing(model.tendon_num)
+                nothing
+            else
+                view(model.tendon_num, index + 1, Base.OneTo(1))
+            end
+    f === :matid && return if isnothing(model.tendon_matid)
+                nothing
+            else
+                view(model.tendon_matid, index + 1, Base.OneTo(1))
+            end
+    f === :group && return if isnothing(model.tendon_group)
+                nothing
+            else
+                view(model.tendon_group, index + 1, Base.OneTo(1))
+            end
+    f === :limited && return if isnothing(model.tendon_limited)
+                nothing
+            else
+                view(model.tendon_limited, index + 1, Base.OneTo(1))
+            end
+    f === :width && return if isnothing(model.tendon_width)
+                nothing
+            else
+                view(model.tendon_width, index + 1, Base.OneTo(1))
+            end
     f === :solref_lim && return begin
                 size_arr = Int(LibMuJoCo.mjNREF)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.tendon_solref_lim + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :solimp_lim && return begin
                 size_arr = Int(LibMuJoCo.mjNIMP)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.tendon_solimp_lim + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :solref_fri && return begin
                 size_arr = Int(LibMuJoCo.mjNREF)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.tendon_solref_fri + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
     f === :solimp_fri && return begin
                 size_arr = Int(LibMuJoCo.mjNIMP)
                 offset = index * size_arr * sizeof(Float64)
                 arr_pointer = Ptr{Float64}(model.tendon_solimp_fri + offset)
-                UnsafeArray(arr_pointer, (size_arr,))
+                if arr_pointer == C_NULL
+                    nothing
+                else
+                    UnsafeArray(arr_pointer, (size_arr,))
+                end
             end
-    f === :range && return view(model.tendon_range, index + 1, Base.OneTo(2))
-    f === :margin && return view(model.tendon_margin, index + 1, Base.OneTo(1))
-    f === :stiffness && return view(model.tendon_stiffness, index + 1, Base.OneTo(1))
-    f === :damping && return view(model.tendon_damping, index + 1, Base.OneTo(1))
-    f === :frictionloss && return view(model.tendon_frictionloss, index + 1, Base.OneTo(1))
-    f === :lengthspring && return view(model.tendon_lengthspring, index + 1, Base.OneTo(1))
-    f === :length0 && return view(model.tendon_length0, index + 1, Base.OneTo(1))
-    f === :invweight0 && return view(model.tendon_invweight0, index + 1, Base.OneTo(1))
-    f === :user && return view(model.tendon_user, index + 1, Base.OneTo(model.nuser_tendon))
-    f === :rgba && return view(model.tendon_rgba, index + 1, Base.OneTo(4))
+    f === :range && return if isnothing(model.tendon_range)
+                nothing
+            else
+                view(model.tendon_range, index + 1, Base.OneTo(2))
+            end
+    f === :margin && return if isnothing(model.tendon_margin)
+                nothing
+            else
+                view(model.tendon_margin, index + 1, Base.OneTo(1))
+            end
+    f === :stiffness && return if isnothing(model.tendon_stiffness)
+                nothing
+            else
+                view(model.tendon_stiffness, index + 1, Base.OneTo(1))
+            end
+    f === :damping && return if isnothing(model.tendon_damping)
+                nothing
+            else
+                view(model.tendon_damping, index + 1, Base.OneTo(1))
+            end
+    f === :frictionloss && return if isnothing(model.tendon_frictionloss)
+                nothing
+            else
+                view(model.tendon_frictionloss, index + 1, Base.OneTo(1))
+            end
+    f === :lengthspring && return if isnothing(model.tendon_lengthspring)
+                nothing
+            else
+                view(model.tendon_lengthspring, index + 1, Base.OneTo(1))
+            end
+    f === :length0 && return if isnothing(model.tendon_length0)
+                nothing
+            else
+                view(model.tendon_length0, index + 1, Base.OneTo(1))
+            end
+    f === :invweight0 && return if isnothing(model.tendon_invweight0)
+                nothing
+            else
+                view(model.tendon_invweight0, index + 1, Base.OneTo(1))
+            end
+    f === :user && return if isnothing(model.tendon_user)
+                nothing
+            else
+                view(model.tendon_user, index + 1, Base.OneTo(model.nuser_tendon))
+            end
+    f === :rgba && return if isnothing(model.tendon_rgba)
+                nothing
+            else
+                view(model.tendon_rgba, index + 1, Base.OneTo(4))
+            end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_TENDON, index)
     error("Could not find the property: " * string(f))

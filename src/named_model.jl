@@ -51,7 +51,7 @@ function NamedModel(model::Model)
         identifier = Symbol(string(fn)[6:end-3])
 
         array_offsets = getproperty(model, fn)
-        if length(array_offsets) > 0
+        if !isnothing(array_offsets) && length(array_offsets) > 0
             m = Dict{Symbol, Int}()
             for (i, offset) in enumerate(array_offsets)
                 matching_name = unsafe_string(Ptr{UInt8}(names_char_ptr + offset))

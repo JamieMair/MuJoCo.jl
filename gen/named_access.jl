@@ -406,7 +406,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                     # return a view into the array
                     test_item = test_classes[struct_name]
                     inferred_return_type = typeof(getproperty(test_item, xmacro.fieldname))
-                    if inferred_return_type <: AbstractArray
+                    if inferred_return_type <: Union{Nothing, AbstractArray}
                         push!(property_names, propname)
                         get_array_expr = :($(lower_struct_name).$(xmacro.fieldname))
                         second_dims = if xmacro.numrows isa Symbol && startswith(string(xmacro.numrows), "mj")
@@ -416,7 +416,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                         else
                             Expr(:call, :(Base.OneTo), xmacro.numrows)
                         end
-                        return_expr = Expr(:return, Expr(:call, :view, get_array_expr, :(index + 1), second_dims))
+                        return_expr = Expr(:return, Expr(:if, Expr(:call, :isnothing, get_array_expr), nothing, Expr(:call, :view, get_array_expr, :(index + 1), second_dims)))
                         entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
                         push!(fn_block_exprs, entry_expr)
                     elseif inferred_return_type <: Ptr
@@ -431,7 +431,11 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                             size_arr = Int($(num_elements))
                             offset = index * size_arr * sizeof($element_type)
                             arr_pointer = Ptr{$element_type}($(lower_struct_name).$(xmacro.fieldname) + offset)
-                            UnsafeArray(arr_pointer, (size_arr,))
+                            if arr_pointer == C_NULL
+                                nothing
+                            else
+                                UnsafeArray(arr_pointer, (size_arr,))
+                            end
                         end)
                         entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
                         push!(fn_block_exprs, entry_expr)

@@ -290,309 +290,2856 @@ function Base.getproperty(x::Model, f::Symbol)
     f === :vis && return unsafe_load(Ptr{mjVisual_}(internal_pointer + 504))
     f === :stat && return Statistics(Ptr{mjStatistic_}(internal_pointer + 1072))
     f === :buffer && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 1128))
-    f === :qpos0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1136)), (Int(1), Int(x.nq))))
-    f === :qpos_spring && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1144)), (Int(1), Int(x.nq))))
-    f === :body_parentid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1152)), (Int(1), Int(x.nbody))))
-    f === :body_rootid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1160)), (Int(1), Int(x.nbody))))
-    f === :body_weldid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1168)), (Int(1), Int(x.nbody))))
-    f === :body_mocapid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1176)), (Int(1), Int(x.nbody))))
-    f === :body_jntnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1184)), (Int(1), Int(x.nbody))))
-    f === :body_jntadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1192)), (Int(1), Int(x.nbody))))
-    f === :body_dofnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1200)), (Int(1), Int(x.nbody))))
-    f === :body_dofadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1208)), (Int(1), Int(x.nbody))))
-    f === :body_geomnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1216)), (Int(1), Int(x.nbody))))
-    f === :body_geomadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1224)), (Int(1), Int(x.nbody))))
-    f === :body_simple && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1232)), (Int(1), Int(x.nbody))))
-    f === :body_sameframe && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1240)), (Int(1), Int(x.nbody))))
-    f === :body_pos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1248)), (Int(3), Int(x.nbody))))
-    f === :body_quat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1256)), (Int(4), Int(x.nbody))))
-    f === :body_ipos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1264)), (Int(3), Int(x.nbody))))
-    f === :body_iquat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1272)), (Int(4), Int(x.nbody))))
-    f === :body_mass && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1280)), (Int(1), Int(x.nbody))))
-    f === :body_subtreemass && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1288)), (Int(1), Int(x.nbody))))
-    f === :body_inertia && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1296)), (Int(3), Int(x.nbody))))
-    f === :body_invweight0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1304)), (Int(2), Int(x.nbody))))
-    f === :body_gravcomp && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1312)), (Int(1), Int(x.nbody))))
-    f === :body_user && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1320)), (Int(model.nuser_body), Int(x.nbody))))
-    f === :body_plugin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1328)), (Int(1), Int(x.nbody))))
-    f === :body_bvhadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1336)), (Int(1), Int(x.nbody))))
-    f === :body_bvhnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1344)), (Int(1), Int(x.nbody))))
-    f === :bvh_depth && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1352)), (Int(1), Int(x.nbvh))))
-    f === :bvh_child && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1360)), (Int(2), Int(x.nbvh))))
-    f === :bvh_geomid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1368)), (Int(1), Int(x.nbvh))))
-    f === :bvh_aabb && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1376)), (Int(6), Int(x.nbvh))))
-    f === :jnt_type && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1384)), (Int(1), Int(x.njnt))))
-    f === :jnt_qposadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1392)), (Int(1), Int(x.njnt))))
-    f === :jnt_dofadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1400)), (Int(1), Int(x.njnt))))
-    f === :jnt_bodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1408)), (Int(1), Int(x.njnt))))
-    f === :jnt_group && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1416)), (Int(1), Int(x.njnt))))
-    f === :jnt_limited && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1424)), (Int(1), Int(x.njnt))))
-    f === :jnt_actfrclimited && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1432)), (Int(1), Int(x.njnt))))
+    f === :qpos0 && return if all((!=)(0), (Int(x.nq),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1136))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nq))))
+                end
+            else
+                nothing
+            end
+    f === :qpos_spring && return if all((!=)(0), (Int(x.nq),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1144))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nq))))
+                end
+            else
+                nothing
+            end
+    f === :body_parentid && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1152))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_rootid && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1160))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_weldid && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1168))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_mocapid && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1176))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_jntnum && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1184))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_jntadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1192))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_dofnum && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1200))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_dofadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1208))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_geomnum && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1216))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_geomadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1224))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_simple && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1232))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_sameframe && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1240))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_pos && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1248))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_quat && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1256))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_ipos && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1264))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_iquat && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1272))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_mass && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1280))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_subtreemass && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1288))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_inertia && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1296))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_invweight0 && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1304))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_gravcomp && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1312))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_user && return if all((!=)(0), (Int(x.nbody), Int(model.nuser_body)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1320))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_body), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_plugin && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1328))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_bvhadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1336))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_bvhnum && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1344))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :bvh_depth && return if all((!=)(0), (Int(x.nbvh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1352))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbvh))))
+                end
+            else
+                nothing
+            end
+    f === :bvh_child && return if all((!=)(0), (Int(x.nbvh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1360))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nbvh))))
+                end
+            else
+                nothing
+            end
+    f === :bvh_geomid && return if all((!=)(0), (Int(x.nbvh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1368))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbvh))))
+                end
+            else
+                nothing
+            end
+    f === :bvh_aabb && return if all((!=)(0), (Int(x.nbvh),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1376))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(x.nbvh))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_type && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1384))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_qposadr && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1392))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_dofadr && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1400))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_bodyid && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1408))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_group && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1416))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_limited && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1424))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_actfrclimited && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1432))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
     f === :jnt_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1440))
     f === :jnt_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1448))
-    f === :jnt_pos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1456)), (Int(3), Int(x.njnt))))
-    f === :jnt_axis && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1464)), (Int(3), Int(x.njnt))))
-    f === :jnt_stiffness && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1472)), (Int(1), Int(x.njnt))))
-    f === :jnt_range && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1480)), (Int(2), Int(x.njnt))))
-    f === :jnt_actfrcrange && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1488)), (Int(2), Int(x.njnt))))
-    f === :jnt_margin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1496)), (Int(1), Int(x.njnt))))
-    f === :jnt_user && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1504)), (Int(model.nuser_jnt), Int(x.njnt))))
-    f === :dof_bodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1512)), (Int(1), Int(x.nv))))
-    f === :dof_jntid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1520)), (Int(1), Int(x.nv))))
-    f === :dof_parentid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1528)), (Int(1), Int(x.nv))))
-    f === :dof_Madr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1536)), (Int(1), Int(x.nv))))
-    f === :dof_simplenum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1544)), (Int(1), Int(x.nv))))
+    f === :jnt_pos && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1456))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_axis && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1464))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_stiffness && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1472))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_range && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1480))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_actfrcrange && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1488))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_margin && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1496))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_user && return if all((!=)(0), (Int(x.njnt), Int(model.nuser_jnt)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1504))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_jnt), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :dof_bodyid && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1512))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_jntid && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1520))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_parentid && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1528))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_Madr && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1536))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_simplenum && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1544))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
     f === :dof_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1552))
     f === :dof_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1560))
-    f === :dof_frictionloss && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1568)), (Int(1), Int(x.nv))))
-    f === :dof_armature && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1576)), (Int(1), Int(x.nv))))
-    f === :dof_damping && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1584)), (Int(1), Int(x.nv))))
-    f === :dof_invweight0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1592)), (Int(1), Int(x.nv))))
-    f === :dof_M0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1600)), (Int(1), Int(x.nv))))
-    f === :geom_type && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1608)), (Int(1), Int(x.ngeom))))
-    f === :geom_contype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1616)), (Int(1), Int(x.ngeom))))
-    f === :geom_conaffinity && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1624)), (Int(1), Int(x.ngeom))))
-    f === :geom_condim && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1632)), (Int(1), Int(x.ngeom))))
-    f === :geom_bodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1640)), (Int(1), Int(x.ngeom))))
-    f === :geom_dataid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1648)), (Int(1), Int(x.ngeom))))
-    f === :geom_matid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1656)), (Int(1), Int(x.ngeom))))
-    f === :geom_group && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1664)), (Int(1), Int(x.ngeom))))
-    f === :geom_priority && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1672)), (Int(1), Int(x.ngeom))))
-    f === :geom_sameframe && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1680)), (Int(1), Int(x.ngeom))))
-    f === :geom_solmix && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1688)), (Int(1), Int(x.ngeom))))
+    f === :dof_frictionloss && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1568))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_armature && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1576))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_damping && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1584))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_invweight0 && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1592))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_M0 && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1600))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :geom_type && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1608))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_contype && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1616))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_conaffinity && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1624))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_condim && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1632))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_bodyid && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1640))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_dataid && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1648))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_matid && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1656))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_group && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1664))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_priority && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1672))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_sameframe && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1680))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_solmix && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1688))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
     f === :geom_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1696))
     f === :geom_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1704))
-    f === :geom_size && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1712)), (Int(3), Int(x.ngeom))))
-    f === :geom_aabb && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1720)), (Int(6), Int(x.ngeom))))
-    f === :geom_rbound && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1728)), (Int(1), Int(x.ngeom))))
-    f === :geom_pos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1736)), (Int(3), Int(x.ngeom))))
-    f === :geom_quat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1744)), (Int(4), Int(x.ngeom))))
-    f === :geom_friction && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1752)), (Int(3), Int(x.ngeom))))
-    f === :geom_margin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1760)), (Int(1), Int(x.ngeom))))
-    f === :geom_gap && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1768)), (Int(1), Int(x.ngeom))))
+    f === :geom_size && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1712))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_aabb && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1720))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_rbound && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1728))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_pos && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1736))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_quat && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1744))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_friction && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1752))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_margin && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1760))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_gap && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1768))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
     f === :geom_fluid && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1776))
-    f === :geom_user && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1784)), (Int(model.nuser_geom), Int(x.ngeom))))
-    f === :geom_rgba && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 1792)), (Int(4), Int(x.ngeom))))
-    f === :site_type && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1800)), (Int(1), Int(x.nsite))))
-    f === :site_bodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1808)), (Int(1), Int(x.nsite))))
-    f === :site_matid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1816)), (Int(1), Int(x.nsite))))
-    f === :site_group && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1824)), (Int(1), Int(x.nsite))))
-    f === :site_sameframe && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1832)), (Int(1), Int(x.nsite))))
-    f === :site_size && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1840)), (Int(3), Int(x.nsite))))
-    f === :site_pos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1848)), (Int(3), Int(x.nsite))))
-    f === :site_quat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1856)), (Int(4), Int(x.nsite))))
-    f === :site_user && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1864)), (Int(model.nuser_site), Int(x.nsite))))
-    f === :site_rgba && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 1872)), (Int(4), Int(x.nsite))))
-    f === :cam_mode && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1880)), (Int(1), Int(x.ncam))))
-    f === :cam_bodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1888)), (Int(1), Int(x.ncam))))
-    f === :cam_targetbodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1896)), (Int(1), Int(x.ncam))))
-    f === :cam_pos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1904)), (Int(3), Int(x.ncam))))
-    f === :cam_quat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1912)), (Int(4), Int(x.ncam))))
-    f === :cam_poscom0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1920)), (Int(3), Int(x.ncam))))
-    f === :cam_pos0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1928)), (Int(3), Int(x.ncam))))
-    f === :cam_mat0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1936)), (Int(9), Int(x.ncam))))
-    f === :cam_fovy && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1944)), (Int(1), Int(x.ncam))))
-    f === :cam_ipd && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1952)), (Int(1), Int(x.ncam))))
-    f === :cam_user && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1960)), (Int(model.nuser_cam), Int(x.ncam))))
-    f === :light_mode && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1968)), (Int(1), Int(x.nlight))))
-    f === :light_bodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1976)), (Int(1), Int(x.nlight))))
-    f === :light_targetbodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1984)), (Int(1), Int(x.nlight))))
-    f === :light_directional && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1992)), (Int(1), Int(x.nlight))))
-    f === :light_castshadow && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2000)), (Int(1), Int(x.nlight))))
-    f === :light_active && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2008)), (Int(1), Int(x.nlight))))
-    f === :light_pos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2016)), (Int(3), Int(x.nlight))))
-    f === :light_dir && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2024)), (Int(3), Int(x.nlight))))
-    f === :light_poscom0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2032)), (Int(3), Int(x.nlight))))
-    f === :light_pos0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2040)), (Int(3), Int(x.nlight))))
-    f === :light_dir0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2048)), (Int(3), Int(x.nlight))))
-    f === :light_attenuation && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2056)), (Int(3), Int(x.nlight))))
-    f === :light_cutoff && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2064)), (Int(1), Int(x.nlight))))
-    f === :light_exponent && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2072)), (Int(1), Int(x.nlight))))
-    f === :light_ambient && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2080)), (Int(3), Int(x.nlight))))
-    f === :light_diffuse && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2088)), (Int(3), Int(x.nlight))))
-    f === :light_specular && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2096)), (Int(3), Int(x.nlight))))
-    f === :mesh_vertadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2104)), (Int(1), Int(x.nmesh))))
-    f === :mesh_vertnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2112)), (Int(1), Int(x.nmesh))))
-    f === :mesh_faceadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2120)), (Int(1), Int(x.nmesh))))
-    f === :mesh_facenum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2128)), (Int(1), Int(x.nmesh))))
-    f === :mesh_bvhadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2136)), (Int(1), Int(x.nmesh))))
-    f === :mesh_bvhnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2144)), (Int(1), Int(x.nmesh))))
-    f === :mesh_normaladr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2152)), (Int(1), Int(x.nmesh))))
-    f === :mesh_normalnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2160)), (Int(1), Int(x.nmesh))))
-    f === :mesh_texcoordadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2168)), (Int(1), Int(x.nmesh))))
-    f === :mesh_texcoordnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2176)), (Int(1), Int(x.nmesh))))
-    f === :mesh_graphadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2184)), (Int(1), Int(x.nmesh))))
-    f === :mesh_vert && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2192)), (Int(3), Int(x.nmeshvert))))
-    f === :mesh_normal && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2200)), (Int(3), Int(x.nmeshnormal))))
-    f === :mesh_texcoord && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2208)), (Int(2), Int(x.nmeshtexcoord))))
-    f === :mesh_face && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2216)), (Int(3), Int(x.nmeshface))))
-    f === :mesh_facenormal && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2224)), (Int(3), Int(x.nmeshface))))
-    f === :mesh_facetexcoord && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2232)), (Int(3), Int(x.nmeshface))))
-    f === :mesh_graph && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2240)), (Int(1), Int(x.nmeshgraph))))
-    f === :skin_matid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2248)), (Int(1), Int(x.nskin))))
-    f === :skin_group && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2256)), (Int(1), Int(x.nskin))))
-    f === :skin_rgba && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2264)), (Int(4), Int(x.nskin))))
-    f === :skin_inflate && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2272)), (Int(1), Int(x.nskin))))
-    f === :skin_vertadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2280)), (Int(1), Int(x.nskin))))
-    f === :skin_vertnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2288)), (Int(1), Int(x.nskin))))
-    f === :skin_texcoordadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2296)), (Int(1), Int(x.nskin))))
-    f === :skin_faceadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2304)), (Int(1), Int(x.nskin))))
-    f === :skin_facenum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2312)), (Int(1), Int(x.nskin))))
-    f === :skin_boneadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2320)), (Int(1), Int(x.nskin))))
-    f === :skin_bonenum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2328)), (Int(1), Int(x.nskin))))
-    f === :skin_vert && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2336)), (Int(3), Int(x.nskinvert))))
-    f === :skin_texcoord && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2344)), (Int(2), Int(x.nskintexvert))))
-    f === :skin_face && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2352)), (Int(3), Int(x.nskinface))))
-    f === :skin_bonevertadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2360)), (Int(1), Int(x.nskinbone))))
-    f === :skin_bonevertnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2368)), (Int(1), Int(x.nskinbone))))
-    f === :skin_bonebindpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2376)), (Int(3), Int(x.nskinbone))))
-    f === :skin_bonebindquat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2384)), (Int(4), Int(x.nskinbone))))
-    f === :skin_bonebodyid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2392)), (Int(1), Int(x.nskinbone))))
-    f === :skin_bonevertid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2400)), (Int(1), Int(x.nskinbonevert))))
-    f === :skin_bonevertweight && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2408)), (Int(1), Int(x.nskinbonevert))))
-    f === :hfield_size && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2416)), (Int(4), Int(x.nhfield))))
-    f === :hfield_nrow && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2424)), (Int(1), Int(x.nhfield))))
-    f === :hfield_ncol && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2432)), (Int(1), Int(x.nhfield))))
-    f === :hfield_adr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2440)), (Int(1), Int(x.nhfield))))
-    f === :hfield_data && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2448)), (Int(1), Int(x.nhfielddata))))
-    f === :tex_type && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2456)), (Int(1), Int(x.ntex))))
-    f === :tex_height && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2464)), (Int(1), Int(x.ntex))))
-    f === :tex_width && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2472)), (Int(1), Int(x.ntex))))
-    f === :tex_adr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2480)), (Int(1), Int(x.ntex))))
-    f === :tex_rgb && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2488)), (Int(1), Int(x.ntexdata))))
-    f === :mat_texid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2496)), (Int(1), Int(x.nmat))))
-    f === :mat_texuniform && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2504)), (Int(1), Int(x.nmat))))
-    f === :mat_texrepeat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2512)), (Int(2), Int(x.nmat))))
-    f === :mat_emission && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2520)), (Int(1), Int(x.nmat))))
-    f === :mat_specular && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2528)), (Int(1), Int(x.nmat))))
-    f === :mat_shininess && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2536)), (Int(1), Int(x.nmat))))
-    f === :mat_reflectance && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2544)), (Int(1), Int(x.nmat))))
-    f === :mat_rgba && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2552)), (Int(4), Int(x.nmat))))
-    f === :pair_dim && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2560)), (Int(1), Int(x.npair))))
-    f === :pair_geom1 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2568)), (Int(1), Int(x.npair))))
-    f === :pair_geom2 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2576)), (Int(1), Int(x.npair))))
-    f === :pair_signature && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2584)), (Int(1), Int(x.npair))))
+    f === :geom_user && return if all((!=)(0), (Int(x.ngeom), Int(model.nuser_geom)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1784))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_geom), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_rgba && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 1792))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :site_type && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1800))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_bodyid && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1808))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_matid && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1816))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_group && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1824))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_sameframe && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1832))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_size && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1840))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_pos && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1848))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_quat && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1856))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_user && return if all((!=)(0), (Int(x.nsite), Int(model.nuser_site)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1864))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_site), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_rgba && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 1872))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :cam_mode && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1880))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_bodyid && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1888))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_targetbodyid && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1896))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_pos && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1904))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_quat && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1912))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_poscom0 && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1920))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_pos0 && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1928))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_mat0 && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1936))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(9), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_fovy && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1944))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_ipd && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1952))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_user && return if all((!=)(0), (Int(x.ncam), Int(model.nuser_cam)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1960))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_cam), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :light_mode && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1968))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_bodyid && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1976))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_targetbodyid && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1984))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_directional && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1992))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_castshadow && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2000))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_active && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2008))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_pos && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2016))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_dir && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2024))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_poscom0 && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2032))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_pos0 && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2040))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_dir0 && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2048))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_attenuation && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2056))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_cutoff && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2064))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_exponent && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2072))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_ambient && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2080))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_diffuse && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2088))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_specular && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2096))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_vertadr && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2104))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_vertnum && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2112))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_faceadr && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2120))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_facenum && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2128))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_bvhadr && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2136))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_bvhnum && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2144))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_normaladr && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2152))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_normalnum && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2160))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_texcoordadr && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2168))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_texcoordnum && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2176))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_graphadr && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2184))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_vert && return if all((!=)(0), (Int(x.nmeshvert),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2192))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nmeshvert))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_normal && return if all((!=)(0), (Int(x.nmeshnormal),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2200))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nmeshnormal))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_texcoord && return if all((!=)(0), (Int(x.nmeshtexcoord),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2208))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nmeshtexcoord))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_face && return if all((!=)(0), (Int(x.nmeshface),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2216))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nmeshface))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_facenormal && return if all((!=)(0), (Int(x.nmeshface),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2224))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nmeshface))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_facetexcoord && return if all((!=)(0), (Int(x.nmeshface),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2232))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nmeshface))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_graph && return if all((!=)(0), (Int(x.nmeshgraph),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2240))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmeshgraph))))
+                end
+            else
+                nothing
+            end
+    f === :skin_matid && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2248))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_group && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2256))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_rgba && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2264))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_inflate && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2272))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_vertadr && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2280))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_vertnum && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2288))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_texcoordadr && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2296))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_faceadr && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2304))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_facenum && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2312))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_boneadr && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2320))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_bonenum && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2328))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :skin_vert && return if all((!=)(0), (Int(x.nskinvert),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2336))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nskinvert))))
+                end
+            else
+                nothing
+            end
+    f === :skin_texcoord && return if all((!=)(0), (Int(x.nskintexvert),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2344))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nskintexvert))))
+                end
+            else
+                nothing
+            end
+    f === :skin_face && return if all((!=)(0), (Int(x.nskinface),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2352))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nskinface))))
+                end
+            else
+                nothing
+            end
+    f === :skin_bonevertadr && return if all((!=)(0), (Int(x.nskinbone),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2360))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskinbone))))
+                end
+            else
+                nothing
+            end
+    f === :skin_bonevertnum && return if all((!=)(0), (Int(x.nskinbone),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2368))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskinbone))))
+                end
+            else
+                nothing
+            end
+    f === :skin_bonebindpos && return if all((!=)(0), (Int(x.nskinbone),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2376))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nskinbone))))
+                end
+            else
+                nothing
+            end
+    f === :skin_bonebindquat && return if all((!=)(0), (Int(x.nskinbone),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2384))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nskinbone))))
+                end
+            else
+                nothing
+            end
+    f === :skin_bonebodyid && return if all((!=)(0), (Int(x.nskinbone),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2392))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskinbone))))
+                end
+            else
+                nothing
+            end
+    f === :skin_bonevertid && return if all((!=)(0), (Int(x.nskinbonevert),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2400))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskinbonevert))))
+                end
+            else
+                nothing
+            end
+    f === :skin_bonevertweight && return if all((!=)(0), (Int(x.nskinbonevert),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2408))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskinbonevert))))
+                end
+            else
+                nothing
+            end
+    f === :hfield_size && return if all((!=)(0), (Int(x.nhfield),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2416))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nhfield))))
+                end
+            else
+                nothing
+            end
+    f === :hfield_nrow && return if all((!=)(0), (Int(x.nhfield),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2424))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nhfield))))
+                end
+            else
+                nothing
+            end
+    f === :hfield_ncol && return if all((!=)(0), (Int(x.nhfield),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2432))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nhfield))))
+                end
+            else
+                nothing
+            end
+    f === :hfield_adr && return if all((!=)(0), (Int(x.nhfield),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2440))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nhfield))))
+                end
+            else
+                nothing
+            end
+    f === :hfield_data && return if all((!=)(0), (Int(x.nhfielddata),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2448))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nhfielddata))))
+                end
+            else
+                nothing
+            end
+    f === :tex_type && return if all((!=)(0), (Int(x.ntex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2456))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntex))))
+                end
+            else
+                nothing
+            end
+    f === :tex_height && return if all((!=)(0), (Int(x.ntex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2464))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntex))))
+                end
+            else
+                nothing
+            end
+    f === :tex_width && return if all((!=)(0), (Int(x.ntex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2472))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntex))))
+                end
+            else
+                nothing
+            end
+    f === :tex_adr && return if all((!=)(0), (Int(x.ntex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2480))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntex))))
+                end
+            else
+                nothing
+            end
+    f === :tex_rgb && return if all((!=)(0), (Int(x.ntexdata),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2488))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntexdata))))
+                end
+            else
+                nothing
+            end
+    f === :mat_texid && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2496))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_texuniform && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2504))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_texrepeat && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2512))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_emission && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2520))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_specular && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2528))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_shininess && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2536))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_reflectance && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2544))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_rgba && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2552))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :pair_dim && return if all((!=)(0), (Int(x.npair),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2560))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npair))))
+                end
+            else
+                nothing
+            end
+    f === :pair_geom1 && return if all((!=)(0), (Int(x.npair),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2568))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npair))))
+                end
+            else
+                nothing
+            end
+    f === :pair_geom2 && return if all((!=)(0), (Int(x.npair),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2576))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npair))))
+                end
+            else
+                nothing
+            end
+    f === :pair_signature && return if all((!=)(0), (Int(x.npair),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2584))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npair))))
+                end
+            else
+                nothing
+            end
     f === :pair_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2592))
     f === :pair_solreffriction && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2600))
     f === :pair_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2608))
-    f === :pair_margin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2616)), (Int(1), Int(x.npair))))
-    f === :pair_gap && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2624)), (Int(1), Int(x.npair))))
-    f === :pair_friction && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2632)), (Int(5), Int(x.npair))))
-    f === :exclude_signature && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2640)), (Int(1), Int(x.nexclude))))
-    f === :eq_type && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2648)), (Int(1), Int(x.neq))))
-    f === :eq_obj1id && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2656)), (Int(1), Int(x.neq))))
-    f === :eq_obj2id && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2664)), (Int(1), Int(x.neq))))
-    f === :eq_active && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2672)), (Int(1), Int(x.neq))))
+    f === :pair_margin && return if all((!=)(0), (Int(x.npair),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2616))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npair))))
+                end
+            else
+                nothing
+            end
+    f === :pair_gap && return if all((!=)(0), (Int(x.npair),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2624))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npair))))
+                end
+            else
+                nothing
+            end
+    f === :pair_friction && return if all((!=)(0), (Int(x.npair),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2632))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(5), Int(x.npair))))
+                end
+            else
+                nothing
+            end
+    f === :exclude_signature && return if all((!=)(0), (Int(x.nexclude),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2640))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nexclude))))
+                end
+            else
+                nothing
+            end
+    f === :eq_type && return if all((!=)(0), (Int(x.neq),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2648))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.neq))))
+                end
+            else
+                nothing
+            end
+    f === :eq_obj1id && return if all((!=)(0), (Int(x.neq),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2656))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.neq))))
+                end
+            else
+                nothing
+            end
+    f === :eq_obj2id && return if all((!=)(0), (Int(x.neq),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2664))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.neq))))
+                end
+            else
+                nothing
+            end
+    f === :eq_active && return if all((!=)(0), (Int(x.neq),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2672))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.neq))))
+                end
+            else
+                nothing
+            end
     f === :eq_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2680))
     f === :eq_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2688))
     f === :eq_data && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2696))
-    f === :tendon_adr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2704)), (Int(1), Int(x.ntendon))))
-    f === :tendon_num && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2712)), (Int(1), Int(x.ntendon))))
-    f === :tendon_matid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2720)), (Int(1), Int(x.ntendon))))
-    f === :tendon_group && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2728)), (Int(1), Int(x.ntendon))))
-    f === :tendon_limited && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2736)), (Int(1), Int(x.ntendon))))
-    f === :tendon_width && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2744)), (Int(1), Int(x.ntendon))))
+    f === :tendon_adr && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2704))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_num && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2712))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_matid && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2720))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_group && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2728))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_limited && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2736))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_width && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2744))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
     f === :tendon_solref_lim && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2752))
     f === :tendon_solimp_lim && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2760))
     f === :tendon_solref_fri && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2768))
     f === :tendon_solimp_fri && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2776))
-    f === :tendon_range && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2784)), (Int(2), Int(x.ntendon))))
-    f === :tendon_margin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2792)), (Int(1), Int(x.ntendon))))
-    f === :tendon_stiffness && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2800)), (Int(1), Int(x.ntendon))))
-    f === :tendon_damping && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2808)), (Int(1), Int(x.ntendon))))
-    f === :tendon_frictionloss && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2816)), (Int(1), Int(x.ntendon))))
-    f === :tendon_lengthspring && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2824)), (Int(2), Int(x.ntendon))))
-    f === :tendon_length0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2832)), (Int(1), Int(x.ntendon))))
-    f === :tendon_invweight0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2840)), (Int(1), Int(x.ntendon))))
-    f === :tendon_user && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2848)), (Int(model.nuser_tendon), Int(x.ntendon))))
-    f === :tendon_rgba && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2856)), (Int(4), Int(x.ntendon))))
-    f === :wrap_type && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2864)), (Int(1), Int(x.nwrap))))
-    f === :wrap_objid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2872)), (Int(1), Int(x.nwrap))))
-    f === :wrap_prm && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2880)), (Int(1), Int(x.nwrap))))
-    f === :actuator_trntype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2888)), (Int(1), Int(x.nu))))
-    f === :actuator_dyntype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2896)), (Int(1), Int(x.nu))))
-    f === :actuator_gaintype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2904)), (Int(1), Int(x.nu))))
-    f === :actuator_biastype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2912)), (Int(1), Int(x.nu))))
-    f === :actuator_trnid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2920)), (Int(2), Int(x.nu))))
-    f === :actuator_actadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2928)), (Int(1), Int(x.nu))))
-    f === :actuator_actnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2936)), (Int(1), Int(x.nu))))
-    f === :actuator_group && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2944)), (Int(1), Int(x.nu))))
-    f === :actuator_ctrllimited && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2952)), (Int(1), Int(x.nu))))
-    f === :actuator_forcelimited && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2960)), (Int(1), Int(x.nu))))
-    f === :actuator_actlimited && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2968)), (Int(1), Int(x.nu))))
+    f === :tendon_range && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2784))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_margin && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2792))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_stiffness && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2800))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_damping && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2808))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_frictionloss && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2816))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_lengthspring && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2824))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_length0 && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2832))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_invweight0 && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2840))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_user && return if all((!=)(0), (Int(x.ntendon), Int(model.nuser_tendon)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2848))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_tendon), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :tendon_rgba && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2856))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :wrap_type && return if all((!=)(0), (Int(x.nwrap),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2864))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nwrap))))
+                end
+            else
+                nothing
+            end
+    f === :wrap_objid && return if all((!=)(0), (Int(x.nwrap),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2872))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nwrap))))
+                end
+            else
+                nothing
+            end
+    f === :wrap_prm && return if all((!=)(0), (Int(x.nwrap),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2880))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nwrap))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_trntype && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2888))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_dyntype && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2896))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_gaintype && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2904))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_biastype && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2912))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_trnid && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2920))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_actadr && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2928))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_actnum && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2936))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_group && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2944))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_ctrllimited && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2952))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_forcelimited && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2960))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_actlimited && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2968))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
     f === :actuator_dynprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2976))
     f === :actuator_gainprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2984))
     f === :actuator_biasprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2992))
-    f === :actuator_ctrlrange && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3000)), (Int(2), Int(x.nu))))
-    f === :actuator_forcerange && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3008)), (Int(2), Int(x.nu))))
-    f === :actuator_actrange && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3016)), (Int(2), Int(x.nu))))
-    f === :actuator_gear && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3024)), (Int(6), Int(x.nu))))
-    f === :actuator_cranklength && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3032)), (Int(1), Int(x.nu))))
-    f === :actuator_acc0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3040)), (Int(1), Int(x.nu))))
-    f === :actuator_length0 && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3048)), (Int(1), Int(x.nu))))
-    f === :actuator_lengthrange && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3056)), (Int(2), Int(x.nu))))
-    f === :actuator_user && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3064)), (Int(model.nuser_actuator), Int(x.nu))))
-    f === :actuator_plugin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3072)), (Int(1), Int(x.nu))))
-    f === :sensor_type && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3080)), (Int(1), Int(x.nsensor))))
-    f === :sensor_datatype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3088)), (Int(1), Int(x.nsensor))))
-    f === :sensor_needstage && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3096)), (Int(1), Int(x.nsensor))))
-    f === :sensor_objtype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3104)), (Int(1), Int(x.nsensor))))
-    f === :sensor_objid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3112)), (Int(1), Int(x.nsensor))))
-    f === :sensor_reftype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3120)), (Int(1), Int(x.nsensor))))
-    f === :sensor_refid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3128)), (Int(1), Int(x.nsensor))))
-    f === :sensor_dim && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3136)), (Int(1), Int(x.nsensor))))
-    f === :sensor_adr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3144)), (Int(1), Int(x.nsensor))))
-    f === :sensor_cutoff && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3152)), (Int(1), Int(x.nsensor))))
-    f === :sensor_noise && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3160)), (Int(1), Int(x.nsensor))))
-    f === :sensor_user && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3168)), (Int(model.nuser_sensor), Int(x.nsensor))))
-    f === :sensor_plugin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3176)), (Int(1), Int(x.nsensor))))
-    f === :plugin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3184)), (Int(1), Int(x.nplugin))))
-    f === :plugin_stateadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3192)), (Int(1), Int(x.nplugin))))
-    f === :plugin_statenum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3200)), (Int(1), Int(x.nplugin))))
-    f === :plugin_attr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3208)), (Int(1), Int(x.npluginattr))))
-    f === :plugin_attradr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3216)), (Int(1), Int(x.nplugin))))
-    f === :numeric_adr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3224)), (Int(1), Int(x.nnumeric))))
-    f === :numeric_size && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3232)), (Int(1), Int(x.nnumeric))))
-    f === :numeric_data && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3240)), (Int(1), Int(x.nnumericdata))))
-    f === :text_adr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3248)), (Int(1), Int(x.ntext))))
-    f === :text_size && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3256)), (Int(1), Int(x.ntext))))
-    f === :text_data && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3264)), (Int(1), Int(x.ntextdata))))
-    f === :tuple_adr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3272)), (Int(1), Int(x.ntuple))))
-    f === :tuple_size && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3280)), (Int(1), Int(x.ntuple))))
-    f === :tuple_objtype && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3288)), (Int(1), Int(x.ntupledata))))
-    f === :tuple_objid && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3296)), (Int(1), Int(x.ntupledata))))
-    f === :tuple_objprm && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3304)), (Int(1), Int(x.ntupledata))))
-    f === :key_time && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3312)), (Int(1), Int(x.nkey))))
-    f === :key_qpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3320)), (Int(model.nq), Int(x.nkey))))
-    f === :key_qvel && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3328)), (Int(model.nv), Int(x.nkey))))
-    f === :key_act && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3336)), (Int(model.na), Int(x.nkey))))
-    f === :key_mpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3344)), (Int(model.nmocap * 3), Int(x.nkey))))
-    f === :key_mquat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3352)), (Int(model.nmocap * 4), Int(x.nkey))))
-    f === :key_ctrl && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3360)), (Int(model.nu), Int(x.nkey))))
-    f === :name_bodyadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3368)), (Int(1), Int(x.nbody))))
-    f === :name_jntadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3376)), (Int(1), Int(x.njnt))))
-    f === :name_geomadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3384)), (Int(1), Int(x.ngeom))))
-    f === :name_siteadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3392)), (Int(1), Int(x.nsite))))
-    f === :name_camadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3400)), (Int(1), Int(x.ncam))))
-    f === :name_lightadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3408)), (Int(1), Int(x.nlight))))
-    f === :name_meshadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3416)), (Int(1), Int(x.nmesh))))
-    f === :name_skinadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3424)), (Int(1), Int(x.nskin))))
-    f === :name_hfieldadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3432)), (Int(1), Int(x.nhfield))))
-    f === :name_texadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3440)), (Int(1), Int(x.ntex))))
-    f === :name_matadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3448)), (Int(1), Int(x.nmat))))
-    f === :name_pairadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3456)), (Int(1), Int(x.npair))))
-    f === :name_excludeadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3464)), (Int(1), Int(x.nexclude))))
-    f === :name_eqadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3472)), (Int(1), Int(x.neq))))
-    f === :name_tendonadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3480)), (Int(1), Int(x.ntendon))))
-    f === :name_actuatoradr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3488)), (Int(1), Int(x.nu))))
-    f === :name_sensoradr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3496)), (Int(1), Int(x.nsensor))))
-    f === :name_numericadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3504)), (Int(1), Int(x.nnumeric))))
-    f === :name_textadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3512)), (Int(1), Int(x.ntext))))
-    f === :name_tupleadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3520)), (Int(1), Int(x.ntuple))))
-    f === :name_keyadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3528)), (Int(1), Int(x.nkey))))
-    f === :name_pluginadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3536)), (Int(1), Int(x.nplugin))))
-    f === :names && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3544)), (Int(1), Int(x.nnames))))
-    f === :names_map && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3552)), (Int(1), Int(x.nnames_map))))
+    f === :actuator_ctrlrange && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3000))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_forcerange && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3008))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_actrange && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3016))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_gear && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3024))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_cranklength && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3032))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_acc0 && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3040))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_length0 && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3048))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_lengthrange && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3056))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_user && return if all((!=)(0), (Int(x.nu), Int(model.nuser_actuator)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3064))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_actuator), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_plugin && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3072))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_type && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3080))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_datatype && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3088))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_needstage && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3096))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_objtype && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3104))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_objid && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3112))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_reftype && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3120))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_refid && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3128))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_dim && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3136))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_adr && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3144))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_cutoff && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3152))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_noise && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3160))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_user && return if all((!=)(0), (Int(x.nsensor), Int(model.nuser_sensor)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3168))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_sensor), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :sensor_plugin && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3176))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :plugin && return if all((!=)(0), (Int(x.nplugin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3184))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nplugin))))
+                end
+            else
+                nothing
+            end
+    f === :plugin_stateadr && return if all((!=)(0), (Int(x.nplugin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3192))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nplugin))))
+                end
+            else
+                nothing
+            end
+    f === :plugin_statenum && return if all((!=)(0), (Int(x.nplugin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3200))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nplugin))))
+                end
+            else
+                nothing
+            end
+    f === :plugin_attr && return if all((!=)(0), (Int(x.npluginattr),))
+                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3208))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npluginattr))))
+                end
+            else
+                nothing
+            end
+    f === :plugin_attradr && return if all((!=)(0), (Int(x.nplugin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3216))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nplugin))))
+                end
+            else
+                nothing
+            end
+    f === :numeric_adr && return if all((!=)(0), (Int(x.nnumeric),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3224))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nnumeric))))
+                end
+            else
+                nothing
+            end
+    f === :numeric_size && return if all((!=)(0), (Int(x.nnumeric),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3232))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nnumeric))))
+                end
+            else
+                nothing
+            end
+    f === :numeric_data && return if all((!=)(0), (Int(x.nnumericdata),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3240))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nnumericdata))))
+                end
+            else
+                nothing
+            end
+    f === :text_adr && return if all((!=)(0), (Int(x.ntext),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3248))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntext))))
+                end
+            else
+                nothing
+            end
+    f === :text_size && return if all((!=)(0), (Int(x.ntext),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3256))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntext))))
+                end
+            else
+                nothing
+            end
+    f === :text_data && return if all((!=)(0), (Int(x.ntextdata),))
+                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3264))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntextdata))))
+                end
+            else
+                nothing
+            end
+    f === :tuple_adr && return if all((!=)(0), (Int(x.ntuple),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3272))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntuple))))
+                end
+            else
+                nothing
+            end
+    f === :tuple_size && return if all((!=)(0), (Int(x.ntuple),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3280))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntuple))))
+                end
+            else
+                nothing
+            end
+    f === :tuple_objtype && return if all((!=)(0), (Int(x.ntupledata),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3288))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntupledata))))
+                end
+            else
+                nothing
+            end
+    f === :tuple_objid && return if all((!=)(0), (Int(x.ntupledata),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3296))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntupledata))))
+                end
+            else
+                nothing
+            end
+    f === :tuple_objprm && return if all((!=)(0), (Int(x.ntupledata),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3304))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntupledata))))
+                end
+            else
+                nothing
+            end
+    f === :key_time && return if all((!=)(0), (Int(x.nkey),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3312))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nkey))))
+                end
+            else
+                nothing
+            end
+    f === :key_qpos && return if all((!=)(0), (Int(x.nkey), Int(model.nq)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3320))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nq), Int(x.nkey))))
+                end
+            else
+                nothing
+            end
+    f === :key_qvel && return if all((!=)(0), (Int(x.nkey), Int(model.nv)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3328))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nv), Int(x.nkey))))
+                end
+            else
+                nothing
+            end
+    f === :key_act && return if all((!=)(0), (Int(x.nkey), Int(model.na)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3336))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.na), Int(x.nkey))))
+                end
+            else
+                nothing
+            end
+    f === :key_mpos && return if all((!=)(0), (Int(x.nkey), Int(model.nmocap * 3)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3344))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nmocap * 3), Int(x.nkey))))
+                end
+            else
+                nothing
+            end
+    f === :key_mquat && return if all((!=)(0), (Int(x.nkey), Int(model.nmocap * 4)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3352))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nmocap * 4), Int(x.nkey))))
+                end
+            else
+                nothing
+            end
+    f === :key_ctrl && return if all((!=)(0), (Int(x.nkey), Int(model.nu)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3360))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nu), Int(x.nkey))))
+                end
+            else
+                nothing
+            end
+    f === :name_bodyadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3368))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :name_jntadr && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3376))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :name_geomadr && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3384))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :name_siteadr && return if all((!=)(0), (Int(x.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3392))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :name_camadr && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3400))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :name_lightadr && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3408))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :name_meshadr && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3416))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :name_skinadr && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3424))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
+    f === :name_hfieldadr && return if all((!=)(0), (Int(x.nhfield),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3432))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nhfield))))
+                end
+            else
+                nothing
+            end
+    f === :name_texadr && return if all((!=)(0), (Int(x.ntex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3440))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntex))))
+                end
+            else
+                nothing
+            end
+    f === :name_matadr && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3448))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :name_pairadr && return if all((!=)(0), (Int(x.npair),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3456))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npair))))
+                end
+            else
+                nothing
+            end
+    f === :name_excludeadr && return if all((!=)(0), (Int(x.nexclude),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3464))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nexclude))))
+                end
+            else
+                nothing
+            end
+    f === :name_eqadr && return if all((!=)(0), (Int(x.neq),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3472))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.neq))))
+                end
+            else
+                nothing
+            end
+    f === :name_tendonadr && return if all((!=)(0), (Int(x.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3480))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :name_actuatoradr && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3488))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
+    f === :name_sensoradr && return if all((!=)(0), (Int(x.nsensor),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3496))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nsensor))))
+                end
+            else
+                nothing
+            end
+    f === :name_numericadr && return if all((!=)(0), (Int(x.nnumeric),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3504))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nnumeric))))
+                end
+            else
+                nothing
+            end
+    f === :name_textadr && return if all((!=)(0), (Int(x.ntext),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3512))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntext))))
+                end
+            else
+                nothing
+            end
+    f === :name_tupleadr && return if all((!=)(0), (Int(x.ntuple),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3520))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntuple))))
+                end
+            else
+                nothing
+            end
+    f === :name_keyadr && return if all((!=)(0), (Int(x.nkey),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3528))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nkey))))
+                end
+            else
+                nothing
+            end
+    f === :name_pluginadr && return if all((!=)(0), (Int(x.nplugin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3536))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nplugin))))
+                end
+            else
+                nothing
+            end
+    f === :names && return if all((!=)(0), (Int(x.nnames),))
+                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3544))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nnames))))
+                end
+            else
+                nothing
+            end
+    f === :names_map && return if all((!=)(0), (Int(x.nnames_map),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3552))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nnames_map))))
+                end
+            else
+                nothing
+            end
     error("Could not find property $(f)")
 end
 function Base.setproperty!(x::Model, f::Symbol, value)
@@ -982,113 +3529,1076 @@ function Base.getproperty(x::Data, f::Symbol)
     f === :energy && return UnsafeArray(Ptr{Float64}(internal_pointer + 40400), (2,))
     f === :buffer && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 40416))
     f === :arena && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 40424))
-    f === :qpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40432)), (Int(1), Int(model.nq))))
-    f === :qvel && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40440)), (Int(1), Int(model.nv))))
-    f === :act && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40448)), (Int(1), Int(model.na))))
-    f === :qacc_warmstart && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40456)), (Int(1), Int(model.nv))))
-    f === :plugin_state && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40464)), (Int(1), Int(model.npluginstate))))
-    f === :ctrl && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40472)), (Int(1), Int(model.nu))))
-    f === :qfrc_applied && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40480)), (Int(1), Int(model.nv))))
-    f === :xfrc_applied && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40488)), (Int(6), Int(model.nbody))))
-    f === :mocap_pos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40496)), (Int(3), Int(model.nmocap))))
-    f === :mocap_quat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40504)), (Int(4), Int(model.nmocap))))
-    f === :qacc && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40512)), (Int(1), Int(model.nv))))
-    f === :act_dot && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40520)), (Int(1), Int(model.na))))
-    f === :userdata && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40528)), (Int(1), Int(model.nuserdata))))
-    f === :sensordata && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40536)), (Int(1), Int(model.nsensordata))))
-    f === :plugin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40544)), (Int(1), Int(x.nplugin))))
-    f === :plugin_data && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt64}}(internal_pointer + 40552)), (Int(1), Int(x.nplugin))))
-    f === :xpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40560)), (Int(3), Int(model.nbody))))
-    f === :xquat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40568)), (Int(4), Int(model.nbody))))
-    f === :xmat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40576)), (Int(9), Int(model.nbody))))
-    f === :xipos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40584)), (Int(3), Int(model.nbody))))
-    f === :ximat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40592)), (Int(9), Int(model.nbody))))
-    f === :xanchor && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40600)), (Int(3), Int(model.njnt))))
-    f === :xaxis && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40608)), (Int(3), Int(model.njnt))))
-    f === :geom_xpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40616)), (Int(3), Int(model.ngeom))))
-    f === :geom_xmat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40624)), (Int(9), Int(model.ngeom))))
-    f === :site_xpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40632)), (Int(3), Int(model.nsite))))
-    f === :site_xmat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40640)), (Int(9), Int(model.nsite))))
-    f === :cam_xpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40648)), (Int(3), Int(model.ncam))))
-    f === :cam_xmat && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40656)), (Int(9), Int(model.ncam))))
-    f === :light_xpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40664)), (Int(3), Int(model.nlight))))
-    f === :light_xdir && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40672)), (Int(3), Int(model.nlight))))
-    f === :subtree_com && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40680)), (Int(3), Int(model.nbody))))
-    f === :cdof && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40688)), (Int(6), Int(model.nv))))
-    f === :cinert && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40696)), (Int(10), Int(model.nbody))))
-    f === :ten_wrapadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40704)), (Int(1), Int(model.ntendon))))
-    f === :ten_wrapnum && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40712)), (Int(1), Int(model.ntendon))))
-    f === :ten_J_rownnz && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40720)), (Int(1), Int(model.ntendon))))
-    f === :ten_J_rowadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40728)), (Int(1), Int(model.ntendon))))
-    f === :ten_J_colind && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40736)), (Int(model.nv), Int(model.ntendon))))
-    f === :ten_length && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40744)), (Int(1), Int(model.ntendon))))
-    f === :ten_J && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40752)), (Int(model.nv), Int(model.ntendon))))
-    f === :wrap_obj && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40760)), (Int(2), Int(model.nwrap))))
-    f === :wrap_xpos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40768)), (Int(6), Int(model.nwrap))))
-    f === :actuator_length && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40776)), (Int(1), Int(model.nu))))
-    f === :actuator_moment && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40784)), (Int(model.nv), Int(model.nu))))
-    f === :crb && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40792)), (Int(10), Int(model.nbody))))
-    f === :qM && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40800)), (Int(1), Int(model.nM))))
-    f === :qLD && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40808)), (Int(1), Int(model.nM))))
-    f === :qLDiagInv && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40816)), (Int(1), Int(model.nv))))
-    f === :qLDiagSqrtInv && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40824)), (Int(1), Int(model.nv))))
-    f === :bvh_active && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 40832)), (Int(1), Int(model.nbvh))))
-    f === :ten_velocity && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40840)), (Int(1), Int(model.ntendon))))
-    f === :actuator_velocity && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40848)), (Int(1), Int(model.nu))))
-    f === :cvel && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40856)), (Int(6), Int(model.nbody))))
-    f === :cdof_dot && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40864)), (Int(6), Int(model.nv))))
-    f === :qfrc_bias && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40872)), (Int(1), Int(model.nv))))
-    f === :qfrc_passive && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40880)), (Int(1), Int(model.nv))))
-    f === :efc_vel && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40888)), (Int(1), Int(data.nefc))))
-    f === :efc_aref && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40896)), (Int(1), Int(data.nefc))))
-    f === :subtree_linvel && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40904)), (Int(3), Int(model.nbody))))
-    f === :subtree_angmom && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40912)), (Int(3), Int(model.nbody))))
-    f === :qH && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40920)), (Int(1), Int(model.nM))))
-    f === :qHDiagInv && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40928)), (Int(1), Int(model.nv))))
-    f === :D_rownnz && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40936)), (Int(1), Int(model.nv))))
-    f === :D_rowadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40944)), (Int(1), Int(model.nv))))
-    f === :D_colind && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40952)), (Int(1), Int(model.nD))))
-    f === :B_rownnz && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40960)), (Int(1), Int(model.nbody))))
-    f === :B_rowadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40968)), (Int(1), Int(model.nbody))))
-    f === :B_colind && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40976)), (Int(1), Int(model.nB))))
-    f === :qDeriv && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40984)), (Int(1), Int(model.nD))))
-    f === :qLU && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40992)), (Int(1), Int(model.nD))))
-    f === :actuator_force && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41000)), (Int(1), Int(model.nu))))
-    f === :qfrc_actuator && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41008)), (Int(1), Int(model.nv))))
-    f === :qfrc_smooth && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41016)), (Int(1), Int(model.nv))))
-    f === :qacc_smooth && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41024)), (Int(1), Int(model.nv))))
-    f === :qfrc_constraint && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41032)), (Int(1), Int(model.nv))))
-    f === :qfrc_inverse && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41040)), (Int(1), Int(model.nv))))
-    f === :cacc && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41048)), (Int(6), Int(model.nbody))))
-    f === :cfrc_int && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41056)), (Int(6), Int(model.nbody))))
-    f === :cfrc_ext && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41064)), (Int(6), Int(model.nbody))))
-    f === :contact && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{mjContact_}}(internal_pointer + 41072)), (Int(1), Int(data.ncon))))
-    f === :efc_type && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41080)), (Int(1), Int(data.nefc))))
-    f === :efc_id && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41088)), (Int(1), Int(data.nefc))))
-    f === :efc_J_rownnz && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41096)), (Int(1), Int(data.nefc))))
-    f === :efc_J_rowadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41104)), (Int(1), Int(data.nefc))))
-    f === :efc_J_rowsuper && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41112)), (Int(1), Int(data.nefc))))
-    f === :efc_J_colind && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41120)), (Int(1), Int(data.nnzJ))))
-    f === :efc_JT_rownnz && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41128)), (Int(1), Int(model.nv))))
-    f === :efc_JT_rowadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41136)), (Int(1), Int(model.nv))))
-    f === :efc_JT_rowsuper && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41144)), (Int(1), Int(model.nv))))
-    f === :efc_JT_colind && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41152)), (Int(1), Int(data.nnzJ))))
-    f === :efc_J && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41160)), (Int(1), Int(data.nnzJ))))
-    f === :efc_JT && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41168)), (Int(1), Int(data.nnzJ))))
-    f === :efc_pos && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41176)), (Int(1), Int(data.nefc))))
-    f === :efc_margin && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41184)), (Int(1), Int(data.nefc))))
-    f === :efc_frictionloss && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41192)), (Int(1), Int(data.nefc))))
-    f === :efc_diagApprox && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41200)), (Int(1), Int(data.nefc))))
-    f === :efc_KBIP && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41208)), (Int(4), Int(data.nefc))))
-    f === :efc_D && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41216)), (Int(1), Int(data.nefc))))
-    f === :efc_R && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41224)), (Int(1), Int(data.nefc))))
-    f === :efc_b && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41232)), (Int(1), Int(data.nefc))))
-    f === :efc_force && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41240)), (Int(1), Int(data.nefc))))
-    f === :efc_state && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41248)), (Int(1), Int(data.nefc))))
-    f === :efc_AR_rownnz && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41256)), (Int(1), Int(data.nefc))))
-    f === :efc_AR_rowadr && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41264)), (Int(1), Int(data.nefc))))
-    f === :efc_AR_colind && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41272)), (Int(data.nefc), Int(data.nefc))))
-    f === :efc_AR && return transpose(UnsafeArray(unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41280)), (Int(data.nefc), Int(data.nefc))))
+    f === :qpos && return if all((!=)(0), (Int(model.nq),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40432))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nq))))
+                end
+            else
+                nothing
+            end
+    f === :qvel && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40440))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :act && return if all((!=)(0), (Int(model.na),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40448))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.na))))
+                end
+            else
+                nothing
+            end
+    f === :qacc_warmstart && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40456))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :plugin_state && return if all((!=)(0), (Int(model.npluginstate),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40464))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.npluginstate))))
+                end
+            else
+                nothing
+            end
+    f === :ctrl && return if all((!=)(0), (Int(model.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40472))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nu))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_applied && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40480))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :xfrc_applied && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40488))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :mocap_pos && return if all((!=)(0), (Int(model.nmocap),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40496))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nmocap))))
+                end
+            else
+                nothing
+            end
+    f === :mocap_quat && return if all((!=)(0), (Int(model.nmocap),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40504))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(model.nmocap))))
+                end
+            else
+                nothing
+            end
+    f === :qacc && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40512))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :act_dot && return if all((!=)(0), (Int(model.na),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40520))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.na))))
+                end
+            else
+                nothing
+            end
+    f === :userdata && return if all((!=)(0), (Int(model.nuserdata),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40528))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nuserdata))))
+                end
+            else
+                nothing
+            end
+    f === :sensordata && return if all((!=)(0), (Int(model.nsensordata),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40536))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nsensordata))))
+                end
+            else
+                nothing
+            end
+    f === :plugin && return if all((!=)(0), (Int(x.nplugin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40544))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nplugin))))
+                end
+            else
+                nothing
+            end
+    f === :plugin_data && return if all((!=)(0), (Int(x.nplugin),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt64}}(internal_pointer + 40552))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nplugin))))
+                end
+            else
+                nothing
+            end
+    f === :xpos && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40560))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :xquat && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40568))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :xmat && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40576))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(9), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :xipos && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40584))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :ximat && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40592))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(9), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :xanchor && return if all((!=)(0), (Int(model.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40600))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :xaxis && return if all((!=)(0), (Int(model.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40608))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :geom_xpos && return if all((!=)(0), (Int(model.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40616))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_xmat && return if all((!=)(0), (Int(model.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40624))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(9), Int(model.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :site_xpos && return if all((!=)(0), (Int(model.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40632))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :site_xmat && return if all((!=)(0), (Int(model.nsite),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40640))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(9), Int(model.nsite))))
+                end
+            else
+                nothing
+            end
+    f === :cam_xpos && return if all((!=)(0), (Int(model.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40648))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_xmat && return if all((!=)(0), (Int(model.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40656))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(9), Int(model.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :light_xpos && return if all((!=)(0), (Int(model.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40664))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_xdir && return if all((!=)(0), (Int(model.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40672))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :subtree_com && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40680))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :cdof && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40688))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :cinert && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40696))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(10), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :ten_wrapadr && return if all((!=)(0), (Int(model.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40704))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :ten_wrapnum && return if all((!=)(0), (Int(model.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40712))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :ten_J_rownnz && return if all((!=)(0), (Int(model.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40720))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :ten_J_rowadr && return if all((!=)(0), (Int(model.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40728))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :ten_J_colind && return if all((!=)(0), (Int(model.ntendon), Int(model.nv)))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40736))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nv), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :ten_length && return if all((!=)(0), (Int(model.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40744))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :ten_J && return if all((!=)(0), (Int(model.ntendon), Int(model.nv)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40752))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nv), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :wrap_obj && return if all((!=)(0), (Int(model.nwrap),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40760))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(model.nwrap))))
+                end
+            else
+                nothing
+            end
+    f === :wrap_xpos && return if all((!=)(0), (Int(model.nwrap),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40768))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nwrap))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_length && return if all((!=)(0), (Int(model.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40776))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nu))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_moment && return if all((!=)(0), (Int(model.nu), Int(model.nv)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40784))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nv), Int(model.nu))))
+                end
+            else
+                nothing
+            end
+    f === :crb && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40792))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(10), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :qM && return if all((!=)(0), (Int(model.nM),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40800))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nM))))
+                end
+            else
+                nothing
+            end
+    f === :qLD && return if all((!=)(0), (Int(model.nM),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40808))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nM))))
+                end
+            else
+                nothing
+            end
+    f === :qLDiagInv && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40816))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qLDiagSqrtInv && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40824))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :bvh_active && return if all((!=)(0), (Int(model.nbvh),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 40832))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nbvh))))
+                end
+            else
+                nothing
+            end
+    f === :ten_velocity && return if all((!=)(0), (Int(model.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40840))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_velocity && return if all((!=)(0), (Int(model.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40848))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nu))))
+                end
+            else
+                nothing
+            end
+    f === :cvel && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40856))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :cdof_dot && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40864))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_bias && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40872))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_passive && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40880))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :efc_vel && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40888))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_aref && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40896))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :subtree_linvel && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40904))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :subtree_angmom && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40912))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :qH && return if all((!=)(0), (Int(model.nM),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40920))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nM))))
+                end
+            else
+                nothing
+            end
+    f === :qHDiagInv && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40928))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :D_rownnz && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40936))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :D_rowadr && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40944))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :D_colind && return if all((!=)(0), (Int(model.nD),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40952))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nD))))
+                end
+            else
+                nothing
+            end
+    f === :B_rownnz && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40960))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :B_rowadr && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40968))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :B_colind && return if all((!=)(0), (Int(model.nB),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40976))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nB))))
+                end
+            else
+                nothing
+            end
+    f === :qDeriv && return if all((!=)(0), (Int(model.nD),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40984))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nD))))
+                end
+            else
+                nothing
+            end
+    f === :qLU && return if all((!=)(0), (Int(model.nD),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40992))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nD))))
+                end
+            else
+                nothing
+            end
+    f === :actuator_force && return if all((!=)(0), (Int(model.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41000))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nu))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_actuator && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41008))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_smooth && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41016))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qacc_smooth && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41024))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_constraint && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41032))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_inverse && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41040))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :cacc && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41048))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :cfrc_int && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41056))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :cfrc_ext && return if all((!=)(0), (Int(model.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41064))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :contact && return if all((!=)(0), (Int(data.ncon),))
+                _ptr = unsafe_load(Ptr{Ptr{mjContact_}}(internal_pointer + 41072))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.ncon))))
+                end
+            else
+                nothing
+            end
+    f === :efc_type && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41080))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_id && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41088))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_J_rownnz && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41096))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_J_rowadr && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41104))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_J_rowsuper && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41112))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_J_colind && return if all((!=)(0), (Int(data.nnzJ),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41120))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nnzJ))))
+                end
+            else
+                nothing
+            end
+    f === :efc_JT_rownnz && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41128))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :efc_JT_rowadr && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41136))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :efc_JT_rowsuper && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41144))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :efc_JT_colind && return if all((!=)(0), (Int(data.nnzJ),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41152))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nnzJ))))
+                end
+            else
+                nothing
+            end
+    f === :efc_J && return if all((!=)(0), (Int(data.nnzJ),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41160))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nnzJ))))
+                end
+            else
+                nothing
+            end
+    f === :efc_JT && return if all((!=)(0), (Int(data.nnzJ),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41168))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nnzJ))))
+                end
+            else
+                nothing
+            end
+    f === :efc_pos && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41176))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_margin && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41184))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_frictionloss && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41192))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_diagApprox && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41200))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_KBIP && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41208))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_D && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41216))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_R && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41224))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_b && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41232))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_force && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41240))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_state && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41248))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_AR_rownnz && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41256))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_AR_rowadr && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41264))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_AR_colind && return if all((!=)(0), (Int(data.nefc), Int(data.nefc)))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41272))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(data.nefc), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_AR && return if all((!=)(0), (Int(data.nefc), Int(data.nefc)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41280))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(data.nefc), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
     error("Could not find property $(f)")
 end
 function Base.setproperty!(x::Data, f::Symbol, value)
