@@ -5,9 +5,10 @@ function MuJoCo.Visualiser.visualise!(
     controller = nothing, 
     trajectories = nothing
 )
-    modes = EngineMode[PassiveDynamics()]
+    modes = EngineMode[]
     !isnothing(controller) && push!(modes, Controller(controller))
     !isnothing(trajectories) && push!(modes, Trajectory(trajectories))
+    push!(modes, PassiveDynamics())
 
     run!(Engine(default_windowsize(), m, d, Tuple(modes)))
     return nothing

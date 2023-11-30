@@ -44,7 +44,7 @@ struct DataGeom
 end
 """
 	light([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, xpos, xdir)
 """
 function light end
@@ -96,7 +96,7 @@ function Base.getproperty(x::DataLight, f::Symbol)
 end
 """
 	cam([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, xpos, xmat)
 """
 function cam end
@@ -148,7 +148,7 @@ function Base.getproperty(x::DataCamera, f::Symbol)
 end
 """
 	actuator([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, ctrl, length, moment, velocity, force)
 """
 function actuator end
@@ -203,7 +203,7 @@ function Base.getproperty(x::DataActuator, f::Symbol)
 end
 """
 	body([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, applied, xpos, xquat, xmat, xipos, ximat, com, cinert, crb, cvel, linvel, angmom, cacc, int, ext)
 """
 function body end
@@ -268,7 +268,7 @@ function Base.getproperty(x::DataBody, f::Symbol)
 end
 """
 	geom([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, xpos, xmat)
 """
 function geom end
@@ -320,7 +320,7 @@ function Base.getproperty(x::DataGeom, f::Symbol)
 end
 """
 	jnt([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, xanchor, xaxis)
 """
 function jnt end
@@ -372,7 +372,7 @@ function Base.getproperty(x::DataJoint, f::Symbol)
 end
 """
 	sensor([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name)
 """
 function sensor end
@@ -422,7 +422,7 @@ function Base.getproperty(x::DataSensor, f::Symbol)
 end
 """
 	site([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, xpos, xmat)
 """
 function site end
@@ -474,7 +474,7 @@ function Base.getproperty(x::DataSite, f::Symbol)
 end
 """
 	tendon([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, wrapadr, wrapnum, J_rownnz, J_rowadr, J_colind, length, J, velocity)
 """
 function tendon end
@@ -648,7 +648,7 @@ struct ModelGeom
 end
 """
 	eq([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, type, obj1id, obj2id, active, solref, solimp, data)
 """
 function eq end
@@ -719,7 +719,7 @@ function Base.getproperty(x::ModelEquality, f::Symbol)
 end
 """
 	key([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, time, qpos, qvel, act, mpos, mquat)
 """
 function key end
@@ -849,7 +849,7 @@ function Base.getproperty(x::ModelGeom, f::Symbol)
 end
 """
 	numeric([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, adr, size)
 """
 function numeric end
@@ -955,7 +955,7 @@ function Base.getproperty(x::ModelSensor, f::Symbol)
 end
 """
 	mat([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, texid, texuniform, texrepeat, emission, specular, shininess, reflectance, rgba)
 """
 function mat end
@@ -1012,7 +1012,7 @@ function Base.getproperty(x::ModelMaterial, f::Symbol)
 end
 """
 	tex([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, type, height, width, adr)
 """
 function tex end
@@ -1199,7 +1199,7 @@ function Base.getproperty(x::ModelSite, f::Symbol)
 end
 """
 	pair([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, dim, geom1, geom2, signature, solref, solimp, margin, gap, friction)
 """
 function pair end
@@ -1267,7 +1267,7 @@ function Base.getproperty(x::ModelPair, f::Symbol)
 end
 """
 	hfield([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, size, nrow, ncol, adr)
 """
 function hfield end
@@ -1434,7 +1434,7 @@ function Base.getproperty(x::ModelCamera, f::Symbol)
 end
 """
 	tuple([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, adr, size)
 """
 function tuple end
@@ -1485,7 +1485,7 @@ function Base.getproperty(x::ModelTuple, f::Symbol)
 end
 """
 	skin([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, matid, rgba, inflate, vertadr, vertnum, texcoordadr, faceadr, facenum, boneadr, bonenum)
 """
 function skin end
@@ -1544,7 +1544,7 @@ function Base.getproperty(x::ModelSkin, f::Symbol)
 end
 """
 	exclude([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, signature)
 """
 function exclude end
@@ -1594,7 +1594,7 @@ function Base.getproperty(x::ModelExclude, f::Symbol)
 end
 """
 	mesh([model, data], [name, index])
-Creates an object with access to views of the supplied model or data object, based either on an index or a name. Properties available are:
+Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
 (id, name, vertadr, vertnum, texcoordadr, faceadr, facenum, graphadr)
 """
 function mesh end
