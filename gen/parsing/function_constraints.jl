@@ -179,7 +179,7 @@ function extract_arg_info(argument)
     static_array_info = if_match(static_array_regex, argument) do m
         return (;
             type = :static_array,
-            is_const = isnothing(m.captures[1]),
+            is_const = !isnothing(m.captures[1]),
             datatype = convert_datatype(m.captures[2]),
             identifier = m.captures[3],
             array_size = convert_size(m.captures[4])
@@ -193,7 +193,7 @@ function extract_arg_info(argument)
         is_model = m.captures[3] == "MjModel"
         return (;
             type = is_model ? (:mjModel) : (:mjData),
-            is_const = isnothing(m.captures[1]),
+            is_const = !isnothing(m.captures[1]),
             namespace_prefix = m.captures[2],
             datatype = convert_datatype(m.captures[3]),
             identifier = m.captures[4]
@@ -206,8 +206,8 @@ function extract_arg_info(argument)
     two_dim_array_info = if_match(two_dim_array_regex, argument) do m
         return (;
             type = :matrix,
-            is_optional = isnothing(m.captures[1]),
-            is_inner_const = isnothing(m.captures[2]),
+            is_optional = !isnothing(m.captures[1]),
+            is_inner_const = !isnothing(m.captures[2]),
             identifier = m.captures[4],
             datatype = LibMuJoCo.mjtNum,
         )
@@ -219,9 +219,9 @@ function extract_arg_info(argument)
     vector_info = if_match(vector_regex, argument) do m
         return (;
             type = :variable_vector,
-            is_const = isnothing(m.captures[1]),
-            is_optional = isnothing(m.captures[2]),
-            is_inner_const = isnothing(m.captures[3]),
+            is_const = !isnothing(m.captures[1]),
+            is_optional = !isnothing(m.captures[2]),
+            is_inner_const = !isnothing(m.captures[3]),
             identifier = m.captures[5],
             datatype = LibMuJoCo.mjtNum,
         )
@@ -234,8 +234,8 @@ function extract_arg_info(argument)
         is_dynamic = m.captures[4] == "Eigen::Dynamic"
         return (;
             type = :anomalous_vector,
-            is_optional = isnothing(m.captures[1]),
-            is_inner_const = isnothing(m.captures[2]),
+            is_optional = !isnothing(m.captures[1]),
+            is_inner_const = !isnothing(m.captures[2]),
             datatype = convert_datatype(m.captures[3]),
             is_dynamic_size = is_dynamic,
             size_vector = is_dynamic ? m.captures[4] : convert_size(m.captures[4]),
