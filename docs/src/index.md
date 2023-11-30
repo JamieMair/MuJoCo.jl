@@ -10,6 +10,14 @@ Welcome to the documentation for `MuJoCo.jl`. This package contains a Julia wrap
 
 This wrapper aims to provide a simple, performant interface to the [MuJoCo C library](https://github.com/deepmind/mujoco), allowing direct manipulation of the data used by the C engine for optimal performance. See the [MuJoCo API](@ref) page for our wrapped functions. We also provide a thin wrapper directly around the MuJoCo C library, which directly wraps all functions exported by the `libmujoco.h` header file. You can view the structs and functions available in the [LibMuJoCo Index](@ref) page.
 
+## Version
+
+The version of MuJoCo this package uses is always made to match the version of `MuJoCo_jll`, checked via
+```@example
+import Pkg
+Pkg.status("MuJoCo_jll"; mode=Pkg.PKGMODE_MANIFEST)
+```
+
 ## Introduction
 
 - [Getting Started](@ref)
