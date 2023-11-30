@@ -1,6 +1,5 @@
-module Functions
 import LinearAlgebra
-import ..LibMuJoCo
+import .LibMuJoCo
 function column_major_warning_string(variable_name)
     return "$variable_name is stored in column-major order (Julia default), but mujoco expects arrays in row-major order. Use helper functions to generate row-major arrays and see documentation for more details."
 end
@@ -3143,4 +3142,3 @@ const _wrapped_fns = (
     :mjd_transitionFD,
     :mjd_inverseFD,
 )
-end # module Functions

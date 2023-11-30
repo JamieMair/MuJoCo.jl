@@ -33,10 +33,6 @@ using .Wrappers.NamedAccess
 
 # Function wrappers
 include("function_constraints.jl")
-using .Functions
-for fn_name in Functions._wrapped_fns
-    eval(:(export $fn_name))
-end
 
 # Rexport Model and Data
 export Model, Data
