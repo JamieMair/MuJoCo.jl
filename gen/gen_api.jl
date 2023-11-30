@@ -141,6 +141,7 @@ function generate_getproperty_fn(mj_struct, new_name::Symbol, all_wrappers, matc
                     end
                     return true
                 end
+                # TODO: Fix to return an arbitrary 0 sized array!
                 dims_expr = Expr(:tuple, Iterators.reverse(converted_array_sizes)...)
 
                 all_non_zero_expr = Expr(:call, :all, Expr(:call, :!=, 0), Expr(:tuple, non_integer_array_sizes...))
