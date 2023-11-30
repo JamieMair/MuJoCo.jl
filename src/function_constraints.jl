@@ -1005,7 +1005,7 @@ Compute velocity by finite-differencing two positions.
 function mj_differentiatePos(
     m,
     qvel::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    dt::AbstractFloat,
+    dt::Number,
     qpos1::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     qpos2::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
 )
@@ -1053,7 +1053,7 @@ function mj_integratePos(
     m,
     qpos::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     qvel::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    dt::AbstractFloat,
+    dt::Number,
 )
     if typeof(qpos) <: AbstractArray{Float64,2} && count(==(1), size(qpos)) < 1
         throw(ArgumentError("qpos should be a vector, not a matrix."))
@@ -1204,10 +1204,7 @@ Set res = val.
 - res should be a vector, not a matrix.
 
 """
-function mju_fill(
-    res::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    val::AbstractFloat,
-)
+function mju_fill(res::Union{AbstractVector{Float64},AbstractArray{Float64,2}}, val::Number)
     if typeof(res) <: AbstractArray{Float64,2} && count(==(1), size(res)) < 1
         throw(ArgumentError("res should be a vector, not a matrix."))
     end
@@ -1306,7 +1303,7 @@ Set res = vec*scl.
 function mju_scl(
     res::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    scl::AbstractFloat,
+    scl::Number,
 )
     if typeof(res) <: AbstractArray{Float64,2} && count(==(1), size(res)) < 1
         throw(ArgumentError("res should be a vector, not a matrix."))
@@ -1488,7 +1485,7 @@ Set res = res + vec*scl.
 function mju_addToScl(
     res::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    scl::AbstractFloat,
+    scl::Number,
 )
     if typeof(res) <: AbstractArray{Float64,2} && count(==(1), size(res)) < 1
         throw(ArgumentError("res should be a vector, not a matrix."))
@@ -1526,7 +1523,7 @@ function mju_addScl(
     res::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     vec1::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
     vec2::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
-    scl::AbstractFloat,
+    scl::Number,
 )
     if typeof(res) <: AbstractArray{Float64,2} && count(==(1), size(res)) < 1
         throw(ArgumentError("res should be a vector, not a matrix."))
@@ -2035,7 +2032,7 @@ Cholesky decomposition: mat = L*L'; return rank, decomposition performed in-plac
 - mat should be a square matrix
 
 """
-function mju_cholFactor(mat::AbstractArray{Float64,2}, mindiag::AbstractFloat)
+function mju_cholFactor(mat::AbstractArray{Float64,2}, mindiag::Number)
     if !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
         @warn column_major_warning_string("mat")
     end
@@ -2147,8 +2144,8 @@ function mju_cholFactorBand(
     ntotal::Integer,
     nband::Integer,
     ndense::Integer,
-    diagadd::AbstractFloat,
-    diagmul::AbstractFloat,
+    diagadd::Number,
+    diagmul::Number,
 )
     if typeof(mat) <: AbstractArray{Float64,2} && count(==(1), size(mat)) < 1
         throw(ArgumentError("mat should be a vector, not a matrix."))
@@ -2758,7 +2755,7 @@ Finite differenced transition matrices (control theory notation)   d(x_next) = A
 function mjd_transitionFD(
     m,
     d,
-    eps::AbstractFloat,
+    eps::Number,
     flg_centered::UInt8,
     A::Union{Nothing,AbstractArray{Float64,2}},
     B::Union{Nothing,AbstractArray{Float64,2}},
@@ -2833,7 +2830,7 @@ Finite differenced Jacobians of (force, sensors) = mj*inverse(state, acceleratio
 function mjd_inverseFD(
     m,
     d,
-    eps::AbstractFloat,
+    eps::Number,
     flg_actuation::UInt8,
     DfDq::Union{Nothing,AbstractArray{Float64,2}},
     DfDv::Union{Nothing,AbstractArray{Float64,2}},
