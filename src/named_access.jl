@@ -62,6 +62,17 @@ function light(data::NamedData, name::Symbol)
     index = index_by_name(data, :light, name)
     return DataLight(getfield(data, :data), index)
 end
+function Base.show(io::IO, x::DataLight)
+    print(io, "DataLight:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::DataLight)
     println(io, "DataLight:")
     max_spaces = mapreduce((x->begin
@@ -114,6 +125,17 @@ function cam(data::NamedData, name::Symbol)
     index = index_by_name(data, :cam, name)
     return DataCamera(getfield(data, :data), index)
 end
+function Base.show(io::IO, x::DataCamera)
+    print(io, "DataCamera:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::DataCamera)
     println(io, "DataCamera:")
     max_spaces = mapreduce((x->begin
@@ -165,6 +187,17 @@ end
 function actuator(data::NamedData, name::Symbol)
     index = index_by_name(data, :actuator, name)
     return DataActuator(getfield(data, :data), index)
+end
+function Base.show(io::IO, x::DataActuator)
+    print(io, "DataActuator:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::DataActuator)
     println(io, "DataActuator:")
@@ -220,6 +253,17 @@ end
 function body(data::NamedData, name::Symbol)
     index = index_by_name(data, :body, name)
     return DataBody(getfield(data, :data), index)
+end
+function Base.show(io::IO, x::DataBody)
+    print(io, "DataBody:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::DataBody)
     println(io, "DataBody:")
@@ -286,6 +330,17 @@ function geom(data::NamedData, name::Symbol)
     index = index_by_name(data, :geom, name)
     return DataGeom(getfield(data, :data), index)
 end
+function Base.show(io::IO, x::DataGeom)
+    print(io, "DataGeom:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::DataGeom)
     println(io, "DataGeom:")
     max_spaces = mapreduce((x->begin
@@ -337,6 +392,17 @@ end
 function jnt(data::NamedData, name::Symbol)
     index = index_by_name(data, :jnt, name)
     return DataJoint(getfield(data, :data), index)
+end
+function Base.show(io::IO, x::DataJoint)
+    print(io, "DataJoint:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::DataJoint)
     println(io, "DataJoint:")
@@ -390,6 +456,17 @@ function sensor(data::NamedData, name::Symbol)
     index = index_by_name(data, :sensor, name)
     return DataSensor(getfield(data, :data), index)
 end
+function Base.show(io::IO, x::DataSensor)
+    print(io, "DataSensor:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::DataSensor)
     println(io, "DataSensor:")
     max_spaces = mapreduce((x->begin
@@ -439,6 +516,17 @@ end
 function site(data::NamedData, name::Symbol)
     index = index_by_name(data, :site, name)
     return DataSite(getfield(data, :data), index)
+end
+function Base.show(io::IO, x::DataSite)
+    print(io, "DataSite:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::DataSite)
     println(io, "DataSite:")
@@ -491,6 +579,17 @@ end
 function tendon(data::NamedData, name::Symbol)
     index = index_by_name(data, :tendon, name)
     return DataTendon(getfield(data, :data), index)
+end
+function Base.show(io::IO, x::DataTendon)
+    print(io, "DataTendon:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::DataTendon)
     println(io, "DataTendon:")
@@ -666,6 +765,17 @@ function eq(model::NamedModel, name::Symbol)
     index = index_by_name(model, :eq, name)
     return ModelEquality(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelEquality)
+    print(io, "ModelEquality:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelEquality)
     println(io, "ModelEquality:")
     max_spaces = mapreduce((x->begin
@@ -737,6 +847,17 @@ function key(model::NamedModel, name::Symbol)
     index = index_by_name(model, :key, name)
     return ModelKeyframe(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelKeyframe)
+    print(io, "ModelKeyframe:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelKeyframe)
     println(io, "ModelKeyframe:")
     max_spaces = mapreduce((x->begin
@@ -785,6 +906,17 @@ end
 function geom(model::NamedModel, name::Symbol)
     index = index_by_name(model, :geom, name)
     return ModelGeom(getfield(model, :model), index)
+end
+function Base.show(io::IO, x::ModelGeom)
+    print(io, "ModelGeom:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelGeom)
     println(io, "ModelGeom:")
@@ -867,6 +999,17 @@ function numeric(model::NamedModel, name::Symbol)
     index = index_by_name(model, :numeric, name)
     return ModelNumeric(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelNumeric)
+    print(io, "ModelNumeric:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelNumeric)
     println(io, "ModelNumeric:")
     max_spaces = mapreduce((x->begin
@@ -911,6 +1054,17 @@ end
 function sensor(model::NamedModel, name::Symbol)
     index = index_by_name(model, :sensor, name)
     return ModelSensor(getfield(model, :model), index)
+end
+function Base.show(io::IO, x::ModelSensor)
+    print(io, "ModelSensor:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelSensor)
     println(io, "ModelSensor:")
@@ -973,6 +1127,17 @@ function mat(model::NamedModel, name::Symbol)
     index = index_by_name(model, :mat, name)
     return ModelMaterial(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelMaterial)
+    print(io, "ModelMaterial:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelMaterial)
     println(io, "ModelMaterial:")
     max_spaces = mapreduce((x->begin
@@ -1030,6 +1195,17 @@ function tex(model::NamedModel, name::Symbol)
     index = index_by_name(model, :tex, name)
     return ModelTexture(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelTexture)
+    print(io, "ModelTexture:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelTexture)
     println(io, "ModelTexture:")
     max_spaces = mapreduce((x->begin
@@ -1076,6 +1252,17 @@ end
 function actuator(model::NamedModel, name::Symbol)
     index = index_by_name(model, :actuator, name)
     return ModelActuator(getfield(model, :model), index)
+end
+function Base.show(io::IO, x::ModelActuator)
+    print(io, "ModelActuator:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelActuator)
     println(io, "ModelActuator:")
@@ -1158,6 +1345,17 @@ function site(model::NamedModel, name::Symbol)
     index = index_by_name(model, :site, name)
     return ModelSite(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelSite)
+    print(io, "ModelSite:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelSite)
     println(io, "ModelSite:")
     max_spaces = mapreduce((x->begin
@@ -1216,6 +1414,17 @@ end
 function pair(model::NamedModel, name::Symbol)
     index = index_by_name(model, :pair, name)
     return ModelPair(getfield(model, :model), index)
+end
+function Base.show(io::IO, x::ModelPair)
+    print(io, "ModelPair:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelPair)
     println(io, "ModelPair:")
@@ -1285,6 +1494,17 @@ function hfield(model::NamedModel, name::Symbol)
     index = index_by_name(model, :hfield, name)
     return ModelHfield(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelHfield)
+    print(io, "ModelHfield:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelHfield)
     println(io, "ModelHfield:")
     max_spaces = mapreduce((x->begin
@@ -1331,6 +1551,17 @@ end
 function light(model::NamedModel, name::Symbol)
     index = index_by_name(model, :light, name)
     return ModelLight(getfield(model, :model), index)
+end
+function Base.show(io::IO, x::ModelLight)
+    print(io, "ModelLight:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelLight)
     println(io, "ModelLight:")
@@ -1392,6 +1623,17 @@ function cam(model::NamedModel, name::Symbol)
     index = index_by_name(model, :cam, name)
     return ModelCamera(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelCamera)
+    print(io, "ModelCamera:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelCamera)
     println(io, "ModelCamera:")
     max_spaces = mapreduce((x->begin
@@ -1452,6 +1694,17 @@ function tuple(model::NamedModel, name::Symbol)
     index = index_by_name(model, :tuple, name)
     return ModelTuple(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelTuple)
+    print(io, "ModelTuple:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelTuple)
     println(io, "ModelTuple:")
     max_spaces = mapreduce((x->begin
@@ -1502,6 +1755,17 @@ end
 function skin(model::NamedModel, name::Symbol)
     index = index_by_name(model, :skin, name)
     return ModelSkin(getfield(model, :model), index)
+end
+function Base.show(io::IO, x::ModelSkin)
+    print(io, "ModelSkin:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelSkin)
     println(io, "ModelSkin:")
@@ -1562,6 +1826,17 @@ function exclude(model::NamedModel, name::Symbol)
     index = index_by_name(model, :exclude, name)
     return ModelExclude(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelExclude)
+    print(io, "ModelExclude:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelExclude)
     println(io, "ModelExclude:")
     max_spaces = mapreduce((x->begin
@@ -1612,6 +1887,17 @@ function mesh(model::NamedModel, name::Symbol)
     index = index_by_name(model, :mesh, name)
     return ModelMesh(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelMesh)
+    print(io, "ModelMesh:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelMesh)
     println(io, "ModelMesh:")
     max_spaces = mapreduce((x->begin
@@ -1660,6 +1946,17 @@ end
 function body(model::NamedModel, name::Symbol)
     index = index_by_name(model, :body, name)
     return ModelBody(getfield(model, :model), index)
+end
+function Base.show(io::IO, x::ModelBody)
+    print(io, "ModelBody:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelBody)
     println(io, "ModelBody:")
@@ -1725,6 +2022,17 @@ function jnt(model::NamedModel, name::Symbol)
     index = index_by_name(model, :jnt, name)
     return ModelJoint(getfield(model, :model), index)
 end
+function Base.show(io::IO, x::ModelJoint)
+    print(io, "ModelJoint:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
+end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelJoint)
     println(io, "ModelJoint:")
     max_spaces = mapreduce((x->begin
@@ -1778,6 +2086,17 @@ end
 function tendon(model::NamedModel, name::Symbol)
     index = index_by_name(model, :tendon, name)
     return ModelTendon(getfield(model, :model), index)
+end
+function Base.show(io::IO, x::ModelTendon)
+    print(io, "ModelTendon:")
+    if hasproperty(x, :name)
+        print(io, " \"")
+        print(io, getproperty(x, :name))
+        print(io, "\"")
+    else
+        print(io, " Unnamed")
+    end
+    nothing
 end
 function Base.show(io::IO, ::MIME"text/plain", x::ModelTendon)
     println(io, "ModelTendon:")

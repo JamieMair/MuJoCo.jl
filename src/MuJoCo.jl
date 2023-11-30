@@ -51,6 +51,12 @@ include("io.jl")
 
 
 # Pretty Printing
+function Base.show(io::IO, ::MODEL_TYPES)
+    print(io, "MuJoCo Model")
+end
+function Base.show(io::IO, ::DATA_TYPES)
+    print(io, "MuJoCo Data")
+end
 function Base.show(io::IO, ::MIME"text/plain", m::MODEL_TYPES)
     nbodies = m.nbody
     njoints = m.njnt
