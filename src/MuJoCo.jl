@@ -49,6 +49,24 @@ export init_visualiser, install_visualiser, visualise!
 
 include("io.jl")
 
+
+# Pretty Printing
+function Base.show(io::IO, ::MODEL_TYPES)
+    print(io, "MuJoCo Model")
+end
+function Base.show(io::IO, ::DATA_TYPES)
+    print(io, "MuJoCo Data")
+end
+function Base.show(io::IO, ::MIME"text/plain", m::MODEL_TYPES)
+    nbodies = m.nbody
+    njoints = m.njnt
+    print(io, "MuJoCo Model with $(nbodies) bodies and $(njoints) joints")
+end
+function Base.show(io::IO, ::MIME"text/plain", d::DATA_TYPES)
+    print(io, "MuJoCo Data object")
+end
+
+
 """
     init_data(model::Model)
 

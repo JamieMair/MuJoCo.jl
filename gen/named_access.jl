@@ -244,16 +244,16 @@ end
 
 
 
-function pretty_print_show_fn(type_expr, description)
-    fn_expr = :(function Base.show(io::IO, ::MIME"text/plain", x::$(type_expr))
+function pretty_print_show_fns(type_expr, description)
+    fn_expr_long = :(function Base.show(io::IO, ::MIME"text/plain", x::$(type_expr))
         println(io, $(description))
-        max_spaces = mapreduce(x->length(string(x)), max, propertynames(x))
+        max_spaces = mapreduce(x -> length(string(x)), max, propertynames(x))
         for pname in propertynames(x)
             prop = getproperty(x, pname)
             print(io, pname)
             print(io, ":")
-            num_spaces = 2 + (max_spaces-length(string(pname)))
-            print(io, " " ^ num_spaces)
+            num_spaces = 2 + (max_spaces - length(string(pname)))
+            print(io, " "^num_spaces)
             if typeof(prop) <: AbstractArray
                 show_array(io, prop)
             else
@@ -262,7 +262,18 @@ function pretty_print_show_fn(type_expr, description)
             println(io, "")
         end
     end)
-    return fn_expr
+    fn_expr_short = :(function Base.show(io::IO, x::$(type_expr))
+        print(io, $(description))
+        if hasproperty(x, :name)
+            print(io, " \"")
+            print(io, getproperty(x, :name))
+            print(io, "\"")
+        else
+            print(io, " Unnamed")
+        end
+        nothing
+    end)
+    return fn_expr_short, fn_expr_long
 end
 
 function new_propname(fieldname)
@@ -278,7 +289,7 @@ function new_propname(fieldname)
 end
 ptr_inner_type(::Type{Ptr{T}}) where {T} = T
 
-const obj_identifier_to_mjOBJ_map = Dict{Symbol, Expr}(
+const obj_identifier_to_mjOBJ_map = Dict{Symbol,Expr}(
     :light => :(LibMuJoCo.mjOBJ_LIGHT),
     :cam => :(LibMuJoCo.mjOBJ_CAMERA),
     :camera => :(LibMuJoCo.mjOBJ_CAMERA),
@@ -321,7 +332,7 @@ end
 
 function named_access_wrappers_expr(index_xmacro_header_file_path)
     xmacros, xviewgroups, xviewgroupaltnames = parse_x_defs(index_xmacro_header_file_path)
-    
+
     available_classes = Dict(
         :Data => Wrappers.Data,
         :Model => Wrappers.Model,
@@ -390,12 +401,12 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
             for xmacro in xmacros[struct_name][collection_name]
                 propname = new_propname(xmacro.fieldname)
-                
+
                 if xmacro.numcols == xgroup.size_identifier
                     # return a view into the array
                     test_item = test_classes[struct_name]
                     inferred_return_type = typeof(getproperty(test_item, xmacro.fieldname))
-                    if inferred_return_type <: AbstractArray
+                    if inferred_return_type <: Union{Nothing, AbstractArray}
                         push!(property_names, propname)
                         get_array_expr = :($(lower_struct_name).$(xmacro.fieldname))
                         second_dims = if xmacro.numrows isa Symbol && startswith(string(xmacro.numrows), "mj")
@@ -405,7 +416,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                         else
                             Expr(:call, :(Base.OneTo), xmacro.numrows)
                         end
-                        return_expr = Expr(:return, Expr(:call, :view, get_array_expr, :(index + 1), second_dims))
+                        return_expr = Expr(:return, Expr(:if, Expr(:call, :isnothing, get_array_expr), nothing, Expr(:call, :view, get_array_expr, :(index + 1), second_dims)))
                         entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
                         push!(fn_block_exprs, entry_expr)
                     elseif inferred_return_type <: Ptr
@@ -420,7 +431,11 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                             size_arr = Int($(num_elements))
                             offset = index * size_arr * sizeof($element_type)
                             arr_pointer = Ptr{$element_type}($(lower_struct_name).$(xmacro.fieldname) + offset)
-                            UnsafeArray(arr_pointer, (size_arr,))
+                            if arr_pointer == C_NULL
+                                nothing
+                            else
+                                UnsafeArray(arr_pointer, (size_arr,))
+                            end
                         end)
                         entry_expr = :(f === $(QuoteNode(propname)) && $(return_expr))
                         push!(fn_block_exprs, entry_expr)
@@ -456,7 +471,10 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
                 return $(cstruct_name)(getfield($(lower_struct_name), $(QuoteNode(lower_struct_name))), index)
             end))
 
-            push!(exprs, pretty_print_show_fn(cstruct_name, "$cstruct_name:"))
+            pp_short_fn, pp_long_fn = pretty_print_show_fns(cstruct_name, "$cstruct_name:")
+
+            push!(exprs, pp_short_fn)
+            push!(exprs, pp_long_fn)
 
             # Finish creating the getproperty function
 
@@ -524,7 +542,7 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
 
     export_expr = Expr(:export, unique(exports)...)
 
-    module_expr = Expr(:module, true, :NamedAccess, Expr(:block, 
+    module_expr = Expr(:module, true, :NamedAccess, Expr(:block,
         :(import ..LibMuJoCo),
         :(import ..Utils: show_array),
         :(using UnsafeArrays),
