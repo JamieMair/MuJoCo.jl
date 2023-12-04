@@ -7,8 +7,6 @@
 
 Welcome to `MuJoCo.jl`! This package contains a Julia wrapper for  DeepMind's general-purpose physics engine [MuJoCo](https://github.com/google-deepmind/mujoco), allowing users to simulate robotic systems, their controllers, and their interactions with surrounding environments, all in native Julia. Please visit our [docs page](https://jamiemair.github.io/MuJoCo.jl/dev/) for more information.
 
-`MuJoCo.jl` is currently under development. While the core functionality is very much usable at this time, some of the API may change from week-to-week. There will likely be some bugs and issues that are currently being worked on. All of our development is done in public, and you can check out the current status by going through the [Issues](https://github.com/JamieMair/MuJoCo.jl/issues) page.
-
 ## Installation
 
 To install `MuJoCo.jl`, run the following code in a Julia REPL:
