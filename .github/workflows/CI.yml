@@ -57,10 +57,8 @@ jobs:
           julia --project=. -e "using Pkg; Pkg.instantiate()"
       - name: Configure doc environment
         run: |
-          julia --project=docs -e "using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()"
+          julia --project=docs/ -e "using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()"
       - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-docdeploy@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-          julia --project=docs -e "using Documenter: DocMeta, doctest; using MuJoCo; DocMeta.setdocmeta!(MuJoCo, :DocTestSetup, :(using MuJoCo); recursive=true); doctest(MuJoCo)"
+          julia --project=docs/ -e "using Documenter: DocMeta, doctest; using MuJoCo; DocMeta.setdocmeta!(MuJoCo, :DocTestSetup, :(using MuJoCo); recursive=true); doctest(MuJoCo)"
+
