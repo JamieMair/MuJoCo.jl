@@ -1,7 +1,7 @@
 name = "MuJoCo"
 uuid = "1c101251-5e0f-4746-b44c-0728d433b68a"
 authors = ["Jamie Mair <JamieMair@users.noreply.github.com>", "Nicholas Barbara <nic-barbara@users.noreply.github.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
