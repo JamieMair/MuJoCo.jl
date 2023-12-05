@@ -10,10 +10,7 @@ makedocs(;
     authors="Jamie Mair <JamieMair@users.noreply.github.com>, Nicholas Barbara <nic-barbara@users.noreply.github.com>",
     sitename="MuJoCo.jl",
     format=Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://JamieMair.github.io/MuJoCo.jl",
-        repolink="https://github.com/JamieMair/MuJoCo.jl/blob/{commit}{path}#{line}",
-        edit_link="main",
+        prettyurls=haskey(ENV, "CI"),
         size_threshold=typemax(Int),
         assets=String[],
     ),
@@ -39,7 +36,4 @@ makedocs(;
     warnonly=true
 )
 
-deploydocs(;
-    repo="github.com/JamieMair/MuJoCo.jl",
-    devbranch="main",
-)
+deploydocs(; repo="github.com/JamieMair/MuJoCo.jl")
