@@ -436,7 +436,7 @@ end
 function create_wrapped_docstring(fn_name, fn_body, argument_infos)
     # original_fn = getproperty(LibMuJoCo, Symbol(fn_name))
     original_documentation = string(eval(:(@doc LibMuJoCo.$(Symbol(fn_name)))))
-
+    
     io = IOBuffer()
 
     write(io, "\"\"\"\n")
@@ -447,7 +447,9 @@ function create_wrapped_docstring(fn_name, fn_body, argument_infos)
     write(io, join(map(x->x.identifier, argument_infos), ", "))
     write(io, ")\n\n")
 
-    println(io, original_documentation)
+    for line in split(original_documentation, "\n")[5:end]
+        println(io, line)
+    end
 
     write_argument_doc_description!(io, argument_infos)
 

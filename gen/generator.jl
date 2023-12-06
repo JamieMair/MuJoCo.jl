@@ -225,7 +225,12 @@ function write_content_files(destination_dir, module_content)
             fn_sig = def.args[1]
             fn_name = string(fn_sig.args[1])
             if haskey(function_mapping, fn_name)
-                documented_fn = Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), function_mapping[fn_name].doc, def)
+                doc_description = function_mapping[fn_name].doc
+                arg_list = join(string.(fn_sig.args[2:end]), ", ")
+                new_docs = """\t$(fn_name)($(arg_list))
+
+                $(doc_description)"""
+                documented_fn = Expr(:macrocall, :(Core.var"@doc"), LineNumberNode(1), new_docs, def)
                 push!(function_block_args, documented_fn) 
             else
                 push!(function_block_args, def)
