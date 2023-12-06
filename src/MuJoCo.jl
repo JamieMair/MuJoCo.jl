@@ -37,6 +37,12 @@ include("function_constraints.jl")
 # Rexport Model and Data
 export Model, Data
 
+# Re-document Model and Data
+@doc (@doc LibMuJoCo.mjModel) Model
+@doc (@doc LibMuJoCo.mjData) Data
+@doc (@doc LibMuJoCo.mjStatistic) Statistics
+@doc (@doc LibMuJoCo.mjOption) Options
+
 include("visualiser.jl")
 
 const MODEL_TYPES = Union{Model, NamedAccess.NamedModel}

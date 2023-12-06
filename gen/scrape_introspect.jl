@@ -105,8 +105,7 @@ function construct_struct_docs(expr)
             if f isa StructFieldDecl
                 if !isempty(f.doc)
                     ndocs += 1
-                    println(io, "## $(f.name)")
-                    println(io, f.doc)
+                    println(io, "  - **`$(f.name)`**: $(f.doc)")
                 end 
             end
         end
