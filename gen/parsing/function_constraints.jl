@@ -394,27 +394,27 @@ end
 
 function argument_doc_description(arg_info)
     if arg_info.type == :basic
-        return "- $(arg_info.identifier)::$(arg_info.datatype)"
+        return "- **`$(arg_info.identifier)::$(arg_info.datatype)`**"
     elseif arg_info.type == :string
-        return "- $(arg_info.identifier)::String" * (arg_info.is_const ? " -> Constant." : "")
+        return "- **`$(arg_info.identifier)::String`**" * (arg_info.is_const ? " -> Constant." : "")
     elseif arg_info.type == :mjModel
-        return "- $(arg_info.identifier)::Model" * (arg_info.is_const ? " -> Constant." : "")
+        return "- **`$(arg_info.identifier)::Model`**" * (arg_info.is_const ? " -> Constant." : "")
     elseif arg_info.type == :mjData
-        return "- $(arg_info.identifier)::Data" * (arg_info.is_const ? " -> Constant." : "")
+        return "- **`$(arg_info.identifier)::Data`**" * (arg_info.is_const ? " -> Constant." : "")
     elseif arg_info.type == :anomalous_vector
         opt = arg_info.is_optional ? "An optional" : "A"
         if arg_info.is_dynamic_size
-            return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+            return "- **`$(arg_info.identifier)::Vector{$(arg_info.datatype)}`** -> $opt vector of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
         else
-            return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of size $(arg_info.size_vector)." * (arg_info.is_inner_const ? " Constant." : "")
+            return "- **`$(arg_info.identifier)::Vector{$(arg_info.datatype)}`** -> $opt vector of size $(arg_info.size_vector)." * (arg_info.is_inner_const ? " Constant." : "")
         end
     elseif arg_info.type == :variable_vector
         opt = arg_info.is_optional ? "An optional" : "A"
-        return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> $opt vector of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+        return "- **`$(arg_info.identifier)::Vector{$(arg_info.datatype)}`** -> $opt vector of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
     elseif arg_info.type == :static_array
-        return "- $(arg_info.identifier)::Vector{$(arg_info.datatype)} -> A vector of size $(arg_info.array_size)." * (arg_info.is_const ? " Constant." : "")
+        return "- **`$(arg_info.identifier)::Vector{$(arg_info.datatype)}`** -> A vector of size $(arg_info.array_size)." * (arg_info.is_const ? " Constant." : "")
     elseif arg_info.type == :matrix
-        return "- $(arg_info.identifier)::Matrix{$(arg_info.datatype)} -> A matrix variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+        return "- **`$(arg_info.identifier)::Matrix{$(arg_info.datatype)}`** -> A matrix variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
     else
         error("Unrecognised argument info for variable $(arg_info)")
     end
