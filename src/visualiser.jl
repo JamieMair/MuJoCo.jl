@@ -41,7 +41,7 @@ end
 function test_visualiser end
 
 """
-    visualise!(m::Model, d::Data; controller=nothing)
+    visualise!(m::Model, d::Data; controller=nothing, trajectories = nothing)
 
 Starts an interactive visualization of a MuJoCo model specified by an instance of `Model` and `Data`.
 
