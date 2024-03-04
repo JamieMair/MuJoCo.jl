@@ -38,14 +38,26 @@ function load_model(path::AbstractString, type::Symbol)
         throw(ArgumentError("Supplied model path could not be found. Path: $path"))
     end
 
+    absolute_path = abspath(path)
+
+
     !(type in (:MJCF, :MJB)) && error("The file type must be either MJCF or MJB.")
     mpointer = if type == :MJCF
-        error_msg = "Could not load XML model from $path"
-        LibMuJoCo.mj_loadXML(path, Ptr{Cvoid}(), error_msg, length(error_msg))
+        nbytes = 1000;
+        error_buffer = zeros(UInt8, nbytes);
+        mpointer = C_NULL
+        GC.@preserve error_buffer begin 
+            mpointer = LibMuJoCo.mj_loadXML(absolute_path, C_NULL, pointer(error_buffer), length(error_buffer))
+            if mpointer == C_NULL
+                error_str = unsafe_string(pointer(error_buffer))
+                error(error_str)
+            end
+        end
+        error_buffer = nothing # make sure the error_buffer is marked as unused
+        mpointer
     elseif type == :MJB
-        error_msg = "Could not load MJB model from $path"
-        mpointer = LibMuJoCo.mj_loadModel(path, Ptr{Cvoid}())
-        mpointer == C_NULL && error(error_msg)
+        mpointer = LibMuJoCo.mj_loadModel(absolute_path, C_NULL)
+        mpointer == C_NULL && error("Could not load MJB model from $absolute_path")
         mpointer
     end
 
