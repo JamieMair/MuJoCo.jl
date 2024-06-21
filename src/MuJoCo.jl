@@ -55,7 +55,11 @@ Model.nq: number of generalized coordinates = dim(qpos)
 julia> show_docs(data, :qvel)
 Data.qvel: velocity (nv x 1)
 ```
-""" show_docs 
+""" show_docs
+
+function show_docs(x::Any, property_name::Symbol)
+    throw(ArgumentError("`show_docs` is not defined for $(typeof(x))."))
+end
 
 # Function wrappers
 include("function_constraints.jl")
