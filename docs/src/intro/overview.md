@@ -65,3 +65,5 @@ The `mj_` functions that have been wrapped are the defaults and can be found in 
 
 3. When writing code, keep a REPL open with a sample `data` and `model` object (such as generated in the above examples), and use tab-completition (double tap `tab`) to see what information is available. Check the [MuJoCo docs](https://mujoco.readthedocs.io/en/stable/overview.html) or the [LibMuJoCo Index](@ref) to read the documentation for the parameters.
 
+4. Read documentation for the field names of the objects using the [`show_docs`](@ref) function, e.g. type `show_docs(model, :nv)` or `show_docs(Model, :nv)` in the REPL to get a print out of the docs for that field.
+
