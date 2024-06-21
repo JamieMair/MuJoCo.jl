@@ -114,6 +114,4 @@ function construct_struct_docs(expr)
     else
         return expr
     end
-
-
 end

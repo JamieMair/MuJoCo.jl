@@ -246,7 +246,6 @@ end
 
 function build_struct_wrapper(struct_name::Symbol, new_name::Symbol, all_wrappers::Dict{Symbol,Symbol}, parsed_macro_info_dict)
     mj_struct = Base.getglobal(LibMuJoCo, struct_name)
-    field_info_dict = nothing
     extra_deps, match_macroinfo = if !haskey(parsed_macro_info_dict, struct_name)
         (), nothing # empty tuple
     else
@@ -298,6 +297,26 @@ function insert_regular_gc_ctor!(expr, info::MutableStructInfo)
     return expr
 end
 
+function generate_struct_field_docs_helpers(mj_name, wrapped_name)
+    exprs = Expr[]
+    fields = struct_mapping[string(mj_name)].fields
+    fn_sig = Expr(:call, :show_docs, Expr(:(::), Expr(:curly, :Type, wrapped_name)), :(property_name::Symbol))
+    fn_body = Expr[]
+    for field in fields
+        doc_str = replace("$(string(wrapped_name)).$(field.name): $(field.doc)", r"\s+"=>" ")
+        field_expr = Expr(:(&&), Expr(:call, :(===), :property_name, QuoteNode(Symbol(field.name))), Expr(:return, Expr(:call, :println, doc_str)))
+        push!(fn_body, field_expr)
+    end
+    push!(fn_body, Expr(:call, :throw, Expr(:call, :ArgumentError, Expr(:string, "The property ", :property_name, " is not defined for $wrapped_name ($mj_name)."))))
+    fn = Expr(:function, fn_sig, Expr(:block, fn_body...))
+    push!(exprs, fn)
+    alt_signature = Expr(:call, :show_docs, Expr(:(::), :x, wrapped_name), :(property_name::Symbol))
+    alt_fn = Expr(:function, alt_signature, Expr(:block, Expr(:return, Expr(:call, :show_docs, :(typeof(x)), :property_name))))
+    push!(exprs, alt_fn)
+
+    return exprs
+end
+
 function create_basic_wrappers()
     parsed_macro_info = parse_macro_file(macro_file)
 
@@ -319,6 +338,12 @@ function create_basic_wrappers()
         push!(other_exprs, fe)
         push!(other_exprs, spfn)
         push!(other_exprs, ac)
+
+        # Documentation functions
+        doc_fns = generate_struct_field_docs_helpers(k, v)
+        for doc_fn in doc_fns
+            push!(other_exprs, doc_fn)
+        end
     end
 
     mutable_struct_info = Dict{Symbol,MutableStructInfo}(
