@@ -61,7 +61,7 @@ function default_buttoncb(e::Engine, s::WindowState, ev::ButtonEvent)
 
         # find the selected body
         selpnt = zeros(MVector{3,Float64})
-        selgeom, selskin = Ref(Cint(0)), Ref(Cint(0))
+        selgeom, selflexid, selskin = Ref(Cint(0)), Ref(Cint(0)), Ref(Cint(0))
         selbody = LibMuJoCo.mjv_select(
             m,
             d,
@@ -72,6 +72,7 @@ function default_buttoncb(e::Engine, s::WindowState, ev::ButtonEvent)
             ui.scn,
             selpnt,
             selgeom,
+            selflexid,
             selskin,
         )
 
