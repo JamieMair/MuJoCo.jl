@@ -33,7 +33,7 @@ mutable struct Data
     end
 end
 function Base.propertynames(x::Options)
-    (:timestep, :apirate, :impratio, :tolerance, :noslip_tolerance, :mpr_tolerance, :gravity, :wind, :magnetic, :density, :viscosity, :o_margin, :o_solref, :o_solimp, :integrator, :collision, :cone, :jacobian, :solver, :iterations, :noslip_iterations, :mpr_iterations, :disableflags, :enableflags)
+    (:timestep, :apirate, :impratio, :tolerance, :ls_tolerance, :noslip_tolerance, :mpr_tolerance, :gravity, :wind, :magnetic, :density, :viscosity, :o_margin, :o_solref, :o_solimp, :o_friction, :integrator, :cone, :jacobian, :solver, :iterations, :ls_iterations, :noslip_iterations, :mpr_iterations, :disableflags, :enableflags, :disableactuator, :sdf_initpoints, :sdf_iterations)
 end
 function Base.getproperty(x::Options, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
@@ -42,26 +42,31 @@ function Base.getproperty(x::Options, f::Symbol)
     f === :apirate && return unsafe_load(Ptr{Float64}(internal_pointer + 8))
     f === :impratio && return unsafe_load(Ptr{Float64}(internal_pointer + 16))
     f === :tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 24))
-    f === :noslip_tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 32))
-    f === :mpr_tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 40))
-    f === :gravity && return UnsafeArray(Ptr{Float64}(internal_pointer + 48), (3,))
-    f === :wind && return UnsafeArray(Ptr{Float64}(internal_pointer + 72), (3,))
-    f === :magnetic && return UnsafeArray(Ptr{Float64}(internal_pointer + 96), (3,))
-    f === :density && return unsafe_load(Ptr{Float64}(internal_pointer + 120))
-    f === :viscosity && return unsafe_load(Ptr{Float64}(internal_pointer + 128))
-    f === :o_margin && return unsafe_load(Ptr{Float64}(internal_pointer + 136))
-    f === :o_solref && return UnsafeArray(Ptr{Float64}(internal_pointer + 144), (2,))
-    f === :o_solimp && return UnsafeArray(Ptr{Float64}(internal_pointer + 160), (5,))
-    f === :integrator && return unsafe_load(Ptr{Int32}(internal_pointer + 200))
-    f === :collision && return unsafe_load(Ptr{Int32}(internal_pointer + 204))
-    f === :cone && return unsafe_load(Ptr{Int32}(internal_pointer + 208))
-    f === :jacobian && return unsafe_load(Ptr{Int32}(internal_pointer + 212))
-    f === :solver && return unsafe_load(Ptr{Int32}(internal_pointer + 216))
-    f === :iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 220))
-    f === :noslip_iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 224))
-    f === :mpr_iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 228))
-    f === :disableflags && return unsafe_load(Ptr{Int32}(internal_pointer + 232))
-    f === :enableflags && return unsafe_load(Ptr{Int32}(internal_pointer + 236))
+    f === :ls_tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 32))
+    f === :noslip_tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 40))
+    f === :mpr_tolerance && return unsafe_load(Ptr{Float64}(internal_pointer + 48))
+    f === :gravity && return UnsafeArray(Ptr{Float64}(internal_pointer + 56), (3,))
+    f === :wind && return UnsafeArray(Ptr{Float64}(internal_pointer + 80), (3,))
+    f === :magnetic && return UnsafeArray(Ptr{Float64}(internal_pointer + 104), (3,))
+    f === :density && return unsafe_load(Ptr{Float64}(internal_pointer + 128))
+    f === :viscosity && return unsafe_load(Ptr{Float64}(internal_pointer + 136))
+    f === :o_margin && return unsafe_load(Ptr{Float64}(internal_pointer + 144))
+    f === :o_solref && return UnsafeArray(Ptr{Float64}(internal_pointer + 152), (2,))
+    f === :o_solimp && return UnsafeArray(Ptr{Float64}(internal_pointer + 168), (5,))
+    f === :o_friction && return UnsafeArray(Ptr{Float64}(internal_pointer + 208), (5,))
+    f === :integrator && return unsafe_load(Ptr{Int32}(internal_pointer + 248))
+    f === :cone && return unsafe_load(Ptr{Int32}(internal_pointer + 252))
+    f === :jacobian && return unsafe_load(Ptr{Int32}(internal_pointer + 256))
+    f === :solver && return unsafe_load(Ptr{Int32}(internal_pointer + 260))
+    f === :iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 264))
+    f === :ls_iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 268))
+    f === :noslip_iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 272))
+    f === :mpr_iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 276))
+    f === :disableflags && return unsafe_load(Ptr{Int32}(internal_pointer + 280))
+    f === :enableflags && return unsafe_load(Ptr{Int32}(internal_pointer + 284))
+    f === :disableactuator && return unsafe_load(Ptr{Int32}(internal_pointer + 288))
+    f === :sdf_initpoints && return unsafe_load(Ptr{Int32}(internal_pointer + 292))
+    f === :sdf_iterations && return unsafe_load(Ptr{Int32}(internal_pointer + 296))
     error("Could not find property $(f)")
 end
 function Base.setproperty!(x::Options, f::Symbol, value)
@@ -87,88 +92,143 @@ function Base.setproperty!(x::Options, f::Symbol, value)
         unsafe_store!(Ptr{Float64}(internal_pointer + 24), cvalue)
         return cvalue
     end
-    if f === :noslip_tolerance
+    if f === :ls_tolerance
         cvalue = convert(Float64, value)
         unsafe_store!(Ptr{Float64}(internal_pointer + 32), cvalue)
         return cvalue
     end
-    if f === :mpr_tolerance
+    if f === :noslip_tolerance
         cvalue = convert(Float64, value)
         unsafe_store!(Ptr{Float64}(internal_pointer + 40), cvalue)
         return cvalue
     end
-    if f === :density
+    if f === :mpr_tolerance
         cvalue = convert(Float64, value)
         unsafe_store!(Ptr{Float64}(internal_pointer + 48), cvalue)
         return cvalue
     end
-    if f === :viscosity
+    if f === :density
         cvalue = convert(Float64, value)
         unsafe_store!(Ptr{Float64}(internal_pointer + 56), cvalue)
         return cvalue
     end
-    if f === :o_margin
+    if f === :viscosity
         cvalue = convert(Float64, value)
         unsafe_store!(Ptr{Float64}(internal_pointer + 64), cvalue)
         return cvalue
     end
+    if f === :o_margin
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 72), cvalue)
+        return cvalue
+    end
     if f === :integrator
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 72), cvalue)
-        return cvalue
-    end
-    if f === :collision
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 76), cvalue)
-        return cvalue
-    end
-    if f === :cone
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 80), cvalue)
         return cvalue
     end
-    if f === :jacobian
+    if f === :cone
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
         return cvalue
     end
-    if f === :solver
+    if f === :jacobian
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
         return cvalue
     end
-    if f === :iterations
+    if f === :solver
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 92), cvalue)
         return cvalue
     end
-    if f === :noslip_iterations
+    if f === :iterations
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 96), cvalue)
         return cvalue
     end
-    if f === :mpr_iterations
+    if f === :ls_iterations
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 100), cvalue)
         return cvalue
     end
-    if f === :disableflags
+    if f === :noslip_iterations
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 104), cvalue)
         return cvalue
     end
-    if f === :enableflags
+    if f === :mpr_iterations
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 108), cvalue)
         return cvalue
     end
-    if f in (:gravity, :wind, :magnetic, :o_solref, :o_solimp)
+    if f === :disableflags
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 112), cvalue)
+        return cvalue
+    end
+    if f === :enableflags
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 116), cvalue)
+        return cvalue
+    end
+    if f === :disableactuator
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 120), cvalue)
+        return cvalue
+    end
+    if f === :sdf_initpoints
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 124), cvalue)
+        return cvalue
+    end
+    if f === :sdf_iterations
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 128), cvalue)
+        return cvalue
+    end
+    if f in (:gravity, :wind, :magnetic, :o_solref, :o_solimp, :o_friction)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
     error("Could not find property $(f) to set.")
 end
 function Base.cconvert(::Type{Ptr{mjOption}}, wrapper::Options)
     return wrapper.internal_pointer
+end
+function show_docs(::Type{Options}, property_name::Symbol)
+    property_name === :timestep && return println("Options.timestep: timestep")
+    property_name === :apirate && return println("Options.apirate: update rate for remote API (Hz)")
+    property_name === :impratio && return println("Options.impratio: ratio of friction-to-normal contact impedance")
+    property_name === :tolerance && return println("Options.tolerance: main solver tolerance")
+    property_name === :ls_tolerance && return println("Options.ls_tolerance: CG/Newton linesearch tolerance")
+    property_name === :noslip_tolerance && return println("Options.noslip_tolerance: noslip solver tolerance")
+    property_name === :mpr_tolerance && return println("Options.mpr_tolerance: MPR solver tolerance")
+    property_name === :gravity && return println("Options.gravity: gravitational acceleration")
+    property_name === :wind && return println("Options.wind: wind (for lift, drag and viscosity)")
+    property_name === :magnetic && return println("Options.magnetic: global magnetic flux")
+    property_name === :density && return println("Options.density: density of medium")
+    property_name === :viscosity && return println("Options.viscosity: viscosity of medium")
+    property_name === :o_margin && return println("Options.o_margin: margin")
+    property_name === :o_solref && return println("Options.o_solref: solref")
+    property_name === :o_solimp && return println("Options.o_solimp: solimp")
+    property_name === :o_friction && return println("Options.o_friction: friction")
+    property_name === :integrator && return println("Options.integrator: integration mode (mjtIntegrator)")
+    property_name === :cone && return println("Options.cone: type of friction cone (mjtCone)")
+    property_name === :jacobian && return println("Options.jacobian: type of Jacobian (mjtJacobian)")
+    property_name === :solver && return println("Options.solver: solver algorithm (mjtSolver)")
+    property_name === :iterations && return println("Options.iterations: maximum number of main solver iterations")
+    property_name === :ls_iterations && return println("Options.ls_iterations: maximum number of CG/Newton linesearch iterations")
+    property_name === :noslip_iterations && return println("Options.noslip_iterations: maximum number of noslip solver iterations")
+    property_name === :mpr_iterations && return println("Options.mpr_iterations: maximum number of MPR solver iterations")
+    property_name === :disableflags && return println("Options.disableflags: bit flags for disabling standard features")
+    property_name === :enableflags && return println("Options.enableflags: bit flags for enabling optional features")
+    property_name === :disableactuator && return println("Options.disableactuator: bit flags for disabling actuators by group id")
+    property_name === :sdf_initpoints && return println("Options.sdf_initpoints: number of starting points for gradient descent")
+    property_name === :sdf_iterations && return println("Options.sdf_iterations: max number of iterations for gradient descent")
+    throw(ArgumentError("The property $(property_name) is not defined for Options (mjOption)."))
+end
+function show_docs(x::Options, property_name::Symbol)
+    return show_docs(typeof(x), property_name)
 end
 function Base.propertynames(x::Statistics)
     (:meaninertia, :meanmass, :meansize, :extent, :center)
@@ -214,8 +274,19 @@ end
 function Base.cconvert(::Type{Ptr{mjStatistic}}, wrapper::Statistics)
     return wrapper.internal_pointer
 end
+function show_docs(::Type{Statistics}, property_name::Symbol)
+    property_name === :meaninertia && return println("Statistics.meaninertia: mean diagonal inertia")
+    property_name === :meanmass && return println("Statistics.meanmass: mean body mass")
+    property_name === :meansize && return println("Statistics.meansize: mean body size")
+    property_name === :extent && return println("Statistics.extent: spatial extent")
+    property_name === :center && return println("Statistics.center: center of model")
+    throw(ArgumentError("The property $(property_name) is not defined for Statistics (mjStatistic)."))
+end
+function show_docs(x::Statistics, property_name::Symbol)
+    return show_docs(typeof(x), property_name)
+end
 function Base.propertynames(x::Model)
-    (:nq, :nv, :nu, :na, :nbody, :nbvh, :njnt, :ngeom, :nsite, :ncam, :nlight, :nmesh, :nmeshvert, :nmeshnormal, :nmeshtexcoord, :nmeshface, :nmeshgraph, :nskin, :nskinvert, :nskintexvert, :nskinface, :nskinbone, :nskinbonevert, :nhfield, :nhfielddata, :ntex, :ntexdata, :nmat, :npair, :nexclude, :neq, :ntendon, :nwrap, :nsensor, :nnumeric, :nnumericdata, :ntext, :ntextdata, :ntuple, :ntupledata, :nkey, :nmocap, :nplugin, :npluginattr, :nuser_body, :nuser_jnt, :nuser_geom, :nuser_site, :nuser_cam, :nuser_tendon, :nuser_actuator, :nuser_sensor, :nnames, :nnames_map, :nM, :nD, :nB, :nemax, :njmax, :nconmax, :nstack, :nuserdata, :nsensordata, :npluginstate, :nbuffer, :opt, :vis, :stat, :buffer, :qpos0, :qpos_spring, :body_parentid, :body_rootid, :body_weldid, :body_mocapid, :body_jntnum, :body_jntadr, :body_dofnum, :body_dofadr, :body_geomnum, :body_geomadr, :body_simple, :body_sameframe, :body_pos, :body_quat, :body_ipos, :body_iquat, :body_mass, :body_subtreemass, :body_inertia, :body_invweight0, :body_gravcomp, :body_user, :body_plugin, :body_bvhadr, :body_bvhnum, :bvh_depth, :bvh_child, :bvh_geomid, :bvh_aabb, :jnt_type, :jnt_qposadr, :jnt_dofadr, :jnt_bodyid, :jnt_group, :jnt_limited, :jnt_actfrclimited, :jnt_solref, :jnt_solimp, :jnt_pos, :jnt_axis, :jnt_stiffness, :jnt_range, :jnt_actfrcrange, :jnt_margin, :jnt_user, :dof_bodyid, :dof_jntid, :dof_parentid, :dof_Madr, :dof_simplenum, :dof_solref, :dof_solimp, :dof_frictionloss, :dof_armature, :dof_damping, :dof_invweight0, :dof_M0, :geom_type, :geom_contype, :geom_conaffinity, :geom_condim, :geom_bodyid, :geom_dataid, :geom_matid, :geom_group, :geom_priority, :geom_sameframe, :geom_solmix, :geom_solref, :geom_solimp, :geom_size, :geom_aabb, :geom_rbound, :geom_pos, :geom_quat, :geom_friction, :geom_margin, :geom_gap, :geom_fluid, :geom_user, :geom_rgba, :site_type, :site_bodyid, :site_matid, :site_group, :site_sameframe, :site_size, :site_pos, :site_quat, :site_user, :site_rgba, :cam_mode, :cam_bodyid, :cam_targetbodyid, :cam_pos, :cam_quat, :cam_poscom0, :cam_pos0, :cam_mat0, :cam_fovy, :cam_ipd, :cam_user, :light_mode, :light_bodyid, :light_targetbodyid, :light_directional, :light_castshadow, :light_active, :light_pos, :light_dir, :light_poscom0, :light_pos0, :light_dir0, :light_attenuation, :light_cutoff, :light_exponent, :light_ambient, :light_diffuse, :light_specular, :mesh_vertadr, :mesh_vertnum, :mesh_faceadr, :mesh_facenum, :mesh_bvhadr, :mesh_bvhnum, :mesh_normaladr, :mesh_normalnum, :mesh_texcoordadr, :mesh_texcoordnum, :mesh_graphadr, :mesh_vert, :mesh_normal, :mesh_texcoord, :mesh_face, :mesh_facenormal, :mesh_facetexcoord, :mesh_graph, :skin_matid, :skin_group, :skin_rgba, :skin_inflate, :skin_vertadr, :skin_vertnum, :skin_texcoordadr, :skin_faceadr, :skin_facenum, :skin_boneadr, :skin_bonenum, :skin_vert, :skin_texcoord, :skin_face, :skin_bonevertadr, :skin_bonevertnum, :skin_bonebindpos, :skin_bonebindquat, :skin_bonebodyid, :skin_bonevertid, :skin_bonevertweight, :hfield_size, :hfield_nrow, :hfield_ncol, :hfield_adr, :hfield_data, :tex_type, :tex_height, :tex_width, :tex_adr, :tex_rgb, :mat_texid, :mat_texuniform, :mat_texrepeat, :mat_emission, :mat_specular, :mat_shininess, :mat_reflectance, :mat_rgba, :pair_dim, :pair_geom1, :pair_geom2, :pair_signature, :pair_solref, :pair_solreffriction, :pair_solimp, :pair_margin, :pair_gap, :pair_friction, :exclude_signature, :eq_type, :eq_obj1id, :eq_obj2id, :eq_active, :eq_solref, :eq_solimp, :eq_data, :tendon_adr, :tendon_num, :tendon_matid, :tendon_group, :tendon_limited, :tendon_width, :tendon_solref_lim, :tendon_solimp_lim, :tendon_solref_fri, :tendon_solimp_fri, :tendon_range, :tendon_margin, :tendon_stiffness, :tendon_damping, :tendon_frictionloss, :tendon_lengthspring, :tendon_length0, :tendon_invweight0, :tendon_user, :tendon_rgba, :wrap_type, :wrap_objid, :wrap_prm, :actuator_trntype, :actuator_dyntype, :actuator_gaintype, :actuator_biastype, :actuator_trnid, :actuator_actadr, :actuator_actnum, :actuator_group, :actuator_ctrllimited, :actuator_forcelimited, :actuator_actlimited, :actuator_dynprm, :actuator_gainprm, :actuator_biasprm, :actuator_ctrlrange, :actuator_forcerange, :actuator_actrange, :actuator_gear, :actuator_cranklength, :actuator_acc0, :actuator_length0, :actuator_lengthrange, :actuator_user, :actuator_plugin, :sensor_type, :sensor_datatype, :sensor_needstage, :sensor_objtype, :sensor_objid, :sensor_reftype, :sensor_refid, :sensor_dim, :sensor_adr, :sensor_cutoff, :sensor_noise, :sensor_user, :sensor_plugin, :plugin, :plugin_stateadr, :plugin_statenum, :plugin_attr, :plugin_attradr, :numeric_adr, :numeric_size, :numeric_data, :text_adr, :text_size, :text_data, :tuple_adr, :tuple_size, :tuple_objtype, :tuple_objid, :tuple_objprm, :key_time, :key_qpos, :key_qvel, :key_act, :key_mpos, :key_mquat, :key_ctrl, :name_bodyadr, :name_jntadr, :name_geomadr, :name_siteadr, :name_camadr, :name_lightadr, :name_meshadr, :name_skinadr, :name_hfieldadr, :name_texadr, :name_matadr, :name_pairadr, :name_excludeadr, :name_eqadr, :name_tendonadr, :name_actuatoradr, :name_sensoradr, :name_numericadr, :name_textadr, :name_tupleadr, :name_keyadr, :name_pluginadr, :names, :names_map)
+    (:nq, :nv, :nu, :na, :nbody, :nbvh, :nbvhstatic, :nbvhdynamic, :njnt, :ngeom, :nsite, :ncam, :nlight, :nflex, :nflexvert, :nflexedge, :nflexelem, :nflexelemdata, :nflexshelldata, :nflexevpair, :nflextexcoord, :nmesh, :nmeshvert, :nmeshnormal, :nmeshtexcoord, :nmeshface, :nmeshgraph, :nskin, :nskinvert, :nskintexvert, :nskinface, :nskinbone, :nskinbonevert, :nhfield, :nhfielddata, :ntex, :ntexdata, :nmat, :npair, :nexclude, :neq, :ntendon, :nwrap, :nsensor, :nnumeric, :nnumericdata, :ntext, :ntextdata, :ntuple, :ntupledata, :nkey, :nmocap, :nplugin, :npluginattr, :nuser_body, :nuser_jnt, :nuser_geom, :nuser_site, :nuser_cam, :nuser_tendon, :nuser_actuator, :nuser_sensor, :nnames, :nnames_map, :npaths, :nM, :nD, :nB, :ntree, :ngravcomp, :nemax, :njmax, :nconmax, :nuserdata, :nsensordata, :npluginstate, :narena, :nbuffer, :opt, :vis, :stat, :buffer, :qpos0, :qpos_spring, :body_parentid, :body_rootid, :body_weldid, :body_mocapid, :body_jntnum, :body_jntadr, :body_dofnum, :body_dofadr, :body_treeid, :body_geomnum, :body_geomadr, :body_simple, :body_sameframe, :body_pos, :body_quat, :body_ipos, :body_iquat, :body_mass, :body_subtreemass, :body_inertia, :body_invweight0, :body_gravcomp, :body_margin, :body_user, :body_plugin, :body_contype, :body_conaffinity, :body_bvhadr, :body_bvhnum, :bvh_depth, :bvh_child, :bvh_nodeid, :bvh_aabb, :jnt_type, :jnt_qposadr, :jnt_dofadr, :jnt_bodyid, :jnt_group, :jnt_limited, :jnt_actfrclimited, :jnt_actgravcomp, :jnt_solref, :jnt_solimp, :jnt_pos, :jnt_axis, :jnt_stiffness, :jnt_range, :jnt_actfrcrange, :jnt_margin, :jnt_user, :dof_bodyid, :dof_jntid, :dof_parentid, :dof_treeid, :dof_Madr, :dof_simplenum, :dof_solref, :dof_solimp, :dof_frictionloss, :dof_armature, :dof_damping, :dof_invweight0, :dof_M0, :geom_type, :geom_contype, :geom_conaffinity, :geom_condim, :geom_bodyid, :geom_dataid, :geom_matid, :geom_group, :geom_priority, :geom_plugin, :geom_sameframe, :geom_solmix, :geom_solref, :geom_solimp, :geom_size, :geom_aabb, :geom_rbound, :geom_pos, :geom_quat, :geom_friction, :geom_margin, :geom_gap, :geom_fluid, :geom_user, :geom_rgba, :site_type, :site_bodyid, :site_matid, :site_group, :site_sameframe, :site_size, :site_pos, :site_quat, :site_user, :site_rgba, :cam_mode, :cam_bodyid, :cam_targetbodyid, :cam_pos, :cam_quat, :cam_poscom0, :cam_pos0, :cam_mat0, :cam_resolution, :cam_fovy, :cam_intrinsic, :cam_sensorsize, :cam_ipd, :cam_user, :light_mode, :light_bodyid, :light_targetbodyid, :light_directional, :light_castshadow, :light_bulbradius, :light_active, :light_pos, :light_dir, :light_poscom0, :light_pos0, :light_dir0, :light_attenuation, :light_cutoff, :light_exponent, :light_ambient, :light_diffuse, :light_specular, :flex_contype, :flex_conaffinity, :flex_condim, :flex_priority, :flex_solmix, :flex_solref, :flex_solimp, :flex_friction, :flex_margin, :flex_gap, :flex_internal, :flex_selfcollide, :flex_activelayers, :flex_dim, :flex_matid, :flex_group, :flex_vertadr, :flex_vertnum, :flex_edgeadr, :flex_edgenum, :flex_elemadr, :flex_elemnum, :flex_elemdataadr, :flex_shellnum, :flex_shelldataadr, :flex_evpairadr, :flex_evpairnum, :flex_texcoordadr, :flex_vertbodyid, :flex_edge, :flex_elem, :flex_elemlayer, :flex_shell, :flex_evpair, :flex_vert, :flex_xvert0, :flexedge_length0, :flexedge_invweight0, :flex_radius, :flex_edgestiffness, :flex_edgedamping, :flex_edgeequality, :flex_rigid, :flexedge_rigid, :flex_centered, :flex_flatskin, :flex_bvhadr, :flex_bvhnum, :flex_rgba, :flex_texcoord, :mesh_vertadr, :mesh_vertnum, :mesh_faceadr, :mesh_facenum, :mesh_bvhadr, :mesh_bvhnum, :mesh_normaladr, :mesh_normalnum, :mesh_texcoordadr, :mesh_texcoordnum, :mesh_graphadr, :mesh_vert, :mesh_normal, :mesh_texcoord, :mesh_face, :mesh_facenormal, :mesh_facetexcoord, :mesh_graph, :mesh_scale, :mesh_pos, :mesh_quat, :mesh_pathadr, :skin_matid, :skin_group, :skin_rgba, :skin_inflate, :skin_vertadr, :skin_vertnum, :skin_texcoordadr, :skin_faceadr, :skin_facenum, :skin_boneadr, :skin_bonenum, :skin_vert, :skin_texcoord, :skin_face, :skin_bonevertadr, :skin_bonevertnum, :skin_bonebindpos, :skin_bonebindquat, :skin_bonebodyid, :skin_bonevertid, :skin_bonevertweight, :skin_pathadr, :hfield_size, :hfield_nrow, :hfield_ncol, :hfield_adr, :hfield_data, :hfield_pathadr, :tex_type, :tex_height, :tex_width, :tex_adr, :tex_rgb, :tex_pathadr, :mat_texid, :mat_texuniform, :mat_texrepeat, :mat_emission, :mat_specular, :mat_shininess, :mat_reflectance, :mat_metallic, :mat_roughness, :mat_rgba, :pair_dim, :pair_geom1, :pair_geom2, :pair_signature, :pair_solref, :pair_solreffriction, :pair_solimp, :pair_margin, :pair_gap, :pair_friction, :exclude_signature, :eq_type, :eq_obj1id, :eq_obj2id, :eq_active0, :eq_solref, :eq_solimp, :eq_data, :tendon_adr, :tendon_num, :tendon_matid, :tendon_group, :tendon_limited, :tendon_width, :tendon_solref_lim, :tendon_solimp_lim, :tendon_solref_fri, :tendon_solimp_fri, :tendon_range, :tendon_margin, :tendon_stiffness, :tendon_damping, :tendon_frictionloss, :tendon_lengthspring, :tendon_length0, :tendon_invweight0, :tendon_user, :tendon_rgba, :wrap_type, :wrap_objid, :wrap_prm, :actuator_trntype, :actuator_dyntype, :actuator_gaintype, :actuator_biastype, :actuator_trnid, :actuator_actadr, :actuator_actnum, :actuator_group, :actuator_ctrllimited, :actuator_forcelimited, :actuator_actlimited, :actuator_dynprm, :actuator_gainprm, :actuator_biasprm, :actuator_actearly, :actuator_ctrlrange, :actuator_forcerange, :actuator_actrange, :actuator_gear, :actuator_cranklength, :actuator_acc0, :actuator_length0, :actuator_lengthrange, :actuator_user, :actuator_plugin, :sensor_type, :sensor_datatype, :sensor_needstage, :sensor_objtype, :sensor_objid, :sensor_reftype, :sensor_refid, :sensor_dim, :sensor_adr, :sensor_cutoff, :sensor_noise, :sensor_user, :sensor_plugin, :plugin, :plugin_stateadr, :plugin_statenum, :plugin_attr, :plugin_attradr, :numeric_adr, :numeric_size, :numeric_data, :text_adr, :text_size, :text_data, :tuple_adr, :tuple_size, :tuple_objtype, :tuple_objid, :tuple_objprm, :key_time, :key_qpos, :key_qvel, :key_act, :key_mpos, :key_mquat, :key_ctrl, :name_bodyadr, :name_jntadr, :name_geomadr, :name_siteadr, :name_camadr, :name_lightadr, :name_flexadr, :name_meshadr, :name_skinadr, :name_hfieldadr, :name_texadr, :name_matadr, :name_pairadr, :name_excludeadr, :name_eqadr, :name_tendonadr, :name_actuatoradr, :name_sensoradr, :name_numericadr, :name_textadr, :name_tupleadr, :name_keyadr, :name_pluginadr, :names, :names_map, :paths)
 end
 function Base.getproperty(x::Model, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
@@ -227,71 +298,84 @@ function Base.getproperty(x::Model, f::Symbol)
     f === :na && return unsafe_load(Ptr{Int32}(internal_pointer + 12))
     f === :nbody && return unsafe_load(Ptr{Int32}(internal_pointer + 16))
     f === :nbvh && return unsafe_load(Ptr{Int32}(internal_pointer + 20))
-    f === :njnt && return unsafe_load(Ptr{Int32}(internal_pointer + 24))
-    f === :ngeom && return unsafe_load(Ptr{Int32}(internal_pointer + 28))
-    f === :nsite && return unsafe_load(Ptr{Int32}(internal_pointer + 32))
-    f === :ncam && return unsafe_load(Ptr{Int32}(internal_pointer + 36))
-    f === :nlight && return unsafe_load(Ptr{Int32}(internal_pointer + 40))
-    f === :nmesh && return unsafe_load(Ptr{Int32}(internal_pointer + 44))
-    f === :nmeshvert && return unsafe_load(Ptr{Int32}(internal_pointer + 48))
-    f === :nmeshnormal && return unsafe_load(Ptr{Int32}(internal_pointer + 52))
-    f === :nmeshtexcoord && return unsafe_load(Ptr{Int32}(internal_pointer + 56))
-    f === :nmeshface && return unsafe_load(Ptr{Int32}(internal_pointer + 60))
-    f === :nmeshgraph && return unsafe_load(Ptr{Int32}(internal_pointer + 64))
-    f === :nskin && return unsafe_load(Ptr{Int32}(internal_pointer + 68))
-    f === :nskinvert && return unsafe_load(Ptr{Int32}(internal_pointer + 72))
-    f === :nskintexvert && return unsafe_load(Ptr{Int32}(internal_pointer + 76))
-    f === :nskinface && return unsafe_load(Ptr{Int32}(internal_pointer + 80))
-    f === :nskinbone && return unsafe_load(Ptr{Int32}(internal_pointer + 84))
-    f === :nskinbonevert && return unsafe_load(Ptr{Int32}(internal_pointer + 88))
-    f === :nhfield && return unsafe_load(Ptr{Int32}(internal_pointer + 92))
-    f === :nhfielddata && return unsafe_load(Ptr{Int32}(internal_pointer + 96))
-    f === :ntex && return unsafe_load(Ptr{Int32}(internal_pointer + 100))
-    f === :ntexdata && return unsafe_load(Ptr{Int32}(internal_pointer + 104))
-    f === :nmat && return unsafe_load(Ptr{Int32}(internal_pointer + 108))
-    f === :npair && return unsafe_load(Ptr{Int32}(internal_pointer + 112))
-    f === :nexclude && return unsafe_load(Ptr{Int32}(internal_pointer + 116))
-    f === :neq && return unsafe_load(Ptr{Int32}(internal_pointer + 120))
-    f === :ntendon && return unsafe_load(Ptr{Int32}(internal_pointer + 124))
-    f === :nwrap && return unsafe_load(Ptr{Int32}(internal_pointer + 128))
-    f === :nsensor && return unsafe_load(Ptr{Int32}(internal_pointer + 132))
-    f === :nnumeric && return unsafe_load(Ptr{Int32}(internal_pointer + 136))
-    f === :nnumericdata && return unsafe_load(Ptr{Int32}(internal_pointer + 140))
-    f === :ntext && return unsafe_load(Ptr{Int32}(internal_pointer + 144))
-    f === :ntextdata && return unsafe_load(Ptr{Int32}(internal_pointer + 148))
-    f === :ntuple && return unsafe_load(Ptr{Int32}(internal_pointer + 152))
-    f === :ntupledata && return unsafe_load(Ptr{Int32}(internal_pointer + 156))
-    f === :nkey && return unsafe_load(Ptr{Int32}(internal_pointer + 160))
-    f === :nmocap && return unsafe_load(Ptr{Int32}(internal_pointer + 164))
-    f === :nplugin && return unsafe_load(Ptr{Int32}(internal_pointer + 168))
-    f === :npluginattr && return unsafe_load(Ptr{Int32}(internal_pointer + 172))
-    f === :nuser_body && return unsafe_load(Ptr{Int32}(internal_pointer + 176))
-    f === :nuser_jnt && return unsafe_load(Ptr{Int32}(internal_pointer + 180))
-    f === :nuser_geom && return unsafe_load(Ptr{Int32}(internal_pointer + 184))
-    f === :nuser_site && return unsafe_load(Ptr{Int32}(internal_pointer + 188))
-    f === :nuser_cam && return unsafe_load(Ptr{Int32}(internal_pointer + 192))
-    f === :nuser_tendon && return unsafe_load(Ptr{Int32}(internal_pointer + 196))
-    f === :nuser_actuator && return unsafe_load(Ptr{Int32}(internal_pointer + 200))
-    f === :nuser_sensor && return unsafe_load(Ptr{Int32}(internal_pointer + 204))
-    f === :nnames && return unsafe_load(Ptr{Int32}(internal_pointer + 208))
-    f === :nnames_map && return unsafe_load(Ptr{Int32}(internal_pointer + 212))
-    f === :nM && return unsafe_load(Ptr{Int32}(internal_pointer + 216))
-    f === :nD && return unsafe_load(Ptr{Int32}(internal_pointer + 220))
-    f === :nB && return unsafe_load(Ptr{Int32}(internal_pointer + 224))
-    f === :nemax && return unsafe_load(Ptr{Int32}(internal_pointer + 228))
-    f === :njmax && return unsafe_load(Ptr{Int32}(internal_pointer + 232))
-    f === :nconmax && return unsafe_load(Ptr{Int32}(internal_pointer + 236))
-    f === :nstack && return unsafe_load(Ptr{Int32}(internal_pointer + 240))
-    f === :nuserdata && return unsafe_load(Ptr{Int32}(internal_pointer + 244))
-    f === :nsensordata && return unsafe_load(Ptr{Int32}(internal_pointer + 248))
-    f === :npluginstate && return unsafe_load(Ptr{Int32}(internal_pointer + 252))
-    f === :nbuffer && return unsafe_load(Ptr{Int32}(internal_pointer + 256))
-    f === :opt && return Options(Ptr{mjOption_}(internal_pointer + 264))
-    f === :vis && return unsafe_load(Ptr{mjVisual_}(internal_pointer + 504))
-    f === :stat && return Statistics(Ptr{mjStatistic_}(internal_pointer + 1072))
-    f === :buffer && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 1128))
+    f === :nbvhstatic && return unsafe_load(Ptr{Int32}(internal_pointer + 24))
+    f === :nbvhdynamic && return unsafe_load(Ptr{Int32}(internal_pointer + 28))
+    f === :njnt && return unsafe_load(Ptr{Int32}(internal_pointer + 32))
+    f === :ngeom && return unsafe_load(Ptr{Int32}(internal_pointer + 36))
+    f === :nsite && return unsafe_load(Ptr{Int32}(internal_pointer + 40))
+    f === :ncam && return unsafe_load(Ptr{Int32}(internal_pointer + 44))
+    f === :nlight && return unsafe_load(Ptr{Int32}(internal_pointer + 48))
+    f === :nflex && return unsafe_load(Ptr{Int32}(internal_pointer + 52))
+    f === :nflexvert && return unsafe_load(Ptr{Int32}(internal_pointer + 56))
+    f === :nflexedge && return unsafe_load(Ptr{Int32}(internal_pointer + 60))
+    f === :nflexelem && return unsafe_load(Ptr{Int32}(internal_pointer + 64))
+    f === :nflexelemdata && return unsafe_load(Ptr{Int32}(internal_pointer + 68))
+    f === :nflexshelldata && return unsafe_load(Ptr{Int32}(internal_pointer + 72))
+    f === :nflexevpair && return unsafe_load(Ptr{Int32}(internal_pointer + 76))
+    f === :nflextexcoord && return unsafe_load(Ptr{Int32}(internal_pointer + 80))
+    f === :nmesh && return unsafe_load(Ptr{Int32}(internal_pointer + 84))
+    f === :nmeshvert && return unsafe_load(Ptr{Int32}(internal_pointer + 88))
+    f === :nmeshnormal && return unsafe_load(Ptr{Int32}(internal_pointer + 92))
+    f === :nmeshtexcoord && return unsafe_load(Ptr{Int32}(internal_pointer + 96))
+    f === :nmeshface && return unsafe_load(Ptr{Int32}(internal_pointer + 100))
+    f === :nmeshgraph && return unsafe_load(Ptr{Int32}(internal_pointer + 104))
+    f === :nskin && return unsafe_load(Ptr{Int32}(internal_pointer + 108))
+    f === :nskinvert && return unsafe_load(Ptr{Int32}(internal_pointer + 112))
+    f === :nskintexvert && return unsafe_load(Ptr{Int32}(internal_pointer + 116))
+    f === :nskinface && return unsafe_load(Ptr{Int32}(internal_pointer + 120))
+    f === :nskinbone && return unsafe_load(Ptr{Int32}(internal_pointer + 124))
+    f === :nskinbonevert && return unsafe_load(Ptr{Int32}(internal_pointer + 128))
+    f === :nhfield && return unsafe_load(Ptr{Int32}(internal_pointer + 132))
+    f === :nhfielddata && return unsafe_load(Ptr{Int32}(internal_pointer + 136))
+    f === :ntex && return unsafe_load(Ptr{Int32}(internal_pointer + 140))
+    f === :ntexdata && return unsafe_load(Ptr{Int32}(internal_pointer + 144))
+    f === :nmat && return unsafe_load(Ptr{Int32}(internal_pointer + 148))
+    f === :npair && return unsafe_load(Ptr{Int32}(internal_pointer + 152))
+    f === :nexclude && return unsafe_load(Ptr{Int32}(internal_pointer + 156))
+    f === :neq && return unsafe_load(Ptr{Int32}(internal_pointer + 160))
+    f === :ntendon && return unsafe_load(Ptr{Int32}(internal_pointer + 164))
+    f === :nwrap && return unsafe_load(Ptr{Int32}(internal_pointer + 168))
+    f === :nsensor && return unsafe_load(Ptr{Int32}(internal_pointer + 172))
+    f === :nnumeric && return unsafe_load(Ptr{Int32}(internal_pointer + 176))
+    f === :nnumericdata && return unsafe_load(Ptr{Int32}(internal_pointer + 180))
+    f === :ntext && return unsafe_load(Ptr{Int32}(internal_pointer + 184))
+    f === :ntextdata && return unsafe_load(Ptr{Int32}(internal_pointer + 188))
+    f === :ntuple && return unsafe_load(Ptr{Int32}(internal_pointer + 192))
+    f === :ntupledata && return unsafe_load(Ptr{Int32}(internal_pointer + 196))
+    f === :nkey && return unsafe_load(Ptr{Int32}(internal_pointer + 200))
+    f === :nmocap && return unsafe_load(Ptr{Int32}(internal_pointer + 204))
+    f === :nplugin && return unsafe_load(Ptr{Int32}(internal_pointer + 208))
+    f === :npluginattr && return unsafe_load(Ptr{Int32}(internal_pointer + 212))
+    f === :nuser_body && return unsafe_load(Ptr{Int32}(internal_pointer + 216))
+    f === :nuser_jnt && return unsafe_load(Ptr{Int32}(internal_pointer + 220))
+    f === :nuser_geom && return unsafe_load(Ptr{Int32}(internal_pointer + 224))
+    f === :nuser_site && return unsafe_load(Ptr{Int32}(internal_pointer + 228))
+    f === :nuser_cam && return unsafe_load(Ptr{Int32}(internal_pointer + 232))
+    f === :nuser_tendon && return unsafe_load(Ptr{Int32}(internal_pointer + 236))
+    f === :nuser_actuator && return unsafe_load(Ptr{Int32}(internal_pointer + 240))
+    f === :nuser_sensor && return unsafe_load(Ptr{Int32}(internal_pointer + 244))
+    f === :nnames && return unsafe_load(Ptr{Int32}(internal_pointer + 248))
+    f === :nnames_map && return unsafe_load(Ptr{Int32}(internal_pointer + 252))
+    f === :npaths && return unsafe_load(Ptr{Int32}(internal_pointer + 256))
+    f === :nM && return unsafe_load(Ptr{Int32}(internal_pointer + 260))
+    f === :nD && return unsafe_load(Ptr{Int32}(internal_pointer + 264))
+    f === :nB && return unsafe_load(Ptr{Int32}(internal_pointer + 268))
+    f === :ntree && return unsafe_load(Ptr{Int32}(internal_pointer + 272))
+    f === :ngravcomp && return unsafe_load(Ptr{Int32}(internal_pointer + 276))
+    f === :nemax && return unsafe_load(Ptr{Int32}(internal_pointer + 280))
+    f === :njmax && return unsafe_load(Ptr{Int32}(internal_pointer + 284))
+    f === :nconmax && return unsafe_load(Ptr{Int32}(internal_pointer + 288))
+    f === :nuserdata && return unsafe_load(Ptr{Int32}(internal_pointer + 292))
+    f === :nsensordata && return unsafe_load(Ptr{Int32}(internal_pointer + 296))
+    f === :npluginstate && return unsafe_load(Ptr{Int32}(internal_pointer + 300))
+    f === :narena && return unsafe_load(Ptr{UInt64}(internal_pointer + 304))
+    f === :nbuffer && return unsafe_load(Ptr{UInt64}(internal_pointer + 312))
+    f === :opt && return Options(Ptr{mjOption_}(internal_pointer + 320))
+    f === :vis && return unsafe_load(Ptr{mjVisual_}(internal_pointer + 624))
+    f === :stat && return Statistics(Ptr{mjStatistic_}(internal_pointer + 1248))
+    f === :buffer && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 1304))
     f === :qpos0 && return if all((!=)(0), (Int(x.nq),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1136))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1312))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -301,7 +385,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :qpos_spring && return if all((!=)(0), (Int(x.nq),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1144))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1320))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -311,226 +395,6 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :body_parentid && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1152))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_rootid && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1160))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_weldid && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1168))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_mocapid && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1176))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_jntnum && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1184))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_jntadr && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1192))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_dofnum && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1200))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_dofadr && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1208))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_geomnum && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1216))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_geomadr && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1224))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_simple && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1232))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_sameframe && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1240))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_pos && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1248))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_quat && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1256))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_ipos && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1264))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_iquat && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1272))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_mass && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1280))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_subtreemass && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1288))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_inertia && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1296))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_invweight0 && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1304))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_gravcomp && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1312))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_user && return if all((!=)(0), (Int(x.nbody), Int(model.nuser_body)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1320))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(model.nuser_body), Int(x.nbody))))
-                end
-            else
-                nothing
-            end
-    f === :body_plugin && return if all((!=)(0), (Int(x.nbody),))
                 _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1328))
                 if _ptr == C_NULL
                     nothing
@@ -540,7 +404,7 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :body_bvhadr && return if all((!=)(0), (Int(x.nbody),))
+    f === :body_rootid && return if all((!=)(0), (Int(x.nbody),))
                 _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1336))
                 if _ptr == C_NULL
                     nothing
@@ -550,7 +414,7 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :body_bvhnum && return if all((!=)(0), (Int(x.nbody),))
+    f === :body_weldid && return if all((!=)(0), (Int(x.nbody),))
                 _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1344))
                 if _ptr == C_NULL
                     nothing
@@ -560,8 +424,268 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :bvh_depth && return if all((!=)(0), (Int(x.nbvh),))
+    f === :body_mocapid && return if all((!=)(0), (Int(x.nbody),))
                 _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1352))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_jntnum && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1360))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_jntadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1368))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_dofnum && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1376))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_dofadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1384))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_treeid && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1392))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_geomnum && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1400))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_geomadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1408))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_simple && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1416))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_sameframe && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1424))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_pos && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1432))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_quat && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1440))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_ipos && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1448))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_iquat && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1456))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_mass && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1464))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_subtreemass && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1472))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_inertia && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1480))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_invweight0 && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1488))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_gravcomp && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1496))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_margin && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1504))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_user && return if all((!=)(0), (Int(x.nbody), Int(model.nuser_body)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1512))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nuser_body), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_plugin && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1520))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_contype && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1528))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_conaffinity && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1536))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_bvhadr && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1544))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :body_bvhnum && return if all((!=)(0), (Int(x.nbody),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1552))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nbody))))
+                end
+            else
+                nothing
+            end
+    f === :bvh_depth && return if all((!=)(0), (Int(x.nbvh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1560))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -571,7 +695,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :bvh_child && return if all((!=)(0), (Int(x.nbvh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1360))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1568))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -580,8 +704,8 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :bvh_geomid && return if all((!=)(0), (Int(x.nbvh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1368))
+    f === :bvh_nodeid && return if all((!=)(0), (Int(x.nbvh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1576))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -590,18 +714,18 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :bvh_aabb && return if all((!=)(0), (Int(x.nbvh),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1376))
+    f === :bvh_aabb && return if all((!=)(0), (Int(x.nbvhstatic),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1584))
                 if _ptr == C_NULL
                     nothing
                 else
-                    transpose(UnsafeArray(_ptr, (Int(6), Int(x.nbvh))))
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(x.nbvhstatic))))
                 end
             else
                 nothing
             end
     f === :jnt_type && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1384))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1592))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -611,7 +735,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_qposadr && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1392))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1600))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -621,7 +745,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_dofadr && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1400))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1608))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -631,7 +755,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_bodyid && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1408))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1616))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -641,7 +765,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_group && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1416))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1624))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -651,7 +775,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_limited && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1424))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1632))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -661,7 +785,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_actfrclimited && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1432))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1640))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -670,10 +794,20 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :jnt_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1440))
-    f === :jnt_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1448))
+    f === :jnt_actgravcomp && return if all((!=)(0), (Int(x.njnt),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1648))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.njnt))))
+                end
+            else
+                nothing
+            end
+    f === :jnt_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1656))
+    f === :jnt_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1664))
     f === :jnt_pos && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1456))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1672))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -683,7 +817,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_axis && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1464))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1680))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -693,7 +827,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_stiffness && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1472))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1688))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -703,7 +837,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_range && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1480))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1696))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -713,7 +847,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_actfrcrange && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1488))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1704))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -723,7 +857,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_margin && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1496))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1712))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -733,7 +867,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :jnt_user && return if all((!=)(0), (Int(x.njnt), Int(model.nuser_jnt)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1504))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1720))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -743,7 +877,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_bodyid && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1512))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1728))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -753,7 +887,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_jntid && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1520))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1736))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -763,7 +897,17 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_parentid && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1528))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1744))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_treeid && return if all((!=)(0), (Int(x.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1752))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -773,7 +917,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_Madr && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1536))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1760))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -783,7 +927,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_simplenum && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1544))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1768))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -792,10 +936,10 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :dof_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1552))
-    f === :dof_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1560))
+    f === :dof_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1776))
+    f === :dof_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1784))
     f === :dof_frictionloss && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1568))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1792))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -805,7 +949,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_armature && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1576))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1800))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -815,7 +959,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_damping && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1584))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1808))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -825,7 +969,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_invweight0 && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1592))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1816))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -835,7 +979,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :dof_M0 && return if all((!=)(0), (Int(x.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1600))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1824))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -845,7 +989,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_type && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1608))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1832))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -855,7 +999,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_contype && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1616))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1840))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -865,7 +1009,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_conaffinity && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1624))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1848))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -875,7 +1019,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_condim && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1632))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1856))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -885,7 +1029,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_bodyid && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1640))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1864))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -895,7 +1039,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_dataid && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1648))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1872))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -905,7 +1049,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_matid && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1656))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1880))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -915,7 +1059,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_group && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1664))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1888))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -925,7 +1069,17 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_priority && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1672))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1896))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ngeom))))
+                end
+            else
+                nothing
+            end
+    f === :geom_plugin && return if all((!=)(0), (Int(x.ngeom),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1904))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -935,7 +1089,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_sameframe && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1680))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1912))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -945,7 +1099,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_solmix && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1688))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1920))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -954,10 +1108,10 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :geom_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1696))
-    f === :geom_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1704))
+    f === :geom_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1928))
+    f === :geom_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1936))
     f === :geom_size && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1712))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1944))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -967,7 +1121,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_aabb && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1720))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1952))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -977,7 +1131,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_rbound && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1728))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1960))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -987,7 +1141,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_pos && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1736))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1968))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -997,7 +1151,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_quat && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1744))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1976))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1007,7 +1161,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_friction && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1752))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1984))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1017,7 +1171,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_margin && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1760))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1992))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1027,7 +1181,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_gap && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1768))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2000))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1036,9 +1190,9 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :geom_fluid && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1776))
+    f === :geom_fluid && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2008))
     f === :geom_user && return if all((!=)(0), (Int(x.ngeom), Int(model.nuser_geom)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1784))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2016))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1048,7 +1202,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :geom_rgba && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 1792))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2024))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1058,7 +1212,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_type && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1800))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2032))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1068,7 +1222,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_bodyid && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1808))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2040))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1078,7 +1232,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_matid && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1816))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2048))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1088,7 +1242,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_group && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1824))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2056))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1098,7 +1252,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_sameframe && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1832))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2064))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1108,7 +1262,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_size && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1840))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2072))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1118,7 +1272,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_pos && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1848))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2080))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1128,7 +1282,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_quat && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1856))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2088))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1138,7 +1292,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_user && return if all((!=)(0), (Int(x.nsite), Int(model.nuser_site)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1864))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2096))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1148,7 +1302,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :site_rgba && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 1872))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2104))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1158,7 +1312,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_mode && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1880))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2112))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1168,7 +1322,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_bodyid && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1888))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2120))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1178,7 +1332,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_targetbodyid && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1896))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2128))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1188,7 +1342,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_pos && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1904))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2136))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1198,7 +1352,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_quat && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1912))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2144))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1208,7 +1362,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_poscom0 && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1920))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2152))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1218,7 +1372,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_pos0 && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1928))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2160))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1228,7 +1382,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_mat0 && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1936))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2168))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1237,8 +1391,18 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
+    f === :cam_resolution && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2176))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
     f === :cam_fovy && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1944))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2184))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1247,8 +1411,28 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
+    f === :cam_intrinsic && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2192))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
+    f === :cam_sensorsize && return if all((!=)(0), (Int(x.ncam),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2200))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.ncam))))
+                end
+            else
+                nothing
+            end
     f === :cam_ipd && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1952))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2208))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1258,7 +1442,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :cam_user && return if all((!=)(0), (Int(x.ncam), Int(model.nuser_cam)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 1960))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2216))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1268,7 +1452,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_mode && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1968))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2224))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1278,7 +1462,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_bodyid && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1976))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2232))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1288,7 +1472,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_targetbodyid && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 1984))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2240))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1298,7 +1482,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_directional && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 1992))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2248))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1308,7 +1492,17 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_castshadow && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2000))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2256))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nlight))))
+                end
+            else
+                nothing
+            end
+    f === :light_bulbradius && return if all((!=)(0), (Int(x.nlight),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2264))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1318,7 +1512,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_active && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2008))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2272))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1328,7 +1522,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_pos && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2016))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2280))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1338,7 +1532,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_dir && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2024))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2288))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1348,7 +1542,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_poscom0 && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2032))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2296))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1358,7 +1552,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_pos0 && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2040))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2304))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1368,7 +1562,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_dir0 && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2048))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2312))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1378,7 +1572,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_attenuation && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2056))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2320))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1388,7 +1582,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_cutoff && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2064))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2328))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1398,7 +1592,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_exponent && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2072))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2336))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1408,7 +1602,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_ambient && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2080))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2344))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1418,7 +1612,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_diffuse && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2088))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2352))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1428,7 +1622,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :light_specular && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2096))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2360))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1437,8 +1631,490 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
+    f === :flex_contype && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2368))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_conaffinity && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2376))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_condim && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2384))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_priority && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2392))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_solmix && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2400))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2408))
+    f === :flex_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2416))
+    f === :flex_friction && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2424))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_margin && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2432))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_gap && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2440))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_internal && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2448))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_selfcollide && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2456))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_activelayers && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2464))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_dim && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2472))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_matid && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2480))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_group && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2488))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_vertadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2496))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_vertnum && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2504))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_edgeadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2512))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_edgenum && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2520))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_elemadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2528))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_elemnum && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2536))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_elemdataadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2544))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_shellnum && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2552))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_shelldataadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2560))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_evpairadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2568))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_evpairnum && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2576))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_texcoordadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2584))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_vertbodyid && return if all((!=)(0), (Int(x.nflexvert),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2592))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflexvert))))
+                end
+            else
+                nothing
+            end
+    f === :flex_edge && return if all((!=)(0), (Int(x.nflexedge),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2600))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nflexedge))))
+                end
+            else
+                nothing
+            end
+    f === :flex_elem && return if all((!=)(0), (Int(x.nflexelemdata),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2608))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflexelemdata))))
+                end
+            else
+                nothing
+            end
+    f === :flex_elemlayer && return if all((!=)(0), (Int(x.nflexelem),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2616))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflexelem))))
+                end
+            else
+                nothing
+            end
+    f === :flex_shell && return if all((!=)(0), (Int(x.nflexshelldata),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2624))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflexshelldata))))
+                end
+            else
+                nothing
+            end
+    f === :flex_evpair && return if all((!=)(0), (Int(x.nflexevpair),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2632))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nflexevpair))))
+                end
+            else
+                nothing
+            end
+    f === :flex_vert && return if all((!=)(0), (Int(x.nflexvert),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2640))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nflexvert))))
+                end
+            else
+                nothing
+            end
+    f === :flex_xvert0 && return if all((!=)(0), (Int(x.nflexvert),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2648))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nflexvert))))
+                end
+            else
+                nothing
+            end
+    f === :flexedge_length0 && return if all((!=)(0), (Int(x.nflexedge),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2656))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflexedge))))
+                end
+            else
+                nothing
+            end
+    f === :flexedge_invweight0 && return if all((!=)(0), (Int(x.nflexedge),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2664))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflexedge))))
+                end
+            else
+                nothing
+            end
+    f === :flex_radius && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2672))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_edgestiffness && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2680))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_edgedamping && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2688))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_edgeequality && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2696))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_rigid && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2704))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flexedge_rigid && return if all((!=)(0), (Int(x.nflexedge),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2712))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflexedge))))
+                end
+            else
+                nothing
+            end
+    f === :flex_centered && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2720))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_flatskin && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2728))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_bvhadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2736))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_bvhnum && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2744))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_rgba && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2752))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
+    f === :flex_texcoord && return if all((!=)(0), (Int(x.nflextexcoord),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2760))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(2), Int(x.nflextexcoord))))
+                end
+            else
+                nothing
+            end
     f === :mesh_vertadr && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2104))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2768))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1448,7 +2124,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_vertnum && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2112))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2776))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1458,7 +2134,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_faceadr && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2120))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2784))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1468,7 +2144,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_facenum && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2128))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2792))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1478,7 +2154,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_bvhadr && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2136))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2800))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1488,7 +2164,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_bvhnum && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2144))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2808))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1498,7 +2174,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_normaladr && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2152))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2816))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1508,7 +2184,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_normalnum && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2160))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2824))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1518,7 +2194,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_texcoordadr && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2168))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2832))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1528,7 +2204,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_texcoordnum && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2176))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2840))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1538,7 +2214,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_graphadr && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2184))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2848))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1548,7 +2224,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_vert && return if all((!=)(0), (Int(x.nmeshvert),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2192))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2856))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1558,7 +2234,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_normal && return if all((!=)(0), (Int(x.nmeshnormal),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2200))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2864))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1568,7 +2244,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_texcoord && return if all((!=)(0), (Int(x.nmeshtexcoord),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2208))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2872))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1578,7 +2254,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_face && return if all((!=)(0), (Int(x.nmeshface),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2216))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2880))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1588,7 +2264,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_facenormal && return if all((!=)(0), (Int(x.nmeshface),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2224))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2888))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1598,7 +2274,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_facetexcoord && return if all((!=)(0), (Int(x.nmeshface),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2232))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2896))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1608,7 +2284,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mesh_graph && return if all((!=)(0), (Int(x.nmeshgraph),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2240))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2904))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1617,8 +2293,48 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
+    f === :mesh_scale && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2912))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_pos && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2920))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_quat && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2928))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(4), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
+    f === :mesh_pathadr && return if all((!=)(0), (Int(x.nmesh),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2936))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmesh))))
+                end
+            else
+                nothing
+            end
     f === :skin_matid && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2248))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2944))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1628,7 +2344,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_group && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2256))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2952))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1638,7 +2354,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_rgba && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2264))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2960))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1648,7 +2364,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_inflate && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2272))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2968))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1658,7 +2374,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_vertadr && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2280))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2976))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1668,7 +2384,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_vertnum && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2288))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2984))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1678,7 +2394,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_texcoordadr && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2296))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2992))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1688,7 +2404,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_faceadr && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2304))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3000))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1698,7 +2414,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_facenum && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2312))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3008))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1708,7 +2424,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_boneadr && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2320))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3016))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1718,7 +2434,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_bonenum && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2328))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3024))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1728,7 +2444,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_vert && return if all((!=)(0), (Int(x.nskinvert),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2336))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3032))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1738,7 +2454,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_texcoord && return if all((!=)(0), (Int(x.nskintexvert),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2344))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3040))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1748,7 +2464,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_face && return if all((!=)(0), (Int(x.nskinface),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2352))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3048))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1758,7 +2474,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_bonevertadr && return if all((!=)(0), (Int(x.nskinbone),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2360))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3056))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1768,7 +2484,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_bonevertnum && return if all((!=)(0), (Int(x.nskinbone),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2368))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3064))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1778,7 +2494,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_bonebindpos && return if all((!=)(0), (Int(x.nskinbone),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2376))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3072))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1788,7 +2504,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_bonebindquat && return if all((!=)(0), (Int(x.nskinbone),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2384))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3080))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1798,7 +2514,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_bonebodyid && return if all((!=)(0), (Int(x.nskinbone),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2392))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3088))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1808,7 +2524,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_bonevertid && return if all((!=)(0), (Int(x.nskinbonevert),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2400))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3096))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1818,7 +2534,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :skin_bonevertweight && return if all((!=)(0), (Int(x.nskinbonevert),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2408))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3104))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1827,8 +2543,18 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
+    f === :skin_pathadr && return if all((!=)(0), (Int(x.nskin),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3112))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nskin))))
+                end
+            else
+                nothing
+            end
     f === :hfield_size && return if all((!=)(0), (Int(x.nhfield),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2416))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3120))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1838,7 +2564,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :hfield_nrow && return if all((!=)(0), (Int(x.nhfield),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2424))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3128))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1848,7 +2574,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :hfield_ncol && return if all((!=)(0), (Int(x.nhfield),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2432))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3136))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1858,7 +2584,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :hfield_adr && return if all((!=)(0), (Int(x.nhfield),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2440))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3144))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1868,7 +2594,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :hfield_data && return if all((!=)(0), (Int(x.nhfielddata),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2448))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3152))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1877,8 +2603,18 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
+    f === :hfield_pathadr && return if all((!=)(0), (Int(x.nhfield),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3160))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nhfield))))
+                end
+            else
+                nothing
+            end
     f === :tex_type && return if all((!=)(0), (Int(x.ntex),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2456))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3168))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1888,7 +2624,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tex_height && return if all((!=)(0), (Int(x.ntex),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2464))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3176))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1898,7 +2634,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tex_width && return if all((!=)(0), (Int(x.ntex),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2472))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3184))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1908,7 +2644,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tex_adr && return if all((!=)(0), (Int(x.ntex),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2480))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3192))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1918,7 +2654,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tex_rgb && return if all((!=)(0), (Int(x.ntexdata),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2488))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 3200))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1927,8 +2663,18 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
+    f === :tex_pathadr && return if all((!=)(0), (Int(x.ntex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3208))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.ntex))))
+                end
+            else
+                nothing
+            end
     f === :mat_texid && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2496))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3216))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1938,7 +2684,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mat_texuniform && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2504))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 3224))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1948,7 +2694,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mat_texrepeat && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2512))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3232))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1958,7 +2704,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mat_emission && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2520))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3240))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1968,7 +2714,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mat_specular && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2528))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3248))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1978,7 +2724,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mat_shininess && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2536))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3256))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1988,7 +2734,27 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mat_reflectance && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2544))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3264))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_metallic && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3272))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nmat))))
+                end
+            else
+                nothing
+            end
+    f === :mat_roughness && return if all((!=)(0), (Int(x.nmat),))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3280))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -1998,7 +2764,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :mat_rgba && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2552))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3288))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2008,7 +2774,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :pair_dim && return if all((!=)(0), (Int(x.npair),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2560))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3296))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2018,7 +2784,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :pair_geom1 && return if all((!=)(0), (Int(x.npair),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2568))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3304))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2028,7 +2794,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :pair_geom2 && return if all((!=)(0), (Int(x.npair),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2576))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3312))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2038,7 +2804,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :pair_signature && return if all((!=)(0), (Int(x.npair),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2584))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3320))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2047,11 +2813,11 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :pair_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2592))
-    f === :pair_solreffriction && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2600))
-    f === :pair_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2608))
+    f === :pair_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3328))
+    f === :pair_solreffriction && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3336))
+    f === :pair_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3344))
     f === :pair_margin && return if all((!=)(0), (Int(x.npair),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2616))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3352))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2061,7 +2827,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :pair_gap && return if all((!=)(0), (Int(x.npair),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2624))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3360))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2071,7 +2837,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :pair_friction && return if all((!=)(0), (Int(x.npair),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2632))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3368))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2081,7 +2847,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :exclude_signature && return if all((!=)(0), (Int(x.nexclude),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2640))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3376))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2091,7 +2857,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :eq_type && return if all((!=)(0), (Int(x.neq),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2648))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3384))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2101,7 +2867,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :eq_obj1id && return if all((!=)(0), (Int(x.neq),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2656))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3392))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2111,7 +2877,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :eq_obj2id && return if all((!=)(0), (Int(x.neq),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2664))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3400))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2120,8 +2886,8 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :eq_active && return if all((!=)(0), (Int(x.neq),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2672))
+    f === :eq_active0 && return if all((!=)(0), (Int(x.neq),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 3408))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2130,11 +2896,11 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :eq_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2680))
-    f === :eq_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2688))
-    f === :eq_data && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2696))
+    f === :eq_solref && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3416))
+    f === :eq_solimp && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3424))
+    f === :eq_data && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3432))
     f === :tendon_adr && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2704))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3440))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2144,7 +2910,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_num && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2712))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3448))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2154,7 +2920,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_matid && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2720))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3456))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2164,7 +2930,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_group && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2728))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3464))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2174,7 +2940,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_limited && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2736))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 3472))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2184,7 +2950,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_width && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2744))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3480))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2193,12 +2959,12 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :tendon_solref_lim && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2752))
-    f === :tendon_solimp_lim && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2760))
-    f === :tendon_solref_fri && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2768))
-    f === :tendon_solimp_fri && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2776))
+    f === :tendon_solref_lim && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3488))
+    f === :tendon_solimp_lim && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3496))
+    f === :tendon_solref_fri && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3504))
+    f === :tendon_solimp_fri && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3512))
     f === :tendon_range && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2784))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3520))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2208,7 +2974,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_margin && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2792))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3528))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2218,7 +2984,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_stiffness && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2800))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3536))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2228,7 +2994,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_damping && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2808))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3544))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2238,7 +3004,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_frictionloss && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2816))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3552))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2248,7 +3014,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_lengthspring && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2824))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3560))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2258,7 +3024,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_length0 && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2832))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3568))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2268,7 +3034,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_invweight0 && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2840))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3576))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2278,7 +3044,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_user && return if all((!=)(0), (Int(x.ntendon), Int(model.nuser_tendon)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2848))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3584))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2288,7 +3054,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tendon_rgba && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 2856))
+                _ptr = unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 3592))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2298,7 +3064,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :wrap_type && return if all((!=)(0), (Int(x.nwrap),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2864))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3600))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2308,7 +3074,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :wrap_objid && return if all((!=)(0), (Int(x.nwrap),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2872))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3608))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2318,7 +3084,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :wrap_prm && return if all((!=)(0), (Int(x.nwrap),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2880))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3616))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2328,7 +3094,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_trntype && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2888))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3624))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2338,7 +3104,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_dyntype && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2896))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3632))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2348,7 +3114,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_gaintype && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2904))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3640))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2358,7 +3124,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_biastype && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2912))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3648))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2368,7 +3134,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_trnid && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2920))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3656))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2378,7 +3144,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_actadr && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2928))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3664))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2388,7 +3154,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_actnum && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2936))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3672))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2398,7 +3164,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_group && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 2944))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3680))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2408,7 +3174,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_ctrllimited && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2952))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 3688))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2418,7 +3184,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_forcelimited && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2960))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 3696))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2428,7 +3194,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_actlimited && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 2968))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 3704))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2437,11 +3203,21 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
-    f === :actuator_dynprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2976))
-    f === :actuator_gainprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2984))
-    f === :actuator_biasprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 2992))
+    f === :actuator_dynprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3712))
+    f === :actuator_gainprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3720))
+    f === :actuator_biasprm && return unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3728))
+    f === :actuator_actearly && return if all((!=)(0), (Int(x.nu),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 3736))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nu))))
+                end
+            else
+                nothing
+            end
     f === :actuator_ctrlrange && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3000))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3744))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2451,7 +3227,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_forcerange && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3008))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3752))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2461,7 +3237,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_actrange && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3016))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3760))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2471,7 +3247,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_gear && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3024))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3768))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2481,7 +3257,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_cranklength && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3032))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3776))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2491,7 +3267,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_acc0 && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3040))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3784))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2501,7 +3277,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_length0 && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3048))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3792))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2511,7 +3287,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_lengthrange && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3056))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3800))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2521,7 +3297,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_user && return if all((!=)(0), (Int(x.nu), Int(model.nuser_actuator)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3064))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3808))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2531,7 +3307,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :actuator_plugin && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3072))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3816))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2541,7 +3317,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_type && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3080))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3824))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2551,7 +3327,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_datatype && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3088))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3832))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2561,7 +3337,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_needstage && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3096))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3840))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2571,7 +3347,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_objtype && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3104))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3848))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2581,7 +3357,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_objid && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3112))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3856))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2591,7 +3367,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_reftype && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3120))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3864))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2601,7 +3377,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_refid && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3128))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3872))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2611,7 +3387,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_dim && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3136))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3880))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2621,7 +3397,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_adr && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3144))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3888))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2631,7 +3407,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_cutoff && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3152))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3896))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2641,7 +3417,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_noise && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3160))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3904))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2651,7 +3427,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_user && return if all((!=)(0), (Int(x.nsensor), Int(model.nuser_sensor)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3168))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3912))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2661,7 +3437,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :sensor_plugin && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3176))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3920))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2671,7 +3447,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :plugin && return if all((!=)(0), (Int(x.nplugin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3184))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3928))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2681,7 +3457,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :plugin_stateadr && return if all((!=)(0), (Int(x.nplugin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3192))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3936))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2691,7 +3467,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :plugin_statenum && return if all((!=)(0), (Int(x.nplugin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3200))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3944))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2701,7 +3477,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :plugin_attr && return if all((!=)(0), (Int(x.npluginattr),))
-                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3208))
+                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3952))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2711,7 +3487,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :plugin_attradr && return if all((!=)(0), (Int(x.nplugin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3216))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3960))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2721,7 +3497,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :numeric_adr && return if all((!=)(0), (Int(x.nnumeric),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3224))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3968))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2731,7 +3507,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :numeric_size && return if all((!=)(0), (Int(x.nnumeric),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3232))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3976))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2741,7 +3517,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :numeric_data && return if all((!=)(0), (Int(x.nnumericdata),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3240))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3984))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2751,7 +3527,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :text_adr && return if all((!=)(0), (Int(x.ntext),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3248))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3992))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2761,7 +3537,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :text_size && return if all((!=)(0), (Int(x.ntext),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3256))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4000))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2771,7 +3547,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :text_data && return if all((!=)(0), (Int(x.ntextdata),))
-                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3264))
+                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 4008))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2781,7 +3557,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tuple_adr && return if all((!=)(0), (Int(x.ntuple),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3272))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4016))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2791,7 +3567,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tuple_size && return if all((!=)(0), (Int(x.ntuple),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3280))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4024))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2801,7 +3577,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tuple_objtype && return if all((!=)(0), (Int(x.ntupledata),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3288))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4032))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2811,7 +3587,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tuple_objid && return if all((!=)(0), (Int(x.ntupledata),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3296))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4040))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2821,7 +3597,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :tuple_objprm && return if all((!=)(0), (Int(x.ntupledata),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3304))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 4048))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2831,7 +3607,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :key_time && return if all((!=)(0), (Int(x.nkey),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3312))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 4056))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2841,7 +3617,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :key_qpos && return if all((!=)(0), (Int(x.nkey), Int(model.nq)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3320))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 4064))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2851,7 +3627,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :key_qvel && return if all((!=)(0), (Int(x.nkey), Int(model.nv)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3328))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 4072))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2861,7 +3637,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :key_act && return if all((!=)(0), (Int(x.nkey), Int(model.na)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3336))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 4080))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2871,7 +3647,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :key_mpos && return if all((!=)(0), (Int(x.nkey), Int(model.nmocap * 3)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3344))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 4088))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2881,7 +3657,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :key_mquat && return if all((!=)(0), (Int(x.nkey), Int(model.nmocap * 4)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3352))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 4096))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2891,7 +3667,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :key_ctrl && return if all((!=)(0), (Int(x.nkey), Int(model.nu)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 3360))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 4104))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2901,7 +3677,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_bodyadr && return if all((!=)(0), (Int(x.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3368))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4112))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2911,7 +3687,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_jntadr && return if all((!=)(0), (Int(x.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3376))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4120))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2921,7 +3697,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_geomadr && return if all((!=)(0), (Int(x.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3384))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4128))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2931,7 +3707,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_siteadr && return if all((!=)(0), (Int(x.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3392))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4136))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2941,7 +3717,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_camadr && return if all((!=)(0), (Int(x.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3400))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4144))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2951,7 +3727,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_lightadr && return if all((!=)(0), (Int(x.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3408))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4152))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2960,8 +3736,18 @@ function Base.getproperty(x::Model, f::Symbol)
             else
                 nothing
             end
+    f === :name_flexadr && return if all((!=)(0), (Int(x.nflex),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4160))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.nflex))))
+                end
+            else
+                nothing
+            end
     f === :name_meshadr && return if all((!=)(0), (Int(x.nmesh),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3416))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4168))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2971,7 +3757,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_skinadr && return if all((!=)(0), (Int(x.nskin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3424))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4176))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2981,7 +3767,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_hfieldadr && return if all((!=)(0), (Int(x.nhfield),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3432))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4184))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -2991,7 +3777,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_texadr && return if all((!=)(0), (Int(x.ntex),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3440))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4192))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3001,7 +3787,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_matadr && return if all((!=)(0), (Int(x.nmat),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3448))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4200))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3011,7 +3797,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_pairadr && return if all((!=)(0), (Int(x.npair),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3456))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4208))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3021,7 +3807,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_excludeadr && return if all((!=)(0), (Int(x.nexclude),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3464))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4216))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3031,7 +3817,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_eqadr && return if all((!=)(0), (Int(x.neq),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3472))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4224))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3041,7 +3827,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_tendonadr && return if all((!=)(0), (Int(x.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3480))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4232))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3051,7 +3837,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_actuatoradr && return if all((!=)(0), (Int(x.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3488))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4240))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3061,7 +3847,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_sensoradr && return if all((!=)(0), (Int(x.nsensor),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3496))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4248))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3071,7 +3857,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_numericadr && return if all((!=)(0), (Int(x.nnumeric),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3504))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4256))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3081,7 +3867,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_textadr && return if all((!=)(0), (Int(x.ntext),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3512))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4264))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3091,7 +3877,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_tupleadr && return if all((!=)(0), (Int(x.ntuple),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3520))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4272))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3101,7 +3887,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_keyadr && return if all((!=)(0), (Int(x.nkey),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3528))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4280))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3111,7 +3897,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :name_pluginadr && return if all((!=)(0), (Int(x.nplugin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3536))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4288))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3121,7 +3907,7 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :names && return if all((!=)(0), (Int(x.nnames),))
-                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 3544))
+                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 4296))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3131,11 +3917,21 @@ function Base.getproperty(x::Model, f::Symbol)
                 nothing
             end
     f === :names_map && return if all((!=)(0), (Int(x.nnames_map),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 3552))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 4304))
                 if _ptr == C_NULL
                     nothing
                 else
                     transpose(UnsafeArray(_ptr, (Int(1), Int(x.nnames_map))))
+                end
+            else
+                nothing
+            end
+    f === :paths && return if all((!=)(0), (Int(x.npaths),))
+                _ptr = unsafe_load(Ptr{Ptr{Int8}}(internal_pointer + 4312))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(x.npaths))))
                 end
             else
                 nothing
@@ -3175,317 +3971,382 @@ function Base.setproperty!(x::Model, f::Symbol, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 20), cvalue)
         return cvalue
     end
-    if f === :njnt
+    if f === :nbvhstatic
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 24), cvalue)
         return cvalue
     end
-    if f === :ngeom
+    if f === :nbvhdynamic
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 28), cvalue)
         return cvalue
     end
-    if f === :nsite
+    if f === :njnt
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 32), cvalue)
         return cvalue
     end
-    if f === :ncam
+    if f === :ngeom
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 36), cvalue)
         return cvalue
     end
-    if f === :nlight
+    if f === :nsite
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 40), cvalue)
         return cvalue
     end
-    if f === :nmesh
+    if f === :ncam
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 44), cvalue)
         return cvalue
     end
-    if f === :nmeshvert
+    if f === :nlight
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 48), cvalue)
         return cvalue
     end
-    if f === :nmeshnormal
+    if f === :nflex
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 52), cvalue)
         return cvalue
     end
-    if f === :nmeshtexcoord
+    if f === :nflexvert
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 56), cvalue)
         return cvalue
     end
-    if f === :nmeshface
+    if f === :nflexedge
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 60), cvalue)
         return cvalue
     end
-    if f === :nmeshgraph
+    if f === :nflexelem
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 64), cvalue)
         return cvalue
     end
-    if f === :nskin
+    if f === :nflexelemdata
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 68), cvalue)
         return cvalue
     end
-    if f === :nskinvert
+    if f === :nflexshelldata
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 72), cvalue)
         return cvalue
     end
-    if f === :nskintexvert
+    if f === :nflexevpair
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 76), cvalue)
         return cvalue
     end
-    if f === :nskinface
+    if f === :nflextexcoord
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 80), cvalue)
         return cvalue
     end
-    if f === :nskinbone
+    if f === :nmesh
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
         return cvalue
     end
-    if f === :nskinbonevert
+    if f === :nmeshvert
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
         return cvalue
     end
-    if f === :nhfield
+    if f === :nmeshnormal
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 92), cvalue)
         return cvalue
     end
-    if f === :nhfielddata
+    if f === :nmeshtexcoord
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 96), cvalue)
         return cvalue
     end
-    if f === :ntex
+    if f === :nmeshface
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 100), cvalue)
         return cvalue
     end
-    if f === :ntexdata
+    if f === :nmeshgraph
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 104), cvalue)
         return cvalue
     end
-    if f === :nmat
+    if f === :nskin
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 108), cvalue)
         return cvalue
     end
-    if f === :npair
+    if f === :nskinvert
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 112), cvalue)
         return cvalue
     end
-    if f === :nexclude
+    if f === :nskintexvert
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 116), cvalue)
         return cvalue
     end
-    if f === :neq
+    if f === :nskinface
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 120), cvalue)
         return cvalue
     end
-    if f === :ntendon
+    if f === :nskinbone
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 124), cvalue)
         return cvalue
     end
-    if f === :nwrap
+    if f === :nskinbonevert
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 128), cvalue)
         return cvalue
     end
-    if f === :nsensor
+    if f === :nhfield
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 132), cvalue)
         return cvalue
     end
-    if f === :nnumeric
+    if f === :nhfielddata
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 136), cvalue)
         return cvalue
     end
-    if f === :nnumericdata
+    if f === :ntex
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 140), cvalue)
         return cvalue
     end
-    if f === :ntext
+    if f === :ntexdata
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 144), cvalue)
         return cvalue
     end
-    if f === :ntextdata
+    if f === :nmat
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 148), cvalue)
         return cvalue
     end
-    if f === :ntuple
+    if f === :npair
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 152), cvalue)
         return cvalue
     end
-    if f === :ntupledata
+    if f === :nexclude
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 156), cvalue)
         return cvalue
     end
-    if f === :nkey
+    if f === :neq
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 160), cvalue)
         return cvalue
     end
-    if f === :nmocap
+    if f === :ntendon
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 164), cvalue)
         return cvalue
     end
-    if f === :nplugin
+    if f === :nwrap
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 168), cvalue)
         return cvalue
     end
-    if f === :npluginattr
+    if f === :nsensor
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 172), cvalue)
         return cvalue
     end
-    if f === :nuser_body
+    if f === :nnumeric
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 176), cvalue)
         return cvalue
     end
-    if f === :nuser_jnt
+    if f === :nnumericdata
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 180), cvalue)
         return cvalue
     end
-    if f === :nuser_geom
+    if f === :ntext
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 184), cvalue)
         return cvalue
     end
-    if f === :nuser_site
+    if f === :ntextdata
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 188), cvalue)
         return cvalue
     end
-    if f === :nuser_cam
+    if f === :ntuple
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 192), cvalue)
         return cvalue
     end
-    if f === :nuser_tendon
+    if f === :ntupledata
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 196), cvalue)
         return cvalue
     end
-    if f === :nuser_actuator
+    if f === :nkey
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 200), cvalue)
         return cvalue
     end
-    if f === :nuser_sensor
+    if f === :nmocap
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 204), cvalue)
         return cvalue
     end
-    if f === :nnames
+    if f === :nplugin
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 208), cvalue)
         return cvalue
     end
-    if f === :nnames_map
+    if f === :npluginattr
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 212), cvalue)
         return cvalue
     end
-    if f === :nM
+    if f === :nuser_body
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 216), cvalue)
         return cvalue
     end
-    if f === :nD
+    if f === :nuser_jnt
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 220), cvalue)
         return cvalue
     end
-    if f === :nB
+    if f === :nuser_geom
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 224), cvalue)
         return cvalue
     end
-    if f === :nemax
+    if f === :nuser_site
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 228), cvalue)
         return cvalue
     end
-    if f === :njmax
+    if f === :nuser_cam
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 232), cvalue)
         return cvalue
     end
-    if f === :nconmax
+    if f === :nuser_tendon
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 236), cvalue)
         return cvalue
     end
-    if f === :nstack
+    if f === :nuser_actuator
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 240), cvalue)
         return cvalue
     end
-    if f === :nuserdata
+    if f === :nuser_sensor
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 244), cvalue)
         return cvalue
     end
-    if f === :nsensordata
+    if f === :nnames
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 248), cvalue)
         return cvalue
     end
-    if f === :npluginstate
+    if f === :nnames_map
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 252), cvalue)
         return cvalue
     end
-    if f === :nbuffer
+    if f === :npaths
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 256), cvalue)
         return cvalue
     end
+    if f === :nM
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 260), cvalue)
+        return cvalue
+    end
+    if f === :nD
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 264), cvalue)
+        return cvalue
+    end
+    if f === :nB
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 268), cvalue)
+        return cvalue
+    end
+    if f === :ntree
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 272), cvalue)
+        return cvalue
+    end
+    if f === :ngravcomp
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 276), cvalue)
+        return cvalue
+    end
+    if f === :nemax
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 280), cvalue)
+        return cvalue
+    end
+    if f === :njmax
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 284), cvalue)
+        return cvalue
+    end
+    if f === :nconmax
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 288), cvalue)
+        return cvalue
+    end
+    if f === :nuserdata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 292), cvalue)
+        return cvalue
+    end
+    if f === :nsensordata
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 296), cvalue)
+        return cvalue
+    end
+    if f === :npluginstate
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 300), cvalue)
+        return cvalue
+    end
+    if f === :narena
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 304), cvalue)
+        return cvalue
+    end
+    if f === :nbuffer
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 312), cvalue)
+        return cvalue
+    end
     if f === :opt
         cvalue = convert(mjOption_, value)
-        unsafe_store!(Ptr{mjOption_}(internal_pointer + 260), cvalue)
+        unsafe_store!(Ptr{mjOption_}(internal_pointer + 320), cvalue)
         return cvalue
     end
     if f === :vis
         cvalue = convert(mjVisual_, value)
-        unsafe_store!(Ptr{mjVisual_}(internal_pointer + 500), cvalue)
+        unsafe_store!(Ptr{mjVisual_}(internal_pointer + 624), cvalue)
         return cvalue
     end
     if f === :stat
         cvalue = convert(mjStatistic_, value)
-        unsafe_store!(Ptr{mjStatistic_}(internal_pointer + 1068), cvalue)
+        unsafe_store!(Ptr{mjStatistic_}(internal_pointer + 1248), cvalue)
         return cvalue
     end
-    if f in (:buffer, :qpos0, :qpos_spring, :body_parentid, :body_rootid, :body_weldid, :body_mocapid, :body_jntnum, :body_jntadr, :body_dofnum, :body_dofadr, :body_geomnum, :body_geomadr, :body_simple, :body_sameframe, :body_pos, :body_quat, :body_ipos, :body_iquat, :body_mass, :body_subtreemass, :body_inertia, :body_invweight0, :body_gravcomp, :body_user, :body_plugin, :body_bvhadr, :body_bvhnum, :bvh_depth, :bvh_child, :bvh_geomid, :bvh_aabb, :jnt_type, :jnt_qposadr, :jnt_dofadr, :jnt_bodyid, :jnt_group, :jnt_limited, :jnt_actfrclimited, :jnt_solref, :jnt_solimp, :jnt_pos, :jnt_axis, :jnt_stiffness, :jnt_range, :jnt_actfrcrange, :jnt_margin, :jnt_user, :dof_bodyid, :dof_jntid, :dof_parentid, :dof_Madr, :dof_simplenum, :dof_solref, :dof_solimp, :dof_frictionloss, :dof_armature, :dof_damping, :dof_invweight0, :dof_M0, :geom_type, :geom_contype, :geom_conaffinity, :geom_condim, :geom_bodyid, :geom_dataid, :geom_matid, :geom_group, :geom_priority, :geom_sameframe, :geom_solmix, :geom_solref, :geom_solimp, :geom_size, :geom_aabb, :geom_rbound, :geom_pos, :geom_quat, :geom_friction, :geom_margin, :geom_gap, :geom_fluid, :geom_user, :geom_rgba, :site_type, :site_bodyid, :site_matid, :site_group, :site_sameframe, :site_size, :site_pos, :site_quat, :site_user, :site_rgba, :cam_mode, :cam_bodyid, :cam_targetbodyid, :cam_pos, :cam_quat, :cam_poscom0, :cam_pos0, :cam_mat0, :cam_fovy, :cam_ipd, :cam_user, :light_mode, :light_bodyid, :light_targetbodyid, :light_directional, :light_castshadow, :light_active, :light_pos, :light_dir, :light_poscom0, :light_pos0, :light_dir0, :light_attenuation, :light_cutoff, :light_exponent, :light_ambient, :light_diffuse, :light_specular, :mesh_vertadr, :mesh_vertnum, :mesh_faceadr, :mesh_facenum, :mesh_bvhadr, :mesh_bvhnum, :mesh_normaladr, :mesh_normalnum, :mesh_texcoordadr, :mesh_texcoordnum, :mesh_graphadr, :mesh_vert, :mesh_normal, :mesh_texcoord, :mesh_face, :mesh_facenormal, :mesh_facetexcoord, :mesh_graph, :skin_matid, :skin_group, :skin_rgba, :skin_inflate, :skin_vertadr, :skin_vertnum, :skin_texcoordadr, :skin_faceadr, :skin_facenum, :skin_boneadr, :skin_bonenum, :skin_vert, :skin_texcoord, :skin_face, :skin_bonevertadr, :skin_bonevertnum, :skin_bonebindpos, :skin_bonebindquat, :skin_bonebodyid, :skin_bonevertid, :skin_bonevertweight, :hfield_size, :hfield_nrow, :hfield_ncol, :hfield_adr, :hfield_data, :tex_type, :tex_height, :tex_width, :tex_adr, :tex_rgb, :mat_texid, :mat_texuniform, :mat_texrepeat, :mat_emission, :mat_specular, :mat_shininess, :mat_reflectance, :mat_rgba, :pair_dim, :pair_geom1, :pair_geom2, :pair_signature, :pair_solref, :pair_solreffriction, :pair_solimp, :pair_margin, :pair_gap, :pair_friction, :exclude_signature, :eq_type, :eq_obj1id, :eq_obj2id, :eq_active, :eq_solref, :eq_solimp, :eq_data, :tendon_adr, :tendon_num, :tendon_matid, :tendon_group, :tendon_limited, :tendon_width, :tendon_solref_lim, :tendon_solimp_lim, :tendon_solref_fri, :tendon_solimp_fri, :tendon_range, :tendon_margin, :tendon_stiffness, :tendon_damping, :tendon_frictionloss, :tendon_lengthspring, :tendon_length0, :tendon_invweight0, :tendon_user, :tendon_rgba, :wrap_type, :wrap_objid, :wrap_prm, :actuator_trntype, :actuator_dyntype, :actuator_gaintype, :actuator_biastype, :actuator_trnid, :actuator_actadr, :actuator_actnum, :actuator_group, :actuator_ctrllimited, :actuator_forcelimited, :actuator_actlimited, :actuator_dynprm, :actuator_gainprm, :actuator_biasprm, :actuator_ctrlrange, :actuator_forcerange, :actuator_actrange, :actuator_gear, :actuator_cranklength, :actuator_acc0, :actuator_length0, :actuator_lengthrange, :actuator_user, :actuator_plugin, :sensor_type, :sensor_datatype, :sensor_needstage, :sensor_objtype, :sensor_objid, :sensor_reftype, :sensor_refid, :sensor_dim, :sensor_adr, :sensor_cutoff, :sensor_noise, :sensor_user, :sensor_plugin, :plugin, :plugin_stateadr, :plugin_statenum, :plugin_attr, :plugin_attradr, :numeric_adr, :numeric_size, :numeric_data, :text_adr, :text_size, :text_data, :tuple_adr, :tuple_size, :tuple_objtype, :tuple_objid, :tuple_objprm, :key_time, :key_qpos, :key_qvel, :key_act, :key_mpos, :key_mquat, :key_ctrl, :name_bodyadr, :name_jntadr, :name_geomadr, :name_siteadr, :name_camadr, :name_lightadr, :name_meshadr, :name_skinadr, :name_hfieldadr, :name_texadr, :name_matadr, :name_pairadr, :name_excludeadr, :name_eqadr, :name_tendonadr, :name_actuatoradr, :name_sensoradr, :name_numericadr, :name_textadr, :name_tupleadr, :name_keyadr, :name_pluginadr, :names, :names_map)
+    if f in (:buffer, :qpos0, :qpos_spring, :body_parentid, :body_rootid, :body_weldid, :body_mocapid, :body_jntnum, :body_jntadr, :body_dofnum, :body_dofadr, :body_treeid, :body_geomnum, :body_geomadr, :body_simple, :body_sameframe, :body_pos, :body_quat, :body_ipos, :body_iquat, :body_mass, :body_subtreemass, :body_inertia, :body_invweight0, :body_gravcomp, :body_margin, :body_user, :body_plugin, :body_contype, :body_conaffinity, :body_bvhadr, :body_bvhnum, :bvh_depth, :bvh_child, :bvh_nodeid, :bvh_aabb, :jnt_type, :jnt_qposadr, :jnt_dofadr, :jnt_bodyid, :jnt_group, :jnt_limited, :jnt_actfrclimited, :jnt_actgravcomp, :jnt_solref, :jnt_solimp, :jnt_pos, :jnt_axis, :jnt_stiffness, :jnt_range, :jnt_actfrcrange, :jnt_margin, :jnt_user, :dof_bodyid, :dof_jntid, :dof_parentid, :dof_treeid, :dof_Madr, :dof_simplenum, :dof_solref, :dof_solimp, :dof_frictionloss, :dof_armature, :dof_damping, :dof_invweight0, :dof_M0, :geom_type, :geom_contype, :geom_conaffinity, :geom_condim, :geom_bodyid, :geom_dataid, :geom_matid, :geom_group, :geom_priority, :geom_plugin, :geom_sameframe, :geom_solmix, :geom_solref, :geom_solimp, :geom_size, :geom_aabb, :geom_rbound, :geom_pos, :geom_quat, :geom_friction, :geom_margin, :geom_gap, :geom_fluid, :geom_user, :geom_rgba, :site_type, :site_bodyid, :site_matid, :site_group, :site_sameframe, :site_size, :site_pos, :site_quat, :site_user, :site_rgba, :cam_mode, :cam_bodyid, :cam_targetbodyid, :cam_pos, :cam_quat, :cam_poscom0, :cam_pos0, :cam_mat0, :cam_resolution, :cam_fovy, :cam_intrinsic, :cam_sensorsize, :cam_ipd, :cam_user, :light_mode, :light_bodyid, :light_targetbodyid, :light_directional, :light_castshadow, :light_bulbradius, :light_active, :light_pos, :light_dir, :light_poscom0, :light_pos0, :light_dir0, :light_attenuation, :light_cutoff, :light_exponent, :light_ambient, :light_diffuse, :light_specular, :flex_contype, :flex_conaffinity, :flex_condim, :flex_priority, :flex_solmix, :flex_solref, :flex_solimp, :flex_friction, :flex_margin, :flex_gap, :flex_internal, :flex_selfcollide, :flex_activelayers, :flex_dim, :flex_matid, :flex_group, :flex_vertadr, :flex_vertnum, :flex_edgeadr, :flex_edgenum, :flex_elemadr, :flex_elemnum, :flex_elemdataadr, :flex_shellnum, :flex_shelldataadr, :flex_evpairadr, :flex_evpairnum, :flex_texcoordadr, :flex_vertbodyid, :flex_edge, :flex_elem, :flex_elemlayer, :flex_shell, :flex_evpair, :flex_vert, :flex_xvert0, :flexedge_length0, :flexedge_invweight0, :flex_radius, :flex_edgestiffness, :flex_edgedamping, :flex_edgeequality, :flex_rigid, :flexedge_rigid, :flex_centered, :flex_flatskin, :flex_bvhadr, :flex_bvhnum, :flex_rgba, :flex_texcoord, :mesh_vertadr, :mesh_vertnum, :mesh_faceadr, :mesh_facenum, :mesh_bvhadr, :mesh_bvhnum, :mesh_normaladr, :mesh_normalnum, :mesh_texcoordadr, :mesh_texcoordnum, :mesh_graphadr, :mesh_vert, :mesh_normal, :mesh_texcoord, :mesh_face, :mesh_facenormal, :mesh_facetexcoord, :mesh_graph, :mesh_scale, :mesh_pos, :mesh_quat, :mesh_pathadr, :skin_matid, :skin_group, :skin_rgba, :skin_inflate, :skin_vertadr, :skin_vertnum, :skin_texcoordadr, :skin_faceadr, :skin_facenum, :skin_boneadr, :skin_bonenum, :skin_vert, :skin_texcoord, :skin_face, :skin_bonevertadr, :skin_bonevertnum, :skin_bonebindpos, :skin_bonebindquat, :skin_bonebodyid, :skin_bonevertid, :skin_bonevertweight, :skin_pathadr, :hfield_size, :hfield_nrow, :hfield_ncol, :hfield_adr, :hfield_data, :hfield_pathadr, :tex_type, :tex_height, :tex_width, :tex_adr, :tex_rgb, :tex_pathadr, :mat_texid, :mat_texuniform, :mat_texrepeat, :mat_emission, :mat_specular, :mat_shininess, :mat_reflectance, :mat_metallic, :mat_roughness, :mat_rgba, :pair_dim, :pair_geom1, :pair_geom2, :pair_signature, :pair_solref, :pair_solreffriction, :pair_solimp, :pair_margin, :pair_gap, :pair_friction, :exclude_signature, :eq_type, :eq_obj1id, :eq_obj2id, :eq_active0, :eq_solref, :eq_solimp, :eq_data, :tendon_adr, :tendon_num, :tendon_matid, :tendon_group, :tendon_limited, :tendon_width, :tendon_solref_lim, :tendon_solimp_lim, :tendon_solref_fri, :tendon_solimp_fri, :tendon_range, :tendon_margin, :tendon_stiffness, :tendon_damping, :tendon_frictionloss, :tendon_lengthspring, :tendon_length0, :tendon_invweight0, :tendon_user, :tendon_rgba, :wrap_type, :wrap_objid, :wrap_prm, :actuator_trntype, :actuator_dyntype, :actuator_gaintype, :actuator_biastype, :actuator_trnid, :actuator_actadr, :actuator_actnum, :actuator_group, :actuator_ctrllimited, :actuator_forcelimited, :actuator_actlimited, :actuator_dynprm, :actuator_gainprm, :actuator_biasprm, :actuator_actearly, :actuator_ctrlrange, :actuator_forcerange, :actuator_actrange, :actuator_gear, :actuator_cranklength, :actuator_acc0, :actuator_length0, :actuator_lengthrange, :actuator_user, :actuator_plugin, :sensor_type, :sensor_datatype, :sensor_needstage, :sensor_objtype, :sensor_objid, :sensor_reftype, :sensor_refid, :sensor_dim, :sensor_adr, :sensor_cutoff, :sensor_noise, :sensor_user, :sensor_plugin, :plugin, :plugin_stateadr, :plugin_statenum, :plugin_attr, :plugin_attradr, :numeric_adr, :numeric_size, :numeric_data, :text_adr, :text_size, :text_data, :tuple_adr, :tuple_size, :tuple_objtype, :tuple_objid, :tuple_objprm, :key_time, :key_qpos, :key_qvel, :key_act, :key_mpos, :key_mquat, :key_ctrl, :name_bodyadr, :name_jntadr, :name_geomadr, :name_siteadr, :name_camadr, :name_lightadr, :name_flexadr, :name_meshadr, :name_skinadr, :name_hfieldadr, :name_texadr, :name_matadr, :name_pairadr, :name_excludeadr, :name_eqadr, :name_tendonadr, :name_actuatoradr, :name_sensoradr, :name_numericadr, :name_textadr, :name_tupleadr, :name_keyadr, :name_pluginadr, :names, :names_map, :paths)
         error("Cannot overwrite a pointer field.")
     end
     error("Could not find property $(f) to set.")
@@ -3493,44 +4354,509 @@ end
 function Base.cconvert(::Type{Ptr{mjModel}}, wrapper::Model)
     return wrapper.internal_pointer
 end
+function show_docs(::Type{Model}, property_name::Symbol)
+    property_name === :nq && return println("Model.nq: number of generalized coordinates = dim(qpos)")
+    property_name === :nv && return println("Model.nv: number of degrees of freedom = dim(qvel)")
+    property_name === :nu && return println("Model.nu: number of actuators/controls = dim(ctrl)")
+    property_name === :na && return println("Model.na: number of activation states = dim(act)")
+    property_name === :nbody && return println("Model.nbody: number of bodies")
+    property_name === :nbvh && return println("Model.nbvh: number of total bounding volumes in all bodies")
+    property_name === :nbvhstatic && return println("Model.nbvhstatic: number of static bounding volumes (aabb stored in mjModel)")
+    property_name === :nbvhdynamic && return println("Model.nbvhdynamic: number of dynamic bounding volumes (aabb stored in mjData)")
+    property_name === :njnt && return println("Model.njnt: number of joints")
+    property_name === :ngeom && return println("Model.ngeom: number of geoms")
+    property_name === :nsite && return println("Model.nsite: number of sites")
+    property_name === :ncam && return println("Model.ncam: number of cameras")
+    property_name === :nlight && return println("Model.nlight: number of lights")
+    property_name === :nflex && return println("Model.nflex: number of flexes")
+    property_name === :nflexvert && return println("Model.nflexvert: number of vertices in all flexes")
+    property_name === :nflexedge && return println("Model.nflexedge: number of edges in all flexes")
+    property_name === :nflexelem && return println("Model.nflexelem: number of elements in all flexes")
+    property_name === :nflexelemdata && return println("Model.nflexelemdata: number of element vertex ids in all flexes")
+    property_name === :nflexshelldata && return println("Model.nflexshelldata: number of shell fragment vertex ids in all flexes")
+    property_name === :nflexevpair && return println("Model.nflexevpair: number of element-vertex pairs in all flexes")
+    property_name === :nflextexcoord && return println("Model.nflextexcoord: number of vertices with texture coordinates")
+    property_name === :nmesh && return println("Model.nmesh: number of meshes")
+    property_name === :nmeshvert && return println("Model.nmeshvert: number of vertices in all meshes")
+    property_name === :nmeshnormal && return println("Model.nmeshnormal: number of normals in all meshes")
+    property_name === :nmeshtexcoord && return println("Model.nmeshtexcoord: number of texcoords in all meshes")
+    property_name === :nmeshface && return println("Model.nmeshface: number of triangular faces in all meshes")
+    property_name === :nmeshgraph && return println("Model.nmeshgraph: number of ints in mesh auxiliary data")
+    property_name === :nskin && return println("Model.nskin: number of skins")
+    property_name === :nskinvert && return println("Model.nskinvert: number of vertices in all skins")
+    property_name === :nskintexvert && return println("Model.nskintexvert: number of vertiex with texcoords in all skins")
+    property_name === :nskinface && return println("Model.nskinface: number of triangular faces in all skins")
+    property_name === :nskinbone && return println("Model.nskinbone: number of bones in all skins")
+    property_name === :nskinbonevert && return println("Model.nskinbonevert: number of vertices in all skin bones")
+    property_name === :nhfield && return println("Model.nhfield: number of heightfields")
+    property_name === :nhfielddata && return println("Model.nhfielddata: number of data points in all heightfields")
+    property_name === :ntex && return println("Model.ntex: number of textures")
+    property_name === :ntexdata && return println("Model.ntexdata: number of bytes in texture rgb data")
+    property_name === :nmat && return println("Model.nmat: number of materials")
+    property_name === :npair && return println("Model.npair: number of predefined geom pairs")
+    property_name === :nexclude && return println("Model.nexclude: number of excluded geom pairs")
+    property_name === :neq && return println("Model.neq: number of equality constraints")
+    property_name === :ntendon && return println("Model.ntendon: number of tendons")
+    property_name === :nwrap && return println("Model.nwrap: number of wrap objects in all tendon paths")
+    property_name === :nsensor && return println("Model.nsensor: number of sensors")
+    property_name === :nnumeric && return println("Model.nnumeric: number of numeric custom fields")
+    property_name === :nnumericdata && return println("Model.nnumericdata: number of mjtNums in all numeric fields")
+    property_name === :ntext && return println("Model.ntext: number of text custom fields")
+    property_name === :ntextdata && return println("Model.ntextdata: number of mjtBytes in all text fields")
+    property_name === :ntuple && return println("Model.ntuple: number of tuple custom fields")
+    property_name === :ntupledata && return println("Model.ntupledata: number of objects in all tuple fields")
+    property_name === :nkey && return println("Model.nkey: number of keyframes")
+    property_name === :nmocap && return println("Model.nmocap: number of mocap bodies")
+    property_name === :nplugin && return println("Model.nplugin: number of plugin instances")
+    property_name === :npluginattr && return println("Model.npluginattr: number of chars in all plugin config attributes")
+    property_name === :nuser_body && return println("Model.nuser_body: number of mjtNums in body_user")
+    property_name === :nuser_jnt && return println("Model.nuser_jnt: number of mjtNums in jnt_user")
+    property_name === :nuser_geom && return println("Model.nuser_geom: number of mjtNums in geom_user")
+    property_name === :nuser_site && return println("Model.nuser_site: number of mjtNums in site_user")
+    property_name === :nuser_cam && return println("Model.nuser_cam: number of mjtNums in cam_user")
+    property_name === :nuser_tendon && return println("Model.nuser_tendon: number of mjtNums in tendon_user")
+    property_name === :nuser_actuator && return println("Model.nuser_actuator: number of mjtNums in actuator_user")
+    property_name === :nuser_sensor && return println("Model.nuser_sensor: number of mjtNums in sensor_user")
+    property_name === :nnames && return println("Model.nnames: number of chars in all names")
+    property_name === :nnames_map && return println("Model.nnames_map: number of slots in the names hash map")
+    property_name === :npaths && return println("Model.npaths: number of chars in all paths")
+    property_name === :nM && return println("Model.nM: number of non-zeros in sparse inertia matrix")
+    property_name === :nD && return println("Model.nD: number of non-zeros in sparse dof-dof matrix")
+    property_name === :nB && return println("Model.nB: number of non-zeros in sparse body-dof matrix")
+    property_name === :ntree && return println("Model.ntree: number of kinematic trees under world body")
+    property_name === :ngravcomp && return println("Model.ngravcomp: number of bodies with nonzero gravcomp")
+    property_name === :nemax && return println("Model.nemax: number of potential equality-constraint rows")
+    property_name === :njmax && return println("Model.njmax: number of available rows in constraint Jacobian")
+    property_name === :nconmax && return println("Model.nconmax: number of potential contacts in contact list")
+    property_name === :nuserdata && return println("Model.nuserdata: number of mjtNums reserved for the user")
+    property_name === :nsensordata && return println("Model.nsensordata: number of mjtNums in sensor data vector")
+    property_name === :npluginstate && return println("Model.npluginstate: number of mjtNums in plugin state vector")
+    property_name === :narena && return println("Model.narena: number of bytes in the mjData arena (inclusive of stack)")
+    property_name === :nbuffer && return println("Model.nbuffer: number of bytes in buffer")
+    property_name === :opt && return println("Model.opt: physics options")
+    property_name === :vis && return println("Model.vis: visualization options")
+    property_name === :stat && return println("Model.stat: model statistics")
+    property_name === :buffer && return println("Model.buffer: main buffer; all pointers point in it (nbuffer)")
+    property_name === :qpos0 && return println("Model.qpos0: qpos values at default pose (nq x 1)")
+    property_name === :qpos_spring && return println("Model.qpos_spring: reference pose for springs (nq x 1)")
+    property_name === :body_parentid && return println("Model.body_parentid: id of body's parent (nbody x 1)")
+    property_name === :body_rootid && return println("Model.body_rootid: id of root above body (nbody x 1)")
+    property_name === :body_weldid && return println("Model.body_weldid: id of body that this body is welded to (nbody x 1)")
+    property_name === :body_mocapid && return println("Model.body_mocapid: id of mocap data; -1: none (nbody x 1)")
+    property_name === :body_jntnum && return println("Model.body_jntnum: number of joints for this body (nbody x 1)")
+    property_name === :body_jntadr && return println("Model.body_jntadr: start addr of joints; -1: no joints (nbody x 1)")
+    property_name === :body_dofnum && return println("Model.body_dofnum: number of motion degrees of freedom (nbody x 1)")
+    property_name === :body_dofadr && return println("Model.body_dofadr: start addr of dofs; -1: no dofs (nbody x 1)")
+    property_name === :body_treeid && return println("Model.body_treeid: id of body's kinematic tree; -1: static (nbody x 1)")
+    property_name === :body_geomnum && return println("Model.body_geomnum: number of geoms (nbody x 1)")
+    property_name === :body_geomadr && return println("Model.body_geomadr: start addr of geoms; -1: no geoms (nbody x 1)")
+    property_name === :body_simple && return println("Model.body_simple: 1: diag M; 2: diag M, sliders only (nbody x 1)")
+    property_name === :body_sameframe && return println("Model.body_sameframe: inertial frame is same as body frame (nbody x 1)")
+    property_name === :body_pos && return println("Model.body_pos: position offset rel. to parent body (nbody x 3)")
+    property_name === :body_quat && return println("Model.body_quat: orientation offset rel. to parent body (nbody x 4)")
+    property_name === :body_ipos && return println("Model.body_ipos: local position of center of mass (nbody x 3)")
+    property_name === :body_iquat && return println("Model.body_iquat: local orientation of inertia ellipsoid (nbody x 4)")
+    property_name === :body_mass && return println("Model.body_mass: mass (nbody x 1)")
+    property_name === :body_subtreemass && return println("Model.body_subtreemass: mass of subtree starting at this body (nbody x 1)")
+    property_name === :body_inertia && return println("Model.body_inertia: diagonal inertia in ipos/iquat frame (nbody x 3)")
+    property_name === :body_invweight0 && return println("Model.body_invweight0: mean inv inert in qpos0 (trn, rot) (nbody x 2)")
+    property_name === :body_gravcomp && return println("Model.body_gravcomp: antigravity force, units of body weight (nbody x 1)")
+    property_name === :body_margin && return println("Model.body_margin: MAX over all geom margins (nbody x 1)")
+    property_name === :body_user && return println("Model.body_user: user data (nbody x nuser_body)")
+    property_name === :body_plugin && return println("Model.body_plugin: plugin instance id; -1: not in use (nbody x 1)")
+    property_name === :body_contype && return println("Model.body_contype: OR over all geom contypes (nbody x 1)")
+    property_name === :body_conaffinity && return println("Model.body_conaffinity: OR over all geom conaffinities (nbody x 1)")
+    property_name === :body_bvhadr && return println("Model.body_bvhadr: address of bvh root (nbody x 1)")
+    property_name === :body_bvhnum && return println("Model.body_bvhnum: number of bounding volumes (nbody x 1)")
+    property_name === :bvh_depth && return println("Model.bvh_depth: depth in the bounding volume hierarchy (nbvh x 1)")
+    property_name === :bvh_child && return println("Model.bvh_child: left and right children in tree (nbvh x 2)")
+    property_name === :bvh_nodeid && return println("Model.bvh_nodeid: geom or elem id of node; -1: non-leaf (nbvh x 1)")
+    property_name === :bvh_aabb && return println("Model.bvh_aabb: local bounding box (center, size) (nbvhstatic x 6)")
+    property_name === :jnt_type && return println("Model.jnt_type: type of joint (mjtJoint) (njnt x 1)")
+    property_name === :jnt_qposadr && return println("Model.jnt_qposadr: start addr in 'qpos' for joint's data (njnt x 1)")
+    property_name === :jnt_dofadr && return println("Model.jnt_dofadr: start addr in 'qvel' for joint's data (njnt x 1)")
+    property_name === :jnt_bodyid && return println("Model.jnt_bodyid: id of joint's body (njnt x 1)")
+    property_name === :jnt_group && return println("Model.jnt_group: group for visibility (njnt x 1)")
+    property_name === :jnt_limited && return println("Model.jnt_limited: does joint have limits (njnt x 1)")
+    property_name === :jnt_actfrclimited && return println("Model.jnt_actfrclimited: does joint have actuator force limits (njnt x 1)")
+    property_name === :jnt_actgravcomp && return println("Model.jnt_actgravcomp: is gravcomp force applied via actuators (njnt x 1)")
+    property_name === :jnt_solref && return println("Model.jnt_solref: constraint solver reference: limit (njnt x mjNREF)")
+    property_name === :jnt_solimp && return println("Model.jnt_solimp: constraint solver impedance: limit (njnt x mjNIMP)")
+    property_name === :jnt_pos && return println("Model.jnt_pos: local anchor position (njnt x 3)")
+    property_name === :jnt_axis && return println("Model.jnt_axis: local joint axis (njnt x 3)")
+    property_name === :jnt_stiffness && return println("Model.jnt_stiffness: stiffness coefficient (njnt x 1)")
+    property_name === :jnt_range && return println("Model.jnt_range: joint limits (njnt x 2)")
+    property_name === :jnt_actfrcrange && return println("Model.jnt_actfrcrange: range of total actuator force (njnt x 2)")
+    property_name === :jnt_margin && return println("Model.jnt_margin: min distance for limit detection (njnt x 1)")
+    property_name === :jnt_user && return println("Model.jnt_user: user data (njnt x nuser_jnt)")
+    property_name === :dof_bodyid && return println("Model.dof_bodyid: id of dof's body (nv x 1)")
+    property_name === :dof_jntid && return println("Model.dof_jntid: id of dof's joint (nv x 1)")
+    property_name === :dof_parentid && return println("Model.dof_parentid: id of dof's parent; -1: none (nv x 1)")
+    property_name === :dof_treeid && return println("Model.dof_treeid: id of dof's kinematic tree (nv x 1)")
+    property_name === :dof_Madr && return println("Model.dof_Madr: dof address in M-diagonal (nv x 1)")
+    property_name === :dof_simplenum && return println("Model.dof_simplenum: number of consecutive simple dofs (nv x 1)")
+    property_name === :dof_solref && return println("Model.dof_solref: constraint solver reference:frictionloss (nv x mjNREF)")
+    property_name === :dof_solimp && return println("Model.dof_solimp: constraint solver impedance:frictionloss (nv x mjNIMP)")
+    property_name === :dof_frictionloss && return println("Model.dof_frictionloss: dof friction loss (nv x 1)")
+    property_name === :dof_armature && return println("Model.dof_armature: dof armature inertia/mass (nv x 1)")
+    property_name === :dof_damping && return println("Model.dof_damping: damping coefficient (nv x 1)")
+    property_name === :dof_invweight0 && return println("Model.dof_invweight0: diag. inverse inertia in qpos0 (nv x 1)")
+    property_name === :dof_M0 && return println("Model.dof_M0: diag. inertia in qpos0 (nv x 1)")
+    property_name === :geom_type && return println("Model.geom_type: geometric type (mjtGeom) (ngeom x 1)")
+    property_name === :geom_contype && return println("Model.geom_contype: geom contact type (ngeom x 1)")
+    property_name === :geom_conaffinity && return println("Model.geom_conaffinity: geom contact affinity (ngeom x 1)")
+    property_name === :geom_condim && return println("Model.geom_condim: contact dimensionality (1, 3, 4, 6) (ngeom x 1)")
+    property_name === :geom_bodyid && return println("Model.geom_bodyid: id of geom's body (ngeom x 1)")
+    property_name === :geom_dataid && return println("Model.geom_dataid: id of geom's mesh/hfield; -1: none (ngeom x 1)")
+    property_name === :geom_matid && return println("Model.geom_matid: material id for rendering; -1: none (ngeom x 1)")
+    property_name === :geom_group && return println("Model.geom_group: group for visibility (ngeom x 1)")
+    property_name === :geom_priority && return println("Model.geom_priority: geom contact priority (ngeom x 1)")
+    property_name === :geom_plugin && return println("Model.geom_plugin: plugin instance id; -1: not in use (ngeom x 1)")
+    property_name === :geom_sameframe && return println("Model.geom_sameframe: same as body frame (1) or iframe (2) (ngeom x 1)")
+    property_name === :geom_solmix && return println("Model.geom_solmix: mixing coef for solref/imp in geom pair (ngeom x 1)")
+    property_name === :geom_solref && return println("Model.geom_solref: constraint solver reference: contact (ngeom x mjNREF)")
+    property_name === :geom_solimp && return println("Model.geom_solimp: constraint solver impedance: contact (ngeom x mjNIMP)")
+    property_name === :geom_size && return println("Model.geom_size: geom-specific size parameters (ngeom x 3)")
+    property_name === :geom_aabb && return println("Model.geom_aabb: bounding box, (center, size) (ngeom x 6)")
+    property_name === :geom_rbound && return println("Model.geom_rbound: radius of bounding sphere (ngeom x 1)")
+    property_name === :geom_pos && return println("Model.geom_pos: local position offset rel. to body (ngeom x 3)")
+    property_name === :geom_quat && return println("Model.geom_quat: local orientation offset rel. to body (ngeom x 4)")
+    property_name === :geom_friction && return println("Model.geom_friction: friction for (slide, spin, roll) (ngeom x 3)")
+    property_name === :geom_margin && return println("Model.geom_margin: detect contact if dist<margin(ngeom x 1)")
+    property_name === :geom_gap && return println("Model.geom_gap: include in solver if dist<margin-gap (ngeom x 1)")
+    property_name === :geom_fluid && return println("Model.geom_fluid: fluid interaction parameters (ngeom x mjNFLUID)")
+    property_name === :geom_user && return println("Model.geom_user: user data (ngeom x nuser_geom)")
+    property_name === :geom_rgba && return println("Model.geom_rgba: rgba when material is omitted (ngeom x 4)")
+    property_name === :site_type && return println("Model.site_type: geom type for rendering (mjtGeom) (nsite x 1)")
+    property_name === :site_bodyid && return println("Model.site_bodyid: id of site's body (nsite x 1)")
+    property_name === :site_matid && return println("Model.site_matid: material id for rendering; -1: none (nsite x 1)")
+    property_name === :site_group && return println("Model.site_group: group for visibility (nsite x 1)")
+    property_name === :site_sameframe && return println("Model.site_sameframe: same as body frame (1) or iframe (2) (nsite x 1)")
+    property_name === :site_size && return println("Model.site_size: geom size for rendering (nsite x 3)")
+    property_name === :site_pos && return println("Model.site_pos: local position offset rel. to body (nsite x 3)")
+    property_name === :site_quat && return println("Model.site_quat: local orientation offset rel. to body (nsite x 4)")
+    property_name === :site_user && return println("Model.site_user: user data (nsite x nuser_site)")
+    property_name === :site_rgba && return println("Model.site_rgba: rgba when material is omitted (nsite x 4)")
+    property_name === :cam_mode && return println("Model.cam_mode: camera tracking mode (mjtCamLight) (ncam x 1)")
+    property_name === :cam_bodyid && return println("Model.cam_bodyid: id of camera's body (ncam x 1)")
+    property_name === :cam_targetbodyid && return println("Model.cam_targetbodyid: id of targeted body; -1: none (ncam x 1)")
+    property_name === :cam_pos && return println("Model.cam_pos: position rel. to body frame (ncam x 3)")
+    property_name === :cam_quat && return println("Model.cam_quat: orientation rel. to body frame (ncam x 4)")
+    property_name === :cam_poscom0 && return println("Model.cam_poscom0: global position rel. to sub-com in qpos0 (ncam x 3)")
+    property_name === :cam_pos0 && return println("Model.cam_pos0: global position rel. to body in qpos0 (ncam x 3)")
+    property_name === :cam_mat0 && return println("Model.cam_mat0: global orientation in qpos0 (ncam x 9)")
+    property_name === :cam_resolution && return println("Model.cam_resolution: [width, height] in pixels (ncam x 2)")
+    property_name === :cam_fovy && return println("Model.cam_fovy: y-field of view (deg) (ncam x 1)")
+    property_name === :cam_intrinsic && return println("Model.cam_intrinsic: [focal length; principal point] (ncam x 4)")
+    property_name === :cam_sensorsize && return println("Model.cam_sensorsize: sensor size (ncam x 2)")
+    property_name === :cam_ipd && return println("Model.cam_ipd: inter-pupilary distance (ncam x 1)")
+    property_name === :cam_user && return println("Model.cam_user: user data (ncam x nuser_cam)")
+    property_name === :light_mode && return println("Model.light_mode: light tracking mode (mjtCamLight) (nlight x 1)")
+    property_name === :light_bodyid && return println("Model.light_bodyid: id of light's body (nlight x 1)")
+    property_name === :light_targetbodyid && return println("Model.light_targetbodyid: id of targeted body; -1: none (nlight x 1)")
+    property_name === :light_directional && return println("Model.light_directional: directional light (nlight x 1)")
+    property_name === :light_castshadow && return println("Model.light_castshadow: does light cast shadows (nlight x 1)")
+    property_name === :light_bulbradius && return println("Model.light_bulbradius: light radius for soft shadows (nlight x 1)")
+    property_name === :light_active && return println("Model.light_active: is light on (nlight x 1)")
+    property_name === :light_pos && return println("Model.light_pos: position rel. to body frame (nlight x 3)")
+    property_name === :light_dir && return println("Model.light_dir: direction rel. to body frame (nlight x 3)")
+    property_name === :light_poscom0 && return println("Model.light_poscom0: global position rel. to sub-com in qpos0 (nlight x 3)")
+    property_name === :light_pos0 && return println("Model.light_pos0: global position rel. to body in qpos0 (nlight x 3)")
+    property_name === :light_dir0 && return println("Model.light_dir0: global direction in qpos0 (nlight x 3)")
+    property_name === :light_attenuation && return println("Model.light_attenuation: OpenGL attenuation (quadratic model) (nlight x 3)")
+    property_name === :light_cutoff && return println("Model.light_cutoff: OpenGL cutoff (nlight x 1)")
+    property_name === :light_exponent && return println("Model.light_exponent: OpenGL exponent (nlight x 1)")
+    property_name === :light_ambient && return println("Model.light_ambient: ambient rgb (alpha=1) (nlight x 3)")
+    property_name === :light_diffuse && return println("Model.light_diffuse: diffuse rgb (alpha=1) (nlight x 3)")
+    property_name === :light_specular && return println("Model.light_specular: specular rgb (alpha=1) (nlight x 3)")
+    property_name === :flex_contype && return println("Model.flex_contype: flex contact type (nflex x 1)")
+    property_name === :flex_conaffinity && return println("Model.flex_conaffinity: flex contact affinity (nflex x 1)")
+    property_name === :flex_condim && return println("Model.flex_condim: contact dimensionality (1, 3, 4, 6) (nflex x 1)")
+    property_name === :flex_priority && return println("Model.flex_priority: flex contact priority (nflex x 1)")
+    property_name === :flex_solmix && return println("Model.flex_solmix: mix coef for solref/imp in contact pair (nflex x 1)")
+    property_name === :flex_solref && return println("Model.flex_solref: constraint solver reference: contact (nflex x mjNREF)")
+    property_name === :flex_solimp && return println("Model.flex_solimp: constraint solver impedance: contact (nflex x mjNIMP)")
+    property_name === :flex_friction && return println("Model.flex_friction: friction for (slide, spin, roll) (nflex x 3)")
+    property_name === :flex_margin && return println("Model.flex_margin: detect contact if dist<margin(nflex x 1)")
+    property_name === :flex_gap && return println("Model.flex_gap: include in solver if dist<margin-gap (nflex x 1)")
+    property_name === :flex_internal && return println("Model.flex_internal: internal flex collision enabled (nflex x 1)")
+    property_name === :flex_selfcollide && return println("Model.flex_selfcollide: self collision mode (mjtFlexSelf) (nflex x 1)")
+    property_name === :flex_activelayers && return println("Model.flex_activelayers: number of active element layers, 3D only (nflex x 1)")
+    property_name === :flex_dim && return println("Model.flex_dim: 1: lines, 2: triangles, 3: tetrahedra (nflex x 1)")
+    property_name === :flex_matid && return println("Model.flex_matid: material id for rendering (nflex x 1)")
+    property_name === :flex_group && return println("Model.flex_group: group for visibility (nflex x 1)")
+    property_name === :flex_vertadr && return println("Model.flex_vertadr: first vertex address (nflex x 1)")
+    property_name === :flex_vertnum && return println("Model.flex_vertnum: number of vertices (nflex x 1)")
+    property_name === :flex_edgeadr && return println("Model.flex_edgeadr: first edge address (nflex x 1)")
+    property_name === :flex_edgenum && return println("Model.flex_edgenum: number of edges (nflex x 1)")
+    property_name === :flex_elemadr && return println("Model.flex_elemadr: first element address (nflex x 1)")
+    property_name === :flex_elemnum && return println("Model.flex_elemnum: number of elements (nflex x 1)")
+    property_name === :flex_elemdataadr && return println("Model.flex_elemdataadr: first element vertex id address (nflex x 1)")
+    property_name === :flex_shellnum && return println("Model.flex_shellnum: number of shells (nflex x 1)")
+    property_name === :flex_shelldataadr && return println("Model.flex_shelldataadr: first shell data address (nflex x 1)")
+    property_name === :flex_evpairadr && return println("Model.flex_evpairadr: first evpair address (nflex x 1)")
+    property_name === :flex_evpairnum && return println("Model.flex_evpairnum: number of evpairs (nflex x 1)")
+    property_name === :flex_texcoordadr && return println("Model.flex_texcoordadr: address in flex_texcoord; -1: none (nflex x 1)")
+    property_name === :flex_vertbodyid && return println("Model.flex_vertbodyid: vertex body ids (nflexvert x 1)")
+    property_name === :flex_edge && return println("Model.flex_edge: edge vertex ids (2 per edge) (nflexedge x 2)")
+    property_name === :flex_elem && return println("Model.flex_elem: element vertex ids (dim+1 per elem) (nflexelemdata x 1)")
+    property_name === :flex_elemlayer && return println("Model.flex_elemlayer: element distance from surface, 3D only (nflexelem x 1)")
+    property_name === :flex_shell && return println("Model.flex_shell: shell fragment vertex ids (dim per frag) (nflexshelldata x 1)")
+    property_name === :flex_evpair && return println("Model.flex_evpair: (element, vertex) collision pairs (nflexevpair x 2)")
+    property_name === :flex_vert && return println("Model.flex_vert: vertex positions in local body frames (nflexvert x 3)")
+    property_name === :flex_xvert0 && return println("Model.flex_xvert0: Cartesian vertex positions in qpos0 (nflexvert x 3)")
+    property_name === :flexedge_length0 && return println("Model.flexedge_length0: edge lengths in qpos0 (nflexedge x 1)")
+    property_name === :flexedge_invweight0 && return println("Model.flexedge_invweight0: edge inv. weight in qpos0 (nflexedge x 1)")
+    property_name === :flex_radius && return println("Model.flex_radius: radius around primitive element (nflex x 1)")
+    property_name === :flex_edgestiffness && return println("Model.flex_edgestiffness: edge stiffness (nflex x 1)")
+    property_name === :flex_edgedamping && return println("Model.flex_edgedamping: edge damping (nflex x 1)")
+    property_name === :flex_edgeequality && return println("Model.flex_edgeequality: is edge equality constraint defined (nflex x 1)")
+    property_name === :flex_rigid && return println("Model.flex_rigid: are all verices in the same body (nflex x 1)")
+    property_name === :flexedge_rigid && return println("Model.flexedge_rigid: are both edge vertices in same body (nflexedge x 1)")
+    property_name === :flex_centered && return println("Model.flex_centered: are all vertex coordinates (0,0,0) (nflex x 1)")
+    property_name === :flex_flatskin && return println("Model.flex_flatskin: render flex skin with flat shading (nflex x 1)")
+    property_name === :flex_bvhadr && return println("Model.flex_bvhadr: address of bvh root; -1: no bvh (nflex x 1)")
+    property_name === :flex_bvhnum && return println("Model.flex_bvhnum: number of bounding volumes (nflex x 1)")
+    property_name === :flex_rgba && return println("Model.flex_rgba: rgba when material is omitted (nflex x 4)")
+    property_name === :flex_texcoord && return println("Model.flex_texcoord: vertex texture coordinates (nflextexcoord x 2)")
+    property_name === :mesh_vertadr && return println("Model.mesh_vertadr: first vertex address (nmesh x 1)")
+    property_name === :mesh_vertnum && return println("Model.mesh_vertnum: number of vertices (nmesh x 1)")
+    property_name === :mesh_faceadr && return println("Model.mesh_faceadr: first face address (nmesh x 1)")
+    property_name === :mesh_facenum && return println("Model.mesh_facenum: number of faces (nmesh x 1)")
+    property_name === :mesh_bvhadr && return println("Model.mesh_bvhadr: address of bvh root (nmesh x 1)")
+    property_name === :mesh_bvhnum && return println("Model.mesh_bvhnum: number of bvh (nmesh x 1)")
+    property_name === :mesh_normaladr && return println("Model.mesh_normaladr: first normal address (nmesh x 1)")
+    property_name === :mesh_normalnum && return println("Model.mesh_normalnum: number of normals (nmesh x 1)")
+    property_name === :mesh_texcoordadr && return println("Model.mesh_texcoordadr: texcoord data address; -1: no texcoord (nmesh x 1)")
+    property_name === :mesh_texcoordnum && return println("Model.mesh_texcoordnum: number of texcoord (nmesh x 1)")
+    property_name === :mesh_graphadr && return println("Model.mesh_graphadr: graph data address; -1: no graph (nmesh x 1)")
+    property_name === :mesh_vert && return println("Model.mesh_vert: vertex positions for all meshes (nmeshvert x 3)")
+    property_name === :mesh_normal && return println("Model.mesh_normal: normals for all meshes (nmeshnormal x 3)")
+    property_name === :mesh_texcoord && return println("Model.mesh_texcoord: vertex texcoords for all meshes (nmeshtexcoord x 2)")
+    property_name === :mesh_face && return println("Model.mesh_face: vertex face data (nmeshface x 3)")
+    property_name === :mesh_facenormal && return println("Model.mesh_facenormal: normal face data (nmeshface x 3)")
+    property_name === :mesh_facetexcoord && return println("Model.mesh_facetexcoord: texture face data (nmeshface x 3)")
+    property_name === :mesh_graph && return println("Model.mesh_graph: convex graph data (nmeshgraph x 1)")
+    property_name === :mesh_scale && return println("Model.mesh_scale: scaling applied to asset vertices (nmesh x 3)")
+    property_name === :mesh_pos && return println("Model.mesh_pos: translation applied to asset vertices (nmesh x 3)")
+    property_name === :mesh_quat && return println("Model.mesh_quat: rotation applied to asset vertices (nmesh x 4)")
+    property_name === :mesh_pathadr && return println("Model.mesh_pathadr: address of asset path for mesh; -1: none (nmesh x 1)")
+    property_name === :skin_matid && return println("Model.skin_matid: skin material id; -1: none (nskin x 1)")
+    property_name === :skin_group && return println("Model.skin_group: group for visibility (nskin x 1)")
+    property_name === :skin_rgba && return println("Model.skin_rgba: skin rgba (nskin x 4)")
+    property_name === :skin_inflate && return println("Model.skin_inflate: inflate skin in normal direction (nskin x 1)")
+    property_name === :skin_vertadr && return println("Model.skin_vertadr: first vertex address (nskin x 1)")
+    property_name === :skin_vertnum && return println("Model.skin_vertnum: number of vertices (nskin x 1)")
+    property_name === :skin_texcoordadr && return println("Model.skin_texcoordadr: texcoord data address; -1: no texcoord (nskin x 1)")
+    property_name === :skin_faceadr && return println("Model.skin_faceadr: first face address (nskin x 1)")
+    property_name === :skin_facenum && return println("Model.skin_facenum: number of faces (nskin x 1)")
+    property_name === :skin_boneadr && return println("Model.skin_boneadr: first bone in skin (nskin x 1)")
+    property_name === :skin_bonenum && return println("Model.skin_bonenum: number of bones in skin (nskin x 1)")
+    property_name === :skin_vert && return println("Model.skin_vert: vertex positions for all skin meshes (nskinvert x 3)")
+    property_name === :skin_texcoord && return println("Model.skin_texcoord: vertex texcoords for all skin meshes (nskintexvert x 2)")
+    property_name === :skin_face && return println("Model.skin_face: triangle faces for all skin meshes (nskinface x 3)")
+    property_name === :skin_bonevertadr && return println("Model.skin_bonevertadr: first vertex in each bone (nskinbone x 1)")
+    property_name === :skin_bonevertnum && return println("Model.skin_bonevertnum: number of vertices in each bone (nskinbone x 1)")
+    property_name === :skin_bonebindpos && return println("Model.skin_bonebindpos: bind pos of each bone (nskinbone x 3)")
+    property_name === :skin_bonebindquat && return println("Model.skin_bonebindquat: bind quat of each bone (nskinbone x 4)")
+    property_name === :skin_bonebodyid && return println("Model.skin_bonebodyid: body id of each bone (nskinbone x 1)")
+    property_name === :skin_bonevertid && return println("Model.skin_bonevertid: mesh ids of vertices in each bone (nskinbonevert x 1)")
+    property_name === :skin_bonevertweight && return println("Model.skin_bonevertweight: weights of vertices in each bone (nskinbonevert x 1)")
+    property_name === :skin_pathadr && return println("Model.skin_pathadr: address of asset path for skin; -1: none (nskin x 1)")
+    property_name === :hfield_size && return println("Model.hfield_size: (x, y, z_top, z_bottom) (nhfield x 4)")
+    property_name === :hfield_nrow && return println("Model.hfield_nrow: number of rows in grid (nhfield x 1)")
+    property_name === :hfield_ncol && return println("Model.hfield_ncol: number of columns in grid (nhfield x 1)")
+    property_name === :hfield_adr && return println("Model.hfield_adr: address in hfield_data (nhfield x 1)")
+    property_name === :hfield_data && return println("Model.hfield_data: elevation data (nhfielddata x 1)")
+    property_name === :hfield_pathadr && return println("Model.hfield_pathadr: address of hfield asset path; -1: none (nhfield x 1)")
+    property_name === :tex_type && return println("Model.tex_type: texture type (mjtTexture) (ntex x 1)")
+    property_name === :tex_height && return println("Model.tex_height: number of rows in texture image (ntex x 1)")
+    property_name === :tex_width && return println("Model.tex_width: number of columns in texture image (ntex x 1)")
+    property_name === :tex_adr && return println("Model.tex_adr: address in rgb (ntex x 1)")
+    property_name === :tex_rgb && return println("Model.tex_rgb: rgb (alpha = 1) (ntexdata x 1)")
+    property_name === :tex_pathadr && return println("Model.tex_pathadr: address of texture asset path; -1: none (ntex x 1)")
+    property_name === :mat_texid && return println("Model.mat_texid: texture id; -1: none (nmat x 1)")
+    property_name === :mat_texuniform && return println("Model.mat_texuniform: make texture cube uniform (nmat x 1)")
+    property_name === :mat_texrepeat && return println("Model.mat_texrepeat: texture repetition for 2d mapping (nmat x 2)")
+    property_name === :mat_emission && return println("Model.mat_emission: emission (x rgb) (nmat x 1)")
+    property_name === :mat_specular && return println("Model.mat_specular: specular (x white) (nmat x 1)")
+    property_name === :mat_shininess && return println("Model.mat_shininess: shininess coef (nmat x 1)")
+    property_name === :mat_reflectance && return println("Model.mat_reflectance: reflectance (0: disable) (nmat x 1)")
+    property_name === :mat_metallic && return println("Model.mat_metallic: metallic coef (nmat x 1)")
+    property_name === :mat_roughness && return println("Model.mat_roughness: roughness coef (nmat x 1)")
+    property_name === :mat_rgba && return println("Model.mat_rgba: rgba (nmat x 4)")
+    property_name === :pair_dim && return println("Model.pair_dim: contact dimensionality (npair x 1)")
+    property_name === :pair_geom1 && return println("Model.pair_geom1: id of geom1 (npair x 1)")
+    property_name === :pair_geom2 && return println("Model.pair_geom2: id of geom2 (npair x 1)")
+    property_name === :pair_signature && return println("Model.pair_signature: body1<<16 + body2 (npair x 1)")
+    property_name === :pair_solref && return println("Model.pair_solref: solver reference: contact normal (npair x mjNREF)")
+    property_name === :pair_solreffriction && return println("Model.pair_solreffriction: solver reference: contact friction (npair x mjNREF)")
+    property_name === :pair_solimp && return println("Model.pair_solimp: solver impedance: contact (npair x mjNIMP)")
+    property_name === :pair_margin && return println("Model.pair_margin: detect contact if dist<margin(npair x 1)")
+    property_name === :pair_gap && return println("Model.pair_gap: include in solver if dist<margin-gap (npair x 1)")
+    property_name === :pair_friction && return println("Model.pair_friction: tangent1, 2, spin, roll1, 2 (npair x 5)")
+    property_name === :exclude_signature && return println("Model.exclude_signature: body1<<16 + body2 (nexclude x 1)")
+    property_name === :eq_type && return println("Model.eq_type: constraint type (mjtEq) (neq x 1)")
+    property_name === :eq_obj1id && return println("Model.eq_obj1id: id of object 1 (neq x 1)")
+    property_name === :eq_obj2id && return println("Model.eq_obj2id: id of object 2 (neq x 1)")
+    property_name === :eq_active0 && return println("Model.eq_active0: initial enable/disable constraint state (neq x 1)")
+    property_name === :eq_solref && return println("Model.eq_solref: constraint solver reference (neq x mjNREF)")
+    property_name === :eq_solimp && return println("Model.eq_solimp: constraint solver impedance (neq x mjNIMP)")
+    property_name === :eq_data && return println("Model.eq_data: numeric data for constraint (neq x mjNEQDATA)")
+    property_name === :tendon_adr && return println("Model.tendon_adr: address of first object in tendon's path (ntendon x 1)")
+    property_name === :tendon_num && return println("Model.tendon_num: number of objects in tendon's path (ntendon x 1)")
+    property_name === :tendon_matid && return println("Model.tendon_matid: material id for rendering (ntendon x 1)")
+    property_name === :tendon_group && return println("Model.tendon_group: group for visibility (ntendon x 1)")
+    property_name === :tendon_limited && return println("Model.tendon_limited: does tendon have length limits (ntendon x 1)")
+    property_name === :tendon_width && return println("Model.tendon_width: width for rendering (ntendon x 1)")
+    property_name === :tendon_solref_lim && return println("Model.tendon_solref_lim: constraint solver reference: limit (ntendon x mjNREF)")
+    property_name === :tendon_solimp_lim && return println("Model.tendon_solimp_lim: constraint solver impedance: limit (ntendon x mjNIMP)")
+    property_name === :tendon_solref_fri && return println("Model.tendon_solref_fri: constraint solver reference: friction (ntendon x mjNREF)")
+    property_name === :tendon_solimp_fri && return println("Model.tendon_solimp_fri: constraint solver impedance: friction (ntendon x mjNIMP)")
+    property_name === :tendon_range && return println("Model.tendon_range: tendon length limits (ntendon x 2)")
+    property_name === :tendon_margin && return println("Model.tendon_margin: min distance for limit detection (ntendon x 1)")
+    property_name === :tendon_stiffness && return println("Model.tendon_stiffness: stiffness coefficient (ntendon x 1)")
+    property_name === :tendon_damping && return println("Model.tendon_damping: damping coefficient (ntendon x 1)")
+    property_name === :tendon_frictionloss && return println("Model.tendon_frictionloss: loss due to friction (ntendon x 1)")
+    property_name === :tendon_lengthspring && return println("Model.tendon_lengthspring: spring resting length range (ntendon x 2)")
+    property_name === :tendon_length0 && return println("Model.tendon_length0: tendon length in qpos0 (ntendon x 1)")
+    property_name === :tendon_invweight0 && return println("Model.tendon_invweight0: inv. weight in qpos0 (ntendon x 1)")
+    property_name === :tendon_user && return println("Model.tendon_user: user data (ntendon x nuser_tendon)")
+    property_name === :tendon_rgba && return println("Model.tendon_rgba: rgba when material is omitted (ntendon x 4)")
+    property_name === :wrap_type && return println("Model.wrap_type: wrap object type (mjtWrap) (nwrap x 1)")
+    property_name === :wrap_objid && return println("Model.wrap_objid: object id: geom, site, joint (nwrap x 1)")
+    property_name === :wrap_prm && return println("Model.wrap_prm: divisor, joint coef, or site id (nwrap x 1)")
+    property_name === :actuator_trntype && return println("Model.actuator_trntype: transmission type (mjtTrn) (nu x 1)")
+    property_name === :actuator_dyntype && return println("Model.actuator_dyntype: dynamics type (mjtDyn) (nu x 1)")
+    property_name === :actuator_gaintype && return println("Model.actuator_gaintype: gain type (mjtGain) (nu x 1)")
+    property_name === :actuator_biastype && return println("Model.actuator_biastype: bias type (mjtBias) (nu x 1)")
+    property_name === :actuator_trnid && return println("Model.actuator_trnid: transmission id: joint, tendon, site (nu x 2)")
+    property_name === :actuator_actadr && return println("Model.actuator_actadr: first activation address; -1: stateless (nu x 1)")
+    property_name === :actuator_actnum && return println("Model.actuator_actnum: number of activation variables (nu x 1)")
+    property_name === :actuator_group && return println("Model.actuator_group: group for visibility (nu x 1)")
+    property_name === :actuator_ctrllimited && return println("Model.actuator_ctrllimited: is control limited (nu x 1)")
+    property_name === :actuator_forcelimited && return println("Model.actuator_forcelimited: is force limited (nu x 1)")
+    property_name === :actuator_actlimited && return println("Model.actuator_actlimited: is activation limited (nu x 1)")
+    property_name === :actuator_dynprm && return println("Model.actuator_dynprm: dynamics parameters (nu x mjNDYN)")
+    property_name === :actuator_gainprm && return println("Model.actuator_gainprm: gain parameters (nu x mjNGAIN)")
+    property_name === :actuator_biasprm && return println("Model.actuator_biasprm: bias parameters (nu x mjNBIAS)")
+    property_name === :actuator_actearly && return println("Model.actuator_actearly: step activation before force (nu x 1)")
+    property_name === :actuator_ctrlrange && return println("Model.actuator_ctrlrange: range of controls (nu x 2)")
+    property_name === :actuator_forcerange && return println("Model.actuator_forcerange: range of forces (nu x 2)")
+    property_name === :actuator_actrange && return println("Model.actuator_actrange: range of activations (nu x 2)")
+    property_name === :actuator_gear && return println("Model.actuator_gear: scale length and transmitted force (nu x 6)")
+    property_name === :actuator_cranklength && return println("Model.actuator_cranklength: crank length for slider-crank (nu x 1)")
+    property_name === :actuator_acc0 && return println("Model.actuator_acc0: acceleration from unit force in qpos0 (nu x 1)")
+    property_name === :actuator_length0 && return println("Model.actuator_length0: actuator length in qpos0 (nu x 1)")
+    property_name === :actuator_lengthrange && return println("Model.actuator_lengthrange: feasible actuator length range (nu x 2)")
+    property_name === :actuator_user && return println("Model.actuator_user: user data (nu x nuser_actuator)")
+    property_name === :actuator_plugin && return println("Model.actuator_plugin: plugin instance id; -1: not a plugin (nu x 1)")
+    property_name === :sensor_type && return println("Model.sensor_type: sensor type (mjtSensor) (nsensor x 1)")
+    property_name === :sensor_datatype && return println("Model.sensor_datatype: numeric data type (mjtDataType) (nsensor x 1)")
+    property_name === :sensor_needstage && return println("Model.sensor_needstage: required compute stage (mjtStage) (nsensor x 1)")
+    property_name === :sensor_objtype && return println("Model.sensor_objtype: type of sensorized object (mjtObj) (nsensor x 1)")
+    property_name === :sensor_objid && return println("Model.sensor_objid: id of sensorized object (nsensor x 1)")
+    property_name === :sensor_reftype && return println("Model.sensor_reftype: type of reference frame (mjtObj) (nsensor x 1)")
+    property_name === :sensor_refid && return println("Model.sensor_refid: id of reference frame; -1: global frame (nsensor x 1)")
+    property_name === :sensor_dim && return println("Model.sensor_dim: number of scalar outputs (nsensor x 1)")
+    property_name === :sensor_adr && return println("Model.sensor_adr: address in sensor array (nsensor x 1)")
+    property_name === :sensor_cutoff && return println("Model.sensor_cutoff: cutoff for real and positive; 0: ignore (nsensor x 1)")
+    property_name === :sensor_noise && return println("Model.sensor_noise: noise standard deviation (nsensor x 1)")
+    property_name === :sensor_user && return println("Model.sensor_user: user data (nsensor x nuser_sensor)")
+    property_name === :sensor_plugin && return println("Model.sensor_plugin: plugin instance id; -1: not a plugin (nsensor x 1)")
+    property_name === :plugin && return println("Model.plugin: globally registered plugin slot number (nplugin x 1)")
+    property_name === :plugin_stateadr && return println("Model.plugin_stateadr: address in the plugin state array (nplugin x 1)")
+    property_name === :plugin_statenum && return println("Model.plugin_statenum: number of states in the plugin instance (nplugin x 1)")
+    property_name === :plugin_attr && return println("Model.plugin_attr: config attributes of plugin instances (npluginattr x 1)")
+    property_name === :plugin_attradr && return println("Model.plugin_attradr: address to each instance's config attrib (nplugin x 1)")
+    property_name === :numeric_adr && return println("Model.numeric_adr: address of field in numeric_data (nnumeric x 1)")
+    property_name === :numeric_size && return println("Model.numeric_size: size of numeric field (nnumeric x 1)")
+    property_name === :numeric_data && return println("Model.numeric_data: array of all numeric fields (nnumericdata x 1)")
+    property_name === :text_adr && return println("Model.text_adr: address of text in text_data (ntext x 1)")
+    property_name === :text_size && return println("Model.text_size: size of text field (strlen+1) (ntext x 1)")
+    property_name === :text_data && return println("Model.text_data: array of all text fields (0-terminated) (ntextdata x 1)")
+    property_name === :tuple_adr && return println("Model.tuple_adr: address of text in text_data (ntuple x 1)")
+    property_name === :tuple_size && return println("Model.tuple_size: number of objects in tuple (ntuple x 1)")
+    property_name === :tuple_objtype && return println("Model.tuple_objtype: array of object types in all tuples (ntupledata x 1)")
+    property_name === :tuple_objid && return println("Model.tuple_objid: array of object ids in all tuples (ntupledata x 1)")
+    property_name === :tuple_objprm && return println("Model.tuple_objprm: array of object params in all tuples (ntupledata x 1)")
+    property_name === :key_time && return println("Model.key_time: key time (nkey x 1)")
+    property_name === :key_qpos && return println("Model.key_qpos: key position (nkey x nq)")
+    property_name === :key_qvel && return println("Model.key_qvel: key velocity (nkey x nv)")
+    property_name === :key_act && return println("Model.key_act: key activation (nkey x na)")
+    property_name === :key_mpos && return println("Model.key_mpos: key mocap position (nkey x 3*nmocap)")
+    property_name === :key_mquat && return println("Model.key_mquat: key mocap quaternion (nkey x 4*nmocap)")
+    property_name === :key_ctrl && return println("Model.key_ctrl: key control (nkey x nu)")
+    property_name === :name_bodyadr && return println("Model.name_bodyadr: body name pointers (nbody x 1)")
+    property_name === :name_jntadr && return println("Model.name_jntadr: joint name pointers (njnt x 1)")
+    property_name === :name_geomadr && return println("Model.name_geomadr: geom name pointers (ngeom x 1)")
+    property_name === :name_siteadr && return println("Model.name_siteadr: site name pointers (nsite x 1)")
+    property_name === :name_camadr && return println("Model.name_camadr: camera name pointers (ncam x 1)")
+    property_name === :name_lightadr && return println("Model.name_lightadr: light name pointers (nlight x 1)")
+    property_name === :name_flexadr && return println("Model.name_flexadr: flex name pointers (nflex x 1)")
+    property_name === :name_meshadr && return println("Model.name_meshadr: mesh name pointers (nmesh x 1)")
+    property_name === :name_skinadr && return println("Model.name_skinadr: skin name pointers (nskin x 1)")
+    property_name === :name_hfieldadr && return println("Model.name_hfieldadr: hfield name pointers (nhfield x 1)")
+    property_name === :name_texadr && return println("Model.name_texadr: texture name pointers (ntex x 1)")
+    property_name === :name_matadr && return println("Model.name_matadr: material name pointers (nmat x 1)")
+    property_name === :name_pairadr && return println("Model.name_pairadr: geom pair name pointers (npair x 1)")
+    property_name === :name_excludeadr && return println("Model.name_excludeadr: exclude name pointers (nexclude x 1)")
+    property_name === :name_eqadr && return println("Model.name_eqadr: equality constraint name pointers (neq x 1)")
+    property_name === :name_tendonadr && return println("Model.name_tendonadr: tendon name pointers (ntendon x 1)")
+    property_name === :name_actuatoradr && return println("Model.name_actuatoradr: actuator name pointers (nu x 1)")
+    property_name === :name_sensoradr && return println("Model.name_sensoradr: sensor name pointers (nsensor x 1)")
+    property_name === :name_numericadr && return println("Model.name_numericadr: numeric name pointers (nnumeric x 1)")
+    property_name === :name_textadr && return println("Model.name_textadr: text name pointers (ntext x 1)")
+    property_name === :name_tupleadr && return println("Model.name_tupleadr: tuple name pointers (ntuple x 1)")
+    property_name === :name_keyadr && return println("Model.name_keyadr: keyframe name pointers (nkey x 1)")
+    property_name === :name_pluginadr && return println("Model.name_pluginadr: plugin instance name pointers (nplugin x 1)")
+    property_name === :names && return println("Model.names: names of all objects, 0-terminated (nnames x 1)")
+    property_name === :names_map && return println("Model.names_map: internal hash map of names (nnames_map x 1)")
+    property_name === :paths && return println("Model.paths: paths to assets, 0-terminated (npaths x 1)")
+    throw(ArgumentError("The property $(property_name) is not defined for Model (mjModel)."))
+end
+function show_docs(x::Model, property_name::Symbol)
+    return show_docs(typeof(x), property_name)
+end
 function Base.propertynames(x::Data)
-    (:nstack, :nbuffer, :nplugin, :pstack, :parena, :maxuse_stack, :maxuse_arena, :maxuse_con, :maxuse_efc, :warning, :timer, :solver, :solver_iter, :solver_nnz, :solver_fwdinv, :nbodypair_broad, :nbodypair_narrow, :ngeompair_mid, :ngeompair_narrow, :ne, :nf, :nefc, :nnzJ, :ncon, :time, :energy, :buffer, :arena, :qpos, :qvel, :act, :qacc_warmstart, :plugin_state, :ctrl, :qfrc_applied, :xfrc_applied, :mocap_pos, :mocap_quat, :qacc, :act_dot, :userdata, :sensordata, :plugin, :plugin_data, :xpos, :xquat, :xmat, :xipos, :ximat, :xanchor, :xaxis, :geom_xpos, :geom_xmat, :site_xpos, :site_xmat, :cam_xpos, :cam_xmat, :light_xpos, :light_xdir, :subtree_com, :cdof, :cinert, :ten_wrapadr, :ten_wrapnum, :ten_J_rownnz, :ten_J_rowadr, :ten_J_colind, :ten_length, :ten_J, :wrap_obj, :wrap_xpos, :actuator_length, :actuator_moment, :crb, :qM, :qLD, :qLDiagInv, :qLDiagSqrtInv, :bvh_active, :ten_velocity, :actuator_velocity, :cvel, :cdof_dot, :qfrc_bias, :qfrc_passive, :efc_vel, :efc_aref, :subtree_linvel, :subtree_angmom, :qH, :qHDiagInv, :D_rownnz, :D_rowadr, :D_colind, :B_rownnz, :B_rowadr, :B_colind, :qDeriv, :qLU, :actuator_force, :qfrc_actuator, :qfrc_smooth, :qacc_smooth, :qfrc_constraint, :qfrc_inverse, :cacc, :cfrc_int, :cfrc_ext, :contact, :efc_type, :efc_id, :efc_J_rownnz, :efc_J_rowadr, :efc_J_rowsuper, :efc_J_colind, :efc_JT_rownnz, :efc_JT_rowadr, :efc_JT_rowsuper, :efc_JT_colind, :efc_J, :efc_JT, :efc_pos, :efc_margin, :efc_frictionloss, :efc_diagApprox, :efc_KBIP, :efc_D, :efc_R, :efc_b, :efc_force, :efc_state, :efc_AR_rownnz, :efc_AR_rowadr, :efc_AR_colind, :efc_AR)
+    (:narena, :nbuffer, :nplugin, :pstack, :pbase, :parena, :maxuse_stack, :maxuse_threadstack, :maxuse_arena, :maxuse_con, :maxuse_efc, :warning, :timer, :solver, :solver_nisland, :solver_niter, :solver_nnz, :solver_fwdinv, :ne, :nf, :nl, :nefc, :nnzJ, :ncon, :nisland, :time, :energy, :buffer, :arena, :qpos, :qvel, :act, :qacc_warmstart, :plugin_state, :ctrl, :qfrc_applied, :xfrc_applied, :eq_active, :mocap_pos, :mocap_quat, :qacc, :act_dot, :userdata, :sensordata, :plugin, :plugin_data, :xpos, :xquat, :xmat, :xipos, :ximat, :xanchor, :xaxis, :geom_xpos, :geom_xmat, :site_xpos, :site_xmat, :cam_xpos, :cam_xmat, :light_xpos, :light_xdir, :subtree_com, :cdof, :cinert, :flexvert_xpos, :flexelem_aabb, :flexedge_J_rownnz, :flexedge_J_rowadr, :flexedge_J_colind, :flexedge_J, :flexedge_length, :ten_wrapadr, :ten_wrapnum, :ten_J_rownnz, :ten_J_rowadr, :ten_J_colind, :ten_J, :ten_length, :wrap_obj, :wrap_xpos, :actuator_length, :actuator_moment, :crb, :qM, :qLD, :qLDiagInv, :qLDiagSqrtInv, :bvh_aabb_dyn, :bvh_active, :flexedge_velocity, :ten_velocity, :actuator_velocity, :cvel, :cdof_dot, :qfrc_bias, :qfrc_spring, :qfrc_damper, :qfrc_gravcomp, :qfrc_fluid, :qfrc_passive, :subtree_linvel, :subtree_angmom, :qH, :qHDiagInv, :D_rownnz, :D_rowadr, :D_colind, :B_rownnz, :B_rowadr, :B_colind, :qDeriv, :qLU, :actuator_force, :qfrc_actuator, :qfrc_smooth, :qacc_smooth, :qfrc_constraint, :qfrc_inverse, :cacc, :cfrc_int, :cfrc_ext, :contact, :efc_type, :efc_id, :efc_J_rownnz, :efc_J_rowadr, :efc_J_rowsuper, :efc_J_colind, :efc_JT_rownnz, :efc_JT_rowadr, :efc_JT_rowsuper, :efc_JT_colind, :efc_J, :efc_JT, :efc_pos, :efc_margin, :efc_frictionloss, :efc_diagApprox, :efc_KBIP, :efc_D, :efc_R, :tendon_efcadr, :dof_island, :island_dofnum, :island_dofadr, :island_dofind, :dof_islandind, :efc_island, :island_efcnum, :island_efcadr, :island_efcind, :efc_AR_rownnz, :efc_AR_rowadr, :efc_AR_colind, :efc_AR, :efc_vel, :efc_aref, :efc_b, :efc_force, :efc_state, :threadpool)
 end
 function Base.getproperty(x::Data, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
     model = getfield(x, :model)
     data = x
     f === :internal_pointer && return internal_pointer
-    f === :nstack && return unsafe_load(Ptr{Int32}(internal_pointer + 0))
-    f === :nbuffer && return unsafe_load(Ptr{Int32}(internal_pointer + 4))
-    f === :nplugin && return unsafe_load(Ptr{Int32}(internal_pointer + 8))
-    f === :pstack && return unsafe_load(Ptr{UInt64}(internal_pointer + 16))
-    f === :parena && return unsafe_load(Ptr{UInt64}(internal_pointer + 24))
-    f === :maxuse_stack && return unsafe_load(Ptr{Int32}(internal_pointer + 32))
-    f === :maxuse_arena && return unsafe_load(Ptr{UInt64}(internal_pointer + 40))
-    f === :maxuse_con && return unsafe_load(Ptr{Int32}(internal_pointer + 48))
-    f === :maxuse_efc && return unsafe_load(Ptr{Int32}(internal_pointer + 52))
-    f === :warning && return UnsafeArray(Ptr{mjWarningStat_}(internal_pointer + 56), (8,))
-    f === :timer && return UnsafeArray(Ptr{mjTimerStat_}(internal_pointer + 120), (13,))
-    f === :solver && return UnsafeArray(Ptr{mjSolverStat_}(internal_pointer + 328), (1000,))
-    f === :solver_iter && return unsafe_load(Ptr{Int32}(internal_pointer + 40328))
-    f === :solver_nnz && return unsafe_load(Ptr{Int32}(internal_pointer + 40332))
-    f === :solver_fwdinv && return UnsafeArray(Ptr{Float64}(internal_pointer + 40336), (2,))
-    f === :nbodypair_broad && return unsafe_load(Ptr{Int32}(internal_pointer + 40352))
-    f === :nbodypair_narrow && return unsafe_load(Ptr{Int32}(internal_pointer + 40356))
-    f === :ngeompair_mid && return unsafe_load(Ptr{Int32}(internal_pointer + 40360))
-    f === :ngeompair_narrow && return unsafe_load(Ptr{Int32}(internal_pointer + 40364))
-    f === :ne && return unsafe_load(Ptr{Int32}(internal_pointer + 40368))
-    f === :nf && return unsafe_load(Ptr{Int32}(internal_pointer + 40372))
-    f === :nefc && return unsafe_load(Ptr{Int32}(internal_pointer + 40376))
-    f === :nnzJ && return unsafe_load(Ptr{Int32}(internal_pointer + 40380))
-    f === :ncon && return unsafe_load(Ptr{Int32}(internal_pointer + 40384))
-    f === :time && return unsafe_load(Ptr{Float64}(internal_pointer + 40392))
-    f === :energy && return UnsafeArray(Ptr{Float64}(internal_pointer + 40400), (2,))
-    f === :buffer && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 40416))
-    f === :arena && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 40424))
+    f === :narena && return unsafe_load(Ptr{UInt64}(internal_pointer + 0))
+    f === :nbuffer && return unsafe_load(Ptr{UInt64}(internal_pointer + 8))
+    f === :nplugin && return unsafe_load(Ptr{Int32}(internal_pointer + 16))
+    f === :pstack && return unsafe_load(Ptr{UInt64}(internal_pointer + 24))
+    f === :pbase && return unsafe_load(Ptr{UInt64}(internal_pointer + 32))
+    f === :parena && return unsafe_load(Ptr{UInt64}(internal_pointer + 40))
+    f === :maxuse_stack && return unsafe_load(Ptr{UInt64}(internal_pointer + 48))
+    f === :maxuse_threadstack && return UnsafeArray(Ptr{UInt64}(internal_pointer + 56), (128,))
+    f === :maxuse_arena && return unsafe_load(Ptr{UInt64}(internal_pointer + 1080))
+    f === :maxuse_con && return unsafe_load(Ptr{Int32}(internal_pointer + 1088))
+    f === :maxuse_efc && return unsafe_load(Ptr{Int32}(internal_pointer + 1092))
+    f === :warning && return UnsafeArray(Ptr{mjWarningStat_}(internal_pointer + 1096), (8,))
+    f === :timer && return UnsafeArray(Ptr{mjTimerStat_}(internal_pointer + 1160), (15,))
+    f === :solver && return UnsafeArray(Ptr{mjSolverStat_}(internal_pointer + 1400), (4000,))
+    f === :solver_nisland && return unsafe_load(Ptr{Int32}(internal_pointer + 161400))
+    f === :solver_niter && return UnsafeArray(Ptr{Int32}(internal_pointer + 161404), (20,))
+    f === :solver_nnz && return UnsafeArray(Ptr{Int32}(internal_pointer + 161484), (20,))
+    f === :solver_fwdinv && return UnsafeArray(Ptr{Float64}(internal_pointer + 161568), (2,))
+    f === :ne && return unsafe_load(Ptr{Int32}(internal_pointer + 161584))
+    f === :nf && return unsafe_load(Ptr{Int32}(internal_pointer + 161588))
+    f === :nl && return unsafe_load(Ptr{Int32}(internal_pointer + 161592))
+    f === :nefc && return unsafe_load(Ptr{Int32}(internal_pointer + 161596))
+    f === :nnzJ && return unsafe_load(Ptr{Int32}(internal_pointer + 161600))
+    f === :ncon && return unsafe_load(Ptr{Int32}(internal_pointer + 161604))
+    f === :nisland && return unsafe_load(Ptr{Int32}(internal_pointer + 161608))
+    f === :time && return unsafe_load(Ptr{Float64}(internal_pointer + 161616))
+    f === :energy && return UnsafeArray(Ptr{Float64}(internal_pointer + 161624), (2,))
+    f === :buffer && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 161640))
+    f === :arena && return unsafe_load(Ptr{Ptr{Nothing}}(internal_pointer + 161648))
     f === :qpos && return if all((!=)(0), (Int(model.nq),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40432))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161656))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3540,7 +4866,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qvel && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40440))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161664))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3550,7 +4876,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :act && return if all((!=)(0), (Int(model.na),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40448))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161672))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3560,7 +4886,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qacc_warmstart && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40456))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161680))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3570,7 +4896,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :plugin_state && return if all((!=)(0), (Int(model.npluginstate),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40464))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161688))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3580,7 +4906,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :ctrl && return if all((!=)(0), (Int(model.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40472))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161696))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3590,7 +4916,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qfrc_applied && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40480))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161704))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3600,7 +4926,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :xfrc_applied && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40488))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161712))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3609,8 +4935,18 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
+    f === :eq_active && return if all((!=)(0), (Int(model.neq),))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 161720))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.neq))))
+                end
+            else
+                nothing
+            end
     f === :mocap_pos && return if all((!=)(0), (Int(model.nmocap),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40496))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161728))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3620,7 +4956,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :mocap_quat && return if all((!=)(0), (Int(model.nmocap),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40504))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161736))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3630,7 +4966,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qacc && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40512))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161744))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3640,7 +4976,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :act_dot && return if all((!=)(0), (Int(model.na),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40520))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161752))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3650,7 +4986,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :userdata && return if all((!=)(0), (Int(model.nuserdata),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40528))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161760))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3660,7 +4996,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :sensordata && return if all((!=)(0), (Int(model.nsensordata),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40536))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161768))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3670,7 +5006,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :plugin && return if all((!=)(0), (Int(x.nplugin),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40544))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 161776))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3680,7 +5016,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :plugin_data && return if all((!=)(0), (Int(x.nplugin),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt64}}(internal_pointer + 40552))
+                _ptr = unsafe_load(Ptr{Ptr{UInt64}}(internal_pointer + 161784))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3690,7 +5026,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :xpos && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40560))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161792))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3700,7 +5036,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :xquat && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40568))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161800))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3710,7 +5046,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :xmat && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40576))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161808))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3720,7 +5056,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :xipos && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40584))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161816))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3730,7 +5066,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :ximat && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40592))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161824))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3740,7 +5076,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :xanchor && return if all((!=)(0), (Int(model.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40600))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161832))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3750,7 +5086,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :xaxis && return if all((!=)(0), (Int(model.njnt),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40608))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161840))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3760,7 +5096,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :geom_xpos && return if all((!=)(0), (Int(model.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40616))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161848))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3770,7 +5106,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :geom_xmat && return if all((!=)(0), (Int(model.ngeom),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40624))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161856))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3780,7 +5116,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :site_xpos && return if all((!=)(0), (Int(model.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40632))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161864))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3790,7 +5126,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :site_xmat && return if all((!=)(0), (Int(model.nsite),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40640))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161872))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3800,7 +5136,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cam_xpos && return if all((!=)(0), (Int(model.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40648))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161880))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3810,7 +5146,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cam_xmat && return if all((!=)(0), (Int(model.ncam),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40656))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161888))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3820,7 +5156,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :light_xpos && return if all((!=)(0), (Int(model.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40664))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161896))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3830,7 +5166,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :light_xdir && return if all((!=)(0), (Int(model.nlight),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40672))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161904))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3840,7 +5176,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :subtree_com && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40680))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161912))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3850,7 +5186,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cdof && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40688))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161920))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3860,7 +5196,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cinert && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40696))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161928))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3869,8 +5205,78 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
+    f === :flexvert_xpos && return if all((!=)(0), (Int(model.nflexvert),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161936))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(3), Int(model.nflexvert))))
+                end
+            else
+                nothing
+            end
+    f === :flexelem_aabb && return if all((!=)(0), (Int(model.nflexelem),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161944))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nflexelem))))
+                end
+            else
+                nothing
+            end
+    f === :flexedge_J_rownnz && return if all((!=)(0), (Int(model.nflexedge),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 161952))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nflexedge))))
+                end
+            else
+                nothing
+            end
+    f === :flexedge_J_rowadr && return if all((!=)(0), (Int(model.nflexedge),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 161960))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nflexedge))))
+                end
+            else
+                nothing
+            end
+    f === :flexedge_J_colind && return if all((!=)(0), (Int(model.nflexedge), Int(model.nv)))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 161968))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nv), Int(model.nflexedge))))
+                end
+            else
+                nothing
+            end
+    f === :flexedge_J && return if all((!=)(0), (Int(model.nflexedge), Int(model.nv)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161976))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nv), Int(model.nflexedge))))
+                end
+            else
+                nothing
+            end
+    f === :flexedge_length && return if all((!=)(0), (Int(model.nflexedge),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 161984))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nflexedge))))
+                end
+            else
+                nothing
+            end
     f === :ten_wrapadr && return if all((!=)(0), (Int(model.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40704))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 161992))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3880,7 +5286,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :ten_wrapnum && return if all((!=)(0), (Int(model.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40712))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162000))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3890,7 +5296,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :ten_J_rownnz && return if all((!=)(0), (Int(model.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40720))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162008))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3900,7 +5306,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :ten_J_rowadr && return if all((!=)(0), (Int(model.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40728))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162016))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3910,7 +5316,17 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :ten_J_colind && return if all((!=)(0), (Int(model.ntendon), Int(model.nv)))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40736))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162024))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(model.nv), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :ten_J && return if all((!=)(0), (Int(model.ntendon), Int(model.nv)))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162032))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3920,7 +5336,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :ten_length && return if all((!=)(0), (Int(model.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40744))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162040))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3929,18 +5345,8 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
-    f === :ten_J && return if all((!=)(0), (Int(model.ntendon), Int(model.nv)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40752))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(model.nv), Int(model.ntendon))))
-                end
-            else
-                nothing
-            end
     f === :wrap_obj && return if all((!=)(0), (Int(model.nwrap),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40760))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162048))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3950,7 +5356,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :wrap_xpos && return if all((!=)(0), (Int(model.nwrap),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40768))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162056))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3960,7 +5366,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :actuator_length && return if all((!=)(0), (Int(model.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40776))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162064))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3970,7 +5376,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :actuator_moment && return if all((!=)(0), (Int(model.nu), Int(model.nv)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40784))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162072))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3980,7 +5386,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :crb && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40792))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162080))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -3990,7 +5396,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qM && return if all((!=)(0), (Int(model.nM),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40800))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162088))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4000,7 +5406,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qLD && return if all((!=)(0), (Int(model.nM),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40808))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162096))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4010,7 +5416,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qLDiagInv && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40816))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162104))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4020,7 +5426,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qLDiagSqrtInv && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40824))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162112))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4029,8 +5435,18 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
+    f === :bvh_aabb_dyn && return if all((!=)(0), (Int(model.nbvhdynamic),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162120))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(6), Int(model.nbvhdynamic))))
+                end
+            else
+                nothing
+            end
     f === :bvh_active && return if all((!=)(0), (Int(model.nbvh),))
-                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 40832))
+                _ptr = unsafe_load(Ptr{Ptr{UInt8}}(internal_pointer + 162128))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4039,8 +5455,18 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
+    f === :flexedge_velocity && return if all((!=)(0), (Int(model.nflexedge),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162136))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nflexedge))))
+                end
+            else
+                nothing
+            end
     f === :ten_velocity && return if all((!=)(0), (Int(model.ntendon),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40840))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162144))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4050,7 +5476,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :actuator_velocity && return if all((!=)(0), (Int(model.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40848))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162152))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4060,7 +5486,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cvel && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40856))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162160))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4070,7 +5496,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cdof_dot && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40864))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162168))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4080,7 +5506,47 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qfrc_bias && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40872))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162176))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_spring && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162184))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_damper && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162192))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_gravcomp && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162200))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :qfrc_fluid && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162208))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4090,7 +5556,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qfrc_passive && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40880))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162216))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4099,28 +5565,8 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
-    f === :efc_vel && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40888))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
-                end
-            else
-                nothing
-            end
-    f === :efc_aref && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40896))
-                if _ptr == C_NULL
-                    nothing
-                else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
-                end
-            else
-                nothing
-            end
     f === :subtree_linvel && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40904))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162224))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4130,7 +5576,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :subtree_angmom && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40912))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162232))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4140,7 +5586,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qH && return if all((!=)(0), (Int(model.nM),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40920))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162240))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4150,7 +5596,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qHDiagInv && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40928))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162248))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4160,7 +5606,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :D_rownnz && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40936))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162256))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4170,7 +5616,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :D_rowadr && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40944))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162264))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4180,7 +5626,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :D_colind && return if all((!=)(0), (Int(model.nD),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40952))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162272))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4190,7 +5636,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :B_rownnz && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40960))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162280))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4200,7 +5646,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :B_rowadr && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40968))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162288))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4210,7 +5656,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :B_colind && return if all((!=)(0), (Int(model.nB),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40976))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162296))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4220,7 +5666,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qDeriv && return if all((!=)(0), (Int(model.nD),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40984))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162304))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4230,7 +5676,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qLU && return if all((!=)(0), (Int(model.nD),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 40992))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162312))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4240,7 +5686,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :actuator_force && return if all((!=)(0), (Int(model.nu),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41000))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162320))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4250,7 +5696,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qfrc_actuator && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41008))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162328))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4260,7 +5706,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qfrc_smooth && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41016))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162336))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4270,7 +5716,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qacc_smooth && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41024))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162344))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4280,7 +5726,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qfrc_constraint && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41032))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162352))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4290,7 +5736,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :qfrc_inverse && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41040))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162360))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4300,7 +5746,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cacc && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41048))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162368))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4310,7 +5756,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cfrc_int && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41056))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162376))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4320,7 +5766,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :cfrc_ext && return if all((!=)(0), (Int(model.nbody),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41064))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162384))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4330,7 +5776,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :contact && return if all((!=)(0), (Int(data.ncon),))
-                _ptr = unsafe_load(Ptr{Ptr{mjContact_}}(internal_pointer + 41072))
+                _ptr = unsafe_load(Ptr{Ptr{mjContact_}}(internal_pointer + 162392))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4340,7 +5786,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_type && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41080))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162400))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4350,7 +5796,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_id && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41088))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162408))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4360,7 +5806,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_J_rownnz && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41096))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162416))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4370,7 +5816,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_J_rowadr && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41104))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162424))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4380,7 +5826,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_J_rowsuper && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41112))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162432))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4390,7 +5836,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_J_colind && return if all((!=)(0), (Int(data.nnzJ),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41120))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162440))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4400,7 +5846,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_JT_rownnz && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41128))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162448))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4410,7 +5856,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_JT_rowadr && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41136))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162456))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4420,7 +5866,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_JT_rowsuper && return if all((!=)(0), (Int(model.nv),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41144))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162464))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4430,7 +5876,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_JT_colind && return if all((!=)(0), (Int(data.nnzJ),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41152))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162472))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4440,7 +5886,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_J && return if all((!=)(0), (Int(data.nnzJ),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41160))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162480))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4450,7 +5896,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_JT && return if all((!=)(0), (Int(data.nnzJ),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41168))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162488))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4460,7 +5906,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_pos && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41176))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162496))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4470,7 +5916,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_margin && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41184))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162504))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4480,7 +5926,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_frictionloss && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41192))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162512))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4490,7 +5936,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_diagApprox && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41200))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162520))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4500,7 +5946,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_KBIP && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41208))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162528))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4510,7 +5956,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_D && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41216))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162536))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4520,7 +5966,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_R && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41224))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162544))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4529,8 +5975,68 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
-    f === :efc_b && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41232))
+    f === :tendon_efcadr && return if all((!=)(0), (Int(model.ntendon),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162552))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.ntendon))))
+                end
+            else
+                nothing
+            end
+    f === :dof_island && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162560))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :island_dofnum && return if all((!=)(0), (Int(data.nisland),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162568))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nisland))))
+                end
+            else
+                nothing
+            end
+    f === :island_dofadr && return if all((!=)(0), (Int(data.nisland),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162576))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nisland))))
+                end
+            else
+                nothing
+            end
+    f === :island_dofind && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162584))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :dof_islandind && return if all((!=)(0), (Int(model.nv),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162592))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(model.nv))))
+                end
+            else
+                nothing
+            end
+    f === :efc_island && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162600))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4539,18 +6045,28 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
-    f === :efc_force && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41240))
+    f === :island_efcnum && return if all((!=)(0), (Int(data.nisland),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162608))
                 if _ptr == C_NULL
                     nothing
                 else
-                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nisland))))
                 end
             else
                 nothing
             end
-    f === :efc_state && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41248))
+    f === :island_efcadr && return if all((!=)(0), (Int(data.nisland),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162616))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nisland))))
+                end
+            else
+                nothing
+            end
+    f === :island_efcind && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162624))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4560,7 +6076,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_AR_rownnz && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41256))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162632))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4570,7 +6086,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_AR_rowadr && return if all((!=)(0), (Int(data.nefc),))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41264))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162640))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4580,7 +6096,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_AR_colind && return if all((!=)(0), (Int(data.nefc), Int(data.nefc)))
-                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 41272))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162648))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4590,7 +6106,7 @@ function Base.getproperty(x::Data, f::Symbol)
                 nothing
             end
     f === :efc_AR && return if all((!=)(0), (Int(data.nefc), Int(data.nefc)))
-                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 41280))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162656))
                 if _ptr == C_NULL
                     nothing
                 else
@@ -4599,82 +6115,113 @@ function Base.getproperty(x::Data, f::Symbol)
             else
                 nothing
             end
+    f === :efc_vel && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162664))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_aref && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162672))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_b && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162680))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_force && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Float64}}(internal_pointer + 162688))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :efc_state && return if all((!=)(0), (Int(data.nefc),))
+                _ptr = unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 162696))
+                if _ptr == C_NULL
+                    nothing
+                else
+                    transpose(UnsafeArray(_ptr, (Int(1), Int(data.nefc))))
+                end
+            else
+                nothing
+            end
+    f === :threadpool && return unsafe_load(Ptr{UInt64}(internal_pointer + 162704))
     error("Could not find property $(f)")
 end
 function Base.setproperty!(x::Data, f::Symbol, value)
     internal_pointer = getfield(x, :internal_pointer)
     f === :internal_pointer && error("Cannot set the internal pointer, create a new struct instead.")
-    if f === :nstack
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 0), cvalue)
+    if f === :narena
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 0), cvalue)
         return cvalue
     end
     if f === :nbuffer
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 4), cvalue)
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 8), cvalue)
         return cvalue
     end
     if f === :nplugin
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 16), cvalue)
         return cvalue
     end
     if f === :pstack
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 12), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 20), cvalue)
+        return cvalue
+    end
+    if f === :pbase
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 28), cvalue)
         return cvalue
     end
     if f === :parena
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 20), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 36), cvalue)
         return cvalue
     end
     if f === :maxuse_stack
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 28), cvalue)
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 44), cvalue)
         return cvalue
     end
     if f === :maxuse_arena
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 32), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 52), cvalue)
         return cvalue
     end
     if f === :maxuse_con
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 40), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 60), cvalue)
         return cvalue
     end
     if f === :maxuse_efc
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 44), cvalue)
-        return cvalue
-    end
-    if f === :solver_iter
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 48), cvalue)
-        return cvalue
-    end
-    if f === :solver_nnz
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 52), cvalue)
-        return cvalue
-    end
-    if f === :nbodypair_broad
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 56), cvalue)
-        return cvalue
-    end
-    if f === :nbodypair_narrow
-        cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 60), cvalue)
-        return cvalue
-    end
-    if f === :ngeompair_mid
-        cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 64), cvalue)
         return cvalue
     end
-    if f === :ngeompair_narrow
+    if f === :solver_nisland
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 68), cvalue)
         return cvalue
@@ -4689,34 +6236,216 @@ function Base.setproperty!(x::Data, f::Symbol, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 76), cvalue)
         return cvalue
     end
-    if f === :nefc
+    if f === :nl
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 80), cvalue)
         return cvalue
     end
-    if f === :nnzJ
+    if f === :nefc
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
         return cvalue
     end
-    if f === :ncon
+    if f === :nnzJ
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
         return cvalue
     end
-    if f === :time
-        cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 92), cvalue)
+    if f === :ncon
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 92), cvalue)
         return cvalue
     end
-    if f in (:warning, :timer, :solver, :solver_fwdinv, :energy)
+    if f === :nisland
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 96), cvalue)
+        return cvalue
+    end
+    if f === :time
+        cvalue = convert(Float64, value)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 100), cvalue)
+        return cvalue
+    end
+    if f === :threadpool
+        cvalue = convert(UInt64, value)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 108), cvalue)
+        return cvalue
+    end
+    if f in (:maxuse_threadstack, :warning, :timer, :solver, :solver_niter, :solver_nnz, :solver_fwdinv, :energy)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
-    if f in (:buffer, :arena, :qpos, :qvel, :act, :qacc_warmstart, :plugin_state, :ctrl, :qfrc_applied, :xfrc_applied, :mocap_pos, :mocap_quat, :qacc, :act_dot, :userdata, :sensordata, :plugin, :plugin_data, :xpos, :xquat, :xmat, :xipos, :ximat, :xanchor, :xaxis, :geom_xpos, :geom_xmat, :site_xpos, :site_xmat, :cam_xpos, :cam_xmat, :light_xpos, :light_xdir, :subtree_com, :cdof, :cinert, :ten_wrapadr, :ten_wrapnum, :ten_J_rownnz, :ten_J_rowadr, :ten_J_colind, :ten_length, :ten_J, :wrap_obj, :wrap_xpos, :actuator_length, :actuator_moment, :crb, :qM, :qLD, :qLDiagInv, :qLDiagSqrtInv, :bvh_active, :ten_velocity, :actuator_velocity, :cvel, :cdof_dot, :qfrc_bias, :qfrc_passive, :efc_vel, :efc_aref, :subtree_linvel, :subtree_angmom, :qH, :qHDiagInv, :D_rownnz, :D_rowadr, :D_colind, :B_rownnz, :B_rowadr, :B_colind, :qDeriv, :qLU, :actuator_force, :qfrc_actuator, :qfrc_smooth, :qacc_smooth, :qfrc_constraint, :qfrc_inverse, :cacc, :cfrc_int, :cfrc_ext, :contact, :efc_type, :efc_id, :efc_J_rownnz, :efc_J_rowadr, :efc_J_rowsuper, :efc_J_colind, :efc_JT_rownnz, :efc_JT_rowadr, :efc_JT_rowsuper, :efc_JT_colind, :efc_J, :efc_JT, :efc_pos, :efc_margin, :efc_frictionloss, :efc_diagApprox, :efc_KBIP, :efc_D, :efc_R, :efc_b, :efc_force, :efc_state, :efc_AR_rownnz, :efc_AR_rowadr, :efc_AR_colind, :efc_AR)
+    if f in (:buffer, :arena, :qpos, :qvel, :act, :qacc_warmstart, :plugin_state, :ctrl, :qfrc_applied, :xfrc_applied, :eq_active, :mocap_pos, :mocap_quat, :qacc, :act_dot, :userdata, :sensordata, :plugin, :plugin_data, :xpos, :xquat, :xmat, :xipos, :ximat, :xanchor, :xaxis, :geom_xpos, :geom_xmat, :site_xpos, :site_xmat, :cam_xpos, :cam_xmat, :light_xpos, :light_xdir, :subtree_com, :cdof, :cinert, :flexvert_xpos, :flexelem_aabb, :flexedge_J_rownnz, :flexedge_J_rowadr, :flexedge_J_colind, :flexedge_J, :flexedge_length, :ten_wrapadr, :ten_wrapnum, :ten_J_rownnz, :ten_J_rowadr, :ten_J_colind, :ten_J, :ten_length, :wrap_obj, :wrap_xpos, :actuator_length, :actuator_moment, :crb, :qM, :qLD, :qLDiagInv, :qLDiagSqrtInv, :bvh_aabb_dyn, :bvh_active, :flexedge_velocity, :ten_velocity, :actuator_velocity, :cvel, :cdof_dot, :qfrc_bias, :qfrc_spring, :qfrc_damper, :qfrc_gravcomp, :qfrc_fluid, :qfrc_passive, :subtree_linvel, :subtree_angmom, :qH, :qHDiagInv, :D_rownnz, :D_rowadr, :D_colind, :B_rownnz, :B_rowadr, :B_colind, :qDeriv, :qLU, :actuator_force, :qfrc_actuator, :qfrc_smooth, :qacc_smooth, :qfrc_constraint, :qfrc_inverse, :cacc, :cfrc_int, :cfrc_ext, :contact, :efc_type, :efc_id, :efc_J_rownnz, :efc_J_rowadr, :efc_J_rowsuper, :efc_J_colind, :efc_JT_rownnz, :efc_JT_rowadr, :efc_JT_rowsuper, :efc_JT_colind, :efc_J, :efc_JT, :efc_pos, :efc_margin, :efc_frictionloss, :efc_diagApprox, :efc_KBIP, :efc_D, :efc_R, :tendon_efcadr, :dof_island, :island_dofnum, :island_dofadr, :island_dofind, :dof_islandind, :efc_island, :island_efcnum, :island_efcadr, :island_efcind, :efc_AR_rownnz, :efc_AR_rowadr, :efc_AR_colind, :efc_AR, :efc_vel, :efc_aref, :efc_b, :efc_force, :efc_state)
         error("Cannot overwrite a pointer field.")
     end
     error("Could not find property $(f) to set.")
 end
 function Base.cconvert(::Type{Ptr{mjData}}, wrapper::Data)
     return wrapper.internal_pointer
+end
+function show_docs(::Type{Data}, property_name::Symbol)
+    property_name === :narena && return println("Data.narena: size of the arena in bytes (inclusive of the stack)")
+    property_name === :nbuffer && return println("Data.nbuffer: size of main buffer in bytes")
+    property_name === :nplugin && return println("Data.nplugin: number of plugin instances")
+    property_name === :pstack && return println("Data.pstack: first available mjtNum address in stack")
+    property_name === :pbase && return println("Data.pbase: value of pstack when mj_markStack was last called")
+    property_name === :parena && return println("Data.parena: first available byte in arena")
+    property_name === :maxuse_stack && return println("Data.maxuse_stack: maximum stack allocation in bytes")
+    property_name === :maxuse_threadstack && return println("Data.maxuse_threadstack: maximum stack allocation per thread in bytes")
+    property_name === :maxuse_arena && return println("Data.maxuse_arena: maximum arena allocation in bytes")
+    property_name === :maxuse_con && return println("Data.maxuse_con: maximum number of contacts")
+    property_name === :maxuse_efc && return println("Data.maxuse_efc: maximum number of scalar constraints")
+    property_name === :warning && return println("Data.warning: warning statistics")
+    property_name === :timer && return println("Data.timer: timer statistics")
+    property_name === :solver && return println("Data.solver: solver statistics per island, per iteration")
+    property_name === :solver_nisland && return println("Data.solver_nisland: number of islands processed by solver")
+    property_name === :solver_niter && return println("Data.solver_niter: number of solver iterations, per island")
+    property_name === :solver_nnz && return println("Data.solver_nnz: number of non-zeros in Hessian or efc_AR, per island")
+    property_name === :solver_fwdinv && return println("Data.solver_fwdinv: forward-inverse comparison: qfrc, efc")
+    property_name === :ne && return println("Data.ne: number of equality constraints")
+    property_name === :nf && return println("Data.nf: number of friction constraints")
+    property_name === :nl && return println("Data.nl: number of limit constraints")
+    property_name === :nefc && return println("Data.nefc: number of constraints")
+    property_name === :nnzJ && return println("Data.nnzJ: number of non-zeros in constraint Jacobian")
+    property_name === :ncon && return println("Data.ncon: number of detected contacts")
+    property_name === :nisland && return println("Data.nisland: number of detected constraint islands")
+    property_name === :time && return println("Data.time: simulation time")
+    property_name === :energy && return println("Data.energy: potential, kinetic energy")
+    property_name === :buffer && return println("Data.buffer: main buffer; all pointers point in it (nbuffer bytes)")
+    property_name === :arena && return println("Data.arena: arena+stack buffer (narena*sizeof(mjtNum) bytes)")
+    property_name === :qpos && return println("Data.qpos: position (nq x 1)")
+    property_name === :qvel && return println("Data.qvel: velocity (nv x 1)")
+    property_name === :act && return println("Data.act: actuator activation (na x 1)")
+    property_name === :qacc_warmstart && return println("Data.qacc_warmstart: acceleration used for warmstart (nv x 1)")
+    property_name === :plugin_state && return println("Data.plugin_state: plugin state (npluginstate x 1)")
+    property_name === :ctrl && return println("Data.ctrl: control (nu x 1)")
+    property_name === :qfrc_applied && return println("Data.qfrc_applied: applied generalized force (nv x 1)")
+    property_name === :xfrc_applied && return println("Data.xfrc_applied: applied Cartesian force/torque (nbody x 6)")
+    property_name === :eq_active && return println("Data.eq_active: enable/disable constraints (neq x 1)")
+    property_name === :mocap_pos && return println("Data.mocap_pos: positions of mocap bodies (nmocap x 3)")
+    property_name === :mocap_quat && return println("Data.mocap_quat: orientations of mocap bodies (nmocap x 4)")
+    property_name === :qacc && return println("Data.qacc: acceleration (nv x 1)")
+    property_name === :act_dot && return println("Data.act_dot: time-derivative of actuator activation (na x 1)")
+    property_name === :userdata && return println("Data.userdata: user data, not touched by engine (nuserdata x 1)")
+    property_name === :sensordata && return println("Data.sensordata: sensor data array (nsensordata x 1)")
+    property_name === :plugin && return println("Data.plugin: copy of m->plugin, required for deletion (nplugin x 1)")
+    property_name === :plugin_data && return println("Data.plugin_data: pointer to plugin-managed data structure (nplugin x 1)")
+    property_name === :xpos && return println("Data.xpos: Cartesian position of body frame (nbody x 3)")
+    property_name === :xquat && return println("Data.xquat: Cartesian orientation of body frame (nbody x 4)")
+    property_name === :xmat && return println("Data.xmat: Cartesian orientation of body frame (nbody x 9)")
+    property_name === :xipos && return println("Data.xipos: Cartesian position of body com (nbody x 3)")
+    property_name === :ximat && return println("Data.ximat: Cartesian orientation of body inertia (nbody x 9)")
+    property_name === :xanchor && return println("Data.xanchor: Cartesian position of joint anchor (njnt x 3)")
+    property_name === :xaxis && return println("Data.xaxis: Cartesian joint axis (njnt x 3)")
+    property_name === :geom_xpos && return println("Data.geom_xpos: Cartesian geom position (ngeom x 3)")
+    property_name === :geom_xmat && return println("Data.geom_xmat: Cartesian geom orientation (ngeom x 9)")
+    property_name === :site_xpos && return println("Data.site_xpos: Cartesian site position (nsite x 3)")
+    property_name === :site_xmat && return println("Data.site_xmat: Cartesian site orientation (nsite x 9)")
+    property_name === :cam_xpos && return println("Data.cam_xpos: Cartesian camera position (ncam x 3)")
+    property_name === :cam_xmat && return println("Data.cam_xmat: Cartesian camera orientation (ncam x 9)")
+    property_name === :light_xpos && return println("Data.light_xpos: Cartesian light position (nlight x 3)")
+    property_name === :light_xdir && return println("Data.light_xdir: Cartesian light direction (nlight x 3)")
+    property_name === :subtree_com && return println("Data.subtree_com: center of mass of each subtree (nbody x 3)")
+    property_name === :cdof && return println("Data.cdof: com-based motion axis of each dof (rot:lin) (nv x 6)")
+    property_name === :cinert && return println("Data.cinert: com-based body inertia and mass (nbody x 10)")
+    property_name === :flexvert_xpos && return println("Data.flexvert_xpos: Cartesian flex vertex positions (nflexvert x 3)")
+    property_name === :flexelem_aabb && return println("Data.flexelem_aabb: flex element bounding boxes (center, size) (nflexelem x 6)")
+    property_name === :flexedge_J_rownnz && return println("Data.flexedge_J_rownnz: number of non-zeros in Jacobian row (nflexedge x 1)")
+    property_name === :flexedge_J_rowadr && return println("Data.flexedge_J_rowadr: row start address in colind array (nflexedge x 1)")
+    property_name === :flexedge_J_colind && return println("Data.flexedge_J_colind: column indices in sparse Jacobian (nflexedge x nv)")
+    property_name === :flexedge_J && return println("Data.flexedge_J: flex edge Jacobian (nflexedge x nv)")
+    property_name === :flexedge_length && return println("Data.flexedge_length: flex edge lengths (nflexedge x 1)")
+    property_name === :ten_wrapadr && return println("Data.ten_wrapadr: start address of tendon's path (ntendon x 1)")
+    property_name === :ten_wrapnum && return println("Data.ten_wrapnum: number of wrap points in path (ntendon x 1)")
+    property_name === :ten_J_rownnz && return println("Data.ten_J_rownnz: number of non-zeros in Jacobian row (ntendon x 1)")
+    property_name === :ten_J_rowadr && return println("Data.ten_J_rowadr: row start address in colind array (ntendon x 1)")
+    property_name === :ten_J_colind && return println("Data.ten_J_colind: column indices in sparse Jacobian (ntendon x nv)")
+    property_name === :ten_J && return println("Data.ten_J: tendon Jacobian (ntendon x nv)")
+    property_name === :ten_length && return println("Data.ten_length: tendon lengths (ntendon x 1)")
+    property_name === :wrap_obj && return println("Data.wrap_obj: geom id; -1: site; -2: pulley (nwrap*2 x 1)")
+    property_name === :wrap_xpos && return println("Data.wrap_xpos: Cartesian 3D points in all path (nwrap*2 x 3)")
+    property_name === :actuator_length && return println("Data.actuator_length: actuator lengths (nu x 1)")
+    property_name === :actuator_moment && return println("Data.actuator_moment: actuator moments (nu x nv)")
+    property_name === :crb && return println("Data.crb: com-based composite inertia and mass (nbody x 10)")
+    property_name === :qM && return println("Data.qM: total inertia (sparse) (nM x 1)")
+    property_name === :qLD && return println("Data.qLD: L'*D*L factorization of M (sparse) (nM x 1)")
+    property_name === :qLDiagInv && return println("Data.qLDiagInv: 1/diag(D) (nv x 1)")
+    property_name === :qLDiagSqrtInv && return println("Data.qLDiagSqrtInv: 1/sqrt(diag(D)) (nv x 1)")
+    property_name === :bvh_aabb_dyn && return println("Data.bvh_aabb_dyn: global bounding box (center, size) (nbvhdynamic x 6)")
+    property_name === :bvh_active && return println("Data.bvh_active: volume has been added to collisions (nbvh x 1)")
+    property_name === :flexedge_velocity && return println("Data.flexedge_velocity: flex edge velocities (nflexedge x 1)")
+    property_name === :ten_velocity && return println("Data.ten_velocity: tendon velocities (ntendon x 1)")
+    property_name === :actuator_velocity && return println("Data.actuator_velocity: actuator velocities (nu x 1)")
+    property_name === :cvel && return println("Data.cvel: com-based velocity (rot:lin) (nbody x 6)")
+    property_name === :cdof_dot && return println("Data.cdof_dot: time-derivative of cdof (rot:lin) (nv x 6)")
+    property_name === :qfrc_bias && return println("Data.qfrc_bias: C(qpos,qvel) (nv x 1)")
+    property_name === :qfrc_spring && return println("Data.qfrc_spring: passive spring force (nv x 1)")
+    property_name === :qfrc_damper && return println("Data.qfrc_damper: passive damper force (nv x 1)")
+    property_name === :qfrc_gravcomp && return println("Data.qfrc_gravcomp: passive gravity compensation force (nv x 1)")
+    property_name === :qfrc_fluid && return println("Data.qfrc_fluid: passive fluid force (nv x 1)")
+    property_name === :qfrc_passive && return println("Data.qfrc_passive: total passive force (nv x 1)")
+    property_name === :subtree_linvel && return println("Data.subtree_linvel: linear velocity of subtree com (nbody x 3)")
+    property_name === :subtree_angmom && return println("Data.subtree_angmom: angular momentum about subtree com (nbody x 3)")
+    property_name === :qH && return println("Data.qH: L'*D*L factorization of modified M (nM x 1)")
+    property_name === :qHDiagInv && return println("Data.qHDiagInv: 1/diag(D) of modified M (nv x 1)")
+    property_name === :D_rownnz && return println("Data.D_rownnz: non-zeros in each row (nv x 1)")
+    property_name === :D_rowadr && return println("Data.D_rowadr: address of each row in D_colind (nv x 1)")
+    property_name === :D_colind && return println("Data.D_colind: column indices of non-zeros (nD x 1)")
+    property_name === :B_rownnz && return println("Data.B_rownnz: non-zeros in each row (nbody x 1)")
+    property_name === :B_rowadr && return println("Data.B_rowadr: address of each row in B_colind (nbody x 1)")
+    property_name === :B_colind && return println("Data.B_colind: column indices of non-zeros (nB x 1)")
+    property_name === :qDeriv && return println("Data.qDeriv: d (passive + actuator - bias) / d qvel (nD x 1)")
+    property_name === :qLU && return println("Data.qLU: sparse LU of (qM - dt*qDeriv) (nD x 1)")
+    property_name === :actuator_force && return println("Data.actuator_force: actuator force in actuation space (nu x 1)")
+    property_name === :qfrc_actuator && return println("Data.qfrc_actuator: actuator force (nv x 1)")
+    property_name === :qfrc_smooth && return println("Data.qfrc_smooth: net unconstrained force (nv x 1)")
+    property_name === :qacc_smooth && return println("Data.qacc_smooth: unconstrained acceleration (nv x 1)")
+    property_name === :qfrc_constraint && return println("Data.qfrc_constraint: constraint force (nv x 1)")
+    property_name === :qfrc_inverse && return println("Data.qfrc_inverse: net external force; should equal: (nv x 1)qfrc_applied + J'*xfrc_applied + qfrc_actuator")
+    property_name === :cacc && return println("Data.cacc: com-based acceleration (nbody x 6)")
+    property_name === :cfrc_int && return println("Data.cfrc_int: com-based interaction force with parent (nbody x 6)")
+    property_name === :cfrc_ext && return println("Data.cfrc_ext: com-based external force on body (nbody x 6)")
+    property_name === :contact && return println("Data.contact: list of all detected contacts (ncon x 1)")
+    property_name === :efc_type && return println("Data.efc_type: constraint type (mjtConstraint) (nefc x 1)")
+    property_name === :efc_id && return println("Data.efc_id: id of object of specified type (nefc x 1)")
+    property_name === :efc_J_rownnz && return println("Data.efc_J_rownnz: number of non-zeros in constraint Jacobian row (nefc x 1)")
+    property_name === :efc_J_rowadr && return println("Data.efc_J_rowadr: row start address in colind array (nefc x 1)")
+    property_name === :efc_J_rowsuper && return println("Data.efc_J_rowsuper: number of subsequent rows in supernode (nefc x 1)")
+    property_name === :efc_J_colind && return println("Data.efc_J_colind: column indices in constraint Jacobian (nnzJ x 1)")
+    property_name === :efc_JT_rownnz && return println("Data.efc_JT_rownnz: number of non-zeros in constraint Jacobian row T (nv x 1)")
+    property_name === :efc_JT_rowadr && return println("Data.efc_JT_rowadr: row start address in colind array T (nv x 1)")
+    property_name === :efc_JT_rowsuper && return println("Data.efc_JT_rowsuper: number of subsequent rows in supernode T (nv x 1)")
+    property_name === :efc_JT_colind && return println("Data.efc_JT_colind: column indices in constraint Jacobian T (nnzJ x 1)")
+    property_name === :efc_J && return println("Data.efc_J: constraint Jacobian (nnzJ x 1)")
+    property_name === :efc_JT && return println("Data.efc_JT: constraint Jacobian transposed (nnzJ x 1)")
+    property_name === :efc_pos && return println("Data.efc_pos: constraint position (equality, contact) (nefc x 1)")
+    property_name === :efc_margin && return println("Data.efc_margin: inclusion margin (contact) (nefc x 1)")
+    property_name === :efc_frictionloss && return println("Data.efc_frictionloss: frictionloss (friction) (nefc x 1)")
+    property_name === :efc_diagApprox && return println("Data.efc_diagApprox: approximation to diagonal of A (nefc x 1)")
+    property_name === :efc_KBIP && return println("Data.efc_KBIP: stiffness, damping, impedance, imp' (nefc x 4)")
+    property_name === :efc_D && return println("Data.efc_D: constraint mass (nefc x 1)")
+    property_name === :efc_R && return println("Data.efc_R: inverse constraint mass (nefc x 1)")
+    property_name === :tendon_efcadr && return println("Data.tendon_efcadr: first efc address involving tendon; -1: none (ntendon x 1)")
+    property_name === :dof_island && return println("Data.dof_island: island id of this dof; -1: none (nv x 1)")
+    property_name === :island_dofnum && return println("Data.island_dofnum: number of dofs in island (nisland x 1)")
+    property_name === :island_dofadr && return println("Data.island_dofadr: start address in island_dofind (nisland x 1)")
+    property_name === :island_dofind && return println("Data.island_dofind: island dof indices; -1: none (nv x 1)")
+    property_name === :dof_islandind && return println("Data.dof_islandind: dof island indices; -1: none (nv x 1)")
+    property_name === :efc_island && return println("Data.efc_island: island id of this constraint (nefc x 1)")
+    property_name === :island_efcnum && return println("Data.island_efcnum: number of constraints in island (nisland x 1)")
+    property_name === :island_efcadr && return println("Data.island_efcadr: start address in island_efcind (nisland x 1)")
+    property_name === :island_efcind && return println("Data.island_efcind: island constraint indices (nefc x 1)")
+    property_name === :efc_AR_rownnz && return println("Data.efc_AR_rownnz: number of non-zeros in AR (nefc x 1)")
+    property_name === :efc_AR_rowadr && return println("Data.efc_AR_rowadr: row start address in colind array (nefc x 1)")
+    property_name === :efc_AR_colind && return println("Data.efc_AR_colind: column indices in sparse AR (nefc x nefc)")
+    property_name === :efc_AR && return println("Data.efc_AR: J*inv(M)*J' + R (nefc x nefc)")
+    property_name === :efc_vel && return println("Data.efc_vel: velocity in constraint space: J*qvel (nefc x 1)")
+    property_name === :efc_aref && return println("Data.efc_aref: reference pseudo-acceleration (nefc x 1)")
+    property_name === :efc_b && return println("Data.efc_b: linear cost term: J*qacc_smooth - aref (nefc x 1)")
+    property_name === :efc_force && return println("Data.efc_force: constraint force in constraint space (nefc x 1)")
+    property_name === :efc_state && return println("Data.efc_state: constraint state (mjtConstraintState) (nefc x 1)")
+    property_name === :threadpool && return println("Data.threadpool: ThreadPool for multithreaded operations")
+    throw(ArgumentError("The property $(property_name) is not defined for Data (mjData)."))
+end
+function show_docs(x::Data, property_name::Symbol)
+    return show_docs(typeof(x), property_name)
 end

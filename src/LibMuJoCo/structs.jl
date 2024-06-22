@@ -11,17 +11,21 @@ const mjtTimer = mjtTimer_
 
   - **`dist`**: distance between nearest points; neg: penetration
   - **`pos`**: position of contact point: midpoint between geoms
-  - **`frame`**: normal is in [0-2]
+  - **`frame`**: normal is in [0-2], points from geom[0] to geom[1]
   - **`includemargin`**: include if dist<includemargin=margin-gap
   - **`friction`**: tangent1, 2, spin, roll1, 2
   - **`solref`**: constraint solver reference, normal direction
   - **`solreffriction`**: constraint solver reference, friction directions
   - **`solimp`**: constraint solver impedance
   - **`mu`**: friction of regularized cone, set by mj_makeConstraint
-  - **`H`**: cone Hessian, set by mj_updateConstraint
+  - **`H`**: cone Hessian, set by mj_constraintUpdate
   - **`dim`**: contact space dimensionality: 1, 3, 4 or 6
-  - **`geom1`**: id of geom 1
-  - **`geom2`**: id of geom 2
+  - **`geom1`**: id of geom 1; deprecated, use geom[0]
+  - **`geom2`**: id of geom 2; deprecated, use geom[1]
+  - **`geom`**: geom ids; -1 for flex
+  - **`flex`**: flex ids; -1 for geom
+  - **`elem`**: element ids; -1 for geom or flex vertex
+  - **`vert`**: vertex ids;  -1 for geom or flex element
   - **`exclude`**: 0: include, 1: in gap, 2: fused, 3: no dofs
   - **`efc_address`**: address in efc; -1: not included
 
@@ -40,6 +44,10 @@ struct mjContact_
     dim::Cint
     geom1::Cint
     geom2::Cint
+    geom::NTuple{2,Cint}
+    flex::NTuple{2,Cint}
+    elem::NTuple{2,Cint}
+    vert::NTuple{2,Cint}
     exclude::Cint
     efc_address::Cint
     mjContact_() = new()
@@ -57,6 +65,10 @@ struct mjContact_
         dim::Cint,
         geom1::Cint,
         geom2::Cint,
+        geom::NTuple{2,Cint},
+        flex::NTuple{2,Cint},
+        elem::NTuple{2,Cint},
+        vert::NTuple{2,Cint},
         exclude::Cint,
         efc_address::Cint,
     ) = new(
@@ -73,6 +85,10 @@ struct mjContact_
         dim,
         geom1,
         geom2,
+        geom,
+        flex,
+        elem,
+        vert,
         exclude,
         efc_address,
     )
@@ -149,34 +165,35 @@ const mjSolverStat = mjSolverStat_
 
 # Fields
 
-  - **`nstack`**: number of mjtNums that can fit in the arena+stack space
+  - **`narena`**: size of the arena in bytes (inclusive of the stack)
   - **`nbuffer`**: size of main buffer in bytes
   - **`nplugin`**: number of plugin instances
   - **`pstack`**: first available mjtNum address in stack
+  - **`pbase`**: value of pstack when mj_markStack was last called
   - **`parena`**: first available byte in arena
-  - **`maxuse_stack`**: maximum stack allocation
-  - **`maxuse_arena`**: maximum arena allocation
+  - **`maxuse_stack`**: maximum stack allocation in bytes
+  - **`maxuse_threadstack`**: maximum stack allocation per thread in bytes
+  - **`maxuse_arena`**: maximum arena allocation in bytes
   - **`maxuse_con`**: maximum number of contacts
   - **`maxuse_efc`**: maximum number of scalar constraints
   - **`warning`**: warning statistics
   - **`timer`**: timer statistics
-  - **`solver`**: solver statistics per iteration
-  - **`solver_iter`**: number of solver iterations
-  - **`solver_nnz`**: number of non-zeros in Hessian or efc_AR
+  - **`solver`**: solver statistics per island, per iteration
+  - **`solver_nisland`**: number of islands processed by solver
+  - **`solver_niter`**: number of solver iterations, per island
+  - **`solver_nnz`**: number of non-zeros in Hessian or efc_AR, per island
   - **`solver_fwdinv`**: forward-inverse comparison: qfrc, efc
-  - **`nbodypair_broad`**: number of body pairs in collision according to the broad-phase
-  - **`nbodypair_narrow`**: number of body pairs actually in collision in the narrow-phase
-  - **`ngeompair_mid`**: number of geom pairs in collision according to the mid-phase
-  - **`ngeompair_narrow`**: number of geom pairs actually in collision in the narrow-phase
   - **`ne`**: number of equality constraints
   - **`nf`**: number of friction constraints
+  - **`nl`**: number of limit constraints
   - **`nefc`**: number of constraints
   - **`nnzJ`**: number of non-zeros in constraint Jacobian
   - **`ncon`**: number of detected contacts
+  - **`nisland`**: number of detected constraint islands
   - **`time`**: simulation time
   - **`energy`**: potential, kinetic energy
   - **`buffer`**: main buffer; all pointers point in it                (nbuffer bytes)
-  - **`arena`**: arena+stack buffer                     (nstack*sizeof(mjtNum) bytes)
+  - **`arena`**: arena+stack buffer                     (narena*sizeof(mjtNum) bytes)
   - **`qpos`**: position                                         (nq x 1)
   - **`qvel`**: velocity                                         (nv x 1)
   - **`act`**: actuator activation                              (na x 1)
@@ -185,6 +202,7 @@ const mjSolverStat = mjSolverStat_
   - **`ctrl`**: control                                          (nu x 1)
   - **`qfrc_applied`**: applied generalized force                        (nv x 1)
   - **`xfrc_applied`**: applied Cartesian force/torque                   (nbody x 6)
+  - **`eq_active`**: enable/disable constraints                       (neq x 1)
   - **`mocap_pos`**: positions of mocap bodies                        (nmocap x 3)
   - **`mocap_quat`**: orientations of mocap bodies                     (nmocap x 4)
   - **`qacc`**: acceleration                                     (nv x 1)
@@ -209,15 +227,22 @@ const mjSolverStat = mjSolverStat_
   - **`light_xpos`**: Cartesian light position                         (nlight x 3)
   - **`light_xdir`**: Cartesian light direction                        (nlight x 3)
   - **`subtree_com`**: center of mass of each subtree                   (nbody x 3)
-  - **`cdof`**: com-based motion axis of each dof                (nv x 6)
+  - **`cdof`**: com-based motion axis of each dof (rot:lin)      (nv x 6)
   - **`cinert`**: com-based body inertia and mass                  (nbody x 10)
+  - **`flexvert_xpos`**: Cartesian flex vertex positions                  (nflexvert x 3)
+  - **`flexelem_aabb`**: flex element bounding boxes (center, size)       (nflexelem x 6)
+  - **`flexedge_J_rownnz`**: number of non-zeros in Jacobian row              (nflexedge x 1)
+  - **`flexedge_J_rowadr`**: row start address in colind array                (nflexedge x 1)
+  - **`flexedge_J_colind`**: column indices in sparse Jacobian                (nflexedge x nv)
+  - **`flexedge_J`**: flex edge Jacobian                               (nflexedge x nv)
+  - **`flexedge_length`**: flex edge lengths                                (nflexedge x 1)
   - **`ten_wrapadr`**: start address of tendon's path                   (ntendon x 1)
   - **`ten_wrapnum`**: number of wrap points in path                    (ntendon x 1)
   - **`ten_J_rownnz`**: number of non-zeros in Jacobian row              (ntendon x 1)
   - **`ten_J_rowadr`**: row start address in colind array                (ntendon x 1)
   - **`ten_J_colind`**: column indices in sparse Jacobian                (ntendon x nv)
-  - **`ten_length`**: tendon lengths                                   (ntendon x 1)
   - **`ten_J`**: tendon Jacobian                                  (ntendon x nv)
+  - **`ten_length`**: tendon lengths                                   (ntendon x 1)
   - **`wrap_obj`**: geom id; -1: site; -2: pulley                    (nwrap*2 x 1)
   - **`wrap_xpos`**: Cartesian 3D points in all path                  (nwrap*2 x 3)
   - **`actuator_length`**: actuator lengths                                 (nu x 1)
@@ -227,15 +252,19 @@ const mjSolverStat = mjSolverStat_
   - **`qLD`**: L'*D*L factorization of M (sparse)               (nM x 1)
   - **`qLDiagInv`**: 1/diag(D)                                        (nv x 1)
   - **`qLDiagSqrtInv`**: 1/sqrt(diag(D))                                  (nv x 1)
+  - **`bvh_aabb_dyn`**: global bounding box (center, size)               (nbvhdynamic x 6)
   - **`bvh_active`**: volume has been added to collisions              (nbvh x 1)
+  - **`flexedge_velocity`**: flex edge velocities                             (nflexedge x 1)
   - **`ten_velocity`**: tendon velocities                                (ntendon x 1)
   - **`actuator_velocity`**: actuator velocities                              (nu x 1)
-  - **`cvel`**: com-based velocity [3D rot; 3D tran]             (nbody x 6)
-  - **`cdof_dot`**: time-derivative of cdof                          (nv x 6)
+  - **`cvel`**: com-based velocity (rot:lin)                     (nbody x 6)
+  - **`cdof_dot`**: time-derivative of cdof (rot:lin)                (nv x 6)
   - **`qfrc_bias`**: C(qpos,qvel)                                     (nv x 1)
-  - **`qfrc_passive`**: passive force                                    (nv x 1)
-  - **`efc_vel`**: velocity in constraint space: J*qvel             (nefc x 1)
-  - **`efc_aref`**: reference pseudo-acceleration                    (nefc x 1)
+  - **`qfrc_spring`**: passive spring force                             (nv x 1)
+  - **`qfrc_damper`**: passive damper force                             (nv x 1)
+  - **`qfrc_gravcomp`**: passive gravity compensation force               (nv x 1)
+  - **`qfrc_fluid`**: passive fluid force                              (nv x 1)
+  - **`qfrc_passive`**: total passive force                              (nv x 1)
   - **`subtree_linvel`**: linear velocity of subtree com                   (nbody x 3)
   - **`subtree_angmom`**: angular momentum about subtree com               (nbody x 3)
   - **`qH`**: L'*D*L factorization of modified M               (nM x 1)
@@ -277,40 +306,54 @@ const mjSolverStat = mjSolverStat_
   - **`efc_KBIP`**: stiffness, damping, impedance, imp'              (nefc x 4)
   - **`efc_D`**: constraint mass                                  (nefc x 1)
   - **`efc_R`**: inverse constraint mass                          (nefc x 1)
+  - **`tendon_efcadr`**: first efc address involving tendon; -1: none     (ntendon x 1)
+  - **`dof_island`**: island id of this dof; -1: none                  (nv x 1)
+  - **`island_dofnum`**: number of dofs in island                         (nisland x 1)
+  - **`island_dofadr`**: start address in island_dofind                   (nisland x 1)
+  - **`island_dofind`**: island dof indices; -1: none                     (nv x 1)
+  - **`dof_islandind`**: dof island indices; -1: none                     (nv x 1)
+  - **`efc_island`**: island id of this constraint                     (nefc x 1)
+  - **`island_efcnum`**: number of constraints in island                  (nisland x 1)
+  - **`island_efcadr`**: start address in island_efcind                   (nisland x 1)
+  - **`island_efcind`**: island constraint indices                        (nefc x 1)
+  - **`efc_AR_rownnz`**: number of non-zeros in AR                        (nefc x 1)
+  - **`efc_AR_rowadr`**: row start address in colind array                (nefc x 1)
+  - **`efc_AR_colind`**: column indices in sparse AR                      (nefc x nefc)
+  - **`efc_AR`**: J*inv(M)*J' + R                                  (nefc x nefc)
+  - **`efc_vel`**: velocity in constraint space: J*qvel             (nefc x 1)
+  - **`efc_aref`**: reference pseudo-acceleration                    (nefc x 1)
   - **`efc_b`**: linear cost term: J*qacc_smooth - aref            (nefc x 1)
   - **`efc_force`**: constraint force in constraint space              (nefc x 1)
   - **`efc_state`**: constraint state (mjtConstraintState)             (nefc x 1)
-  - **`efc_AR_rownnz`**: number of non-zeros in AR                         (nefc x 1)
-  - **`efc_AR_rowadr`**: row start address in colind array                 (nefc x 1)
-  - **`efc_AR_colind`**: column indices in sparse AR                       (nefc x nefc)
-  - **`efc_AR`**: J*inv(M)*J' + R                                   (nefc x nefc)
+  - **`threadpool`**: ThreadPool for multithreaded operations
 
 """
 struct mjData_
-    nstack::Cint
-    nbuffer::Cint
+    narena::Csize_t
+    nbuffer::Csize_t
     nplugin::Cint
     pstack::Csize_t
+    pbase::Csize_t
     parena::Csize_t
-    maxuse_stack::Cint
+    maxuse_stack::Csize_t
+    maxuse_threadstack::NTuple{128,Csize_t}
     maxuse_arena::Csize_t
     maxuse_con::Cint
     maxuse_efc::Cint
     warning::NTuple{8,mjWarningStat}
-    timer::NTuple{13,mjTimerStat}
-    solver::NTuple{1000,mjSolverStat}
-    solver_iter::Cint
-    solver_nnz::Cint
+    timer::NTuple{15,mjTimerStat}
+    solver::NTuple{4000,mjSolverStat}
+    solver_nisland::Cint
+    solver_niter::NTuple{20,Cint}
+    solver_nnz::NTuple{20,Cint}
     solver_fwdinv::NTuple{2,mjtNum}
-    nbodypair_broad::Cint
-    nbodypair_narrow::Cint
-    ngeompair_mid::Cint
-    ngeompair_narrow::Cint
     ne::Cint
     nf::Cint
+    nl::Cint
     nefc::Cint
     nnzJ::Cint
     ncon::Cint
+    nisland::Cint
     time::mjtNum
     energy::NTuple{2,mjtNum}
     buffer::Ptr{Cvoid}
@@ -323,6 +366,7 @@ struct mjData_
     ctrl::Ptr{mjtNum}
     qfrc_applied::Ptr{mjtNum}
     xfrc_applied::Ptr{mjtNum}
+    eq_active::Ptr{mjtByte}
     mocap_pos::Ptr{mjtNum}
     mocap_quat::Ptr{mjtNum}
     qacc::Ptr{mjtNum}
@@ -349,13 +393,20 @@ struct mjData_
     subtree_com::Ptr{mjtNum}
     cdof::Ptr{mjtNum}
     cinert::Ptr{mjtNum}
+    flexvert_xpos::Ptr{mjtNum}
+    flexelem_aabb::Ptr{mjtNum}
+    flexedge_J_rownnz::Ptr{Cint}
+    flexedge_J_rowadr::Ptr{Cint}
+    flexedge_J_colind::Ptr{Cint}
+    flexedge_J::Ptr{mjtNum}
+    flexedge_length::Ptr{mjtNum}
     ten_wrapadr::Ptr{Cint}
     ten_wrapnum::Ptr{Cint}
     ten_J_rownnz::Ptr{Cint}
     ten_J_rowadr::Ptr{Cint}
     ten_J_colind::Ptr{Cint}
-    ten_length::Ptr{mjtNum}
     ten_J::Ptr{mjtNum}
+    ten_length::Ptr{mjtNum}
     wrap_obj::Ptr{Cint}
     wrap_xpos::Ptr{mjtNum}
     actuator_length::Ptr{mjtNum}
@@ -365,15 +416,19 @@ struct mjData_
     qLD::Ptr{mjtNum}
     qLDiagInv::Ptr{mjtNum}
     qLDiagSqrtInv::Ptr{mjtNum}
+    bvh_aabb_dyn::Ptr{mjtNum}
     bvh_active::Ptr{mjtByte}
+    flexedge_velocity::Ptr{mjtNum}
     ten_velocity::Ptr{mjtNum}
     actuator_velocity::Ptr{mjtNum}
     cvel::Ptr{mjtNum}
     cdof_dot::Ptr{mjtNum}
     qfrc_bias::Ptr{mjtNum}
+    qfrc_spring::Ptr{mjtNum}
+    qfrc_damper::Ptr{mjtNum}
+    qfrc_gravcomp::Ptr{mjtNum}
+    qfrc_fluid::Ptr{mjtNum}
     qfrc_passive::Ptr{mjtNum}
-    efc_vel::Ptr{mjtNum}
-    efc_aref::Ptr{mjtNum}
     subtree_linvel::Ptr{mjtNum}
     subtree_angmom::Ptr{mjtNum}
     qH::Ptr{mjtNum}
@@ -415,39 +470,53 @@ struct mjData_
     efc_KBIP::Ptr{mjtNum}
     efc_D::Ptr{mjtNum}
     efc_R::Ptr{mjtNum}
-    efc_b::Ptr{mjtNum}
-    efc_force::Ptr{mjtNum}
-    efc_state::Ptr{Cint}
+    tendon_efcadr::Ptr{Cint}
+    dof_island::Ptr{Cint}
+    island_dofnum::Ptr{Cint}
+    island_dofadr::Ptr{Cint}
+    island_dofind::Ptr{Cint}
+    dof_islandind::Ptr{Cint}
+    efc_island::Ptr{Cint}
+    island_efcnum::Ptr{Cint}
+    island_efcadr::Ptr{Cint}
+    island_efcind::Ptr{Cint}
     efc_AR_rownnz::Ptr{Cint}
     efc_AR_rowadr::Ptr{Cint}
     efc_AR_colind::Ptr{Cint}
     efc_AR::Ptr{mjtNum}
+    efc_vel::Ptr{mjtNum}
+    efc_aref::Ptr{mjtNum}
+    efc_b::Ptr{mjtNum}
+    efc_force::Ptr{mjtNum}
+    efc_state::Ptr{Cint}
+    threadpool::Csize_t
     mjData_() = new()
     mjData_(
-        nstack::Cint,
-        nbuffer::Cint,
+        narena::Csize_t,
+        nbuffer::Csize_t,
         nplugin::Cint,
         pstack::Csize_t,
+        pbase::Csize_t,
         parena::Csize_t,
-        maxuse_stack::Cint,
+        maxuse_stack::Csize_t,
+        maxuse_threadstack::NTuple{128,Csize_t},
         maxuse_arena::Csize_t,
         maxuse_con::Cint,
         maxuse_efc::Cint,
         warning::NTuple{8,mjWarningStat},
-        timer::NTuple{13,mjTimerStat},
-        solver::NTuple{1000,mjSolverStat},
-        solver_iter::Cint,
-        solver_nnz::Cint,
+        timer::NTuple{15,mjTimerStat},
+        solver::NTuple{4000,mjSolverStat},
+        solver_nisland::Cint,
+        solver_niter::NTuple{20,Cint},
+        solver_nnz::NTuple{20,Cint},
         solver_fwdinv::NTuple{2,mjtNum},
-        nbodypair_broad::Cint,
-        nbodypair_narrow::Cint,
-        ngeompair_mid::Cint,
-        ngeompair_narrow::Cint,
         ne::Cint,
         nf::Cint,
+        nl::Cint,
         nefc::Cint,
         nnzJ::Cint,
         ncon::Cint,
+        nisland::Cint,
         time::mjtNum,
         energy::NTuple{2,mjtNum},
         buffer::Ptr{Cvoid},
@@ -460,6 +529,7 @@ struct mjData_
         ctrl::Ptr{mjtNum},
         qfrc_applied::Ptr{mjtNum},
         xfrc_applied::Ptr{mjtNum},
+        eq_active::Ptr{mjtByte},
         mocap_pos::Ptr{mjtNum},
         mocap_quat::Ptr{mjtNum},
         qacc::Ptr{mjtNum},
@@ -486,13 +556,20 @@ struct mjData_
         subtree_com::Ptr{mjtNum},
         cdof::Ptr{mjtNum},
         cinert::Ptr{mjtNum},
+        flexvert_xpos::Ptr{mjtNum},
+        flexelem_aabb::Ptr{mjtNum},
+        flexedge_J_rownnz::Ptr{Cint},
+        flexedge_J_rowadr::Ptr{Cint},
+        flexedge_J_colind::Ptr{Cint},
+        flexedge_J::Ptr{mjtNum},
+        flexedge_length::Ptr{mjtNum},
         ten_wrapadr::Ptr{Cint},
         ten_wrapnum::Ptr{Cint},
         ten_J_rownnz::Ptr{Cint},
         ten_J_rowadr::Ptr{Cint},
         ten_J_colind::Ptr{Cint},
-        ten_length::Ptr{mjtNum},
         ten_J::Ptr{mjtNum},
+        ten_length::Ptr{mjtNum},
         wrap_obj::Ptr{Cint},
         wrap_xpos::Ptr{mjtNum},
         actuator_length::Ptr{mjtNum},
@@ -502,15 +579,19 @@ struct mjData_
         qLD::Ptr{mjtNum},
         qLDiagInv::Ptr{mjtNum},
         qLDiagSqrtInv::Ptr{mjtNum},
+        bvh_aabb_dyn::Ptr{mjtNum},
         bvh_active::Ptr{mjtByte},
+        flexedge_velocity::Ptr{mjtNum},
         ten_velocity::Ptr{mjtNum},
         actuator_velocity::Ptr{mjtNum},
         cvel::Ptr{mjtNum},
         cdof_dot::Ptr{mjtNum},
         qfrc_bias::Ptr{mjtNum},
+        qfrc_spring::Ptr{mjtNum},
+        qfrc_damper::Ptr{mjtNum},
+        qfrc_gravcomp::Ptr{mjtNum},
+        qfrc_fluid::Ptr{mjtNum},
         qfrc_passive::Ptr{mjtNum},
-        efc_vel::Ptr{mjtNum},
-        efc_aref::Ptr{mjtNum},
         subtree_linvel::Ptr{mjtNum},
         subtree_angmom::Ptr{mjtNum},
         qH::Ptr{mjtNum},
@@ -552,38 +633,52 @@ struct mjData_
         efc_KBIP::Ptr{mjtNum},
         efc_D::Ptr{mjtNum},
         efc_R::Ptr{mjtNum},
-        efc_b::Ptr{mjtNum},
-        efc_force::Ptr{mjtNum},
-        efc_state::Ptr{Cint},
+        tendon_efcadr::Ptr{Cint},
+        dof_island::Ptr{Cint},
+        island_dofnum::Ptr{Cint},
+        island_dofadr::Ptr{Cint},
+        island_dofind::Ptr{Cint},
+        dof_islandind::Ptr{Cint},
+        efc_island::Ptr{Cint},
+        island_efcnum::Ptr{Cint},
+        island_efcadr::Ptr{Cint},
+        island_efcind::Ptr{Cint},
         efc_AR_rownnz::Ptr{Cint},
         efc_AR_rowadr::Ptr{Cint},
         efc_AR_colind::Ptr{Cint},
         efc_AR::Ptr{mjtNum},
+        efc_vel::Ptr{mjtNum},
+        efc_aref::Ptr{mjtNum},
+        efc_b::Ptr{mjtNum},
+        efc_force::Ptr{mjtNum},
+        efc_state::Ptr{Cint},
+        threadpool::Csize_t,
     ) = new(
-        nstack,
+        narena,
         nbuffer,
         nplugin,
         pstack,
+        pbase,
         parena,
         maxuse_stack,
+        maxuse_threadstack,
         maxuse_arena,
         maxuse_con,
         maxuse_efc,
         warning,
         timer,
         solver,
-        solver_iter,
+        solver_nisland,
+        solver_niter,
         solver_nnz,
         solver_fwdinv,
-        nbodypair_broad,
-        nbodypair_narrow,
-        ngeompair_mid,
-        ngeompair_narrow,
         ne,
         nf,
+        nl,
         nefc,
         nnzJ,
         ncon,
+        nisland,
         time,
         energy,
         buffer,
@@ -596,6 +691,7 @@ struct mjData_
         ctrl,
         qfrc_applied,
         xfrc_applied,
+        eq_active,
         mocap_pos,
         mocap_quat,
         qacc,
@@ -622,13 +718,20 @@ struct mjData_
         subtree_com,
         cdof,
         cinert,
+        flexvert_xpos,
+        flexelem_aabb,
+        flexedge_J_rownnz,
+        flexedge_J_rowadr,
+        flexedge_J_colind,
+        flexedge_J,
+        flexedge_length,
         ten_wrapadr,
         ten_wrapnum,
         ten_J_rownnz,
         ten_J_rowadr,
         ten_J_colind,
-        ten_length,
         ten_J,
+        ten_length,
         wrap_obj,
         wrap_xpos,
         actuator_length,
@@ -638,15 +741,19 @@ struct mjData_
         qLD,
         qLDiagInv,
         qLDiagSqrtInv,
+        bvh_aabb_dyn,
         bvh_active,
+        flexedge_velocity,
         ten_velocity,
         actuator_velocity,
         cvel,
         cdof_dot,
         qfrc_bias,
+        qfrc_spring,
+        qfrc_damper,
+        qfrc_gravcomp,
+        qfrc_fluid,
         qfrc_passive,
-        efc_vel,
-        efc_aref,
         subtree_linvel,
         subtree_angmom,
         qH,
@@ -688,13 +795,26 @@ struct mjData_
         efc_KBIP,
         efc_D,
         efc_R,
-        efc_b,
-        efc_force,
-        efc_state,
+        tendon_efcadr,
+        dof_island,
+        island_dofnum,
+        island_dofadr,
+        island_dofind,
+        dof_islandind,
+        efc_island,
+        island_efcnum,
+        island_efcadr,
+        island_efcind,
         efc_AR_rownnz,
         efc_AR_rowadr,
         efc_AR_colind,
         efc_AR,
+        efc_vel,
+        efc_aref,
+        efc_b,
+        efc_force,
+        efc_state,
+        threadpool,
     )
 end
 const mjData = mjData_
@@ -705,7 +825,6 @@ const mjtGeom = mjtGeom_
 const mjtCamLight = mjtCamLight_
 const mjtTexture = mjtTexture_
 const mjtIntegrator = mjtIntegrator_
-const mjtCollision = mjtCollision_
 const mjtCone = mjtCone_
 const mjtJacobian = mjtJacobian_
 const mjtSolver = mjtSolver_
@@ -722,6 +841,7 @@ const mjtSensor = mjtSensor_
 const mjtStage = mjtStage_
 const mjtDataType = mjtDataType_
 const mjtLRMode = mjtLRMode_
+const mjtFlexSelf = mjtFlexSelf_
 """
 	mjLROpt
 
@@ -785,40 +905,25 @@ const mjLROpt = mjLROpt_
   - **`filename`**: file name without path
   - **`filesize`**: file size in bytes
   - **`filedata`**: buffer with file data
+  - **`filestamp`**: checksum of the file data
 
 """
 struct mjVFS_
     nfile::Cint
     filename::NTuple{2000,NTuple{1000,Cchar}}
-    filesize::NTuple{2000,Cint}
+    filesize::NTuple{2000,Csize_t}
     filedata::NTuple{2000,Ptr{Cvoid}}
+    filestamp::NTuple{2000,UInt64}
     mjVFS_() = new()
     mjVFS_(
         nfile::Cint,
         filename::NTuple{2000,NTuple{1000,Cchar}},
-        filesize::NTuple{2000,Cint},
+        filesize::NTuple{2000,Csize_t},
         filedata::NTuple{2000,Ptr{Cvoid}},
-    ) = new(nfile, filename, filesize, filedata)
+        filestamp::NTuple{2000,UInt64},
+    ) = new(nfile, filename, filesize, filedata, filestamp)
 end
 const mjVFS = mjVFS_
-struct mjResource_
-    name::Ptr{Cchar}
-    data::Ptr{Cvoid}
-    provider_data::Ptr{Cvoid}
-    read::Ptr{Cvoid}
-    close::Ptr{Cvoid}
-    getdir::Ptr{Cvoid}
-    mjResource_() = new()
-    mjResource_(
-        name::Ptr{Cchar},
-        data::Ptr{Cvoid},
-        provider_data::Ptr{Cvoid},
-        read::Ptr{Cvoid},
-        close::Ptr{Cvoid},
-        getdir::Ptr{Cvoid},
-    ) = new(name, data, provider_data, read, close, getdir)
-end
-const mjResource = mjResource_
 """
 	mjOption
 
@@ -828,6 +933,7 @@ const mjResource = mjResource_
   - **`apirate`**: update rate for remote API (Hz)
   - **`impratio`**: ratio of friction-to-normal contact impedance
   - **`tolerance`**: main solver tolerance
+  - **`ls_tolerance`**: CG/Newton linesearch tolerance
   - **`noslip_tolerance`**: noslip solver tolerance
   - **`mpr_tolerance`**: MPR solver tolerance
   - **`gravity`**: gravitational acceleration
@@ -838,16 +944,20 @@ const mjResource = mjResource_
   - **`o_margin`**: margin
   - **`o_solref`**: solref
   - **`o_solimp`**: solimp
+  - **`o_friction`**: friction
   - **`integrator`**: integration mode (mjtIntegrator)
-  - **`collision`**: collision mode (mjtCollision)
   - **`cone`**: type of friction cone (mjtCone)
   - **`jacobian`**: type of Jacobian (mjtJacobian)
   - **`solver`**: solver algorithm (mjtSolver)
   - **`iterations`**: maximum number of main solver iterations
+  - **`ls_iterations`**: maximum number of CG/Newton linesearch iterations
   - **`noslip_iterations`**: maximum number of noslip solver iterations
   - **`mpr_iterations`**: maximum number of MPR solver iterations
   - **`disableflags`**: bit flags for disabling standard features
   - **`enableflags`**: bit flags for enabling optional features
+  - **`disableactuator`**: bit flags for disabling actuators by group id
+  - **`sdf_initpoints`**: number of starting points for gradient descent
+  - **`sdf_iterations`**: max number of iterations for gradient descent
 
 """
 struct mjOption_
@@ -855,6 +965,7 @@ struct mjOption_
     apirate::mjtNum
     impratio::mjtNum
     tolerance::mjtNum
+    ls_tolerance::mjtNum
     noslip_tolerance::mjtNum
     mpr_tolerance::mjtNum
     gravity::NTuple{3,mjtNum}
@@ -865,22 +976,27 @@ struct mjOption_
     o_margin::mjtNum
     o_solref::NTuple{2,mjtNum}
     o_solimp::NTuple{5,mjtNum}
+    o_friction::NTuple{5,mjtNum}
     integrator::Cint
-    collision::Cint
     cone::Cint
     jacobian::Cint
     solver::Cint
     iterations::Cint
+    ls_iterations::Cint
     noslip_iterations::Cint
     mpr_iterations::Cint
     disableflags::Cint
     enableflags::Cint
+    disableactuator::Cint
+    sdf_initpoints::Cint
+    sdf_iterations::Cint
     mjOption_() = new()
     mjOption_(
         timestep::mjtNum,
         apirate::mjtNum,
         impratio::mjtNum,
         tolerance::mjtNum,
+        ls_tolerance::mjtNum,
         noslip_tolerance::mjtNum,
         mpr_tolerance::mjtNum,
         gravity::NTuple{3,mjtNum},
@@ -891,21 +1007,26 @@ struct mjOption_
         o_margin::mjtNum,
         o_solref::NTuple{2,mjtNum},
         o_solimp::NTuple{5,mjtNum},
+        o_friction::NTuple{5,mjtNum},
         integrator::Cint,
-        collision::Cint,
         cone::Cint,
         jacobian::Cint,
         solver::Cint,
         iterations::Cint,
+        ls_iterations::Cint,
         noslip_iterations::Cint,
         mpr_iterations::Cint,
         disableflags::Cint,
         enableflags::Cint,
+        disableactuator::Cint,
+        sdf_initpoints::Cint,
+        sdf_iterations::Cint,
     ) = new(
         timestep,
         apirate,
         impratio,
         tolerance,
+        ls_tolerance,
         noslip_tolerance,
         mpr_tolerance,
         gravity,
@@ -916,20 +1037,24 @@ struct mjOption_
         o_margin,
         o_solref,
         o_solimp,
+        o_friction,
         integrator,
-        collision,
         cone,
         jacobian,
         solver,
         iterations,
+        ls_iterations,
         noslip_iterations,
         mpr_iterations,
         disableflags,
         enableflags,
+        disableactuator,
+        sdf_initpoints,
+        sdf_iterations,
     )
 end
 const mjOption = mjOption_
-struct var"##Ctag#314"
+struct var"##Ctag#248"
     fovy::Cfloat
     ipd::Cfloat
     azimuth::Cfloat
@@ -940,8 +1065,9 @@ struct var"##Ctag#314"
     offwidth::Cint
     offheight::Cint
     ellipsoidinertia::Cint
-    var"##Ctag#314"() = new()
-    var"##Ctag#314"(
+    bvactive::Cint
+    var"##Ctag#248"() = new()
+    var"##Ctag#248"(
         fovy::Cfloat,
         ipd::Cfloat,
         azimuth::Cfloat,
@@ -952,6 +1078,7 @@ struct var"##Ctag#314"
         offwidth::Cint,
         offheight::Cint,
         ellipsoidinertia::Cint,
+        bvactive::Cint,
     ) = new(
         fovy,
         ipd,
@@ -963,16 +1090,17 @@ struct var"##Ctag#314"
         offwidth,
         offheight,
         ellipsoidinertia,
+        bvactive,
     )
 end
-struct var"##Ctag#315"
+struct var"##Ctag#249"
     shadowsize::Cint
     offsamples::Cint
     numslices::Cint
     numstacks::Cint
     numquads::Cint
-    var"##Ctag#315"() = new()
-    var"##Ctag#315"(
+    var"##Ctag#249"() = new()
+    var"##Ctag#249"(
         shadowsize::Cint,
         offsamples::Cint,
         numslices::Cint,
@@ -980,20 +1108,20 @@ struct var"##Ctag#315"
         numquads::Cint,
     ) = new(shadowsize, offsamples, numslices, numstacks, numquads)
 end
-struct var"##Ctag#316"
+struct var"##Ctag#250"
     ambient::NTuple{3,Cfloat}
     diffuse::NTuple{3,Cfloat}
     specular::NTuple{3,Cfloat}
     active::Cint
-    var"##Ctag#316"() = new()
-    var"##Ctag#316"(
+    var"##Ctag#250"() = new()
+    var"##Ctag#250"(
         ambient::NTuple{3,Cfloat},
         diffuse::NTuple{3,Cfloat},
         specular::NTuple{3,Cfloat},
         active::Cint,
     ) = new(ambient, diffuse, specular, active)
 end
-struct var"##Ctag#317"
+struct var"##Ctag#251"
     stiffness::Cfloat
     stiffnessrot::Cfloat
     force::Cfloat
@@ -1007,8 +1135,8 @@ struct var"##Ctag#317"
     shadowclip::Cfloat
     shadowscale::Cfloat
     actuatortendon::Cfloat
-    var"##Ctag#317"() = new()
-    var"##Ctag#317"(
+    var"##Ctag#251"() = new()
+    var"##Ctag#251"(
         stiffness::Cfloat,
         stiffnessrot::Cfloat,
         force::Cfloat,
@@ -1038,7 +1166,7 @@ struct var"##Ctag#317"
         actuatortendon,
     )
 end
-struct var"##Ctag#318"
+struct var"##Ctag#252"
     forcewidth::Cfloat
     contactwidth::Cfloat
     contactheight::Cfloat
@@ -1055,8 +1183,9 @@ struct var"##Ctag#318"
     framewidth::Cfloat
     constraint::Cfloat
     slidercrank::Cfloat
-    var"##Ctag#318"() = new()
-    var"##Ctag#318"(
+    frustum::Cfloat
+    var"##Ctag#252"() = new()
+    var"##Ctag#252"(
         forcewidth::Cfloat,
         contactwidth::Cfloat,
         contactheight::Cfloat,
@@ -1073,6 +1202,7 @@ struct var"##Ctag#318"
         framewidth::Cfloat,
         constraint::Cfloat,
         slidercrank::Cfloat,
+        frustum::Cfloat,
     ) = new(
         forcewidth,
         contactwidth,
@@ -1090,9 +1220,10 @@ struct var"##Ctag#318"
         framewidth,
         constraint,
         slidercrank,
+        frustum,
     )
 end
-struct var"##Ctag#319"
+struct var"##Ctag#253"
     fog::NTuple{4,Cfloat}
     haze::NTuple{4,Cfloat}
     force::NTuple{4,Cfloat}
@@ -1115,8 +1246,11 @@ struct var"##Ctag#319"
     constraint::NTuple{4,Cfloat}
     slidercrank::NTuple{4,Cfloat}
     crankbroken::NTuple{4,Cfloat}
-    var"##Ctag#319"() = new()
-    var"##Ctag#319"(
+    frustum::NTuple{4,Cfloat}
+    bv::NTuple{4,Cfloat}
+    bvactive::NTuple{4,Cfloat}
+    var"##Ctag#253"() = new()
+    var"##Ctag#253"(
         fog::NTuple{4,Cfloat},
         haze::NTuple{4,Cfloat},
         force::NTuple{4,Cfloat},
@@ -1139,6 +1273,9 @@ struct var"##Ctag#319"
         constraint::NTuple{4,Cfloat},
         slidercrank::NTuple{4,Cfloat},
         crankbroken::NTuple{4,Cfloat},
+        frustum::NTuple{4,Cfloat},
+        bv::NTuple{4,Cfloat},
+        bvactive::NTuple{4,Cfloat},
     ) = new(
         fog,
         haze,
@@ -1162,15 +1299,18 @@ struct var"##Ctag#319"
         constraint,
         slidercrank,
         crankbroken,
+        frustum,
+        bv,
+        bvactive,
     )
 end
 """
 	mjVisual
 """
 struct mjVisual_
-    data::NTuple{568,UInt8}
+    data::NTuple{624,UInt8}
     mjVisual_() = new()
-    mjVisual_(data::NTuple{568,UInt8}) = new(data)
+    mjVisual_(data::NTuple{624,UInt8}) = new(data)
 end
 const mjVisual = mjVisual_
 """
@@ -1212,11 +1352,21 @@ const mjStatistic = mjStatistic_
   - **`na`**: number of activation states = dim(act)
   - **`nbody`**: number of bodies
   - **`nbvh`**: number of total bounding volumes in all bodies
+  - **`nbvhstatic`**: number of static bounding volumes (aabb stored in mjModel)
+  - **`nbvhdynamic`**: number of dynamic bounding volumes (aabb stored in mjData)
   - **`njnt`**: number of joints
   - **`ngeom`**: number of geoms
   - **`nsite`**: number of sites
   - **`ncam`**: number of cameras
   - **`nlight`**: number of lights
+  - **`nflex`**: number of flexes
+  - **`nflexvert`**: number of vertices in all flexes
+  - **`nflexedge`**: number of edges in all flexes
+  - **`nflexelem`**: number of elements in all flexes
+  - **`nflexelemdata`**: number of element vertex ids in all flexes
+  - **`nflexshelldata`**: number of shell fragment vertex ids in all flexes
+  - **`nflexevpair`**: number of element-vertex pairs in all flexes
+  - **`nflextexcoord`**: number of vertices with texture coordinates
   - **`nmesh`**: number of meshes
   - **`nmeshvert`**: number of vertices in all meshes
   - **`nmeshnormal`**: number of normals in all meshes
@@ -1260,16 +1410,19 @@ const mjStatistic = mjStatistic_
   - **`nuser_sensor`**: number of mjtNums in sensor_user
   - **`nnames`**: number of chars in all names
   - **`nnames_map`**: number of slots in the names hash map
+  - **`npaths`**: number of chars in all paths
   - **`nM`**: number of non-zeros in sparse inertia matrix
   - **`nD`**: number of non-zeros in sparse dof-dof matrix
   - **`nB`**: number of non-zeros in sparse body-dof matrix
+  - **`ntree`**: number of kinematic trees under world body
+  - **`ngravcomp`**: number of bodies with nonzero gravcomp
   - **`nemax`**: number of potential equality-constraint rows
   - **`njmax`**: number of available rows in constraint Jacobian
   - **`nconmax`**: number of potential contacts in contact list
-  - **`nstack`**: number of fields in mjData stack
-  - **`nuserdata`**: number of extra fields in mjData
-  - **`nsensordata`**: number of fields in sensor data vector
-  - **`npluginstate`**: number of fields in the plugin state vector
+  - **`nuserdata`**: number of mjtNums reserved for the user
+  - **`nsensordata`**: number of mjtNums in sensor data vector
+  - **`npluginstate`**: number of mjtNums in plugin state vector
+  - **`narena`**: number of bytes in the mjData arena (inclusive of stack)
   - **`nbuffer`**: number of bytes in buffer
   - **`opt`**: physics options
   - **`vis`**: visualization options
@@ -1285,9 +1438,10 @@ const mjStatistic = mjStatistic_
   - **`body_jntadr`**: start addr of joints; -1: no joints      (nbody x 1)
   - **`body_dofnum`**: number of motion degrees of freedom      (nbody x 1)
   - **`body_dofadr`**: start addr of dofs; -1: no dofs          (nbody x 1)
+  - **`body_treeid`**: id of body's kinematic tree; -1: static  (nbody x 1)
   - **`body_geomnum`**: number of geoms                          (nbody x 1)
   - **`body_geomadr`**: start addr of geoms; -1: no geoms        (nbody x 1)
-  - **`body_simple`**: body is simple (has diagonal M)          (nbody x 1)
+  - **`body_simple`**: 1: diag M; 2: diag M, sliders only       (nbody x 1)
   - **`body_sameframe`**: inertial frame is same as body frame     (nbody x 1)
   - **`body_pos`**: position offset rel. to parent body      (nbody x 3)
   - **`body_quat`**: orientation offset rel. to parent body   (nbody x 4)
@@ -1298,14 +1452,17 @@ const mjStatistic = mjStatistic_
   - **`body_inertia`**: diagonal inertia in ipos/iquat frame     (nbody x 3)
   - **`body_invweight0`**: mean inv inert in qpos0 (trn, rot)       (nbody x 2)
   - **`body_gravcomp`**: antigravity force, units of body weight  (nbody x 1)
+  - **`body_margin`**: MAX over all geom margins                (nbody x 1)
   - **`body_user`**: user data                                (nbody x nuser_body)
   - **`body_plugin`**: plugin instance id; -1: not in use       (nbody x 1)
+  - **`body_contype`**: OR over all geom contypes                (nbody x 1)
+  - **`body_conaffinity`**: OR over all geom conaffinities           (nbody x 1)
   - **`body_bvhadr`**: address of bvh root                      (nbody x 1)
   - **`body_bvhnum`**: number of bounding volumes               (nbody x 1)
   - **`bvh_depth`**: depth in the bounding volume hierarchy   (nbvh x 1)
   - **`bvh_child`**: left and right children in tree          (nbvh x 2)
-  - **`bvh_geomid`**: geom id of the node; -1: non-leaf        (nbvh x 1)
-  - **`bvh_aabb`**: bounding box of node (center, size)      (nbvh x 6)
+  - **`bvh_nodeid`**: geom or elem id of node; -1: non-leaf    (nbvh x 1)
+  - **`bvh_aabb`**: local bounding box (center, size)        (nbvhstatic x 6)
   - **`jnt_type`**: type of joint (mjtJoint)                 (njnt x 1)
   - **`jnt_qposadr`**: start addr in 'qpos' for joint's data    (njnt x 1)
   - **`jnt_dofadr`**: start addr in 'qvel' for joint's data    (njnt x 1)
@@ -1313,6 +1470,7 @@ const mjStatistic = mjStatistic_
   - **`jnt_group`**: group for visibility                     (njnt x 1)
   - **`jnt_limited`**: does joint have limits                   (njnt x 1)
   - **`jnt_actfrclimited`**: does joint have actuator force limits    (njnt x 1)
+  - **`jnt_actgravcomp`**: is gravcomp force applied via actuators  (njnt x 1)
   - **`jnt_solref`**: constraint solver reference: limit       (njnt x mjNREF)
   - **`jnt_solimp`**: constraint solver impedance: limit       (njnt x mjNIMP)
   - **`jnt_pos`**: local anchor position                    (njnt x 3)
@@ -1325,6 +1483,7 @@ const mjStatistic = mjStatistic_
   - **`dof_bodyid`**: id of dof's body                         (nv x 1)
   - **`dof_jntid`**: id of dof's joint                        (nv x 1)
   - **`dof_parentid`**: id of dof's parent; -1: none             (nv x 1)
+  - **`dof_treeid`**: id of dof's kinematic tree               (nv x 1)
   - **`dof_Madr`**: dof address in M-diagonal                (nv x 1)
   - **`dof_simplenum`**: number of consecutive simple dofs        (nv x 1)
   - **`dof_solref`**: constraint solver reference:frictionloss (nv x mjNREF)
@@ -1343,6 +1502,7 @@ const mjStatistic = mjStatistic_
   - **`geom_matid`**: material id for rendering; -1: none      (ngeom x 1)
   - **`geom_group`**: group for visibility                     (ngeom x 1)
   - **`geom_priority`**: geom contact priority                    (ngeom x 1)
+  - **`geom_plugin`**: plugin instance id; -1: not in use       (ngeom x 1)
   - **`geom_sameframe`**: same as body frame (1) or iframe (2)     (ngeom x 1)
   - **`geom_solmix`**: mixing coef for solref/imp in geom pair  (ngeom x 1)
   - **`geom_solref`**: constraint solver reference: contact     (ngeom x mjNREF)
@@ -1376,7 +1536,10 @@ const mjStatistic = mjStatistic_
   - **`cam_poscom0`**: global position rel. to sub-com in qpos0 (ncam x 3)
   - **`cam_pos0`**: global position rel. to body in qpos0    (ncam x 3)
   - **`cam_mat0`**: global orientation in qpos0              (ncam x 9)
+  - **`cam_resolution`**: [width, height] in pixels                (ncam x 2)
   - **`cam_fovy`**: y-field of view (deg)                    (ncam x 1)
+  - **`cam_intrinsic`**: [focal length; principal point]          (ncam x 4)
+  - **`cam_sensorsize`**: sensor size                              (ncam x 2)
   - **`cam_ipd`**: inter-pupilary distance                  (ncam x 1)
   - **`cam_user`**: user data                                (ncam x nuser_cam)
   - **`light_mode`**: light tracking mode (mjtCamLight)        (nlight x 1)
@@ -1384,6 +1547,7 @@ const mjStatistic = mjStatistic_
   - **`light_targetbodyid`**: id of targeted body; -1: none            (nlight x 1)
   - **`light_directional`**: directional light                        (nlight x 1)
   - **`light_castshadow`**: does light cast shadows                  (nlight x 1)
+  - **`light_bulbradius`**: light radius for soft shadows            (nlight x 1)
   - **`light_active`**: is light on                              (nlight x 1)
   - **`light_pos`**: position rel. to body frame              (nlight x 3)
   - **`light_dir`**: direction rel. to body frame             (nlight x 3)
@@ -1396,6 +1560,56 @@ const mjStatistic = mjStatistic_
   - **`light_ambient`**: ambient rgb (alpha=1)                    (nlight x 3)
   - **`light_diffuse`**: diffuse rgb (alpha=1)                    (nlight x 3)
   - **`light_specular`**: specular rgb (alpha=1)                   (nlight x 3)
+  - **`flex_contype`**: flex contact type                        (nflex x 1)
+  - **`flex_conaffinity`**: flex contact affinity                    (nflex x 1)
+  - **`flex_condim`**: contact dimensionality (1, 3, 4, 6)      (nflex x 1)
+  - **`flex_priority`**: flex contact priority                    (nflex x 1)
+  - **`flex_solmix`**: mix coef for solref/imp in contact pair  (nflex x 1)
+  - **`flex_solref`**: constraint solver reference: contact     (nflex x mjNREF)
+  - **`flex_solimp`**: constraint solver impedance: contact     (nflex x mjNIMP)
+  - **`flex_friction`**: friction for (slide, spin, roll)         (nflex x 3)
+  - **`flex_margin`**: detect contact if dist<margin(nflex x 1)
+  - **`flex_gap`**: include in solver if dist<margin-gap     (nflex x 1)
+  - **`flex_internal`**: internal flex collision enabled          (nflex x 1)
+  - **`flex_selfcollide`**: self collision mode (mjtFlexSelf)        (nflex x 1)
+  - **`flex_activelayers`**: number of active element layers, 3D only (nflex x 1)
+  - **`flex_dim`**: 1: lines, 2: triangles, 3: tetrahedra    (nflex x 1)
+  - **`flex_matid`**: material id for rendering                (nflex x 1)
+  - **`flex_group`**: group for visibility                     (nflex x 1)
+  - **`flex_vertadr`**: first vertex address                     (nflex x 1)
+  - **`flex_vertnum`**: number of vertices                       (nflex x 1)
+  - **`flex_edgeadr`**: first edge address                       (nflex x 1)
+  - **`flex_edgenum`**: number of edges                          (nflex x 1)
+  - **`flex_elemadr`**: first element address                    (nflex x 1)
+  - **`flex_elemnum`**: number of elements                       (nflex x 1)
+  - **`flex_elemdataadr`**: first element vertex id address          (nflex x 1)
+  - **`flex_shellnum`**: number of shells                         (nflex x 1)
+  - **`flex_shelldataadr`**: first shell data address                 (nflex x 1)
+  - **`flex_evpairadr`**: first evpair address                     (nflex x 1)
+  - **`flex_evpairnum`**: number of evpairs                        (nflex x 1)
+  - **`flex_texcoordadr`**: address in flex_texcoord; -1: none       (nflex x 1)
+  - **`flex_vertbodyid`**: vertex body ids                          (nflexvert x 1)
+  - **`flex_edge`**: edge vertex ids (2 per edge)             (nflexedge x 2)
+  - **`flex_elem`**: element vertex ids (dim+1 per elem)      (nflexelemdata x 1)
+  - **`flex_elemlayer`**: element distance from surface, 3D only   (nflexelem x 1)
+  - **`flex_shell`**: shell fragment vertex ids (dim per frag) (nflexshelldata x 1)
+  - **`flex_evpair`**: (element, vertex) collision pairs        (nflexevpair x 2)
+  - **`flex_vert`**: vertex positions in local body frames    (nflexvert x 3)
+  - **`flex_xvert0`**: Cartesian vertex positions in qpos0      (nflexvert x 3)
+  - **`flexedge_length0`**: edge lengths in qpos0                    (nflexedge x 1)
+  - **`flexedge_invweight0`**: edge inv. weight in qpos0                (nflexedge x 1)
+  - **`flex_radius`**: radius around primitive element          (nflex x 1)
+  - **`flex_edgestiffness`**: edge stiffness                           (nflex x 1)
+  - **`flex_edgedamping`**: edge damping                             (nflex x 1)
+  - **`flex_edgeequality`**: is edge equality constraint defined      (nflex x 1)
+  - **`flex_rigid`**: are all verices in the same body         (nflex x 1)
+  - **`flexedge_rigid`**: are both edge vertices in same body      (nflexedge x 1)
+  - **`flex_centered`**: are all vertex coordinates (0,0,0)       (nflex x 1)
+  - **`flex_flatskin`**: render flex skin with flat shading       (nflex x 1)
+  - **`flex_bvhadr`**: address of bvh root; -1: no bvh          (nflex x 1)
+  - **`flex_bvhnum`**: number of bounding volumes               (nflex x 1)
+  - **`flex_rgba`**: rgba when material is omitted            (nflex x 4)
+  - **`flex_texcoord`**: vertex texture coordinates               (nflextexcoord x 2)
   - **`mesh_vertadr`**: first vertex address                     (nmesh x 1)
   - **`mesh_vertnum`**: number of vertices                       (nmesh x 1)
   - **`mesh_faceadr`**: first face address                       (nmesh x 1)
@@ -1414,6 +1628,10 @@ const mjStatistic = mjStatistic_
   - **`mesh_facenormal`**: normal face data                         (nmeshface x 3)
   - **`mesh_facetexcoord`**: texture face data                        (nmeshface x 3)
   - **`mesh_graph`**: convex graph data                        (nmeshgraph x 1)
+  - **`mesh_scale`**: scaling applied to asset vertices        (nmesh x 3)
+  - **`mesh_pos`**: translation applied to asset vertices    (nmesh x 3)
+  - **`mesh_quat`**: rotation applied to asset vertices       (nmesh x 4)
+  - **`mesh_pathadr`**: address of asset path for mesh; -1: none (nmesh x 1)
   - **`skin_matid`**: skin material id; -1: none               (nskin x 1)
   - **`skin_group`**: group for visibility                     (nskin x 1)
   - **`skin_rgba`**: skin rgba                                (nskin x 4)
@@ -1435,16 +1653,19 @@ const mjStatistic = mjStatistic_
   - **`skin_bonebodyid`**: body id of each bone                     (nskinbone x 1)
   - **`skin_bonevertid`**: mesh ids of vertices in each bone        (nskinbonevert x 1)
   - **`skin_bonevertweight`**: weights of vertices in each bone         (nskinbonevert x 1)
+  - **`skin_pathadr`**: address of asset path for skin; -1: none (nskin x 1)
   - **`hfield_size`**: (x, y, z_top, z_bottom)                  (nhfield x 4)
   - **`hfield_nrow`**: number of rows in grid                   (nhfield x 1)
   - **`hfield_ncol`**: number of columns in grid                (nhfield x 1)
   - **`hfield_adr`**: address in hfield_data                   (nhfield x 1)
   - **`hfield_data`**: elevation data                           (nhfielddata x 1)
+  - **`hfield_pathadr`**: address of hfield asset path; -1: none   (nhfield x 1)
   - **`tex_type`**: texture type (mjtTexture)                (ntex x 1)
   - **`tex_height`**: number of rows in texture image          (ntex x 1)
   - **`tex_width`**: number of columns in texture image       (ntex x 1)
   - **`tex_adr`**: address in rgb                           (ntex x 1)
   - **`tex_rgb`**: rgb (alpha = 1)                          (ntexdata x 1)
+  - **`tex_pathadr`**: address of texture asset path; -1: none  (ntex x 1)
   - **`mat_texid`**: texture id; -1: none                     (nmat x 1)
   - **`mat_texuniform`**: make texture cube uniform                (nmat x 1)
   - **`mat_texrepeat`**: texture repetition for 2d mapping        (nmat x 2)
@@ -1452,22 +1673,24 @@ const mjStatistic = mjStatistic_
   - **`mat_specular`**: specular (x white)                       (nmat x 1)
   - **`mat_shininess`**: shininess coef                           (nmat x 1)
   - **`mat_reflectance`**: reflectance (0: disable)                 (nmat x 1)
+  - **`mat_metallic`**: metallic coef                            (nmat x 1)
+  - **`mat_roughness`**: roughness coef                           (nmat x 1)
   - **`mat_rgba`**: rgba                                     (nmat x 4)
   - **`pair_dim`**: contact dimensionality                   (npair x 1)
   - **`pair_geom1`**: id of geom1                              (npair x 1)
   - **`pair_geom2`**: id of geom2                              (npair x 1)
-  - **`pair_signature`**: (body1+1)<<16 + body2+1                (npair x 1)
+  - **`pair_signature`**: body1<<16 + body2                      (npair x 1)
   - **`pair_solref`**: solver reference: contact normal         (npair x mjNREF)
   - **`pair_solreffriction`**: solver reference: contact friction       (npair x mjNREF)
   - **`pair_solimp`**: solver impedance: contact                (npair x mjNIMP)
   - **`pair_margin`**: detect contact if dist<margin(npair x 1)
   - **`pair_gap`**: include in solver if dist<margin-gap     (npair x 1)
   - **`pair_friction`**: tangent1, 2, spin, roll1, 2              (npair x 5)
-  - **`exclude_signature`**: (body1+1)<<16 + body2+1                (nexclude x 1)
+  - **`exclude_signature`**: body1<<16 + body2                      (nexclude x 1)
   - **`eq_type`**: constraint type (mjtEq)                  (neq x 1)
   - **`eq_obj1id`**: id of object 1                           (neq x 1)
   - **`eq_obj2id`**: id of object 2                           (neq x 1)
-  - **`eq_active`**: enable/disable constraint                (neq x 1)
+  - **`eq_active0`**: initial enable/disable constraint state  (neq x 1)
   - **`eq_solref`**: constraint solver reference              (neq x mjNREF)
   - **`eq_solimp`**: constraint solver impedance              (neq x mjNIMP)
   - **`eq_data`**: numeric data for constraint              (neq x mjNEQDATA)
@@ -1508,6 +1731,7 @@ const mjStatistic = mjStatistic_
   - **`actuator_dynprm`**: dynamics parameters                      (nu x mjNDYN)
   - **`actuator_gainprm`**: gain parameters                          (nu x mjNGAIN)
   - **`actuator_biasprm`**: bias parameters                          (nu x mjNBIAS)
+  - **`actuator_actearly`**: step activation before force             (nu x 1)
   - **`actuator_ctrlrange`**: range of controls                        (nu x 2)
   - **`actuator_forcerange`**: range of forces                          (nu x 2)
   - **`actuator_actrange`**: range of activations                     (nu x 2)
@@ -1560,6 +1784,7 @@ const mjStatistic = mjStatistic_
   - **`name_siteadr`**: site name pointers                       (nsite x 1)
   - **`name_camadr`**: camera name pointers                     (ncam x 1)
   - **`name_lightadr`**: light name pointers                      (nlight x 1)
+  - **`name_flexadr`**: flex name pointers                       (nflex x 1)
   - **`name_meshadr`**: mesh name pointers                       (nmesh x 1)
   - **`name_skinadr`**: skin name pointers                       (nskin x 1)
   - **`name_hfieldadr`**: hfield name pointers                     (nhfield x 1)
@@ -1578,6 +1803,7 @@ const mjStatistic = mjStatistic_
   - **`name_pluginadr`**: plugin instance name pointers            (nplugin x 1)
   - **`names`**: names of all objects, 0-terminated       (nnames x 1)
   - **`names_map`**: internal hash map of names               (nnames_map x 1)
+  - **`paths`**: paths to assets, 0-terminated            (npaths x 1)
 
 """
 struct mjModel_
@@ -1587,11 +1813,21 @@ struct mjModel_
     na::Cint
     nbody::Cint
     nbvh::Cint
+    nbvhstatic::Cint
+    nbvhdynamic::Cint
     njnt::Cint
     ngeom::Cint
     nsite::Cint
     ncam::Cint
     nlight::Cint
+    nflex::Cint
+    nflexvert::Cint
+    nflexedge::Cint
+    nflexelem::Cint
+    nflexelemdata::Cint
+    nflexshelldata::Cint
+    nflexevpair::Cint
+    nflextexcoord::Cint
     nmesh::Cint
     nmeshvert::Cint
     nmeshnormal::Cint
@@ -1635,17 +1871,20 @@ struct mjModel_
     nuser_sensor::Cint
     nnames::Cint
     nnames_map::Cint
+    npaths::Cint
     nM::Cint
     nD::Cint
     nB::Cint
+    ntree::Cint
+    ngravcomp::Cint
     nemax::Cint
     njmax::Cint
     nconmax::Cint
-    nstack::Cint
     nuserdata::Cint
     nsensordata::Cint
     npluginstate::Cint
-    nbuffer::Cint
+    narena::Csize_t
+    nbuffer::Csize_t
     opt::mjOption
     vis::mjVisual
     stat::mjStatistic
@@ -1660,6 +1899,7 @@ struct mjModel_
     body_jntadr::Ptr{Cint}
     body_dofnum::Ptr{Cint}
     body_dofadr::Ptr{Cint}
+    body_treeid::Ptr{Cint}
     body_geomnum::Ptr{Cint}
     body_geomadr::Ptr{Cint}
     body_simple::Ptr{mjtByte}
@@ -1673,13 +1913,16 @@ struct mjModel_
     body_inertia::Ptr{mjtNum}
     body_invweight0::Ptr{mjtNum}
     body_gravcomp::Ptr{mjtNum}
+    body_margin::Ptr{mjtNum}
     body_user::Ptr{mjtNum}
     body_plugin::Ptr{Cint}
+    body_contype::Ptr{Cint}
+    body_conaffinity::Ptr{Cint}
     body_bvhadr::Ptr{Cint}
     body_bvhnum::Ptr{Cint}
     bvh_depth::Ptr{Cint}
     bvh_child::Ptr{Cint}
-    bvh_geomid::Ptr{Cint}
+    bvh_nodeid::Ptr{Cint}
     bvh_aabb::Ptr{mjtNum}
     jnt_type::Ptr{Cint}
     jnt_qposadr::Ptr{Cint}
@@ -1688,6 +1931,7 @@ struct mjModel_
     jnt_group::Ptr{Cint}
     jnt_limited::Ptr{mjtByte}
     jnt_actfrclimited::Ptr{mjtByte}
+    jnt_actgravcomp::Ptr{mjtByte}
     jnt_solref::Ptr{mjtNum}
     jnt_solimp::Ptr{mjtNum}
     jnt_pos::Ptr{mjtNum}
@@ -1700,6 +1944,7 @@ struct mjModel_
     dof_bodyid::Ptr{Cint}
     dof_jntid::Ptr{Cint}
     dof_parentid::Ptr{Cint}
+    dof_treeid::Ptr{Cint}
     dof_Madr::Ptr{Cint}
     dof_simplenum::Ptr{Cint}
     dof_solref::Ptr{mjtNum}
@@ -1718,6 +1963,7 @@ struct mjModel_
     geom_matid::Ptr{Cint}
     geom_group::Ptr{Cint}
     geom_priority::Ptr{Cint}
+    geom_plugin::Ptr{Cint}
     geom_sameframe::Ptr{mjtByte}
     geom_solmix::Ptr{mjtNum}
     geom_solref::Ptr{mjtNum}
@@ -1751,7 +1997,10 @@ struct mjModel_
     cam_poscom0::Ptr{mjtNum}
     cam_pos0::Ptr{mjtNum}
     cam_mat0::Ptr{mjtNum}
+    cam_resolution::Ptr{Cint}
     cam_fovy::Ptr{mjtNum}
+    cam_intrinsic::Ptr{Cfloat}
+    cam_sensorsize::Ptr{Cfloat}
     cam_ipd::Ptr{mjtNum}
     cam_user::Ptr{mjtNum}
     light_mode::Ptr{Cint}
@@ -1759,6 +2008,7 @@ struct mjModel_
     light_targetbodyid::Ptr{Cint}
     light_directional::Ptr{mjtByte}
     light_castshadow::Ptr{mjtByte}
+    light_bulbradius::Ptr{Cfloat}
     light_active::Ptr{mjtByte}
     light_pos::Ptr{mjtNum}
     light_dir::Ptr{mjtNum}
@@ -1771,6 +2021,56 @@ struct mjModel_
     light_ambient::Ptr{Cfloat}
     light_diffuse::Ptr{Cfloat}
     light_specular::Ptr{Cfloat}
+    flex_contype::Ptr{Cint}
+    flex_conaffinity::Ptr{Cint}
+    flex_condim::Ptr{Cint}
+    flex_priority::Ptr{Cint}
+    flex_solmix::Ptr{mjtNum}
+    flex_solref::Ptr{mjtNum}
+    flex_solimp::Ptr{mjtNum}
+    flex_friction::Ptr{mjtNum}
+    flex_margin::Ptr{mjtNum}
+    flex_gap::Ptr{mjtNum}
+    flex_internal::Ptr{mjtByte}
+    flex_selfcollide::Ptr{Cint}
+    flex_activelayers::Ptr{Cint}
+    flex_dim::Ptr{Cint}
+    flex_matid::Ptr{Cint}
+    flex_group::Ptr{Cint}
+    flex_vertadr::Ptr{Cint}
+    flex_vertnum::Ptr{Cint}
+    flex_edgeadr::Ptr{Cint}
+    flex_edgenum::Ptr{Cint}
+    flex_elemadr::Ptr{Cint}
+    flex_elemnum::Ptr{Cint}
+    flex_elemdataadr::Ptr{Cint}
+    flex_shellnum::Ptr{Cint}
+    flex_shelldataadr::Ptr{Cint}
+    flex_evpairadr::Ptr{Cint}
+    flex_evpairnum::Ptr{Cint}
+    flex_texcoordadr::Ptr{Cint}
+    flex_vertbodyid::Ptr{Cint}
+    flex_edge::Ptr{Cint}
+    flex_elem::Ptr{Cint}
+    flex_elemlayer::Ptr{Cint}
+    flex_shell::Ptr{Cint}
+    flex_evpair::Ptr{Cint}
+    flex_vert::Ptr{mjtNum}
+    flex_xvert0::Ptr{mjtNum}
+    flexedge_length0::Ptr{mjtNum}
+    flexedge_invweight0::Ptr{mjtNum}
+    flex_radius::Ptr{mjtNum}
+    flex_edgestiffness::Ptr{mjtNum}
+    flex_edgedamping::Ptr{mjtNum}
+    flex_edgeequality::Ptr{mjtByte}
+    flex_rigid::Ptr{mjtByte}
+    flexedge_rigid::Ptr{mjtByte}
+    flex_centered::Ptr{mjtByte}
+    flex_flatskin::Ptr{mjtByte}
+    flex_bvhadr::Ptr{Cint}
+    flex_bvhnum::Ptr{Cint}
+    flex_rgba::Ptr{Cfloat}
+    flex_texcoord::Ptr{Cfloat}
     mesh_vertadr::Ptr{Cint}
     mesh_vertnum::Ptr{Cint}
     mesh_faceadr::Ptr{Cint}
@@ -1789,6 +2089,10 @@ struct mjModel_
     mesh_facenormal::Ptr{Cint}
     mesh_facetexcoord::Ptr{Cint}
     mesh_graph::Ptr{Cint}
+    mesh_scale::Ptr{mjtNum}
+    mesh_pos::Ptr{mjtNum}
+    mesh_quat::Ptr{mjtNum}
+    mesh_pathadr::Ptr{Cint}
     skin_matid::Ptr{Cint}
     skin_group::Ptr{Cint}
     skin_rgba::Ptr{Cfloat}
@@ -1810,16 +2114,19 @@ struct mjModel_
     skin_bonebodyid::Ptr{Cint}
     skin_bonevertid::Ptr{Cint}
     skin_bonevertweight::Ptr{Cfloat}
+    skin_pathadr::Ptr{Cint}
     hfield_size::Ptr{mjtNum}
     hfield_nrow::Ptr{Cint}
     hfield_ncol::Ptr{Cint}
     hfield_adr::Ptr{Cint}
     hfield_data::Ptr{Cfloat}
+    hfield_pathadr::Ptr{Cint}
     tex_type::Ptr{Cint}
     tex_height::Ptr{Cint}
     tex_width::Ptr{Cint}
     tex_adr::Ptr{Cint}
     tex_rgb::Ptr{mjtByte}
+    tex_pathadr::Ptr{Cint}
     mat_texid::Ptr{Cint}
     mat_texuniform::Ptr{mjtByte}
     mat_texrepeat::Ptr{Cfloat}
@@ -1827,6 +2134,8 @@ struct mjModel_
     mat_specular::Ptr{Cfloat}
     mat_shininess::Ptr{Cfloat}
     mat_reflectance::Ptr{Cfloat}
+    mat_metallic::Ptr{Cfloat}
+    mat_roughness::Ptr{Cfloat}
     mat_rgba::Ptr{Cfloat}
     pair_dim::Ptr{Cint}
     pair_geom1::Ptr{Cint}
@@ -1842,7 +2151,7 @@ struct mjModel_
     eq_type::Ptr{Cint}
     eq_obj1id::Ptr{Cint}
     eq_obj2id::Ptr{Cint}
-    eq_active::Ptr{mjtByte}
+    eq_active0::Ptr{mjtByte}
     eq_solref::Ptr{mjtNum}
     eq_solimp::Ptr{mjtNum}
     eq_data::Ptr{mjtNum}
@@ -1883,6 +2192,7 @@ struct mjModel_
     actuator_dynprm::Ptr{mjtNum}
     actuator_gainprm::Ptr{mjtNum}
     actuator_biasprm::Ptr{mjtNum}
+    actuator_actearly::Ptr{mjtByte}
     actuator_ctrlrange::Ptr{mjtNum}
     actuator_forcerange::Ptr{mjtNum}
     actuator_actrange::Ptr{mjtNum}
@@ -1935,6 +2245,7 @@ struct mjModel_
     name_siteadr::Ptr{Cint}
     name_camadr::Ptr{Cint}
     name_lightadr::Ptr{Cint}
+    name_flexadr::Ptr{Cint}
     name_meshadr::Ptr{Cint}
     name_skinadr::Ptr{Cint}
     name_hfieldadr::Ptr{Cint}
@@ -1953,6 +2264,7 @@ struct mjModel_
     name_pluginadr::Ptr{Cint}
     names::Ptr{Cchar}
     names_map::Ptr{Cint}
+    paths::Ptr{Cchar}
     mjModel_() = new()
     mjModel_(
         nq::Cint,
@@ -1961,11 +2273,21 @@ struct mjModel_
         na::Cint,
         nbody::Cint,
         nbvh::Cint,
+        nbvhstatic::Cint,
+        nbvhdynamic::Cint,
         njnt::Cint,
         ngeom::Cint,
         nsite::Cint,
         ncam::Cint,
         nlight::Cint,
+        nflex::Cint,
+        nflexvert::Cint,
+        nflexedge::Cint,
+        nflexelem::Cint,
+        nflexelemdata::Cint,
+        nflexshelldata::Cint,
+        nflexevpair::Cint,
+        nflextexcoord::Cint,
         nmesh::Cint,
         nmeshvert::Cint,
         nmeshnormal::Cint,
@@ -2009,17 +2331,20 @@ struct mjModel_
         nuser_sensor::Cint,
         nnames::Cint,
         nnames_map::Cint,
+        npaths::Cint,
         nM::Cint,
         nD::Cint,
         nB::Cint,
+        ntree::Cint,
+        ngravcomp::Cint,
         nemax::Cint,
         njmax::Cint,
         nconmax::Cint,
-        nstack::Cint,
         nuserdata::Cint,
         nsensordata::Cint,
         npluginstate::Cint,
-        nbuffer::Cint,
+        narena::Csize_t,
+        nbuffer::Csize_t,
         opt::mjOption,
         vis::mjVisual,
         stat::mjStatistic,
@@ -2034,6 +2359,7 @@ struct mjModel_
         body_jntadr::Ptr{Cint},
         body_dofnum::Ptr{Cint},
         body_dofadr::Ptr{Cint},
+        body_treeid::Ptr{Cint},
         body_geomnum::Ptr{Cint},
         body_geomadr::Ptr{Cint},
         body_simple::Ptr{mjtByte},
@@ -2047,13 +2373,16 @@ struct mjModel_
         body_inertia::Ptr{mjtNum},
         body_invweight0::Ptr{mjtNum},
         body_gravcomp::Ptr{mjtNum},
+        body_margin::Ptr{mjtNum},
         body_user::Ptr{mjtNum},
         body_plugin::Ptr{Cint},
+        body_contype::Ptr{Cint},
+        body_conaffinity::Ptr{Cint},
         body_bvhadr::Ptr{Cint},
         body_bvhnum::Ptr{Cint},
         bvh_depth::Ptr{Cint},
         bvh_child::Ptr{Cint},
-        bvh_geomid::Ptr{Cint},
+        bvh_nodeid::Ptr{Cint},
         bvh_aabb::Ptr{mjtNum},
         jnt_type::Ptr{Cint},
         jnt_qposadr::Ptr{Cint},
@@ -2062,6 +2391,7 @@ struct mjModel_
         jnt_group::Ptr{Cint},
         jnt_limited::Ptr{mjtByte},
         jnt_actfrclimited::Ptr{mjtByte},
+        jnt_actgravcomp::Ptr{mjtByte},
         jnt_solref::Ptr{mjtNum},
         jnt_solimp::Ptr{mjtNum},
         jnt_pos::Ptr{mjtNum},
@@ -2074,6 +2404,7 @@ struct mjModel_
         dof_bodyid::Ptr{Cint},
         dof_jntid::Ptr{Cint},
         dof_parentid::Ptr{Cint},
+        dof_treeid::Ptr{Cint},
         dof_Madr::Ptr{Cint},
         dof_simplenum::Ptr{Cint},
         dof_solref::Ptr{mjtNum},
@@ -2092,6 +2423,7 @@ struct mjModel_
         geom_matid::Ptr{Cint},
         geom_group::Ptr{Cint},
         geom_priority::Ptr{Cint},
+        geom_plugin::Ptr{Cint},
         geom_sameframe::Ptr{mjtByte},
         geom_solmix::Ptr{mjtNum},
         geom_solref::Ptr{mjtNum},
@@ -2125,7 +2457,10 @@ struct mjModel_
         cam_poscom0::Ptr{mjtNum},
         cam_pos0::Ptr{mjtNum},
         cam_mat0::Ptr{mjtNum},
+        cam_resolution::Ptr{Cint},
         cam_fovy::Ptr{mjtNum},
+        cam_intrinsic::Ptr{Cfloat},
+        cam_sensorsize::Ptr{Cfloat},
         cam_ipd::Ptr{mjtNum},
         cam_user::Ptr{mjtNum},
         light_mode::Ptr{Cint},
@@ -2133,6 +2468,7 @@ struct mjModel_
         light_targetbodyid::Ptr{Cint},
         light_directional::Ptr{mjtByte},
         light_castshadow::Ptr{mjtByte},
+        light_bulbradius::Ptr{Cfloat},
         light_active::Ptr{mjtByte},
         light_pos::Ptr{mjtNum},
         light_dir::Ptr{mjtNum},
@@ -2145,6 +2481,56 @@ struct mjModel_
         light_ambient::Ptr{Cfloat},
         light_diffuse::Ptr{Cfloat},
         light_specular::Ptr{Cfloat},
+        flex_contype::Ptr{Cint},
+        flex_conaffinity::Ptr{Cint},
+        flex_condim::Ptr{Cint},
+        flex_priority::Ptr{Cint},
+        flex_solmix::Ptr{mjtNum},
+        flex_solref::Ptr{mjtNum},
+        flex_solimp::Ptr{mjtNum},
+        flex_friction::Ptr{mjtNum},
+        flex_margin::Ptr{mjtNum},
+        flex_gap::Ptr{mjtNum},
+        flex_internal::Ptr{mjtByte},
+        flex_selfcollide::Ptr{Cint},
+        flex_activelayers::Ptr{Cint},
+        flex_dim::Ptr{Cint},
+        flex_matid::Ptr{Cint},
+        flex_group::Ptr{Cint},
+        flex_vertadr::Ptr{Cint},
+        flex_vertnum::Ptr{Cint},
+        flex_edgeadr::Ptr{Cint},
+        flex_edgenum::Ptr{Cint},
+        flex_elemadr::Ptr{Cint},
+        flex_elemnum::Ptr{Cint},
+        flex_elemdataadr::Ptr{Cint},
+        flex_shellnum::Ptr{Cint},
+        flex_shelldataadr::Ptr{Cint},
+        flex_evpairadr::Ptr{Cint},
+        flex_evpairnum::Ptr{Cint},
+        flex_texcoordadr::Ptr{Cint},
+        flex_vertbodyid::Ptr{Cint},
+        flex_edge::Ptr{Cint},
+        flex_elem::Ptr{Cint},
+        flex_elemlayer::Ptr{Cint},
+        flex_shell::Ptr{Cint},
+        flex_evpair::Ptr{Cint},
+        flex_vert::Ptr{mjtNum},
+        flex_xvert0::Ptr{mjtNum},
+        flexedge_length0::Ptr{mjtNum},
+        flexedge_invweight0::Ptr{mjtNum},
+        flex_radius::Ptr{mjtNum},
+        flex_edgestiffness::Ptr{mjtNum},
+        flex_edgedamping::Ptr{mjtNum},
+        flex_edgeequality::Ptr{mjtByte},
+        flex_rigid::Ptr{mjtByte},
+        flexedge_rigid::Ptr{mjtByte},
+        flex_centered::Ptr{mjtByte},
+        flex_flatskin::Ptr{mjtByte},
+        flex_bvhadr::Ptr{Cint},
+        flex_bvhnum::Ptr{Cint},
+        flex_rgba::Ptr{Cfloat},
+        flex_texcoord::Ptr{Cfloat},
         mesh_vertadr::Ptr{Cint},
         mesh_vertnum::Ptr{Cint},
         mesh_faceadr::Ptr{Cint},
@@ -2163,6 +2549,10 @@ struct mjModel_
         mesh_facenormal::Ptr{Cint},
         mesh_facetexcoord::Ptr{Cint},
         mesh_graph::Ptr{Cint},
+        mesh_scale::Ptr{mjtNum},
+        mesh_pos::Ptr{mjtNum},
+        mesh_quat::Ptr{mjtNum},
+        mesh_pathadr::Ptr{Cint},
         skin_matid::Ptr{Cint},
         skin_group::Ptr{Cint},
         skin_rgba::Ptr{Cfloat},
@@ -2184,16 +2574,19 @@ struct mjModel_
         skin_bonebodyid::Ptr{Cint},
         skin_bonevertid::Ptr{Cint},
         skin_bonevertweight::Ptr{Cfloat},
+        skin_pathadr::Ptr{Cint},
         hfield_size::Ptr{mjtNum},
         hfield_nrow::Ptr{Cint},
         hfield_ncol::Ptr{Cint},
         hfield_adr::Ptr{Cint},
         hfield_data::Ptr{Cfloat},
+        hfield_pathadr::Ptr{Cint},
         tex_type::Ptr{Cint},
         tex_height::Ptr{Cint},
         tex_width::Ptr{Cint},
         tex_adr::Ptr{Cint},
         tex_rgb::Ptr{mjtByte},
+        tex_pathadr::Ptr{Cint},
         mat_texid::Ptr{Cint},
         mat_texuniform::Ptr{mjtByte},
         mat_texrepeat::Ptr{Cfloat},
@@ -2201,6 +2594,8 @@ struct mjModel_
         mat_specular::Ptr{Cfloat},
         mat_shininess::Ptr{Cfloat},
         mat_reflectance::Ptr{Cfloat},
+        mat_metallic::Ptr{Cfloat},
+        mat_roughness::Ptr{Cfloat},
         mat_rgba::Ptr{Cfloat},
         pair_dim::Ptr{Cint},
         pair_geom1::Ptr{Cint},
@@ -2216,7 +2611,7 @@ struct mjModel_
         eq_type::Ptr{Cint},
         eq_obj1id::Ptr{Cint},
         eq_obj2id::Ptr{Cint},
-        eq_active::Ptr{mjtByte},
+        eq_active0::Ptr{mjtByte},
         eq_solref::Ptr{mjtNum},
         eq_solimp::Ptr{mjtNum},
         eq_data::Ptr{mjtNum},
@@ -2257,6 +2652,7 @@ struct mjModel_
         actuator_dynprm::Ptr{mjtNum},
         actuator_gainprm::Ptr{mjtNum},
         actuator_biasprm::Ptr{mjtNum},
+        actuator_actearly::Ptr{mjtByte},
         actuator_ctrlrange::Ptr{mjtNum},
         actuator_forcerange::Ptr{mjtNum},
         actuator_actrange::Ptr{mjtNum},
@@ -2309,6 +2705,7 @@ struct mjModel_
         name_siteadr::Ptr{Cint},
         name_camadr::Ptr{Cint},
         name_lightadr::Ptr{Cint},
+        name_flexadr::Ptr{Cint},
         name_meshadr::Ptr{Cint},
         name_skinadr::Ptr{Cint},
         name_hfieldadr::Ptr{Cint},
@@ -2327,6 +2724,7 @@ struct mjModel_
         name_pluginadr::Ptr{Cint},
         names::Ptr{Cchar},
         names_map::Ptr{Cint},
+        paths::Ptr{Cchar},
     ) = new(
         nq,
         nv,
@@ -2334,11 +2732,21 @@ struct mjModel_
         na,
         nbody,
         nbvh,
+        nbvhstatic,
+        nbvhdynamic,
         njnt,
         ngeom,
         nsite,
         ncam,
         nlight,
+        nflex,
+        nflexvert,
+        nflexedge,
+        nflexelem,
+        nflexelemdata,
+        nflexshelldata,
+        nflexevpair,
+        nflextexcoord,
         nmesh,
         nmeshvert,
         nmeshnormal,
@@ -2382,16 +2790,19 @@ struct mjModel_
         nuser_sensor,
         nnames,
         nnames_map,
+        npaths,
         nM,
         nD,
         nB,
+        ntree,
+        ngravcomp,
         nemax,
         njmax,
         nconmax,
-        nstack,
         nuserdata,
         nsensordata,
         npluginstate,
+        narena,
         nbuffer,
         opt,
         vis,
@@ -2407,6 +2818,7 @@ struct mjModel_
         body_jntadr,
         body_dofnum,
         body_dofadr,
+        body_treeid,
         body_geomnum,
         body_geomadr,
         body_simple,
@@ -2420,13 +2832,16 @@ struct mjModel_
         body_inertia,
         body_invweight0,
         body_gravcomp,
+        body_margin,
         body_user,
         body_plugin,
+        body_contype,
+        body_conaffinity,
         body_bvhadr,
         body_bvhnum,
         bvh_depth,
         bvh_child,
-        bvh_geomid,
+        bvh_nodeid,
         bvh_aabb,
         jnt_type,
         jnt_qposadr,
@@ -2435,6 +2850,7 @@ struct mjModel_
         jnt_group,
         jnt_limited,
         jnt_actfrclimited,
+        jnt_actgravcomp,
         jnt_solref,
         jnt_solimp,
         jnt_pos,
@@ -2447,6 +2863,7 @@ struct mjModel_
         dof_bodyid,
         dof_jntid,
         dof_parentid,
+        dof_treeid,
         dof_Madr,
         dof_simplenum,
         dof_solref,
@@ -2465,6 +2882,7 @@ struct mjModel_
         geom_matid,
         geom_group,
         geom_priority,
+        geom_plugin,
         geom_sameframe,
         geom_solmix,
         geom_solref,
@@ -2498,7 +2916,10 @@ struct mjModel_
         cam_poscom0,
         cam_pos0,
         cam_mat0,
+        cam_resolution,
         cam_fovy,
+        cam_intrinsic,
+        cam_sensorsize,
         cam_ipd,
         cam_user,
         light_mode,
@@ -2506,6 +2927,7 @@ struct mjModel_
         light_targetbodyid,
         light_directional,
         light_castshadow,
+        light_bulbradius,
         light_active,
         light_pos,
         light_dir,
@@ -2518,6 +2940,56 @@ struct mjModel_
         light_ambient,
         light_diffuse,
         light_specular,
+        flex_contype,
+        flex_conaffinity,
+        flex_condim,
+        flex_priority,
+        flex_solmix,
+        flex_solref,
+        flex_solimp,
+        flex_friction,
+        flex_margin,
+        flex_gap,
+        flex_internal,
+        flex_selfcollide,
+        flex_activelayers,
+        flex_dim,
+        flex_matid,
+        flex_group,
+        flex_vertadr,
+        flex_vertnum,
+        flex_edgeadr,
+        flex_edgenum,
+        flex_elemadr,
+        flex_elemnum,
+        flex_elemdataadr,
+        flex_shellnum,
+        flex_shelldataadr,
+        flex_evpairadr,
+        flex_evpairnum,
+        flex_texcoordadr,
+        flex_vertbodyid,
+        flex_edge,
+        flex_elem,
+        flex_elemlayer,
+        flex_shell,
+        flex_evpair,
+        flex_vert,
+        flex_xvert0,
+        flexedge_length0,
+        flexedge_invweight0,
+        flex_radius,
+        flex_edgestiffness,
+        flex_edgedamping,
+        flex_edgeequality,
+        flex_rigid,
+        flexedge_rigid,
+        flex_centered,
+        flex_flatskin,
+        flex_bvhadr,
+        flex_bvhnum,
+        flex_rgba,
+        flex_texcoord,
         mesh_vertadr,
         mesh_vertnum,
         mesh_faceadr,
@@ -2536,6 +3008,10 @@ struct mjModel_
         mesh_facenormal,
         mesh_facetexcoord,
         mesh_graph,
+        mesh_scale,
+        mesh_pos,
+        mesh_quat,
+        mesh_pathadr,
         skin_matid,
         skin_group,
         skin_rgba,
@@ -2557,16 +3033,19 @@ struct mjModel_
         skin_bonebodyid,
         skin_bonevertid,
         skin_bonevertweight,
+        skin_pathadr,
         hfield_size,
         hfield_nrow,
         hfield_ncol,
         hfield_adr,
         hfield_data,
+        hfield_pathadr,
         tex_type,
         tex_height,
         tex_width,
         tex_adr,
         tex_rgb,
+        tex_pathadr,
         mat_texid,
         mat_texuniform,
         mat_texrepeat,
@@ -2574,6 +3053,8 @@ struct mjModel_
         mat_specular,
         mat_shininess,
         mat_reflectance,
+        mat_metallic,
+        mat_roughness,
         mat_rgba,
         pair_dim,
         pair_geom1,
@@ -2589,7 +3070,7 @@ struct mjModel_
         eq_type,
         eq_obj1id,
         eq_obj2id,
-        eq_active,
+        eq_active0,
         eq_solref,
         eq_solimp,
         eq_data,
@@ -2630,6 +3111,7 @@ struct mjModel_
         actuator_dynprm,
         actuator_gainprm,
         actuator_biasprm,
+        actuator_actearly,
         actuator_ctrlrange,
         actuator_forcerange,
         actuator_actrange,
@@ -2682,6 +3164,7 @@ struct mjModel_
         name_siteadr,
         name_camadr,
         name_lightadr,
+        name_flexadr,
         name_meshadr,
         name_skinadr,
         name_hfieldadr,
@@ -2700,27 +3183,43 @@ struct mjModel_
         name_pluginadr,
         names,
         names_map,
+        paths,
     )
 end
 const mjModel = mjModel_
-struct mjpResourceProvider_
+struct mjpResourceProvider
     prefix::Ptr{Cchar}
     open::mjfOpenResource
     read::mjfReadResource
     close::mjfCloseResource
     getdir::mjfGetResourceDir
+    modified::mjfResourceModified
     data::Ptr{Cvoid}
-    mjpResourceProvider_() = new()
-    mjpResourceProvider_(
+    mjpResourceProvider() = new()
+    mjpResourceProvider(
         prefix::Ptr{Cchar},
         open::mjfOpenResource,
         read::mjfReadResource,
         close::mjfCloseResource,
         getdir::mjfGetResourceDir,
+        modified::mjfResourceModified,
         data::Ptr{Cvoid},
-    ) = new(prefix, open, read, close, getdir, data)
+    ) = new(prefix, open, read, close, getdir, modified, data)
 end
-const mjpResourceProvider = mjpResourceProvider_
+struct mjResource_
+    name::Ptr{Cchar}
+    data::Ptr{Cvoid}
+    timestamp::NTuple{512,Cchar}
+    provider::Ptr{mjpResourceProvider}
+    mjResource_() = new()
+    mjResource_(
+        name::Ptr{Cchar},
+        data::Ptr{Cvoid},
+        timestamp::NTuple{512,Cchar},
+        provider::Ptr{mjpResourceProvider},
+    ) = new(name, data, timestamp, provider)
+end
+const mjResource = mjResource_
 const mjtPluginCapabilityBit = mjtPluginCapabilityBit_
 struct mjpPlugin_
     name::Ptr{Cchar}
@@ -2737,6 +3236,13 @@ struct mjpPlugin_
     compute::Ptr{Cvoid}
     advance::Ptr{Cvoid}
     visualize::Ptr{Cvoid}
+    actuator_actdim::Ptr{Cvoid}
+    actuator_act_dot::Ptr{Cvoid}
+    sdf_distance::Ptr{Cvoid}
+    sdf_gradient::Ptr{Cvoid}
+    sdf_staticdistance::Ptr{Cvoid}
+    sdf_attribute::Ptr{Cvoid}
+    sdf_aabb::Ptr{Cvoid}
     mjpPlugin_() = new()
     mjpPlugin_(
         name::Ptr{Cchar},
@@ -2753,6 +3259,13 @@ struct mjpPlugin_
         compute::Ptr{Cvoid},
         advance::Ptr{Cvoid},
         visualize::Ptr{Cvoid},
+        actuator_actdim::Ptr{Cvoid},
+        actuator_act_dot::Ptr{Cvoid},
+        sdf_distance::Ptr{Cvoid},
+        sdf_gradient::Ptr{Cvoid},
+        sdf_staticdistance::Ptr{Cvoid},
+        sdf_attribute::Ptr{Cvoid},
+        sdf_aabb::Ptr{Cvoid},
     ) = new(
         name,
         nattribute,
@@ -2768,11 +3281,19 @@ struct mjpPlugin_
         compute,
         advance,
         visualize,
+        actuator_actdim,
+        actuator_act_dot,
+        sdf_distance,
+        sdf_gradient,
+        sdf_staticdistance,
+        sdf_attribute,
+        sdf_aabb,
     )
 end
 const mjpPlugin = mjpPlugin_
 const mjtGridPos = mjtGridPos_
 const mjtFramebuffer = mjtFramebuffer_
+const mjtDepthMap = mjtDepthMap_
 const mjtFontScale = mjtFontScale_
 const mjtFont = mjtFont_
 """
@@ -2858,6 +3379,7 @@ const mjrRect = mjrRect_
   - **`windowDoublebuffer`**: is default/window framebuffer double buffered
   - **`currentBuffer`**: currently active framebuffer: mjFB_WINDOW or mjFB_OFFSCREEN
   - **`readPixelFormat`**: default color pixel format for mjr_readPixels
+  - **`readDepthMap`**: depth mapping: mjDEPTH_ZERONEAR or mjDEPTH_ZEROFAR
 
 """
 struct mjrContext_
@@ -2918,6 +3440,7 @@ struct mjrContext_
     windowDoublebuffer::Cint
     currentBuffer::Cint
     readPixelFormat::Cint
+    readDepthMap::Cint
     mjrContext_() = new()
     mjrContext_(
         lineWidth::Cfloat,
@@ -2977,6 +3500,7 @@ struct mjrContext_
         windowDoublebuffer::Cint,
         currentBuffer::Cint,
         readPixelFormat::Cint,
+        readDepthMap::Cint,
     ) = new(
         lineWidth,
         shadowClip,
@@ -3035,9 +3559,43 @@ struct mjrContext_
         windowDoublebuffer,
         currentBuffer,
         readPixelFormat,
+        readDepthMap,
     )
 end
 const mjrContext = mjrContext_
+const mjtTaskStatus = mjtTaskStatus_
+"""
+	mjThreadPool
+
+# Fields
+
+  - **`nworker`**: number of workers in the pool
+
+"""
+struct mjThreadPool_
+    nworker::Cint
+    mjThreadPool_() = new()
+    mjThreadPool_(nworker::Cint) = new(nworker)
+end
+const mjThreadPool = mjThreadPool_
+"""
+	mjTask
+
+# Fields
+
+  - **`func`**: pointer to the function that implements the task
+  - **`args`**: arguments to func
+  - **`status`**: status of the task
+
+"""
+struct mjTask_
+    func::mjfTask
+    args::Ptr{Cvoid}
+    status::Cint
+    mjTask_() = new()
+    mjTask_(func::mjfTask, args::Ptr{Cvoid}, status::Cint) = new(func, args, status)
+end
+const mjTask = mjTask_
 const mjtButton = mjtButton_
 const mjtEvent = mjtEvent_
 const mjtItem = mjtItem_
@@ -3380,7 +3938,7 @@ struct mjuiSection_
     modifier::Cint
     shortcut::Cint
     nitem::Cint
-    item::NTuple{100,mjuiItem}
+    item::NTuple{200,mjuiItem}
     rtitle::mjrRect
     rcontent::mjrRect
     mjuiSection_() = new()
@@ -3390,7 +3948,7 @@ struct mjuiSection_
         modifier::Cint,
         shortcut::Cint,
         nitem::Cint,
-        item::NTuple{100,mjuiItem},
+        item::NTuple{200,mjuiItem},
         rtitle::mjrRect,
         rcontent::mjrRect,
     ) = new(name, state, modifier, shortcut, nitem, item, rtitle, rcontent)
@@ -3541,6 +4099,7 @@ const mjtStereo = mjtStereo_
 # Fields
 
   - **`select`**: selected body id; non-positive: none
+  - **`flexselect`**: selected flex id; negative: none
   - **`skinselect`**: selected skin id; negative: none
   - **`active`**: perturbation bitmask (mjtPertBit)
   - **`active2`**: secondary perturbation bitmask (mjtPertBit)
@@ -3554,6 +4113,7 @@ const mjtStereo = mjtStereo_
 """
 struct mjvPerturb_
     select::Cint
+    flexselect::Cint
     skinselect::Cint
     active::Cint
     active2::Cint
@@ -3566,6 +4126,7 @@ struct mjvPerturb_
     mjvPerturb_() = new()
     mjvPerturb_(
         select::Cint,
+        flexselect::Cint,
         skinselect::Cint,
         active::Cint,
         active2::Cint,
@@ -3577,6 +4138,7 @@ struct mjvPerturb_
         scale::mjtNum,
     ) = new(
         select,
+        flexselect,
         skinselect,
         active,
         active2,
@@ -3632,6 +4194,7 @@ const mjvCamera = mjvCamera_
   - **`forward`**: forward direction
   - **`up`**: up direction
   - **`frustum_center`**: hor. center (left,right set to match aspect)
+  - **`frustum_width`**: width (not used for rendering)
   - **`frustum_bottom`**: bottom
   - **`frustum_top`**: top
   - **`frustum_near`**: near
@@ -3643,6 +4206,7 @@ struct mjvGLCamera_
     forward::NTuple{3,Cfloat}
     up::NTuple{3,Cfloat}
     frustum_center::Cfloat
+    frustum_width::Cfloat
     frustum_bottom::Cfloat
     frustum_top::Cfloat
     frustum_near::Cfloat
@@ -3653,6 +4217,7 @@ struct mjvGLCamera_
         forward::NTuple{3,Cfloat},
         up::NTuple{3,Cfloat},
         frustum_center::Cfloat,
+        frustum_width::Cfloat,
         frustum_bottom::Cfloat,
         frustum_top::Cfloat,
         frustum_near::Cfloat,
@@ -3662,6 +4227,7 @@ struct mjvGLCamera_
         forward,
         up,
         frustum_center,
+        frustum_width,
         frustum_bottom,
         frustum_top,
         frustum_near,
@@ -3681,7 +4247,7 @@ const mjvGLCamera = mjvGLCamera_
   - **`category`**: visual category
   - **`texid`**: texture id; -1: no texture
   - **`texuniform`**: uniform cube mapping
-  - **`texcoord`**: mesh geom has texture coordinates
+  - **`texcoord`**: mesh or flex geom has texture coordinates
   - **`segid`**: segmentation id; -1: not shown
   - **`texrepeat`**: texture repetition for 2D mapping
   - **`size`**: size parameters
@@ -3787,6 +4353,7 @@ const mjvGeom = mjvGeom_
   - **`headlight`**: headlight
   - **`directional`**: directional light
   - **`castshadow`**: does light cast shadows
+  - **`bulbradius`**: bulb radius for soft shadows
 
 """
 struct mjvLight_
@@ -3801,6 +4368,7 @@ struct mjvLight_
     headlight::mjtByte
     directional::mjtByte
     castshadow::mjtByte
+    bulbradius::Cfloat
     mjvLight_() = new()
     mjvLight_(
         pos::NTuple{3,Cfloat},
@@ -3814,6 +4382,7 @@ struct mjvLight_
         headlight::mjtByte,
         directional::mjtByte,
         castshadow::mjtByte,
+        bulbradius::Cfloat,
     ) = new(
         pos,
         dir,
@@ -3826,6 +4395,7 @@ struct mjvLight_
         headlight,
         directional,
         castshadow,
+        bulbradius,
     )
 end
 const mjvLight = mjvLight_
@@ -3841,9 +4411,11 @@ const mjvLight = mjvLight_
   - **`jointgroup`**: joint visualization by group
   - **`tendongroup`**: tendon visualization by group
   - **`actuatorgroup`**: actuator visualization by group
+  - **`flexgroup`**: flex visualization by group
   - **`skingroup`**: skin visualization by group
   - **`flags`**: visualization flags (indexed by mjtVisFlag)
   - **`bvh_depth`**: depth of the bounding volume hierarchy to be visualized
+  - **`flex_layer`**: element layer to be visualized for 3D flex
 
 """
 struct mjvOption_
@@ -3854,9 +4426,11 @@ struct mjvOption_
     jointgroup::NTuple{6,mjtByte}
     tendongroup::NTuple{6,mjtByte}
     actuatorgroup::NTuple{6,mjtByte}
+    flexgroup::NTuple{6,mjtByte}
     skingroup::NTuple{6,mjtByte}
-    flags::NTuple{25,mjtByte}
+    flags::NTuple{32,mjtByte}
     bvh_depth::Cint
+    flex_layer::Cint
     mjvOption_() = new()
     mjvOption_(
         label::Cint,
@@ -3866,9 +4440,11 @@ struct mjvOption_
         jointgroup::NTuple{6,mjtByte},
         tendongroup::NTuple{6,mjtByte},
         actuatorgroup::NTuple{6,mjtByte},
+        flexgroup::NTuple{6,mjtByte},
         skingroup::NTuple{6,mjtByte},
-        flags::NTuple{25,mjtByte},
+        flags::NTuple{32,mjtByte},
         bvh_depth::Cint,
+        flex_layer::Cint,
     ) = new(
         label,
         frame,
@@ -3877,9 +4453,11 @@ struct mjvOption_
         jointgroup,
         tendongroup,
         actuatorgroup,
+        flexgroup,
         skingroup,
         flags,
         bvh_depth,
+        flex_layer,
     )
 end
 const mjvOption = mjvOption_
@@ -3892,12 +4470,29 @@ const mjvOption = mjvOption_
   - **`ngeom`**: number of geoms currently in buffer
   - **`geoms`**: buffer for geoms (ngeom)
   - **`geomorder`**: buffer for ordering geoms by distance to camera (ngeom)
+  - **`nflex`**: number of flexes
+  - **`flexedgeadr`**: address of flex edges (nflex)
+  - **`flexedgenum`**: number of edges in flex (nflex)
+  - **`flexvertadr`**: address of flex vertices (nflex)
+  - **`flexvertnum`**: number of vertices in flex (nflex)
+  - **`flexfaceadr`**: address of flex faces (nflex)
+  - **`flexfacenum`**: number of flex faces allocated (nflex)
+  - **`flexfaceused`**: number of flex faces currently in use (nflex)
+  - **`flexedge`**: flex edge data (2*nflexedge)
+  - **`flexvert`**: flex vertices (3*nflexvert)
+  - **`flexface`**: flex faces vertices (9*sum(flexfacenum))
+  - **`flexnormal`**: flex face normals (9*sum(flexfacenum))
+  - **`flextexcoord`**: flex face texture coordinates (6*sum(flexfacenum))
+  - **`flexvertopt`**: copy of mjVIS_FLEXVERT mjvOption flag
+  - **`flexedgeopt`**: copy of mjVIS_FLEXEDGE mjvOption flag
+  - **`flexfaceopt`**: copy of mjVIS_FLEXFACE mjvOption flag
+  - **`flexskinopt`**: copy of mjVIS_FLEXSKIN mjvOption flag
   - **`nskin`**: number of skins
   - **`skinfacenum`**: number of faces in skin (nskin)
   - **`skinvertadr`**: address of skin vertices (nskin)
   - **`skinvertnum`**: number of vertices in skin (nskin)
-  - **`skinvert`**: skin vertex data (nskin)
-  - **`skinnormal`**: skin normal data (nskin)
+  - **`skinvert`**: skin vertex data (3*nskinvert)
+  - **`skinnormal`**: skin normal data (3*nskinvert)
   - **`nlight`**: number of lights currently in buffer
   - **`lights`**: buffer for lights (nlight)
   - **`camera`**: left and right camera
@@ -3916,6 +4511,23 @@ struct mjvScene_
     ngeom::Cint
     geoms::Ptr{mjvGeom}
     geomorder::Ptr{Cint}
+    nflex::Cint
+    flexedgeadr::Ptr{Cint}
+    flexedgenum::Ptr{Cint}
+    flexvertadr::Ptr{Cint}
+    flexvertnum::Ptr{Cint}
+    flexfaceadr::Ptr{Cint}
+    flexfacenum::Ptr{Cint}
+    flexfaceused::Ptr{Cint}
+    flexedge::Ptr{Cint}
+    flexvert::Ptr{Cfloat}
+    flexface::Ptr{Cfloat}
+    flexnormal::Ptr{Cfloat}
+    flextexcoord::Ptr{Cfloat}
+    flexvertopt::mjtByte
+    flexedgeopt::mjtByte
+    flexfaceopt::mjtByte
+    flexskinopt::mjtByte
     nskin::Cint
     skinfacenum::Ptr{Cint}
     skinvertadr::Ptr{Cint}
@@ -3939,6 +4551,23 @@ struct mjvScene_
         ngeom::Cint,
         geoms::Ptr{mjvGeom},
         geomorder::Ptr{Cint},
+        nflex::Cint,
+        flexedgeadr::Ptr{Cint},
+        flexedgenum::Ptr{Cint},
+        flexvertadr::Ptr{Cint},
+        flexvertnum::Ptr{Cint},
+        flexfaceadr::Ptr{Cint},
+        flexfacenum::Ptr{Cint},
+        flexfaceused::Ptr{Cint},
+        flexedge::Ptr{Cint},
+        flexvert::Ptr{Cfloat},
+        flexface::Ptr{Cfloat},
+        flexnormal::Ptr{Cfloat},
+        flextexcoord::Ptr{Cfloat},
+        flexvertopt::mjtByte,
+        flexedgeopt::mjtByte,
+        flexfaceopt::mjtByte,
+        flexskinopt::mjtByte,
         nskin::Cint,
         skinfacenum::Ptr{Cint},
         skinvertadr::Ptr{Cint},
@@ -3961,6 +4590,23 @@ struct mjvScene_
         ngeom,
         geoms,
         geomorder,
+        nflex,
+        flexedgeadr,
+        flexedgenum,
+        flexvertadr,
+        flexvertnum,
+        flexfaceadr,
+        flexfacenum,
+        flexfaceused,
+        flexedge,
+        flexvert,
+        flexface,
+        flexnormal,
+        flextexcoord,
+        flexvertopt,
+        flexedgeopt,
+        flexfaceopt,
+        flexskinopt,
         nskin,
         skinfacenum,
         skinvertadr,
@@ -4127,11 +4773,13 @@ struct mjvFigure_
     )
 end
 const mjvFigure = mjvFigure_
-struct var"##Ctag#320"
+struct var"##Ctag#254"
+    nv::Cint
     nu::Cint
     na::Cint
     nbody::Cint
     nbvh::Cint
+    nbvhstatic::Cint
     njnt::Cint
     ngeom::Cint
     nsite::Cint
@@ -4139,6 +4787,9 @@ struct var"##Ctag#320"
     nlight::Cint
     nmesh::Cint
     nskin::Cint
+    nflex::Cint
+    nflexvert::Cint
+    nflextexcoord::Cint
     nskinvert::Cint
     nskinface::Cint
     nskinbone::Cint
@@ -4146,10 +4797,13 @@ struct var"##Ctag#320"
     nmat::Cint
     neq::Cint
     ntendon::Cint
+    ntree::Cint
     nwrap::Cint
     nsensor::Cint
     nnames::Cint
+    npaths::Cint
     nsensordata::Cint
+    narena::Cint
     opt::mjOption
     vis::mjVisual
     stat::mjStatistic
@@ -4159,6 +4813,8 @@ struct var"##Ctag#320"
     body_mocapid::Ptr{Cint}
     body_jntnum::Ptr{Cint}
     body_jntadr::Ptr{Cint}
+    body_dofnum::Ptr{Cint}
+    body_dofadr::Ptr{Cint}
     body_geomnum::Ptr{Cint}
     body_geomadr::Ptr{Cint}
     body_iquat::Ptr{mjtNum}
@@ -4168,13 +4824,15 @@ struct var"##Ctag#320"
     body_bvhnum::Ptr{Cint}
     bvh_depth::Ptr{Cint}
     bvh_child::Ptr{Cint}
-    bvh_geomid::Ptr{Cint}
+    bvh_nodeid::Ptr{Cint}
     bvh_aabb::Ptr{mjtNum}
     jnt_type::Ptr{Cint}
     jnt_bodyid::Ptr{Cint}
     jnt_group::Ptr{Cint}
     geom_type::Ptr{Cint}
     geom_bodyid::Ptr{Cint}
+    geom_contype::Ptr{Cint}
+    geom_conaffinity::Ptr{Cint}
     geom_dataid::Ptr{Cint}
     geom_matid::Ptr{Cint}
     geom_group::Ptr{Cint}
@@ -4190,8 +4848,11 @@ struct var"##Ctag#320"
     site_rgba::Ptr{Cfloat}
     cam_fovy::Ptr{mjtNum}
     cam_ipd::Ptr{mjtNum}
+    cam_intrinsic::Ptr{Cfloat}
+    cam_sensorsize::Ptr{Cfloat}
     light_directional::Ptr{mjtByte}
     light_castshadow::Ptr{mjtByte}
+    light_bulbradius::Ptr{Cfloat}
     light_active::Ptr{mjtByte}
     light_attenuation::Ptr{Cfloat}
     light_cutoff::Ptr{Cfloat}
@@ -4199,8 +4860,31 @@ struct var"##Ctag#320"
     light_ambient::Ptr{Cfloat}
     light_diffuse::Ptr{Cfloat}
     light_specular::Ptr{Cfloat}
+    flex_flatskin::Ptr{mjtByte}
+    flex_dim::Ptr{Cint}
+    flex_matid::Ptr{Cint}
+    flex_group::Ptr{Cint}
+    flex_vertadr::Ptr{Cint}
+    flex_vertnum::Ptr{Cint}
+    flex_elem::Ptr{Cint}
+    flex_elemlayer::Ptr{Cint}
+    flex_elemadr::Ptr{Cint}
+    flex_elemnum::Ptr{Cint}
+    flex_elemdataadr::Ptr{Cint}
+    flex_shell::Ptr{Cint}
+    flex_shellnum::Ptr{Cint}
+    flex_shelldataadr::Ptr{Cint}
+    flex_texcoordadr::Ptr{Cint}
+    flex_bvhadr::Ptr{Cint}
+    flex_bvhnum::Ptr{Cint}
+    flex_radius::Ptr{mjtNum}
+    flex_rgba::Ptr{Cfloat}
+    hfield_pathadr::Ptr{Cint}
+    mesh_bvhadr::Ptr{Cint}
+    mesh_bvhnum::Ptr{Cint}
     mesh_texcoordadr::Ptr{Cint}
     mesh_graphadr::Ptr{Cint}
+    mesh_pathadr::Ptr{Cint}
     skin_matid::Ptr{Cint}
     skin_group::Ptr{Cint}
     skin_rgba::Ptr{Cfloat}
@@ -4221,6 +4905,8 @@ struct var"##Ctag#320"
     skin_bonebodyid::Ptr{Cint}
     skin_bonevertid::Ptr{Cint}
     skin_bonevertweight::Ptr{Cfloat}
+    skin_pathadr::Ptr{Cint}
+    tex_pathadr::Ptr{Cint}
     mat_texid::Ptr{Cint}
     mat_texuniform::Ptr{mjtByte}
     mat_texrepeat::Ptr{Cfloat}
@@ -4228,11 +4914,12 @@ struct var"##Ctag#320"
     mat_specular::Ptr{Cfloat}
     mat_shininess::Ptr{Cfloat}
     mat_reflectance::Ptr{Cfloat}
+    mat_metallic::Ptr{Cfloat}
+    mat_roughness::Ptr{Cfloat}
     mat_rgba::Ptr{Cfloat}
     eq_type::Ptr{Cint}
     eq_obj1id::Ptr{Cint}
     eq_obj2id::Ptr{Cint}
-    eq_active::Ptr{mjtByte}
     eq_data::Ptr{mjtNum}
     tendon_num::Ptr{Cint}
     tendon_matid::Ptr{Cint}
@@ -4269,12 +4956,15 @@ struct var"##Ctag#320"
     name_tendonadr::Ptr{Cint}
     name_actuatoradr::Ptr{Cint}
     names::Ptr{Cchar}
-    var"##Ctag#320"() = new()
-    var"##Ctag#320"(
+    paths::Ptr{Cchar}
+    var"##Ctag#254"() = new()
+    var"##Ctag#254"(
+        nv::Cint,
         nu::Cint,
         na::Cint,
         nbody::Cint,
         nbvh::Cint,
+        nbvhstatic::Cint,
         njnt::Cint,
         ngeom::Cint,
         nsite::Cint,
@@ -4282,6 +4972,9 @@ struct var"##Ctag#320"
         nlight::Cint,
         nmesh::Cint,
         nskin::Cint,
+        nflex::Cint,
+        nflexvert::Cint,
+        nflextexcoord::Cint,
         nskinvert::Cint,
         nskinface::Cint,
         nskinbone::Cint,
@@ -4289,10 +4982,13 @@ struct var"##Ctag#320"
         nmat::Cint,
         neq::Cint,
         ntendon::Cint,
+        ntree::Cint,
         nwrap::Cint,
         nsensor::Cint,
         nnames::Cint,
+        npaths::Cint,
         nsensordata::Cint,
+        narena::Cint,
         opt::mjOption,
         vis::mjVisual,
         stat::mjStatistic,
@@ -4302,6 +4998,8 @@ struct var"##Ctag#320"
         body_mocapid::Ptr{Cint},
         body_jntnum::Ptr{Cint},
         body_jntadr::Ptr{Cint},
+        body_dofnum::Ptr{Cint},
+        body_dofadr::Ptr{Cint},
         body_geomnum::Ptr{Cint},
         body_geomadr::Ptr{Cint},
         body_iquat::Ptr{mjtNum},
@@ -4311,13 +5009,15 @@ struct var"##Ctag#320"
         body_bvhnum::Ptr{Cint},
         bvh_depth::Ptr{Cint},
         bvh_child::Ptr{Cint},
-        bvh_geomid::Ptr{Cint},
+        bvh_nodeid::Ptr{Cint},
         bvh_aabb::Ptr{mjtNum},
         jnt_type::Ptr{Cint},
         jnt_bodyid::Ptr{Cint},
         jnt_group::Ptr{Cint},
         geom_type::Ptr{Cint},
         geom_bodyid::Ptr{Cint},
+        geom_contype::Ptr{Cint},
+        geom_conaffinity::Ptr{Cint},
         geom_dataid::Ptr{Cint},
         geom_matid::Ptr{Cint},
         geom_group::Ptr{Cint},
@@ -4333,8 +5033,11 @@ struct var"##Ctag#320"
         site_rgba::Ptr{Cfloat},
         cam_fovy::Ptr{mjtNum},
         cam_ipd::Ptr{mjtNum},
+        cam_intrinsic::Ptr{Cfloat},
+        cam_sensorsize::Ptr{Cfloat},
         light_directional::Ptr{mjtByte},
         light_castshadow::Ptr{mjtByte},
+        light_bulbradius::Ptr{Cfloat},
         light_active::Ptr{mjtByte},
         light_attenuation::Ptr{Cfloat},
         light_cutoff::Ptr{Cfloat},
@@ -4342,8 +5045,31 @@ struct var"##Ctag#320"
         light_ambient::Ptr{Cfloat},
         light_diffuse::Ptr{Cfloat},
         light_specular::Ptr{Cfloat},
+        flex_flatskin::Ptr{mjtByte},
+        flex_dim::Ptr{Cint},
+        flex_matid::Ptr{Cint},
+        flex_group::Ptr{Cint},
+        flex_vertadr::Ptr{Cint},
+        flex_vertnum::Ptr{Cint},
+        flex_elem::Ptr{Cint},
+        flex_elemlayer::Ptr{Cint},
+        flex_elemadr::Ptr{Cint},
+        flex_elemnum::Ptr{Cint},
+        flex_elemdataadr::Ptr{Cint},
+        flex_shell::Ptr{Cint},
+        flex_shellnum::Ptr{Cint},
+        flex_shelldataadr::Ptr{Cint},
+        flex_texcoordadr::Ptr{Cint},
+        flex_bvhadr::Ptr{Cint},
+        flex_bvhnum::Ptr{Cint},
+        flex_radius::Ptr{mjtNum},
+        flex_rgba::Ptr{Cfloat},
+        hfield_pathadr::Ptr{Cint},
+        mesh_bvhadr::Ptr{Cint},
+        mesh_bvhnum::Ptr{Cint},
         mesh_texcoordadr::Ptr{Cint},
         mesh_graphadr::Ptr{Cint},
+        mesh_pathadr::Ptr{Cint},
         skin_matid::Ptr{Cint},
         skin_group::Ptr{Cint},
         skin_rgba::Ptr{Cfloat},
@@ -4364,6 +5090,8 @@ struct var"##Ctag#320"
         skin_bonebodyid::Ptr{Cint},
         skin_bonevertid::Ptr{Cint},
         skin_bonevertweight::Ptr{Cfloat},
+        skin_pathadr::Ptr{Cint},
+        tex_pathadr::Ptr{Cint},
         mat_texid::Ptr{Cint},
         mat_texuniform::Ptr{mjtByte},
         mat_texrepeat::Ptr{Cfloat},
@@ -4371,11 +5099,12 @@ struct var"##Ctag#320"
         mat_specular::Ptr{Cfloat},
         mat_shininess::Ptr{Cfloat},
         mat_reflectance::Ptr{Cfloat},
+        mat_metallic::Ptr{Cfloat},
+        mat_roughness::Ptr{Cfloat},
         mat_rgba::Ptr{Cfloat},
         eq_type::Ptr{Cint},
         eq_obj1id::Ptr{Cint},
         eq_obj2id::Ptr{Cint},
-        eq_active::Ptr{mjtByte},
         eq_data::Ptr{mjtNum},
         tendon_num::Ptr{Cint},
         tendon_matid::Ptr{Cint},
@@ -4412,11 +5141,14 @@ struct var"##Ctag#320"
         name_tendonadr::Ptr{Cint},
         name_actuatoradr::Ptr{Cint},
         names::Ptr{Cchar},
+        paths::Ptr{Cchar},
     ) = new(
+        nv,
         nu,
         na,
         nbody,
         nbvh,
+        nbvhstatic,
         njnt,
         ngeom,
         nsite,
@@ -4424,6 +5156,9 @@ struct var"##Ctag#320"
         nlight,
         nmesh,
         nskin,
+        nflex,
+        nflexvert,
+        nflextexcoord,
         nskinvert,
         nskinface,
         nskinbone,
@@ -4431,10 +5166,13 @@ struct var"##Ctag#320"
         nmat,
         neq,
         ntendon,
+        ntree,
         nwrap,
         nsensor,
         nnames,
+        npaths,
         nsensordata,
+        narena,
         opt,
         vis,
         stat,
@@ -4444,6 +5182,8 @@ struct var"##Ctag#320"
         body_mocapid,
         body_jntnum,
         body_jntadr,
+        body_dofnum,
+        body_dofadr,
         body_geomnum,
         body_geomadr,
         body_iquat,
@@ -4453,13 +5193,15 @@ struct var"##Ctag#320"
         body_bvhnum,
         bvh_depth,
         bvh_child,
-        bvh_geomid,
+        bvh_nodeid,
         bvh_aabb,
         jnt_type,
         jnt_bodyid,
         jnt_group,
         geom_type,
         geom_bodyid,
+        geom_contype,
+        geom_conaffinity,
         geom_dataid,
         geom_matid,
         geom_group,
@@ -4475,8 +5217,11 @@ struct var"##Ctag#320"
         site_rgba,
         cam_fovy,
         cam_ipd,
+        cam_intrinsic,
+        cam_sensorsize,
         light_directional,
         light_castshadow,
+        light_bulbradius,
         light_active,
         light_attenuation,
         light_cutoff,
@@ -4484,8 +5229,31 @@ struct var"##Ctag#320"
         light_ambient,
         light_diffuse,
         light_specular,
+        flex_flatskin,
+        flex_dim,
+        flex_matid,
+        flex_group,
+        flex_vertadr,
+        flex_vertnum,
+        flex_elem,
+        flex_elemlayer,
+        flex_elemadr,
+        flex_elemnum,
+        flex_elemdataadr,
+        flex_shell,
+        flex_shellnum,
+        flex_shelldataadr,
+        flex_texcoordadr,
+        flex_bvhadr,
+        flex_bvhnum,
+        flex_radius,
+        flex_rgba,
+        hfield_pathadr,
+        mesh_bvhadr,
+        mesh_bvhnum,
         mesh_texcoordadr,
         mesh_graphadr,
+        mesh_pathadr,
         skin_matid,
         skin_group,
         skin_rgba,
@@ -4506,6 +5274,8 @@ struct var"##Ctag#320"
         skin_bonebodyid,
         skin_bonevertid,
         skin_bonevertweight,
+        skin_pathadr,
+        tex_pathadr,
         mat_texid,
         mat_texuniform,
         mat_texrepeat,
@@ -4513,11 +5283,12 @@ struct var"##Ctag#320"
         mat_specular,
         mat_shininess,
         mat_reflectance,
+        mat_metallic,
+        mat_roughness,
         mat_rgba,
         eq_type,
         eq_obj1id,
         eq_obj2id,
-        eq_active,
         eq_data,
         tendon_num,
         tendon_matid,
@@ -4554,16 +5325,19 @@ struct var"##Ctag#320"
         name_tendonadr,
         name_actuatoradr,
         names,
+        paths,
     )
 end
-struct var"##Ctag#321"
+struct var"##Ctag#255"
     warning::NTuple{8,mjWarningStat}
     nefc::Cint
     ncon::Cint
+    nisland::Cint
     time::mjtNum
     act::Ptr{mjtNum}
     ctrl::Ptr{mjtNum}
     xfrc_applied::Ptr{mjtNum}
+    eq_active::Ptr{mjtByte}
     sensordata::Ptr{mjtNum}
     xpos::Ptr{mjtNum}
     xquat::Ptr{mjtNum}
@@ -4584,19 +5358,30 @@ struct var"##Ctag#321"
     ten_wrapadr::Ptr{Cint}
     ten_wrapnum::Ptr{Cint}
     wrap_obj::Ptr{Cint}
+    ten_length::Ptr{mjtNum}
     wrap_xpos::Ptr{mjtNum}
+    bvh_aabb_dyn::Ptr{mjtNum}
     bvh_active::Ptr{mjtByte}
+    island_dofadr::Ptr{Cint}
+    island_dofind::Ptr{Cint}
+    dof_island::Ptr{Cint}
+    efc_island::Ptr{Cint}
+    tendon_efcadr::Ptr{Cint}
+    flexvert_xpos::Ptr{mjtNum}
     contact::Ptr{mjContact}
     efc_force::Ptr{mjtNum}
-    var"##Ctag#321"() = new()
-    var"##Ctag#321"(
+    arena::Ptr{Cvoid}
+    var"##Ctag#255"() = new()
+    var"##Ctag#255"(
         warning::NTuple{8,mjWarningStat},
         nefc::Cint,
         ncon::Cint,
+        nisland::Cint,
         time::mjtNum,
         act::Ptr{mjtNum},
         ctrl::Ptr{mjtNum},
         xfrc_applied::Ptr{mjtNum},
+        eq_active::Ptr{mjtByte},
         sensordata::Ptr{mjtNum},
         xpos::Ptr{mjtNum},
         xquat::Ptr{mjtNum},
@@ -4617,18 +5402,29 @@ struct var"##Ctag#321"
         ten_wrapadr::Ptr{Cint},
         ten_wrapnum::Ptr{Cint},
         wrap_obj::Ptr{Cint},
+        ten_length::Ptr{mjtNum},
         wrap_xpos::Ptr{mjtNum},
+        bvh_aabb_dyn::Ptr{mjtNum},
         bvh_active::Ptr{mjtByte},
+        island_dofadr::Ptr{Cint},
+        island_dofind::Ptr{Cint},
+        dof_island::Ptr{Cint},
+        efc_island::Ptr{Cint},
+        tendon_efcadr::Ptr{Cint},
+        flexvert_xpos::Ptr{mjtNum},
         contact::Ptr{mjContact},
         efc_force::Ptr{mjtNum},
+        arena::Ptr{Cvoid},
     ) = new(
         warning,
         nefc,
         ncon,
+        nisland,
         time,
         act,
         ctrl,
         xfrc_applied,
+        eq_active,
         sensordata,
         xpos,
         xquat,
@@ -4649,10 +5445,19 @@ struct var"##Ctag#321"
         ten_wrapadr,
         ten_wrapnum,
         wrap_obj,
+        ten_length,
         wrap_xpos,
+        bvh_aabb_dyn,
         bvh_active,
+        island_dofadr,
+        island_dofind,
+        dof_island,
+        efc_island,
+        tendon_efcadr,
+        flexvert_xpos,
         contact,
         efc_force,
+        arena,
     )
 end
 """
@@ -4663,12 +5468,12 @@ end
   - **`nbuffer`**: size of the buffer in bytes
   - **`buffer`**: heap-allocated memory for all arrays in this struct
   - **`maxgeom`**: maximum number of mjvGeom supported by this state object
-  - **`plugincache`**: scratch space for vis geoms inserted by plugins
+  - **`scratch`**: scratch space for vis geoms inserted by the user and plugins
 
 """
 struct mjvSceneState_
-    data::NTuple{10856,UInt8}
+    data::NTuple{11880,UInt8}
     mjvSceneState_() = new()
-    mjvSceneState_(data::NTuple{10856,UInt8}) = new(data)
+    mjvSceneState_(data::NTuple{11880,UInt8}) = new(data)
 end
 const mjvSceneState = mjvSceneState_

@@ -7,7 +7,7 @@ if !isdir("./mujoco")
     run(`$(git()) clone https://github.com/deepmind/mujoco.git`)
 end
 
-mj_version = "2.3.7"
+mj_version = "3.1.6"
 cd("./mujoco")
 run(`$(git()) checkout tags/$(mj_version)`)
 cd("../")
@@ -114,6 +114,4 @@ function construct_struct_docs(expr)
     else
         return expr
     end
-
-
 end

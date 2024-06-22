@@ -228,6 +228,20 @@ function extract_arg_info(argument)
     end
     !isnothing(vector_info) && return vector_info
 
+    ivector_regex = r"(const )?\s*(std::optional<)?Eigen::Ref<(const )?\s*EigenVectorI>(>)?\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
+    ivector_info = if_match(ivector_regex, argument) do m
+        return (;
+            type = :variable_vector,
+            is_const = !isnothing(m.captures[1]),
+            is_optional = !isnothing(m.captures[2]),
+            is_inner_const = !isnothing(m.captures[3]),
+            identifier = m.captures[5],
+            datatype = convert_datatype("int"),
+        )
+    end
+    !isnothing(ivector_info) && return ivector_info
+
+
     # Matches vectors of various types (e.g. std::optional<Eigen::Ref<Eigen::Vector<int, Eigen::Dynamic>>> index)
     anomalous_vector_regex = r"(std::optional<)?Eigen::Ref<(const )?\s*Eigen::Vector<\s*\b([a-zA-Z_][a-zA-Z0-9_:]*)\s*,\s*\b(Eigen::Dynamic|[a-zA-Z0-9_]*)\s*>>(>)?\s+\b([a-zA-Z_][a-zA-Z0-9_]*)"
     anomalous_vector_info = if_match(anomalous_vector_regex, argument) do m

@@ -340,10 +340,13 @@ function named_access_wrappers_expr(index_xmacro_header_file_path)
     module_name = :LibMuJoCo
 
     # Get sample filepath to humanoid
-    root_path = abspath(joinpath(MuJoCo_jll.artifact_dir, "share", "mujoco", "model"))
+    root_path = abspath(joinpath(MuJoCo_jll.artifact_dir, "share", "mujoco", "model", "humanoid"))
     sample_model_path = joinpath(root_path, "humanoid.xml")
 
     test_model = Wrappers.Model(LibMuJoCo.mj_loadXML(sample_model_path, Ptr{Cvoid}(), "", 0))
+    if test_model.internal_pointer == C_NULL
+        @error "The file path for the model, or the file itself, could not be loaded: $(sample_model_path)"
+    end
     test_data = Wrappers.Data(Wrappers.LibMuJoCo.mj_makeData(test_model), test_model)
 
     test_classes = Dict(
