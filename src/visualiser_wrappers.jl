@@ -70,7 +70,7 @@ mutable struct VisualiserScene
     end
 end
 function Base.propertynames(x::RendererContext)
-    (:lineWidth, :shadowClip, :shadowScale, :fogStart, :fogEnd, :fogRGBA, :shadowSize, :offWidth, :offHeight, :offSamples, :fontScale, :auxWidth, :auxHeight, :auxSamples, :offFBO, :offFBO_r, :offColor, :offColor_r, :offDepthStencil, :offDepthStencil_r, :shadowFBO, :shadowTex, :auxFBO, :auxFBO_r, :auxColor, :auxColor_r, :ntexture, :textureType, :texture, :basePlane, :baseMesh, :baseHField, :baseBuiltin, :baseFontNormal, :baseFontShadow, :baseFontBig, :rangePlane, :rangeMesh, :rangeHField, :rangeBuiltin, :rangeFont, :nskin, :skinvertVBO, :skinnormalVBO, :skintexcoordVBO, :skinfaceVBO, :charWidth, :charWidthBig, :charHeight, :charHeightBig, :glInitialized, :windowAvailable, :windowSamples, :windowStereo, :windowDoublebuffer, :currentBuffer, :readPixelFormat)
+    (:lineWidth, :shadowClip, :shadowScale, :fogStart, :fogEnd, :fogRGBA, :shadowSize, :offWidth, :offHeight, :offSamples, :fontScale, :auxWidth, :auxHeight, :auxSamples, :offFBO, :offFBO_r, :offColor, :offColor_r, :offDepthStencil, :offDepthStencil_r, :shadowFBO, :shadowTex, :auxFBO, :auxFBO_r, :auxColor, :auxColor_r, :ntexture, :textureType, :texture, :basePlane, :baseMesh, :baseHField, :baseBuiltin, :baseFontNormal, :baseFontShadow, :baseFontBig, :rangePlane, :rangeMesh, :rangeHField, :rangeBuiltin, :rangeFont, :nskin, :skinvertVBO, :skinnormalVBO, :skintexcoordVBO, :skinfaceVBO, :charWidth, :charWidthBig, :charHeight, :charHeightBig, :glInitialized, :windowAvailable, :windowSamples, :windowStereo, :windowDoublebuffer, :currentBuffer, :readPixelFormat, :readDepthMap)
 end
 function Base.getproperty(x::RendererContext, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
@@ -132,6 +132,7 @@ function Base.getproperty(x::RendererContext, f::Symbol)
     f === :windowDoublebuffer && return unsafe_load(Ptr{Int32}(internal_pointer + 2296))
     f === :currentBuffer && return unsafe_load(Ptr{Int32}(internal_pointer + 2300))
     f === :readPixelFormat && return unsafe_load(Ptr{Int32}(internal_pointer + 2304))
+    f === :readDepthMap && return unsafe_load(Ptr{Int32}(internal_pointer + 2308))
     error("Could not find property $(f)")
 end
 function Base.setproperty!(x::RendererContext, f::Symbol, value)
@@ -342,6 +343,11 @@ function Base.setproperty!(x::RendererContext, f::Symbol, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 160), cvalue)
         return cvalue
     end
+    if f === :readDepthMap
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 164), cvalue)
+        return cvalue
+    end
     if f in (:fogRGBA, :auxWidth, :auxHeight, :auxSamples, :auxFBO, :auxFBO_r, :auxColor, :auxColor_r, :textureType, :texture, :charWidth, :charWidthBig)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
@@ -354,7 +360,7 @@ function Base.cconvert(::Type{Ptr{mjrContext}}, wrapper::RendererContext)
     return wrapper.internal_pointer
 end
 function Base.propertynames(x::VisualiserOption)
-    (:label, :frame, :geomgroup, :sitegroup, :jointgroup, :tendongroup, :actuatorgroup, :skingroup, :flags, :bvh_depth)
+    (:label, :frame, :geomgroup, :sitegroup, :jointgroup, :tendongroup, :actuatorgroup, :flexgroup, :skingroup, :flags, :bvh_depth, :flex_layer)
 end
 function Base.getproperty(x::VisualiserOption, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
@@ -366,9 +372,11 @@ function Base.getproperty(x::VisualiserOption, f::Symbol)
     f === :jointgroup && return UnsafeArray(Ptr{UInt8}(internal_pointer + 20), (6,))
     f === :tendongroup && return UnsafeArray(Ptr{UInt8}(internal_pointer + 26), (6,))
     f === :actuatorgroup && return UnsafeArray(Ptr{UInt8}(internal_pointer + 32), (6,))
-    f === :skingroup && return UnsafeArray(Ptr{UInt8}(internal_pointer + 38), (6,))
-    f === :flags && return UnsafeArray(Ptr{UInt8}(internal_pointer + 44), (25,))
-    f === :bvh_depth && return unsafe_load(Ptr{Int32}(internal_pointer + 72))
+    f === :flexgroup && return UnsafeArray(Ptr{UInt8}(internal_pointer + 38), (6,))
+    f === :skingroup && return UnsafeArray(Ptr{UInt8}(internal_pointer + 44), (6,))
+    f === :flags && return UnsafeArray(Ptr{UInt8}(internal_pointer + 50), (32,))
+    f === :bvh_depth && return unsafe_load(Ptr{Int32}(internal_pointer + 84))
+    f === :flex_layer && return unsafe_load(Ptr{Int32}(internal_pointer + 88))
     error("Could not find property $(f)")
 end
 function Base.setproperty!(x::VisualiserOption, f::Symbol, value)
@@ -389,7 +397,12 @@ function Base.setproperty!(x::VisualiserOption, f::Symbol, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
         return cvalue
     end
-    if f in (:geomgroup, :sitegroup, :jointgroup, :tendongroup, :actuatorgroup, :skingroup, :flags)
+    if f === :flex_layer
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 12), cvalue)
+        return cvalue
+    end
+    if f in (:geomgroup, :sitegroup, :jointgroup, :tendongroup, :actuatorgroup, :flexgroup, :skingroup, :flags)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
     error("Could not find property $(f) to set.")
@@ -561,21 +574,22 @@ function Base.cconvert(::Type{Ptr{mjvFigure}}, wrapper::VisualiserFigure)
     return wrapper.internal_pointer
 end
 function Base.propertynames(x::VisualiserPerturb)
-    (:select, :skinselect, :active, :active2, :refpos, :refquat, :refselpos, :localpos, :localmass, :scale)
+    (:select, :flexselect, :skinselect, :active, :active2, :refpos, :refquat, :refselpos, :localpos, :localmass, :scale)
 end
 function Base.getproperty(x::VisualiserPerturb, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
     f === :internal_pointer && return internal_pointer
     f === :select && return unsafe_load(Ptr{Int32}(internal_pointer + 0))
-    f === :skinselect && return unsafe_load(Ptr{Int32}(internal_pointer + 4))
-    f === :active && return unsafe_load(Ptr{Int32}(internal_pointer + 8))
-    f === :active2 && return unsafe_load(Ptr{Int32}(internal_pointer + 12))
-    f === :refpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 16), (3,))
-    f === :refquat && return UnsafeArray(Ptr{Float64}(internal_pointer + 40), (4,))
-    f === :refselpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 72), (3,))
-    f === :localpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 96), (3,))
-    f === :localmass && return unsafe_load(Ptr{Float64}(internal_pointer + 120))
-    f === :scale && return unsafe_load(Ptr{Float64}(internal_pointer + 128))
+    f === :flexselect && return unsafe_load(Ptr{Int32}(internal_pointer + 4))
+    f === :skinselect && return unsafe_load(Ptr{Int32}(internal_pointer + 8))
+    f === :active && return unsafe_load(Ptr{Int32}(internal_pointer + 12))
+    f === :active2 && return unsafe_load(Ptr{Int32}(internal_pointer + 16))
+    f === :refpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 24), (3,))
+    f === :refquat && return UnsafeArray(Ptr{Float64}(internal_pointer + 48), (4,))
+    f === :refselpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 80), (3,))
+    f === :localpos && return UnsafeArray(Ptr{Float64}(internal_pointer + 104), (3,))
+    f === :localmass && return unsafe_load(Ptr{Float64}(internal_pointer + 128))
+    f === :scale && return unsafe_load(Ptr{Float64}(internal_pointer + 136))
     error("Could not find property $(f)")
 end
 function Base.setproperty!(x::VisualiserPerturb, f::Symbol, value)
@@ -586,29 +600,34 @@ function Base.setproperty!(x::VisualiserPerturb, f::Symbol, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 0), cvalue)
         return cvalue
     end
-    if f === :skinselect
+    if f === :flexselect
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 4), cvalue)
         return cvalue
     end
-    if f === :active
+    if f === :skinselect
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
         return cvalue
     end
-    if f === :active2
+    if f === :active
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 12), cvalue)
         return cvalue
     end
+    if f === :active2
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 16), cvalue)
+        return cvalue
+    end
     if f === :localmass
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 16), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 20), cvalue)
         return cvalue
     end
     if f === :scale
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 24), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 28), cvalue)
         return cvalue
     end
     if f in (:refpos, :refquat, :refselpos, :localpos)
@@ -620,7 +639,7 @@ function Base.cconvert(::Type{Ptr{mjvPerturb}}, wrapper::VisualiserPerturb)
     return wrapper.internal_pointer
 end
 function Base.propertynames(x::VisualiserScene)
-    (:maxgeom, :ngeom, :geoms, :geomorder, :nskin, :skinfacenum, :skinvertadr, :skinvertnum, :skinvert, :skinnormal, :nlight, :lights, :camera, :enabletransform, :translate, :rotate, :scale, :stereo, :flags, :framewidth, :framergb)
+    (:maxgeom, :ngeom, :geoms, :geomorder, :nflex, :flexedgeadr, :flexedgenum, :flexvertadr, :flexvertnum, :flexfaceadr, :flexfacenum, :flexfaceused, :flexedge, :flexvert, :flexface, :flexnormal, :flextexcoord, :flexvertopt, :flexedgeopt, :flexfaceopt, :flexskinopt, :nskin, :skinfacenum, :skinvertadr, :skinvertnum, :skinvert, :skinnormal, :nlight, :lights, :camera, :enabletransform, :translate, :rotate, :scale, :stereo, :flags, :framewidth, :framergb)
 end
 function Base.getproperty(x::VisualiserScene, f::Symbol)
     internal_pointer = getfield(x, :internal_pointer)
@@ -629,23 +648,40 @@ function Base.getproperty(x::VisualiserScene, f::Symbol)
     f === :ngeom && return unsafe_load(Ptr{Int32}(internal_pointer + 4))
     f === :geoms && return unsafe_load(Ptr{Ptr{mjvGeom_}}(internal_pointer + 8))
     f === :geomorder && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 16))
-    f === :nskin && return unsafe_load(Ptr{Int32}(internal_pointer + 24))
-    f === :skinfacenum && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 32))
-    f === :skinvertadr && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40))
-    f === :skinvertnum && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 48))
-    f === :skinvert && return unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 56))
-    f === :skinnormal && return unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 64))
-    f === :nlight && return unsafe_load(Ptr{Int32}(internal_pointer + 72))
-    f === :lights && return UnsafeArray(Ptr{mjvLight_}(internal_pointer + 76), (100,))
-    f === :camera && return UnsafeArray(Ptr{mjvGLCamera_}(internal_pointer + 8476), (2,))
-    f === :enabletransform && return unsafe_load(Ptr{UInt8}(internal_pointer + 8588))
-    f === :translate && return UnsafeArray(Ptr{Float32}(internal_pointer + 8592), (3,))
-    f === :rotate && return UnsafeArray(Ptr{Float32}(internal_pointer + 8604), (4,))
-    f === :scale && return unsafe_load(Ptr{Float32}(internal_pointer + 8620))
-    f === :stereo && return unsafe_load(Ptr{Int32}(internal_pointer + 8624))
-    f === :flags && return UnsafeArray(Ptr{UInt8}(internal_pointer + 8628), (10,))
-    f === :framewidth && return unsafe_load(Ptr{Int32}(internal_pointer + 8640))
-    f === :framergb && return UnsafeArray(Ptr{Float32}(internal_pointer + 8644), (3,))
+    f === :nflex && return unsafe_load(Ptr{Int32}(internal_pointer + 24))
+    f === :flexedgeadr && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 32))
+    f === :flexedgenum && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 40))
+    f === :flexvertadr && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 48))
+    f === :flexvertnum && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 56))
+    f === :flexfaceadr && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 64))
+    f === :flexfacenum && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 72))
+    f === :flexfaceused && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 80))
+    f === :flexedge && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 88))
+    f === :flexvert && return unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 96))
+    f === :flexface && return unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 104))
+    f === :flexnormal && return unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 112))
+    f === :flextexcoord && return unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 120))
+    f === :flexvertopt && return unsafe_load(Ptr{UInt8}(internal_pointer + 128))
+    f === :flexedgeopt && return unsafe_load(Ptr{UInt8}(internal_pointer + 129))
+    f === :flexfaceopt && return unsafe_load(Ptr{UInt8}(internal_pointer + 130))
+    f === :flexskinopt && return unsafe_load(Ptr{UInt8}(internal_pointer + 131))
+    f === :nskin && return unsafe_load(Ptr{Int32}(internal_pointer + 132))
+    f === :skinfacenum && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 136))
+    f === :skinvertadr && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 144))
+    f === :skinvertnum && return unsafe_load(Ptr{Ptr{Int32}}(internal_pointer + 152))
+    f === :skinvert && return unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 160))
+    f === :skinnormal && return unsafe_load(Ptr{Ptr{Float32}}(internal_pointer + 168))
+    f === :nlight && return unsafe_load(Ptr{Int32}(internal_pointer + 176))
+    f === :lights && return UnsafeArray(Ptr{mjvLight_}(internal_pointer + 180), (100,))
+    f === :camera && return UnsafeArray(Ptr{mjvGLCamera_}(internal_pointer + 8980), (2,))
+    f === :enabletransform && return unsafe_load(Ptr{UInt8}(internal_pointer + 9100))
+    f === :translate && return UnsafeArray(Ptr{Float32}(internal_pointer + 9104), (3,))
+    f === :rotate && return UnsafeArray(Ptr{Float32}(internal_pointer + 9116), (4,))
+    f === :scale && return unsafe_load(Ptr{Float32}(internal_pointer + 9132))
+    f === :stereo && return unsafe_load(Ptr{Int32}(internal_pointer + 9136))
+    f === :flags && return UnsafeArray(Ptr{UInt8}(internal_pointer + 9140), (10,))
+    f === :framewidth && return unsafe_load(Ptr{Int32}(internal_pointer + 9152))
+    f === :framergb && return UnsafeArray(Ptr{Float32}(internal_pointer + 9156), (3,))
     error("Could not find property $(f)")
 end
 function Base.setproperty!(x::VisualiserScene, f::Symbol, value)
@@ -661,40 +697,65 @@ function Base.setproperty!(x::VisualiserScene, f::Symbol, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 4), cvalue)
         return cvalue
     end
-    if f === :nskin
+    if f === :nflex
         cvalue = convert(Int32, value)
         unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
         return cvalue
     end
+    if f === :flexvertopt
+        cvalue = convert(UInt8, value)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 12), cvalue)
+        return cvalue
+    end
+    if f === :flexedgeopt
+        cvalue = convert(UInt8, value)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 13), cvalue)
+        return cvalue
+    end
+    if f === :flexfaceopt
+        cvalue = convert(UInt8, value)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 14), cvalue)
+        return cvalue
+    end
+    if f === :flexskinopt
+        cvalue = convert(UInt8, value)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 15), cvalue)
+        return cvalue
+    end
+    if f === :nskin
+        cvalue = convert(Int32, value)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 16), cvalue)
+        return cvalue
+    end
     if f === :nlight
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 12), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 20), cvalue)
         return cvalue
     end
     if f === :enabletransform
         cvalue = convert(UInt8, value)
-        unsafe_store!(Ptr{UInt8}(internal_pointer + 16), cvalue)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 24), cvalue)
         return cvalue
     end
     if f === :scale
         cvalue = convert(Float32, value)
-        unsafe_store!(Ptr{Float32}(internal_pointer + 17), cvalue)
+        unsafe_store!(Ptr{Float32}(internal_pointer + 25), cvalue)
         return cvalue
     end
     if f === :stereo
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 21), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 29), cvalue)
         return cvalue
     end
     if f === :framewidth
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 25), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 33), cvalue)
         return cvalue
     end
     if f in (:lights, :camera, :translate, :rotate, :flags, :framergb)
         error("Cannot overwrite array field. Mutate the array instead.")
     end
-    if f in (:geoms, :geomorder, :skinfacenum, :skinvertadr, :skinvertnum, :skinvert, :skinnormal)
+    if f in (:geoms, :geomorder, :flexedgeadr, :flexedgenum, :flexvertadr, :flexvertnum, :flexfaceadr, :flexfacenum, :flexfaceused, :flexedge, :flexvert, :flexface, :flexnormal, :flextexcoord, :skinfacenum, :skinvertadr, :skinvertnum, :skinvert, :skinnormal)
         error("Cannot overwrite a pointer field.")
     end
     error("Could not find property $(f) to set.")

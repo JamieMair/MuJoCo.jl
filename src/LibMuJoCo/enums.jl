@@ -10,15 +10,16 @@
     mjSTATE_CTRL = 32
     mjSTATE_QFRC_APPLIED = 64
     mjSTATE_XFRC_APPLIED = 128
-    mjSTATE_MOCAP_POS = 256
-    mjSTATE_MOCAP_QUAT = 512
-    mjSTATE_USERDATA = 1024
-    mjSTATE_PLUGIN = 2048
-    mjNSTATE = 12
+    mjSTATE_EQ_ACTIVE = 256
+    mjSTATE_MOCAP_POS = 512
+    mjSTATE_MOCAP_QUAT = 1024
+    mjSTATE_USERDATA = 2048
+    mjSTATE_PLUGIN = 4096
+    mjNSTATE = 13
     mjSTATE_PHYSICS = 14
-    mjSTATE_FULLPHYSICS = 2063
-    mjSTATE_USER = 2016
-    mjSTATE_INTEGRATION = 4095
+    mjSTATE_FULLPHYSICS = 4111
+    mjSTATE_USER = 4064
+    mjSTATE_INTEGRATION = 8191
 end
 @cenum mjtWarning_::UInt32 begin
     mjWARN_INERTIA = 0
@@ -38,14 +39,16 @@ end
     mjTIMER_POSITION = 3
     mjTIMER_VELOCITY = 4
     mjTIMER_ACTUATION = 5
-    mjTIMER_ACCELERATION = 6
-    mjTIMER_CONSTRAINT = 7
+    mjTIMER_CONSTRAINT = 6
+    mjTIMER_ADVANCE = 7
     mjTIMER_POS_KINEMATICS = 8
     mjTIMER_POS_INERTIA = 9
     mjTIMER_POS_COLLISION = 10
     mjTIMER_POS_MAKE = 11
     mjTIMER_POS_PROJECT = 12
-    mjNTIMER = 13
+    mjTIMER_COL_BROAD = 13
+    mjTIMER_COL_NARROW = 14
+    mjNTIMER = 15
 end
 @cenum mjtDisableBit_::UInt32 begin
     mjDSBL_CONSTRAINT = 1
@@ -62,15 +65,17 @@ end
     mjDSBL_REFSAFE = 2048
     mjDSBL_SENSOR = 4096
     mjDSBL_MIDPHASE = 8192
-    mjNDISABLE = 14
+    mjDSBL_EULERDAMP = 16384
+    mjNDISABLE = 15
 end
 @cenum mjtEnableBit_::UInt32 begin
     mjENBL_OVERRIDE = 1
     mjENBL_ENERGY = 2
     mjENBL_FWDINV = 4
-    mjENBL_SENSORNOISE = 8
+    mjENBL_INVDISCRETE = 8
     mjENBL_MULTICCD = 16
-    mjNENABLE = 5
+    mjENBL_ISLAND = 32
+    mjNENABLE = 6
 end
 @cenum mjtJoint_::UInt32 begin
     mjJNT_FREE = 0
@@ -87,13 +92,17 @@ end
     mjGEOM_CYLINDER = 5
     mjGEOM_BOX = 6
     mjGEOM_MESH = 7
-    mjNGEOMTYPES = 8
+    mjGEOM_SDF = 8
+    mjNGEOMTYPES = 9
     mjGEOM_ARROW = 100
     mjGEOM_ARROW1 = 101
     mjGEOM_ARROW2 = 102
     mjGEOM_LINE = 103
-    mjGEOM_SKIN = 104
-    mjGEOM_LABEL = 105
+    mjGEOM_LINEBOX = 104
+    mjGEOM_FLEX = 105
+    mjGEOM_SKIN = 106
+    mjGEOM_LABEL = 107
+    mjGEOM_TRIANGLE = 108
     mjGEOM_NONE = 1001
 end
 @cenum mjtCamLight_::UInt32 begin
@@ -114,11 +123,6 @@ end
     mjINT_IMPLICIT = 2
     mjINT_IMPLICITFAST = 3
 end
-@cenum mjtCollision_::UInt32 begin
-    mjCOL_ALL = 0
-    mjCOL_PAIR = 1
-    mjCOL_DYNAMIC = 2
-end
 @cenum mjtCone_::UInt32 begin
     mjCONE_PYRAMIDAL = 0
     mjCONE_ELLIPTIC = 1
@@ -138,7 +142,8 @@ end
     mjEQ_WELD = 1
     mjEQ_JOINT = 2
     mjEQ_TENDON = 3
-    mjEQ_DISTANCE = 4
+    mjEQ_FLEX = 4
+    mjEQ_DISTANCE = 5
 end
 @cenum mjtWrap_::UInt32 begin
     mjWRAP_NONE = 0
@@ -161,8 +166,9 @@ end
     mjDYN_NONE = 0
     mjDYN_INTEGRATOR = 1
     mjDYN_FILTER = 2
-    mjDYN_MUSCLE = 3
-    mjDYN_USER = 4
+    mjDYN_FILTEREXACT = 3
+    mjDYN_MUSCLE = 4
+    mjDYN_USER = 5
 end
 @cenum mjtGain_::UInt32 begin
     mjGAIN_FIXED = 0
@@ -186,22 +192,25 @@ end
     mjOBJ_SITE = 6
     mjOBJ_CAMERA = 7
     mjOBJ_LIGHT = 8
-    mjOBJ_MESH = 9
-    mjOBJ_SKIN = 10
-    mjOBJ_HFIELD = 11
-    mjOBJ_TEXTURE = 12
-    mjOBJ_MATERIAL = 13
-    mjOBJ_PAIR = 14
-    mjOBJ_EXCLUDE = 15
-    mjOBJ_EQUALITY = 16
-    mjOBJ_TENDON = 17
-    mjOBJ_ACTUATOR = 18
-    mjOBJ_SENSOR = 19
-    mjOBJ_NUMERIC = 20
-    mjOBJ_TEXT = 21
-    mjOBJ_TUPLE = 22
-    mjOBJ_KEY = 23
-    mjOBJ_PLUGIN = 24
+    mjOBJ_FLEX = 9
+    mjOBJ_MESH = 10
+    mjOBJ_SKIN = 11
+    mjOBJ_HFIELD = 12
+    mjOBJ_TEXTURE = 13
+    mjOBJ_MATERIAL = 14
+    mjOBJ_PAIR = 15
+    mjOBJ_EXCLUDE = 16
+    mjOBJ_EQUALITY = 17
+    mjOBJ_TENDON = 18
+    mjOBJ_ACTUATOR = 19
+    mjOBJ_SENSOR = 20
+    mjOBJ_NUMERIC = 21
+    mjOBJ_TEXT = 22
+    mjOBJ_TUPLE = 23
+    mjOBJ_KEY = 24
+    mjOBJ_PLUGIN = 25
+    mjNOBJECT = 26
+    mjOBJ_FRAME = 100
 end
 @cenum mjtConstraint_::UInt32 begin
     mjCNSTR_EQUALITY = 0
@@ -229,37 +238,41 @@ end
     mjSENS_TORQUE = 5
     mjSENS_MAGNETOMETER = 6
     mjSENS_RANGEFINDER = 7
-    mjSENS_JOINTPOS = 8
-    mjSENS_JOINTVEL = 9
-    mjSENS_TENDONPOS = 10
-    mjSENS_TENDONVEL = 11
-    mjSENS_ACTUATORPOS = 12
-    mjSENS_ACTUATORVEL = 13
-    mjSENS_ACTUATORFRC = 14
-    mjSENS_JOINTACTFRC = 15
-    mjSENS_BALLQUAT = 16
-    mjSENS_BALLANGVEL = 17
-    mjSENS_JOINTLIMITPOS = 18
-    mjSENS_JOINTLIMITVEL = 19
-    mjSENS_JOINTLIMITFRC = 20
-    mjSENS_TENDONLIMITPOS = 21
-    mjSENS_TENDONLIMITVEL = 22
-    mjSENS_TENDONLIMITFRC = 23
-    mjSENS_FRAMEPOS = 24
-    mjSENS_FRAMEQUAT = 25
-    mjSENS_FRAMEXAXIS = 26
-    mjSENS_FRAMEYAXIS = 27
-    mjSENS_FRAMEZAXIS = 28
-    mjSENS_FRAMELINVEL = 29
-    mjSENS_FRAMEANGVEL = 30
-    mjSENS_FRAMELINACC = 31
-    mjSENS_FRAMEANGACC = 32
-    mjSENS_SUBTREECOM = 33
-    mjSENS_SUBTREELINVEL = 34
-    mjSENS_SUBTREEANGMOM = 35
-    mjSENS_CLOCK = 36
-    mjSENS_PLUGIN = 37
-    mjSENS_USER = 38
+    mjSENS_CAMPROJECTION = 8
+    mjSENS_JOINTPOS = 9
+    mjSENS_JOINTVEL = 10
+    mjSENS_TENDONPOS = 11
+    mjSENS_TENDONVEL = 12
+    mjSENS_ACTUATORPOS = 13
+    mjSENS_ACTUATORVEL = 14
+    mjSENS_ACTUATORFRC = 15
+    mjSENS_JOINTACTFRC = 16
+    mjSENS_BALLQUAT = 17
+    mjSENS_BALLANGVEL = 18
+    mjSENS_JOINTLIMITPOS = 19
+    mjSENS_JOINTLIMITVEL = 20
+    mjSENS_JOINTLIMITFRC = 21
+    mjSENS_TENDONLIMITPOS = 22
+    mjSENS_TENDONLIMITVEL = 23
+    mjSENS_TENDONLIMITFRC = 24
+    mjSENS_FRAMEPOS = 25
+    mjSENS_FRAMEQUAT = 26
+    mjSENS_FRAMEXAXIS = 27
+    mjSENS_FRAMEYAXIS = 28
+    mjSENS_FRAMEZAXIS = 29
+    mjSENS_FRAMELINVEL = 30
+    mjSENS_FRAMEANGVEL = 31
+    mjSENS_FRAMELINACC = 32
+    mjSENS_FRAMEANGACC = 33
+    mjSENS_SUBTREECOM = 34
+    mjSENS_SUBTREELINVEL = 35
+    mjSENS_SUBTREEANGMOM = 36
+    mjSENS_GEOMDIST = 37
+    mjSENS_GEOMNORMAL = 38
+    mjSENS_GEOMFROMTO = 39
+    mjSENS_CLOCK = 40
+    mjSENS_PLUGIN = 41
+    mjSENS_USER = 42
 end
 @cenum mjtStage_::UInt32 begin
     mjSTAGE_NONE = 0
@@ -279,20 +292,36 @@ end
     mjLRMODE_MUSCLEUSER = 2
     mjLRMODE_ALL = 3
 end
+@cenum mjtFlexSelf_::UInt32 begin
+    mjFLEXSELF_NONE = 0
+    mjFLEXSELF_NARROW = 1
+    mjFLEXSELF_BVH = 2
+    mjFLEXSELF_SAP = 3
+    mjFLEXSELF_AUTO = 4
+end
 @cenum mjtPluginCapabilityBit_::UInt32 begin
     mjPLUGIN_ACTUATOR = 1
     mjPLUGIN_SENSOR = 2
     mjPLUGIN_PASSIVE = 4
+    mjPLUGIN_SDF = 8
 end
 @cenum mjtGridPos_::UInt32 begin
     mjGRID_TOPLEFT = 0
     mjGRID_TOPRIGHT = 1
     mjGRID_BOTTOMLEFT = 2
     mjGRID_BOTTOMRIGHT = 3
+    mjGRID_TOP = 4
+    mjGRID_BOTTOM = 5
+    mjGRID_LEFT = 6
+    mjGRID_RIGHT = 7
 end
 @cenum mjtFramebuffer_::UInt32 begin
     mjFB_WINDOW = 0
     mjFB_OFFSCREEN = 1
+end
+@cenum mjtDepthMap_::UInt32 begin
+    mjDEPTH_ZERONEAR = 0
+    mjDEPTH_ZEROFAR = 1
 end
 @cenum mjtFontScale_::UInt32 begin
     mjFONTSCALE_50 = 50
@@ -306,6 +335,11 @@ end
     mjFONT_NORMAL = 0
     mjFONT_SHADOW = 1
     mjFONT_BIG = 2
+end
+@cenum mjtTaskStatus_::UInt32 begin
+    mjTASK_NEW = 0
+    mjTASK_QUEUED = 1
+    mjTASK_COMPLETED = 2
 end
 @cenum mjtButton_::UInt32 begin
     mjBUTTON_NONE = 0
@@ -379,12 +413,14 @@ end
     mjLABEL_TENDON = 7
     mjLABEL_ACTUATOR = 8
     mjLABEL_CONSTRAINT = 9
-    mjLABEL_SKIN = 10
-    mjLABEL_SELECTION = 11
-    mjLABEL_SELPNT = 12
-    mjLABEL_CONTACTPOINT = 13
-    mjLABEL_CONTACTFORCE = 14
-    mjNLABEL = 15
+    mjLABEL_FLEX = 10
+    mjLABEL_SKIN = 11
+    mjLABEL_SELECTION = 12
+    mjLABEL_SELPNT = 13
+    mjLABEL_CONTACTPOINT = 14
+    mjLABEL_CONTACTFORCE = 15
+    mjLABEL_ISLAND = 16
+    mjNLABEL = 17
 end
 @cenum mjtFrame_::UInt32 begin
     mjFRAME_NONE = 0
@@ -413,17 +449,24 @@ end
     mjVIS_PERTFORCE = 12
     mjVIS_PERTOBJ = 13
     mjVIS_CONTACTPOINT = 14
-    mjVIS_CONTACTFORCE = 15
-    mjVIS_CONTACTSPLIT = 16
-    mjVIS_TRANSPARENT = 17
-    mjVIS_AUTOCONNECT = 18
-    mjVIS_COM = 19
-    mjVIS_SELECT = 20
-    mjVIS_STATIC = 21
-    mjVIS_SKIN = 22
-    mjVIS_MIDPHASE = 23
-    mjVIS_MESHBVH = 24
-    mjNVISFLAG = 25
+    mjVIS_ISLAND = 15
+    mjVIS_CONTACTFORCE = 16
+    mjVIS_CONTACTSPLIT = 17
+    mjVIS_TRANSPARENT = 18
+    mjVIS_AUTOCONNECT = 19
+    mjVIS_COM = 20
+    mjVIS_SELECT = 21
+    mjVIS_STATIC = 22
+    mjVIS_SKIN = 23
+    mjVIS_FLEXVERT = 24
+    mjVIS_FLEXEDGE = 25
+    mjVIS_FLEXFACE = 26
+    mjVIS_FLEXSKIN = 27
+    mjVIS_BODYBVH = 28
+    mjVIS_FLEXBVH = 29
+    mjVIS_MESHBVH = 30
+    mjVIS_SDFITER = 31
+    mjNVISFLAG = 32
 end
 @cenum mjtRndFlag_::UInt32 begin
     mjRND_SHADOW = 0
