@@ -85,7 +85,7 @@ export mju_printMat,
 Print matrix to screen.
 
 # Arguments
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 """
 function mju_printMat(mat::AbstractArray{Float64,2})
     if !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -103,8 +103,8 @@ Solve linear system M * x = y using factorization:  x = inv(L'*D*L)*y
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`x::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`y::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`x::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`y::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 """
 function mj_solveM(m, d, x::AbstractArray{Float64,2}, y::AbstractArray{Float64,2})
     if !(typeof(x) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -134,8 +134,8 @@ Half of linear solve:  x = sqrt(inv(D))*inv(L')*y
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`x::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`y::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`x::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`y::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 """
 function mj_solveM2(m, d, x::AbstractArray{Float64,2}, y::AbstractArray{Float64,2})
     if !(typeof(x) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -391,8 +391,8 @@ Compute 3/6-by-nv end-effector Jacobian of global point attached to given body.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`point::Vector{Float64}`** -> A vector of size 3. Constant.
 - **`body::Int32`**
 
@@ -450,8 +450,8 @@ Compute body frame end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`body::Int32`**
 
 # Additional Info
@@ -498,8 +498,8 @@ Compute body center-of-mass end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`body::Int32`**
 
 # Additional Info
@@ -546,7 +546,7 @@ Compute subtree center-of-mass end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`body::Int32`**
 
 # Additional Info
@@ -578,8 +578,8 @@ Compute geom end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`geom::Int32`**
 
 # Additional Info
@@ -626,8 +626,8 @@ Compute site end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`site::Int32`**
 
 # Additional Info
@@ -674,8 +674,8 @@ Compute translation end-effector Jacobian of point, and rotation Jacobian of axi
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`point::Vector{Float64}`** -> A vector of size 3. Constant.
 - **`axis::Vector{Float64}`** -> A vector of size 3. Constant.
 - **`body::Int32`**
@@ -743,7 +743,7 @@ Convert sparse inertia matrix M into full (i.e. dense) matrix.
 
 # Arguments
 - **`m::Model`** -> Constant.
-- **`dst::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`dst::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`M::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
@@ -1626,7 +1626,7 @@ Multiply matrix and vector: res = mat * vec.
 
 # Arguments
 - **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 - **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
@@ -1665,7 +1665,7 @@ Multiply transposed matrix and vector: res = mat' * vec.
 
 # Arguments
 - **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 - **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
@@ -1704,7 +1704,7 @@ Multiply square matrix with vectors on both sides: returns vec1' * mat * vec2.
 
 # Arguments
 - **`vec1::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 - **`vec2::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
@@ -1745,8 +1745,8 @@ end
 Transpose matrix: res = mat'.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
 - #columns in res should equal #rows in mat
@@ -1776,8 +1776,8 @@ end
 Symmetrize square matrix res = (mat + mat')/2.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
 - mat should be square
@@ -1807,7 +1807,7 @@ end
 Set mat to the identity matrix.
 
 # Arguments
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 
 # Additional Info
 - mat should be square
@@ -1830,9 +1830,9 @@ end
 Multiply matrices: res = mat1 * mat2.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`mat1::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
-- **`mat2::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`mat1::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
+- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
 - #rows in res should equal #rows in mat1
@@ -1879,9 +1879,9 @@ end
 Multiply matrices, second argument transposed: res = mat1 * mat2'.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`mat1::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
-- **`mat2::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`mat1::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
+- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
 - #rows in res should equal #rows in mat1
@@ -1928,9 +1928,9 @@ end
 Multiply matrices, first argument transposed: res = mat1' * mat2.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`mat1::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
-- **`mat2::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`mat1::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
+- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
 - #rows in res should equal #columns in mat1
@@ -1977,8 +1977,8 @@ end
 Set res = mat' * diag * mat if diag is not NULL, and res = mat' * mat otherwise.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 - **`diag::Vector{Float64}`** -> An optional vector of variable size. Check additional info for sizes.
 
 # Additional Info
@@ -2028,7 +2028,7 @@ end
 Cholesky decomposition: mat = L*L'; return rank, decomposition performed in-place into mat.
 
 # Arguments
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`mindiag::Float64`**
 
 # Additional Info
@@ -2053,7 +2053,7 @@ Solve (mat*mat') * res = vec, where mat is a Cholesky factor.
 
 # Arguments
 - **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 - **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
 
 # Additional Info
@@ -2095,7 +2095,7 @@ end
 Cholesky rank-one update: L*L' +/- x*x'; return rank.
 
 # Arguments
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`x::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
 - **`flg_plus::Int32`**
 
@@ -2221,7 +2221,7 @@ end
 Convert banded matrix to dense matrix, fill upper triangle if flg_sym>0.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`mat::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
 - **`ntotal::Int32`**
 - **`nband::Int32`**
@@ -2269,7 +2269,7 @@ Convert dense matrix to banded matrix.
 
 # Arguments
 - **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 - **`ntotal::Int32`**
 - **`nband::Int32`**
 - **`ndense::Int32`**
@@ -2314,8 +2314,8 @@ Multiply band-diagonal matrix with nvec vectors, include upper triangle if flg_s
 
 # Arguments
 - **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
-- **`vec::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
+- **`vec::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 - **`ntotal::Int32`**
 - **`nband::Int32`**
 - **`ndense::Int32`**
@@ -2376,9 +2376,9 @@ minimize 0.5*x'*H*x + x'*g  s.t. lower <= x <= upper, return rank or -1 if faile
 
 # Arguments
 - **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`R::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`R::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 - **`index::Vector{Int32}`** -> An optional vector of variable size. Check additional info for sizes.
-- **`H::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes. Constant.
+- **`H::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
 - **`g::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
 - **`lower::Vector{Float64}`** -> An optional vector of variable size. Check additional info for sizes. Constant.
 - **`upper::Vector{Float64}`** -> An optional vector of variable size. Check additional info for sizes. Constant.
@@ -2743,10 +2743,10 @@ Finite differenced transition matrices (control theory notation)   d(x_next) = A
 - **`d::Data`**
 - **`eps::Float64`**
 - **`flg_centered::UInt8`**
-- **`A::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`B::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`C::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`D::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`A::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`B::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`C::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`D::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 
 # Additional Info
 - A should be of shape (2*nv+na, 2*nv+na)
@@ -2812,13 +2812,13 @@ Finite differenced Jacobians of (force, sensors) = mj*inverse(state, acceleratio
 - **`d::Data`**
 - **`eps::Float64`**
 - **`flg_actuation::UInt8`**
-- **`DfDq::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`DfDv::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`DfDa::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`DsDq::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`DsDv::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`DsDa::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
-- **`DmDq::Matrix{Float64}`** -> A matrix variable size. Check additional info for sizes.
+- **`DfDq::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`DfDv::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`DfDa::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`DsDq::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`DsDv::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`DsDa::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`DmDq::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
 
 # Additional Info
 - DfDq should be of shape (nv, nv)
