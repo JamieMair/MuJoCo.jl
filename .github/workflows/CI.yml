@@ -27,7 +27,6 @@ jobs:
           - windows-latest # only for x86_64
         arch:
           - x64
-          - aarch64
         exclude:
           - os: windows-latest
             arch: aarch64
