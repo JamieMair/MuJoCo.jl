@@ -6,3 +6,7 @@ JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
 MuJoCo_jll = "32af7c3b-80ec-5621-8194-2f6cb2280831"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 UnsafeArrays = "c4a57d5a-5b31-53a6-b365-19f8c011fbd6"
+
+
+[compat]
+MuJoCo_jll = "2.3.7"

@@ -26,6 +26,7 @@ VisualiserExt = ["BangBang", "FFMPEG", "GLFW", "Observables", "PrettyTables", "P
 [compat]
 CEnum = "0.3, 0.4, 0.5"
 julia = "1.6"
+LinearAlgebra = "1.6"
 MuJoCo_jll = "3.1.6"
 Requires = "1"
 UnsafeArrays = "1"
