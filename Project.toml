@@ -1,7 +1,7 @@
 name = "MuJoCo"
 uuid = "1c101251-5e0f-4746-b44c-0728d433b68a"
 authors = ["Jamie Mair <JamieMair@users.noreply.github.com>", "Nicholas Barbara <nic-barbara@users.noreply.github.com>"]
-version = "0.1.2"
+version = "0.2.0"
 
 [deps]
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
@@ -27,7 +27,7 @@ VisualiserExt = ["BangBang", "FFMPEG", "GLFW", "Observables", "PrettyTables", "P
 CEnum = "0.3, 0.4, 0.5"
 julia = "1.6"
 LinearAlgebra = "1.6"
-MuJoCo_jll = "2.3.7"
+MuJoCo_jll = "3.1.6"
 Requires = "1"
 UnsafeArrays = "1"
 

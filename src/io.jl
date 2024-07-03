@@ -19,7 +19,7 @@ end
 Returns the absolute path to the humanoid model provided by MuJoCo.
 """
 function humanoid_model_file()
-    return joinpath(example_model_files_directory(), "humanoid.xml")
+    return joinpath(example_model_files_directory(), "humanoid", "humanoid.xml")
 end
 
 function model_type(path::AbstractString)

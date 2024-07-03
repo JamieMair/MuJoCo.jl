@@ -23,14 +23,17 @@ export mju_printMat,
     mj_jacGeom,
     mj_jacSite,
     mj_jacPointAxis,
+    mj_angmomMat,
     mj_fullM,
     mj_mulM,
     mj_mulM2,
     mj_addM,
     mj_applyFT,
+    mj_geomDistance,
     mj_differentiatePos,
     mj_integratePos,
     mj_normalizeQuat,
+    mj_multiRay,
     mj_ray,
     mju_zero,
     mju_fill,
@@ -76,7 +79,8 @@ export mju_printMat,
     mju_insertionSort,
     mju_insertionSortInt,
     mjd_transitionFD,
-    mjd_inverseFD
+    mjd_inverseFD,
+    mjd_subQuat
 
 
 """
@@ -737,6 +741,32 @@ function mj_jacPointAxis(
 
 end
 """
+    mj_angmomMat(m, d, mat, body)
+
+Compute subtree angular momentum matrix.
+
+# Arguments
+- **`m::Model`** -> Constant.
+- **`d::Data`**
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`body::Int32`**
+
+# Additional Info
+- mat should be of shape (3, nv)
+
+"""
+function mj_angmomMat(m, d, mat::AbstractArray{Float64,2}, body::Integer)
+    if !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("mat")
+    end
+
+    if (size(mat, 1) != 3 || size(mat, 2) != m.nv)
+        throw(ArgumentError("mat should be of shape (3, nv)"))
+    end
+    return LibMuJoCo.mj_angmomMat(m, d, mat, body)
+
+end
+"""
     mj_fullM(m, dst, M)
 
 Convert sparse inertia matrix M into full (i.e. dense) matrix.
@@ -985,6 +1015,49 @@ function mj_applyFT(
 
 end
 """
+    mj_geomDistance(m, d, geom1, geom2, distmax, fromto)
+
+Returns smallest signed distance between two geoms and optionally segment from geom1 to geom2.
+
+# Arguments
+- **`m::Model`** -> Constant.
+- **`d::Data`** -> Constant.
+- **`geom1::Int32`**
+- **`geom2::Int32`**
+- **`distmax::Float64`**
+- **`fromto::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+
+# Additional Info
+- fromto should be of size 6
+
+"""
+function mj_geomDistance(
+    m,
+    d,
+    geom1::Integer,
+    geom2::Integer,
+    distmax::Real,
+    fromto::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if !isnothing(fromto) &&
+       !(typeof(fromto) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("fromto")
+    end
+
+    if (!isnothing(fromto) && length(fromto) != 6)
+        throw(ArgumentError("fromto should be of size 6"))
+    end
+    return LibMuJoCo.mj_geomDistance(
+        m,
+        d,
+        geom1,
+        geom2,
+        distmax,
+        !isnothing(fromto) ? fromto : C_NULL,
+    )
+
+end
+"""
     mj_differentiatePos(m, qvel, dt, qpos1, qpos2)
 
 Compute velocity by finite-differencing two positions.
@@ -1097,6 +1170,94 @@ function mj_normalizeQuat(m, qpos::Union{AbstractVector{Float64},AbstractArray{F
         throw(ArgumentError("qpos should be of size nq"))
     end
     return LibMuJoCo.mj_normalizeQuat(m, qpos)
+
+end
+"""
+    mj_multiRay(m, d, pnt, vec, geomgroup, flg_static, bodyexclude, geomid, dist, nray, cutoff)
+
+Intersect multiple rays emanating from a single point. Similar semantics to mj_ray, but vec is an array of (nray x 3) directions.
+
+# Arguments
+- **`m::Model`** -> Constant.
+- **`d::Data`**
+- **`pnt::Vector{Float64}`** -> A vector of size 3. Constant.
+- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
+- **`geomgroup::Vector{UInt8}`** -> An optional vector of size 6. Constant.
+- **`flg_static::UInt8`**
+- **`bodyexclude::Int32`**
+- **`geomid::Vector{Int32}`** -> A vector of variable size. Check additional info for sizes.
+- **`dist::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
+- **`nray::Int32`**
+- **`cutoff::Float64`**
+
+# Additional Info
+- pnt should be a vector of size 3
+- pnt should be a vector of size 3.
+- vec should be a vector, not a matrix.
+- geomgroup should be a vector of size 6
+- geomgroup should be a vector of size 6.
+- geomid should be a vector, not a matrix.
+- dist should be a vector, not a matrix.
+- dist and geomid should be of size nray
+- vec should be of size 3*nray
+
+"""
+function mj_multiRay(
+    m,
+    d,
+    pnt::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    geomgroup::Union{Nothing,AbstractVector{UInt8},AbstractArray{UInt8,2}},
+    flg_static::Union{Bool,UInt8},
+    bodyexclude::Integer,
+    geomid::Union{AbstractVector{Int32},AbstractArray{Int32,2}},
+    dist::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    nray::Integer,
+    cutoff::Real,
+)
+    if length(pnt) != 3
+        throw(ArgumentError("pnt should be a vector of size 3"))
+    end
+    if typeof(pnt) <: AbstractArray{Float64,2} && count(==(1), size(pnt)) < 1
+        throw(ArgumentError("pnt should be a vector of size 3."))
+    end
+    if typeof(vec) <: AbstractArray{Float64,2} && count(==(1), size(vec)) < 1
+        throw(ArgumentError("vec should be a vector, not a matrix."))
+    end
+    if !isnothing(geomgroup) && length(geomgroup) != 6
+        throw(ArgumentError("geomgroup should be a vector of size 6"))
+    end
+    if !isnothing(geomgroup) &&
+       typeof(geomgroup) <: AbstractArray{UInt8,2} &&
+       count(==(1), size(geomgroup)) < 1
+        throw(ArgumentError("geomgroup should be a vector of size 6."))
+    end
+    if typeof(geomid) <: AbstractArray{Int32,2} && count(==(1), size(geomid)) < 1
+        throw(ArgumentError("geomid should be a vector, not a matrix."))
+    end
+    if typeof(dist) <: AbstractArray{Float64,2} && count(==(1), size(dist)) < 1
+        throw(ArgumentError("dist should be a vector, not a matrix."))
+    end
+
+    if (length(dist) != nray || length(geomid) != nray)
+        throw(ArgumentError("dist and geomid should be of size nray"))
+    end
+    if (length(vec) != 3 * nray)
+        throw(ArgumentError("vec should be of size 3*nray"))
+    end
+    mj_multiRay(
+        m,
+        d,
+        pnt[0+1],
+        vec,
+        !isnothing(geomgroup) ? geomgroup : C_NULL,
+        flg_static,
+        bodyexclude,
+        geomid,
+        dist,
+        nray,
+        cutoff,
+    )
 
 end
 """
@@ -2908,6 +3069,65 @@ function mjd_inverseFD(
     )
 
 end
+"""
+    mjd_subQuat(qa, qb, Da, Db)
+
+Derivatives of mju_subQuat.
+
+# Arguments
+- **`qa::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
+- **`qb::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
+- **`Da::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`Db::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+
+# Additional Info
+- qa should be a vector, not a matrix.
+- qb should be a vector, not a matrix.
+- qa must have size 4
+- qb must have size 4
+- Da must have size 9
+- Db must have size 9
+
+"""
+function mjd_subQuat(
+    qa::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    qb::Union{AbstractVector{Float64},AbstractArray{Float64,2}},
+    Da::Union{Nothing,AbstractArray{Float64,2}},
+    Db::Union{Nothing,AbstractArray{Float64,2}},
+)
+    if typeof(qa) <: AbstractArray{Float64,2} && count(==(1), size(qa)) < 1
+        throw(ArgumentError("qa should be a vector, not a matrix."))
+    end
+    if typeof(qb) <: AbstractArray{Float64,2} && count(==(1), size(qb)) < 1
+        throw(ArgumentError("qb should be a vector, not a matrix."))
+    end
+    if !isnothing(Da) && !(typeof(Da) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("Da")
+    end
+    if !isnothing(Db) && !(typeof(Db) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
+        @warn column_major_warning_string("Db")
+    end
+
+    if (length(qa) != 4)
+        throw(ArgumentError("qa must have size 4"))
+    end
+    if (length(qb) != 4)
+        throw(ArgumentError("qb must have size 4"))
+    end
+    if (!isnothing(Da) && length(Da) != 9)
+        throw(ArgumentError("Da must have size 9"))
+    end
+    if (!isnothing(Db) && length(Db) != 9)
+        throw(ArgumentError("Db must have size 9"))
+    end
+    return LibMuJoCo.mjd_subQuat(
+        qa,
+        qb,
+        !isnothing(Da) ? Da : C_NULL,
+        !isnothing(Db) ? Db : C_NULL,
+    )
+
+end
 
 # Tuple for exports
 const _wrapped_fns = (
@@ -2927,14 +3147,17 @@ const _wrapped_fns = (
     :mj_jacGeom,
     :mj_jacSite,
     :mj_jacPointAxis,
+    :mj_angmomMat,
     :mj_fullM,
     :mj_mulM,
     :mj_mulM2,
     :mj_addM,
     :mj_applyFT,
+    :mj_geomDistance,
     :mj_differentiatePos,
     :mj_integratePos,
     :mj_normalizeQuat,
+    :mj_multiRay,
     :mj_ray,
     :mju_zero,
     :mju_fill,
@@ -2981,4 +3204,5 @@ const _wrapped_fns = (
     :mju_insertionSortInt,
     :mjd_transitionFD,
     :mjd_inverseFD,
+    :mjd_subQuat,
 )

@@ -15,17 +15,25 @@ jobs:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         version:
           - '1.6'
           - 'nightly'
         os:
+          - macos-13 # only for x86_64
+          - macos-latest # only for aarch64
           - ubuntu-latest
-          - macos-14
-          - windows-latest
+          - windows-latest # only for x86_64
         arch:
           - x64
+        exclude:
+          - os: windows-latest
+            arch: aarch64
+          - os: macos-13
+            arch: aarch64
+          - os: macos-latest
+            arch: x64
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@v1
@@ -49,7 +57,7 @@ jobs:
       statuses: write
     steps:
       - uses: actions/checkout@v3
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: '1'
       - name: Configure MuJoCo env

@@ -9,7 +9,7 @@ Let's start by having a look at the humanoid model shipped with MuJoCo. You can 
 ```@example humanoid
 using MuJoCo
 
-model = load_model(joinpath(example_model_files_directory(), "humanoid.xml"))
+model = load_model(joinpath(example_model_files_directory(), "humanoid", "humanoid.xml"))
 data = init_data(model)
 nothing # hide
 ```

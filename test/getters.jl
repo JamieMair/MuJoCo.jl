@@ -15,7 +15,7 @@ using TestItemRunner
     @test model.nbody isa Integer
     @test model.nsensordata isa Integer
     
-    @test data.nstack isa Integer
+    @test data.narena isa Integer
     @test data.nbuffer isa Integer
 end
 

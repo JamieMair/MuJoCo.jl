@@ -903,7 +903,7 @@ end
 """
 	eq([model, data], [name, index])
 Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
-(id, name, type, obj1id, obj2id, active, solref, solimp, data)
+(id, name, type, obj1id, obj2id, active0, solref, solimp, data)
 """
 function eq end
 function eq(model::Model, index::Integer)
@@ -951,7 +951,7 @@ function Base.show(io::IO, ::MIME"text/plain", x::ModelEquality)
         end
 end
 function Base.propertynames(::ModelEquality)
-    (:id, :name, :type, :obj1id, :obj2id, :active, :solref, :solimp, :data)
+    (:id, :name, :type, :obj1id, :obj2id, :active0, :solref, :solimp, :data)
 end
 function Base.getproperty(x::ModelEquality, f::Symbol)
     model = getfield(x, :model)
@@ -971,10 +971,10 @@ function Base.getproperty(x::ModelEquality, f::Symbol)
             else
                 view(model.eq_obj2id, index + 1, Base.OneTo(1))
             end
-    f === :active && return if isnothing(model.eq_active)
+    f === :active0 && return if isnothing(model.eq_active0)
                 nothing
             else
-                view(model.eq_active, index + 1, Base.OneTo(1))
+                view(model.eq_active0, index + 1, Base.OneTo(1))
             end
     f === :solref && return begin
                 size_arr = Int(LibMuJoCo.mjNREF)
@@ -1013,7 +1013,7 @@ end
 """
 	key([model, data], [name, index])
 Creates an object with access to views of the supplied model or data object, based either on an index or a name. Index refers to MuJoCo IDs, which start at 0. Properties available are:
-(id, name, time, qpos, qvel, act, mpos, mquat)
+(id, name, time, qpos, qvel, act, mpos, mquat, ctrl)
 """
 function key end
 function key(model::Model, index::Integer)
@@ -1061,7 +1061,7 @@ function Base.show(io::IO, ::MIME"text/plain", x::ModelKeyframe)
         end
 end
 function Base.propertynames(::ModelKeyframe)
-    (:id, :name, :time, :qpos, :qvel, :act, :mpos, :mquat)
+    (:id, :name, :time, :qpos, :qvel, :act, :mpos, :mquat, :ctrl)
 end
 function Base.getproperty(x::ModelKeyframe, f::Symbol)
     model = getfield(x, :model)
@@ -1095,6 +1095,11 @@ function Base.getproperty(x::ModelKeyframe, f::Symbol)
                 nothing
             else
                 view(model.key_mquat, index + 1, Base.OneTo(model.nmocap * 4))
+            end
+    f === :ctrl && return if isnothing(model.key_ctrl)
+                nothing
+            else
+                view(model.key_ctrl, index + 1, Base.OneTo(model.nu))
             end
     f === :id && return index
     f === :name && return name_by_index(model, LibMuJoCo.mjOBJ_KEY, index)

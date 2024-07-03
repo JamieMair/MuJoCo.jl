@@ -26,14 +26,17 @@ const export_blacklist = (
     :mj_jacGeom,
     :mj_jacSite,
     :mj_jacPointAxis,
+    :mj_angmomMat,
     :mj_fullM,
     :mj_mulM,
     :mj_mulM2,
     :mj_addM,
     :mj_applyFT,
+    :mj_geomDistance,
     :mj_differentiatePos,
     :mj_integratePos,
     :mj_normalizeQuat,
+    :mj_multiRay,
     :mj_ray,
     :mju_zero,
     :mju_fill,
@@ -80,6 +83,7 @@ const export_blacklist = (
     :mju_insertionSortInt,
     :mjd_transitionFD,
     :mjd_inverseFD,
+    :mjd_subQuat,
 )
 for name in names(@__MODULE__(); all = true)
     if name in export_blacklist
