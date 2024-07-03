@@ -25,11 +25,12 @@ VisualiserExt = ["BangBang", "FFMPEG", "GLFW", "Observables", "PrettyTables", "P
 
 [compat]
 CEnum = "0.3, 0.4, 0.5"
-julia = "1.6"
 LinearAlgebra = "1.6"
 MuJoCo_jll = "2.3.7"
 Requires = "1"
+StaticArrays = "1"
 UnsafeArrays = "1"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
