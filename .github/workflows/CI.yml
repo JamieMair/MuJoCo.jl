@@ -20,16 +20,20 @@ jobs:
         version:
           - '1.6'
           - 'nightly'
-        include:
-          - os: macos-latest
-            arch: aarch64
-          - os: ubuntu-latest
-            arch: aarch64
-          - os: macos-13 # required to avoid Rosetta 2 translation
-            arch: x64
-          - os: ubuntu-latest
-            arch: x64
+        os:
+          - macos-13 # only for x86_64
+          - macos-latest # only for aarch64
+          - ubuntu-latest
+          - windows-latest # only for x86_64
+        arch:
+          - x64
+          - aarch64
+        exclude:
           - os: windows-latest
+            arch: aarch64
+          - os: macos-13
+            arch: aarch64
+          - os: macos-latest
             arch: x64
     steps:
       - uses: actions/checkout@v4
