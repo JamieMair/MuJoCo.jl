@@ -193,7 +193,7 @@ const mjSolverStat = mjSolverStat_
   - **`time`**: simulation time
   - **`energy`**: potential, kinetic energy
   - **`buffer`**: main buffer; all pointers point in it                (nbuffer bytes)
-  - **`arena`**: arena+stack buffer                     (narena*sizeof(mjtNum) bytes)
+  - **`arena`**: arena+stack buffer                     (narena bytes)
   - **`qpos`**: position                                         (nq x 1)
   - **`qvel`**: velocity                                         (nv x 1)
   - **`act`**: actuator activation                              (na x 1)
