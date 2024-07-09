@@ -14,8 +14,8 @@ function MuJoCo.Visualiser.visualise!(
     window_size = if isnothing(resolution)
         default_windowsize()
     else
-        @assert resolution[1] > 0, "Width of resolution should be greater than 0."
-        @assert resolution[2] > 0, "Height of resolution should be greater than 0."
+        @assert resolution[1] > 0 "Width of resolution should be greater than 0."
+        @assert resolution[2] > 0 "Height of resolution should be greater than 0."
         resolution
     end
 
