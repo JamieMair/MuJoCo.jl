@@ -89,7 +89,8 @@ export mju_printMat,
 Print matrix to screen.
 
 # Arguments
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Constant.
+
 """
 function mju_printMat(mat::AbstractArray{Float64,2})
     if !(typeof(mat) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -107,8 +108,9 @@ Solve linear system M * x = y using factorization:  x = inv(L'*D*L)*y
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`x::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`y::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
+- **`x::Matrix{Float64}`** -> A matrix of variable size.
+- **`y::Matrix{Float64}`** -> A matrix of variable size. Constant.
+
 """
 function mj_solveM(m, d, x::AbstractArray{Float64,2}, y::AbstractArray{Float64,2})
     if !(typeof(x) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -138,8 +140,9 @@ Half of linear solve:  x = sqrt(inv(D))*inv(L')*y
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`x::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`y::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
+- **`x::Matrix{Float64}`** -> A matrix of variable size.
+- **`y::Matrix{Float64}`** -> A matrix of variable size. Constant.
+
 """
 function mj_solveM2(m, d, x::AbstractArray{Float64,2}, y::AbstractArray{Float64,2})
     if !(typeof(x) <: LinearAlgebra.Transpose{Float64,Matrix{Float64}})
@@ -170,11 +173,7 @@ RNE: compute M(qpos)*qacc + C(qpos,qvel); flg_acc=0 removes inertial term.
 - **`m::Model`** -> Constant.
 - **`d::Data`**
 - **`flg_acc::Int32`**
-- **`result::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- result should be a vector, not a matrix.
-- result should have length nv
+- **`result::Vector{Float64}`** -> A vector of variable size. `result` should be a vector, not a matrix. `result` should have length nv.
 
 """
 function mj_rne(
@@ -201,15 +200,9 @@ Compute efc*state, efc*force, qfrc_constraint, and (optionally) cone Hessians. I
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jar::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`cost::Vector{Float64}`** -> An optional vector of size 1.
+- **`jar::Vector{Float64}`** -> A vector of variable size. `jar` should be a vector, not a matrix. size of `jar` should equal nefc. Constant.
+- **`cost::Vector{Float64}`** -> An **optional** vector of size 1. `cost` should be a vector of size 1. Can set to `nothing` if not required.
 - **`flg_coneHessian::Int32`**
-
-# Additional Info
-- jar should be a vector, not a matrix.
-- cost should be a vector of size 1
-- cost should be a vector of size 1.
-- size of jar should equal nefc
 
 """
 function mj_constraintUpdate(
@@ -251,12 +244,8 @@ Get state.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`** -> Constant.
-- **`state::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
+- **`state::Vector{Float64}`** -> A vector of variable size. `state` should be a vector, not a matrix. `state` size should equal mj_stateSize(m, spec).
 - **`spec::Int32`**
-
-# Additional Info
-- state should be a vector, not a matrix.
-- state size should equal mj_stateSize(m, spec)
 
 """
 function mj_getState(
@@ -283,12 +272,8 @@ Set state.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`state::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
+- **`state::Vector{Float64}`** -> A vector of variable size. `state` should be a vector, not a matrix. `state` size should equal mj_stateSize(m, spec).
 - **`spec::Int32`**
-
-# Additional Info
-- state should be a vector, not a matrix.
-- state size should equal mj_stateSize(m, spec)
 
 """
 function mj_setState(
@@ -315,14 +300,8 @@ Multiply dense or sparse constraint Jacobian by vector.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res should be of length nefc
-- vec should be of length nv
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` should be of length nefc.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. `vec` should be of length nv. Constant.
 
 """
 function mj_mulJacVec(
@@ -355,14 +334,8 @@ Multiply dense or sparse constraint Jacobian transpose by vector.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res should be of length nv
-- vec should be of length nefc
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` should be of length nv.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. `vec` should be of length nefc. Constant.
 
 """
 function mj_mulJacTVec(
@@ -395,16 +368,10 @@ Compute 3/6-by-nv end-effector Jacobian of global point attached to given body.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`point::Vector{Float64}`** -> A vector of size 3. Constant.
+- **`jacp::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacp` should be of shape (3, nv). Can set to `nothing` if not required.
+- **`jacr::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacr` should be of shape (3, nv). Can set to `nothing` if not required.
+- **`point::Vector{Float64}`** -> A vector of size 3. `point` should be a vector of size 3. Constant.
 - **`body::Int32`**
-
-# Additional Info
-- point should be a vector of size 3
-- point should be a vector of size 3.
-- jacp should be of shape (3, nv)
-- jacr should be of shape (3, nv)
 
 """
 function mj_jac(
@@ -454,13 +421,9 @@ Compute body frame end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacp` should be of shape (3, nv). Can set to `nothing` if not required.
+- **`jacr::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacr` should be of shape (3, nv). Can set to `nothing` if not required.
 - **`body::Int32`**
-
-# Additional Info
-- jacp should be of shape (3, nv)
-- jacr should be of shape (3, nv)
 
 """
 function mj_jacBody(
@@ -502,13 +465,9 @@ Compute body center-of-mass end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacp` should be of shape (3, nv). Can set to `nothing` if not required.
+- **`jacr::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacr` should be of shape (3, nv). Can set to `nothing` if not required.
 - **`body::Int32`**
-
-# Additional Info
-- jacp should be of shape (3, nv)
-- jacr should be of shape (3, nv)
 
 """
 function mj_jacBodyCom(
@@ -550,11 +509,8 @@ Compute subtree center-of-mass end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacp` should be of shape (3, nv). Can set to `nothing` if not required.
 - **`body::Int32`**
-
-# Additional Info
-- jacp should be of shape (3, nv)
 
 """
 function mj_jacSubtreeCom(
@@ -582,13 +538,9 @@ Compute geom end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacp` should be of shape (3, nv). Can set to `nothing` if not required.
+- **`jacr::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacr` should be of shape (3, nv). Can set to `nothing` if not required.
 - **`geom::Int32`**
-
-# Additional Info
-- jacp should be of shape (3, nv)
-- jacr should be of shape (3, nv)
 
 """
 function mj_jacGeom(
@@ -630,13 +582,9 @@ Compute site end-effector Jacobian.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`jacp::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacp` should be of shape (3, nv). Can set to `nothing` if not required.
+- **`jacr::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacr` should be of shape (3, nv). Can set to `nothing` if not required.
 - **`site::Int32`**
-
-# Additional Info
-- jacp should be of shape (3, nv)
-- jacr should be of shape (3, nv)
 
 """
 function mj_jacSite(
@@ -678,19 +626,11 @@ Compute translation end-effector Jacobian of point, and rotation Jacobian of axi
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`jacp::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`jacr::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`point::Vector{Float64}`** -> A vector of size 3. Constant.
-- **`axis::Vector{Float64}`** -> A vector of size 3. Constant.
+- **`jacp::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacp` should be of shape (3, nv). Can set to `nothing` if not required.
+- **`jacr::Matrix{Float64}`** -> An **optional** matrix of variable size. `jacr` should be of shape (3, nv). Can set to `nothing` if not required.
+- **`point::Vector{Float64}`** -> A vector of size 3. `point` should be a vector of size 3. Constant.
+- **`axis::Vector{Float64}`** -> A vector of size 3. `axis` should be a vector of size 3. Constant.
 - **`body::Int32`**
-
-# Additional Info
-- point should be a vector of size 3
-- point should be a vector of size 3.
-- axis should be a vector of size 3
-- axis should be a vector of size 3.
-- jacp should be of shape (3, nv)
-- jacr should be of shape (3, nv)
 
 """
 function mj_jacPointAxis(
@@ -748,11 +688,8 @@ Compute subtree angular momentum matrix.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. `mat` should be of shape (3, nv).
 - **`body::Int32`**
-
-# Additional Info
-- mat should be of shape (3, nv)
 
 """
 function mj_angmomMat(m, d, mat::AbstractArray{Float64,2}, body::Integer)
@@ -773,13 +710,8 @@ Convert sparse inertia matrix M into full (i.e. dense) matrix.
 
 # Arguments
 - **`m::Model`** -> Constant.
-- **`dst::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`M::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- M should be a vector, not a matrix.
-- M should be of size nM
-- dst should be of shape (nv, nv)
+- **`dst::Matrix{Float64}`** -> A matrix of variable size. `dst` should be of shape (nv, nv).
+- **`M::Vector{Float64}`** -> A vector of variable size. `M` should be a vector, not a matrix. `M` should be of size nM. Constant.
 
 """
 function mj_fullM(
@@ -811,14 +743,8 @@ Multiply vector by inertia matrix.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`** -> Constant.
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res should be of size nv
-- vec should be of size nv
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` should be of size nv.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. `vec` should be of size nv. Constant.
 
 """
 function mj_mulM(
@@ -851,14 +777,8 @@ Multiply vector by (inertia matrix)^(1/2).
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`** -> Constant.
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res should be of size nv
-- vec should be of size nv
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` should be of size nv.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. `vec` should be of size nv. Constant.
 
 """
 function mj_mulM2(
@@ -891,20 +811,10 @@ Add inertia matrix to destination matrix. Destination can be sparse uncompressed
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`dst::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`rownnz::Vector{Int32}`** -> A vector of variable size. Check additional info for sizes.
-- **`rowadr::Vector{Int32}`** -> A vector of variable size. Check additional info for sizes.
-- **`colind::Vector{Int32}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- dst should be a vector, not a matrix.
-- rownnz should be a vector, not a matrix.
-- rowadr should be a vector, not a matrix.
-- colind should be a vector, not a matrix.
-- dst should be of size nM
-- rownnz should be of size nv
-- rowadr should be of size nv
-- colind should be of size nM
+- **`dst::Vector{Float64}`** -> A vector of variable size. `dst` should be a vector, not a matrix. `dst` should be of size nM.
+- **`rownnz::Vector{Int32}`** -> A vector of variable size. `rownnz` should be a vector, not a matrix. `rownnz` should be of size nv.
+- **`rowadr::Vector{Int32}`** -> A vector of variable size. `rowadr` should be a vector, not a matrix. `rowadr` should be of size nv.
+- **`colind::Vector{Int32}`** -> A vector of variable size. `colind` should be a vector, not a matrix. `colind` should be of size nM.
 
 """
 function mj_addM(
@@ -951,21 +861,11 @@ Apply Cartesian force and torque (outside xfrc_applied mechanism).
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`force::Vector{Float64}`** -> A vector of size 3. Constant.
-- **`torque::Vector{Float64}`** -> A vector of size 3. Constant.
-- **`point::Vector{Float64}`** -> A vector of size 3. Constant.
+- **`force::Vector{Float64}`** -> A vector of size 3. `force` should be a vector of size 3. Constant.
+- **`torque::Vector{Float64}`** -> A vector of size 3. `torque` should be a vector of size 3. Constant.
+- **`point::Vector{Float64}`** -> A vector of size 3. `point` should be a vector of size 3. Constant.
 - **`body::Int32`**
-- **`qfrc_target::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- force should be a vector of size 3
-- force should be a vector of size 3.
-- torque should be a vector of size 3
-- torque should be a vector of size 3.
-- point should be a vector of size 3
-- point should be a vector of size 3.
-- qfrc_target should be a vector, not a matrix.
-- qfrc_target should be of size nv
+- **`qfrc_target::Vector{Float64}`** -> A vector of variable size. `qfrc_target` should be a vector, not a matrix. `qfrc_target` should be of size nv.
 
 """
 function mj_applyFT(
@@ -1025,10 +925,7 @@ Returns smallest signed distance between two geoms and optionally segment from g
 - **`geom1::Int32`**
 - **`geom2::Int32`**
 - **`distmax::Float64`**
-- **`fromto::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-
-# Additional Info
-- fromto should be of size 6
+- **`fromto::Matrix{Float64}`** -> An **optional** matrix of variable size. `fromto` should be of size 6. Can set to `nothing` if not required.
 
 """
 function mj_geomDistance(
@@ -1064,18 +961,10 @@ Compute velocity by finite-differencing two positions.
 
 # Arguments
 - **`m::Model`** -> Constant.
-- **`qvel::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
+- **`qvel::Vector{Float64}`** -> A vector of variable size. `qvel` should be a vector, not a matrix. `qvel` should be of size nv.
 - **`dt::Float64`**
-- **`qpos1::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`qpos2::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- qvel should be a vector, not a matrix.
-- qpos1 should be a vector, not a matrix.
-- qpos2 should be a vector, not a matrix.
-- qvel should be of size nv
-- qpos1 should be of size nq
-- qpos2 should be of size nq
+- **`qpos1::Vector{Float64}`** -> A vector of variable size. `qpos1` should be a vector, not a matrix. `qpos1` should be of size nq. Constant.
+- **`qpos2::Vector{Float64}`** -> A vector of variable size. `qpos2` should be a vector, not a matrix. `qpos2` should be of size nq. Constant.
 
 """
 function mj_differentiatePos(
@@ -1114,15 +1003,9 @@ Integrate position with given velocity.
 
 # Arguments
 - **`m::Model`** -> Constant.
-- **`qpos::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`qvel::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
+- **`qpos::Vector{Float64}`** -> A vector of variable size. `qpos` should be a vector, not a matrix. `qpos` should be of size nq.
+- **`qvel::Vector{Float64}`** -> A vector of variable size. `qvel` should be a vector, not a matrix. `qvel` should be of size nv. Constant.
 - **`dt::Float64`**
-
-# Additional Info
-- qpos should be a vector, not a matrix.
-- qvel should be a vector, not a matrix.
-- qpos should be of size nq
-- qvel should be of size nv
 
 """
 function mj_integratePos(
@@ -1154,11 +1037,7 @@ Normalize all quaternions in qpos-type vector.
 
 # Arguments
 - **`m::Model`** -> Constant.
-- **`qpos::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- qpos should be a vector, not a matrix.
-- qpos should be of size nq
+- **`qpos::Vector{Float64}`** -> A vector of variable size. `qpos` should be a vector, not a matrix. `qpos` should be of size nq.
 
 """
 function mj_normalizeQuat(m, qpos::Union{AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1180,26 +1059,15 @@ Intersect multiple rays emanating from a single point. Similar semantics to mj_r
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`**
-- **`pnt::Vector{Float64}`** -> A vector of size 3. Constant.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`geomgroup::Vector{UInt8}`** -> An optional vector of size 6. Constant.
+- **`pnt::Vector{Float64}`** -> A vector of size 3. `pnt` should be a vector of size 3. Constant.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. `vec` should be of size 3*nray. Constant.
+- **`geomgroup::Vector{UInt8}`** -> An **optional** vector of size 6. `geomgroup` should be a vector of size 6. Can set to `nothing` if not required. Constant.
 - **`flg_static::UInt8`**
 - **`bodyexclude::Int32`**
-- **`geomid::Vector{Int32}`** -> A vector of variable size. Check additional info for sizes.
-- **`dist::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
+- **`geomid::Vector{Int32}`** -> A vector of variable size. `geomid` should be a vector, not a matrix. dist and `geomid` should be of size nray.
+- **`dist::Vector{Float64}`** -> A vector of variable size. `dist` should be a vector, not a matrix. `dist` and geomid should be of size nray.
 - **`nray::Int32`**
 - **`cutoff::Float64`**
-
-# Additional Info
-- pnt should be a vector of size 3
-- pnt should be a vector of size 3.
-- vec should be a vector, not a matrix.
-- geomgroup should be a vector of size 6
-- geomgroup should be a vector of size 6.
-- geomid should be a vector, not a matrix.
-- dist should be a vector, not a matrix.
-- dist and geomid should be of size nray
-- vec should be of size 3*nray
 
 """
 function mj_multiRay(
@@ -1268,22 +1136,12 @@ Intersect ray (pnt+x*vec, x>=0) with visible geoms, except geoms in bodyexclude.
 # Arguments
 - **`m::Model`** -> Constant.
 - **`d::Data`** -> Constant.
-- **`pnt::Vector{Float64}`** -> A vector of size 3. Constant.
-- **`vec::Vector{Float64}`** -> A vector of size 3. Constant.
-- **`geomgroup::Vector{UInt8}`** -> An optional vector of size 6. Constant.
+- **`pnt::Vector{Float64}`** -> A vector of size 3. `pnt` should be a vector of size 3. Constant.
+- **`vec::Vector{Float64}`** -> A vector of size 3. `vec` should be a vector of size 3. Constant.
+- **`geomgroup::Vector{UInt8}`** -> An **optional** vector of size 6. `geomgroup` should be a vector of size 6. Can set to `nothing` if not required. Constant.
 - **`flg_static::UInt8`**
 - **`bodyexclude::Int32`**
-- **`geomid::Vector{Int32}`** -> A vector of size 1.
-
-# Additional Info
-- pnt should be a vector of size 3
-- pnt should be a vector of size 3.
-- vec should be a vector of size 3
-- vec should be a vector of size 3.
-- geomgroup should be a vector of size 6
-- geomgroup should be a vector of size 6.
-- geomid should be a vector of size 1
-- geomid should be a vector of size 1.
+- **`geomid::Vector{Int32}`** -> A vector of size 1. `geomid` should be a vector of size 1.
 
 """
 function mj_ray(
@@ -1341,10 +1199,7 @@ end
 Set res = 0.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- res should be a vector, not a matrix.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix.
 
 """
 function mju_zero(res::Union{AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1361,11 +1216,8 @@ end
 Set res = val.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix.
 - **`val::Float64`**
-
-# Additional Info
-- res should be a vector, not a matrix.
 
 """
 function mju_fill(res::Union{AbstractVector{Float64},AbstractArray{Float64,2}}, val::Real)
@@ -1382,13 +1234,8 @@ end
 Set res = vec.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`data::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- data should be a vector, not a matrix.
-- res and data should have the same size
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and data should have the same size.
+- **`data::Vector{Float64}`** -> A vector of variable size. `data` should be a vector, not a matrix. res and `data` should have the same size. Constant.
 
 """
 function mju_copy(
@@ -1414,10 +1261,7 @@ end
 Return sum(vec).
 
 # Arguments
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- vec should be a vector, not a matrix.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix.
 
 """
 function mju_sum(vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1434,10 +1278,7 @@ end
 Return L1 norm: sum(abs(vec)).
 
 # Arguments
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- vec should be a vector, not a matrix.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix.
 
 """
 function mju_L1(vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1454,14 +1295,9 @@ end
 Set res = vec*scl.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec should have the same size.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. res and `vec` should have the same size. Constant.
 - **`scl::Float64`**
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res and vec should have the same size
 
 """
 function mju_scl(
@@ -1488,16 +1324,9 @@ end
 Set res = vec1 + vec2.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec1::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`vec2::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec1 should be a vector, not a matrix.
-- vec2 should be a vector, not a matrix.
-- res and vec1 should have the same size
-- res and vec2 should have the same size
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec1 should have the same size. `res` and vec2 should have the same size.
+- **`vec1::Vector{Float64}`** -> A vector of variable size. `vec1` should be a vector, not a matrix. res and `vec1` should have the same size. Constant.
+- **`vec2::Vector{Float64}`** -> A vector of variable size. `vec2` should be a vector, not a matrix. res and `vec2` should have the same size. Constant.
 
 """
 function mju_add(
@@ -1530,16 +1359,9 @@ end
 Set res = vec1 - vec2.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec1::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`vec2::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec1 should be a vector, not a matrix.
-- vec2 should be a vector, not a matrix.
-- res and vec1 should have the same size
-- res and vec2 should have the same size
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec1 should have the same size. `res` and vec2 should have the same size.
+- **`vec1::Vector{Float64}`** -> A vector of variable size. `vec1` should be a vector, not a matrix. res and `vec1` should have the same size. Constant.
+- **`vec2::Vector{Float64}`** -> A vector of variable size. `vec2` should be a vector, not a matrix. res and `vec2` should have the same size. Constant.
 
 """
 function mju_sub(
@@ -1572,13 +1394,8 @@ end
 Set res = res + vec.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res and vec should have the same size
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec should have the same size.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. res and `vec` should have the same size. Constant.
 
 """
 function mju_addTo(
@@ -1604,13 +1421,8 @@ end
 Set res = res - vec.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res and vec should have the same size
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec should have the same size.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. res and `vec` should have the same size. Constant.
 
 """
 function mju_subFrom(
@@ -1636,14 +1448,9 @@ end
 Set res = res + vec*scl.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec should have the same size.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. res and `vec` should have the same size. Constant.
 - **`scl::Float64`**
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res and vec should have the same size
 
 """
 function mju_addToScl(
@@ -1670,17 +1477,10 @@ end
 Set res = vec1 + vec2*scl.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec1::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`vec2::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec1 should have the same size. `res` and vec2 should have the same size.
+- **`vec1::Vector{Float64}`** -> A vector of variable size. `vec1` should be a vector, not a matrix. res and `vec1` should have the same size. Constant.
+- **`vec2::Vector{Float64}`** -> A vector of variable size. `vec2` should be a vector, not a matrix. res and `vec2` should have the same size. Constant.
 - **`scl::Float64`**
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec1 should be a vector, not a matrix.
-- vec2 should be a vector, not a matrix.
-- res and vec1 should have the same size
-- res and vec2 should have the same size
 
 """
 function mju_addScl(
@@ -1714,10 +1514,7 @@ end
 Normalize vector, return length before normalization.
 
 # Arguments
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- vec should be a vector, not a matrix.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix.
 
 """
 function mju_normalize(vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1734,10 +1531,7 @@ end
 Return vector length (without normalizing vector).
 
 # Arguments
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- vec should be a vector, not a matrix.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. Constant.
 
 """
 function mju_norm(vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -1754,13 +1548,8 @@ end
 Return dot-product of vec1 and vec2.
 
 # Arguments
-- **`vec1::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`vec2::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- vec1 should be a vector, not a matrix.
-- vec2 should be a vector, not a matrix.
-- vec1 and vec2 should have the same size
+- **`vec1::Vector{Float64}`** -> A vector of variable size. `vec1` should be a vector, not a matrix. `vec1` and vec2 should have the same size. Constant.
+- **`vec2::Vector{Float64}`** -> A vector of variable size. `vec2` should be a vector, not a matrix. vec1 and `vec2` should have the same size. Constant.
 
 """
 function mju_dot(
@@ -1786,13 +1575,9 @@ end
 Multiply matrix and vector: res = mat * vec.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Constant.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. Constant.
 
 """
 function mju_mulMatVec(
@@ -1825,13 +1610,9 @@ end
 Multiply transposed matrix and vector: res = mat' * vec.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Constant.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. Constant.
 
 """
 function mju_mulMatTVec(
@@ -1864,13 +1645,9 @@ end
 Multiply square matrix with vectors on both sides: returns vec1' * mat * vec2.
 
 # Arguments
-- **`vec1::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`vec2::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- vec1 should be a vector, not a matrix.
-- vec2 should be a vector, not a matrix.
+- **`vec1::Vector{Float64}`** -> A vector of variable size. `vec1` should be a vector, not a matrix. Constant.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Constant.
+- **`vec2::Vector{Float64}`** -> A vector of variable size. `vec2` should be a vector, not a matrix. Constant.
 
 """
 function mju_mulVecMatVec(
@@ -1906,12 +1683,8 @@ end
 Transpose matrix: res = mat'.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- #columns in res should equal #rows in mat
-- #rows in res should equal #columns in mat
+- **`res::Matrix{Float64}`** -> A matrix of variable size. #columns in `res` should equal #rows in mat. #rows in `res` should equal #columns in mat.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Constant.
 
 """
 function mju_transpose(res::AbstractArray{Float64,2}, mat::AbstractArray{Float64,2})
@@ -1937,12 +1710,8 @@ end
 Symmetrize square matrix res = (mat + mat')/2.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- mat should be square
-- res and mat should have the same shape
+- **`res::Matrix{Float64}`** -> A matrix of variable size. `res` and mat should have the same shape.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. `mat` should be square. res and `mat` should have the same shape. Constant.
 
 """
 function mju_symmetrize(res::AbstractArray{Float64,2}, mat::AbstractArray{Float64,2})
@@ -1968,10 +1737,7 @@ end
 Set mat to the identity matrix.
 
 # Arguments
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-
-# Additional Info
-- mat should be square
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. `mat` should be square.
 
 """
 function mju_eye(mat::AbstractArray{Float64,2})
@@ -1991,13 +1757,9 @@ end
 Multiply matrices: res = mat1 * mat2.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`mat1::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- #rows in res should equal #rows in mat1
-- #columns in mat1 should equal #rows in mat2
+- **`res::Matrix{Float64}`** -> A matrix of variable size. #rows in `res` should equal #rows in mat1.
+- **`mat1::Matrix{Float64}`** -> A matrix of variable size. #columns in `mat1` should equal #rows in mat2. Constant.
+- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Constant.
 
 """
 function mju_mulMatMat(
@@ -2040,13 +1802,9 @@ end
 Multiply matrices, second argument transposed: res = mat1 * mat2'.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`mat1::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- #rows in res should equal #rows in mat1
-- #columns in res should equal #rows in mat2
+- **`res::Matrix{Float64}`** -> A matrix of variable size. #rows in `res` should equal #rows in mat1. #columns in `res` should equal #rows in mat2.
+- **`mat1::Matrix{Float64}`** -> A matrix of variable size. Constant.
+- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Constant.
 
 """
 function mju_mulMatMatT(
@@ -2089,13 +1847,9 @@ end
 Multiply matrices, first argument transposed: res = mat1' * mat2.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`mat1::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- #rows in res should equal #columns in mat1
-- #rows in mat1 should equal #rows in mat2
+- **`res::Matrix{Float64}`** -> A matrix of variable size. #rows in `res` should equal #columns in mat1.
+- **`mat1::Matrix{Float64}`** -> A matrix of variable size. #rows in `mat1` should equal #rows in mat2. Constant.
+- **`mat2::Matrix{Float64}`** -> A matrix of variable size. Constant.
 
 """
 function mju_mulMatTMat(
@@ -2138,14 +1892,9 @@ end
 Set res = mat' * diag * mat if diag is not NULL, and res = mat' * mat otherwise.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`diag::Vector{Float64}`** -> An optional vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- diag should be a vector, not a matrix.
-- #rows in res should equal #columns in mat
-- #rows in res should equal #columns in mat
+- **`res::Matrix{Float64}`** -> A matrix of variable size. #rows in `res` should equal #columns in mat.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Constant.
+- **`diag::Vector{Float64}`** -> An **optional** vector of variable size. `diag` should be a vector, not a matrix. Can set to `nothing` if not required.
 
 """
 function mju_sqrMatTD(
@@ -2189,11 +1938,8 @@ end
 Cholesky decomposition: mat = L*L'; return rank, decomposition performed in-place into mat.
 
 # Arguments
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. `mat` should be a square matrix.
 - **`mindiag::Float64`**
-
-# Additional Info
-- mat should be a square matrix
 
 """
 function mju_cholFactor(mat::AbstractArray{Float64,2}, mindiag::Real)
@@ -2213,14 +1959,9 @@ end
 Solve (mat*mat') * res = vec, where mat is a Cholesky factor.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- mat should be a square matrix
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. `mat` should be a square matrix. Constant.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. Constant.
 
 """
 function mju_cholSolve(
@@ -2256,13 +1997,9 @@ end
 Cholesky rank-one update: L*L' +/- x*x'; return rank.
 
 # Arguments
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`x::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. `mat` should be a square matrix.
+- **`x::Vector{Float64}`** -> A vector of variable size. `x` should be a vector, not a matrix.
 - **`flg_plus::Int32`**
-
-# Additional Info
-- x should be a vector, not a matrix.
-- mat should be a square matrix
 
 """
 function mju_cholUpdate(
@@ -2292,15 +2029,12 @@ end
 Band-dense Cholesky decomposition.  Returns minimum value in the factorized diagonal, or 0 if rank-deficient.  mat has (ntotal-ndense) x nband + ndense x ntotal elements.  The first (ntotal-ndense) x nband store the band part, left of diagonal, inclusive.  The second ndense x ntotal store the band part as entire dense rows.  Add diagadd+diagmul*mat_ii to diagonal before factorization.
 
 # Arguments
-- **`mat::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
+- **`mat::Vector{Float64}`** -> A vector of variable size. `mat` should be a vector, not a matrix.
 - **`ntotal::Int32`**
 - **`nband::Int32`**
 - **`ndense::Int32`**
 - **`diagadd::Float64`**
 - **`diagmul::Float64`**
-
-# Additional Info
-- mat should be a vector, not a matrix.
 
 """
 function mju_cholFactorBand(
@@ -2328,19 +2062,12 @@ end
 Solve (mat*mat')*res = vec where mat is a band-dense Cholesky factor.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. size of `res` should equal ntotal.
+- **`mat::Vector{Float64}`** -> A vector of variable size. `mat` should be a vector, not a matrix. Constant.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. size of `vec` should equal ntotal. Constant.
 - **`ntotal::Int32`**
 - **`nband::Int32`**
 - **`ndense::Int32`**
-
-# Additional Info
-- res should be a vector, not a matrix.
-- mat should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- size of res should equal ntotal
-- size of vec should equal ntotal
 
 """
 function mju_cholSolveBand(
@@ -2382,17 +2109,12 @@ end
 Convert banded matrix to dense matrix, fill upper triangle if flg_sym>0.
 
 # Arguments
-- **`res::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`mat::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`ntotal::Int32`**
+- **`res::Matrix{Float64}`** -> A matrix of variable size. `res` should have ntotal rows. `res` should have ntotal columns.
+- **`mat::Vector{Float64}`** -> A vector of variable size. `mat` should be a vector, not a matrix. Constant.
+- **`ntotal::Int32`** -> res should have `ntotal` rows. res should have `ntotal` columns.
 - **`nband::Int32`**
 - **`ndense::Int32`**
 - **`flg_sym::UInt8`**
-
-# Additional Info
-- mat should be a vector, not a matrix.
-- res should have ntotal rows
-- res should have ntotal columns
 
 """
 function mju_band2Dense(
@@ -2429,16 +2151,11 @@ end
 Convert dense matrix to banded matrix.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`ntotal::Int32`**
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. `mat` should have ntotal rows. `mat` should have ntotal columns. Constant.
+- **`ntotal::Int32`** -> mat should have `ntotal` rows. mat should have `ntotal` columns.
 - **`nband::Int32`**
 - **`ndense::Int32`**
-
-# Additional Info
-- res should be a vector, not a matrix.
-- mat should have ntotal rows
-- mat should have ntotal columns
 
 """
 function mju_dense2Band(
@@ -2474,21 +2191,14 @@ end
 Multiply band-diagonal matrix with nvec vectors, include upper triangle if flg_sym>0.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`mat::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`vec::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`ntotal::Int32`**
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` should have ntotal rows. `res` should have nVec columns.
+- **`mat::Matrix{Float64}`** -> A matrix of variable size. Constant.
+- **`vec::Matrix{Float64}`** -> A matrix of variable size. `vec` should have ntotal rows. `vec` should have nVec columns. Constant.
+- **`ntotal::Int32`** -> res should have `ntotal` rows. vec should have `ntotal` rows.
 - **`nband::Int32`**
 - **`ndense::Int32`**
-- **`nVec::Int32`**
+- **`nVec::Int32`** -> res should have `nVec` columns. vec should have `nVec` columns.
 - **`flg_sym::UInt8`**
-
-# Additional Info
-- res should be a vector, not a matrix.
-- res should have ntotal rows
-- res should have nVec columns
-- vec should have ntotal rows
-- vec should have nVec columns
 
 """
 function mju_bandMulMatVec(
@@ -2536,26 +2246,13 @@ end
 minimize 0.5*x'*H*x + x'*g  s.t. lower <= x <= upper, return rank or -1 if failed   inputs:     n           - problem dimension     H           - SPD matrix                n*n     g           - bias vector               n     lower       - lower bounds              n     upper       - upper bounds              n     res         - solution warmstart        n   return value:     nfree <= n  - rank of unconstrained subspace, -1 if failure   outputs (required):     res         - solution                  n     R           - subspace Cholesky factor  nfree*nfree    allocated: n*(n+7)   outputs (optional):     index       - set of free dimensions    nfree          allocated: n   notes:     the initial value of res is used to warmstart the solver     R must have allocatd size n*(n+7), but only nfree*nfree values are used in output     index (if given) must have allocated size n, but only nfree values are used in output     only the lower triangles of H and R and are read from and written to, respectively     the convenience function mju_boxQPmalloc allocates the required data structures
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`R::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`index::Vector{Int32}`** -> An optional vector of variable size. Check additional info for sizes.
-- **`H::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes. Constant.
-- **`g::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`lower::Vector{Float64}`** -> An optional vector of variable size. Check additional info for sizes. Constant.
-- **`upper::Vector{Float64}`** -> An optional vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- index should be a vector, not a matrix.
-- g should be a vector, not a matrix.
-- lower should be a vector, not a matrix.
-- upper should be a vector, not a matrix.
-- size of R should be n*(n+7)
-- size of index should equal n
-- H should be of shape (n, n)
-- size of g should equal n
-- size of lower should equal n
-- size of upper should equal n
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix.
+- **`R::Matrix{Float64}`** -> A matrix of variable size. size of `R` should be n*(n+7).
+- **`index::Vector{Int32}`** -> An **optional** vector of variable size. `index` should be a vector, not a matrix. size of `index` should equal n. Can set to `nothing` if not required.
+- **`H::Matrix{Float64}`** -> A matrix of variable size. `H` should be of shape (n, n). Constant.
+- **`g::Vector{Float64}`** -> A vector of variable size. `g` should be a vector, not a matrix. size of `g` should equal n. Constant.
+- **`lower::Vector{Float64}`** -> An **optional** vector of variable size. `lower` should be a vector, not a matrix. size of `lower` should equal n. Can set to `nothing` if not required. Constant.
+- **`upper::Vector{Float64}`** -> An **optional** vector of variable size. `upper` should be a vector, not a matrix. size of `upper` should equal n. Can set to `nothing` if not required. Constant.
 
 """
 function mju_boxQP(
@@ -2632,14 +2329,9 @@ end
 Convert contact force to pyramid representation.
 
 # Arguments
-- **`pyramid::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`force::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`mu::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- pyramid should be a vector, not a matrix.
-- force should be a vector, not a matrix.
-- mu should be a vector, not a matrix.
+- **`pyramid::Vector{Float64}`** -> A vector of variable size. `pyramid` should be a vector, not a matrix.
+- **`force::Vector{Float64}`** -> A vector of variable size. `force` should be a vector, not a matrix. Constant.
+- **`mu::Vector{Float64}`** -> A vector of variable size. `mu` should be a vector, not a matrix. Constant.
 
 """
 function mju_encodePyramid(
@@ -2672,14 +2364,9 @@ end
 Convert pyramid representation to contact force.
 
 # Arguments
-- **`force::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`pyramid::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`mu::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- force should be a vector, not a matrix.
-- pyramid should be a vector, not a matrix.
-- mu should be a vector, not a matrix.
+- **`force::Vector{Float64}`** -> A vector of variable size. `force` should be a vector, not a matrix.
+- **`pyramid::Vector{Float64}`** -> A vector of variable size. `pyramid` should be a vector, not a matrix. Constant.
+- **`mu::Vector{Float64}`** -> A vector of variable size. `mu` should be a vector, not a matrix. Constant.
 
 """
 function mju_decodePyramid(
@@ -2712,10 +2399,7 @@ end
 Return 1 if all elements are 0.
 
 # Arguments
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- vec should be a vector, not a matrix.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix.
 
 """
 function mju_isZero(vec::Union{AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -2732,13 +2416,8 @@ end
 Convert from float to mjtNum.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float32}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res and vec should have the same size
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec should have the same size.
+- **`vec::Vector{Float32}`** -> A vector of variable size. `vec` should be a vector, not a matrix. res and `vec` should have the same size. Constant.
 
 """
 function mju_f2n(
@@ -2764,13 +2443,8 @@ end
 Convert from mjtNum to float.
 
 # Arguments
-- **`res::Vector{Float32}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res and vec should have the same size
+- **`res::Vector{Float32}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec should have the same size.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. res and `vec` should have the same size. Constant.
 
 """
 function mju_n2f(
@@ -2796,13 +2470,8 @@ end
 Convert from double to mjtNum.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res and vec should have the same size
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec should have the same size.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. res and `vec` should have the same size. Constant.
 
 """
 function mju_d2n(
@@ -2828,13 +2497,8 @@ end
 Convert from mjtNum to double.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-- **`vec::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-
-# Additional Info
-- res should be a vector, not a matrix.
-- vec should be a vector, not a matrix.
-- res and vec should have the same size
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix. `res` and vec should have the same size.
+- **`vec::Vector{Float64}`** -> A vector of variable size. `vec` should be a vector, not a matrix. res and `vec` should have the same size. Constant.
 
 """
 function mju_n2d(
@@ -2860,10 +2524,7 @@ end
 Insertion sort, resulting list is in increasing order.
 
 # Arguments
-- **`res::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- res should be a vector, not a matrix.
+- **`res::Vector{Float64}`** -> A vector of variable size. `res` should be a vector, not a matrix.
 
 """
 function mju_insertionSort(res::Union{AbstractVector{Float64},AbstractArray{Float64,2}})
@@ -2880,10 +2541,7 @@ end
 Integer insertion sort, resulting list is in increasing order.
 
 # Arguments
-- **`res::Vector{Int32}`** -> A vector of variable size. Check additional info for sizes.
-
-# Additional Info
-- res should be a vector, not a matrix.
+- **`res::Vector{Int32}`** -> A vector of variable size. `res` should be a vector, not a matrix.
 
 """
 function mju_insertionSortInt(res::Union{AbstractVector{Int32},AbstractArray{Int32,2}})
@@ -2904,16 +2562,10 @@ Finite differenced transition matrices (control theory notation)   d(x_next) = A
 - **`d::Data`**
 - **`eps::Float64`**
 - **`flg_centered::UInt8`**
-- **`A::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`B::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`C::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`D::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-
-# Additional Info
-- A should be of shape (2*nv+na, 2*nv+na)
-- B should be of shape (2*nv+na, nu)
-- C should be of shape (nsensordata, 2*nv+na)
-- D should be of shape (nsensordata, nu)
+- **`A::Matrix{Float64}`** -> An **optional** matrix of variable size. `A` should be of shape (2*nv+na, 2*nv+na). Can set to `nothing` if not required.
+- **`B::Matrix{Float64}`** -> An **optional** matrix of variable size. `B` should be of shape (2*nv+na, nu). Can set to `nothing` if not required.
+- **`C::Matrix{Float64}`** -> An **optional** matrix of variable size. `C` should be of shape (nsensordata, 2*nv+na). Can set to `nothing` if not required.
+- **`D::Matrix{Float64}`** -> An **optional** matrix of variable size. `D` should be of shape (nsensordata, nu). Can set to `nothing` if not required.
 
 """
 function mjd_transitionFD(
@@ -2973,22 +2625,13 @@ Finite differenced Jacobians of (force, sensors) = mj*inverse(state, acceleratio
 - **`d::Data`**
 - **`eps::Float64`**
 - **`flg_actuation::UInt8`**
-- **`DfDq::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`DfDv::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`DfDa::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`DsDq::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`DsDv::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`DsDa::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`DmDq::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-
-# Additional Info
-- DfDq should be of shape (nv, nv)
-- DfDv should be of shape (nv, nv)
-- DfDa should be of shape (nv, nv)
-- DsDq should be of shape (nv, nsensordata)
-- DsDv should be of shape (nv, nsensordata)
-- DsDa should be of shape (nv, nsensordata)
-- DmDq should be of shape (nv, nM)
+- **`DfDq::Matrix{Float64}`** -> An **optional** matrix of variable size. `DfDq` should be of shape (nv, nv). Can set to `nothing` if not required.
+- **`DfDv::Matrix{Float64}`** -> An **optional** matrix of variable size. `DfDv` should be of shape (nv, nv). Can set to `nothing` if not required.
+- **`DfDa::Matrix{Float64}`** -> An **optional** matrix of variable size. `DfDa` should be of shape (nv, nv). Can set to `nothing` if not required.
+- **`DsDq::Matrix{Float64}`** -> An **optional** matrix of variable size. `DsDq` should be of shape (nv, nsensordata). Can set to `nothing` if not required.
+- **`DsDv::Matrix{Float64}`** -> An **optional** matrix of variable size. `DsDv` should be of shape (nv, nsensordata). Can set to `nothing` if not required.
+- **`DsDa::Matrix{Float64}`** -> An **optional** matrix of variable size. `DsDa` should be of shape (nv, nsensordata). Can set to `nothing` if not required.
+- **`DmDq::Matrix{Float64}`** -> An **optional** matrix of variable size. `DmDq` should be of shape (nv, nM). Can set to `nothing` if not required.
 
 """
 function mjd_inverseFD(
@@ -3075,18 +2718,10 @@ end
 Derivatives of mju_subQuat.
 
 # Arguments
-- **`qa::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`qb::Vector{Float64}`** -> A vector of variable size. Check additional info for sizes. Constant.
-- **`Da::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-- **`Db::Matrix{Float64}`** -> A matrix of variable size. Check additional info for sizes.
-
-# Additional Info
-- qa should be a vector, not a matrix.
-- qb should be a vector, not a matrix.
-- qa must have size 4
-- qb must have size 4
-- Da must have size 9
-- Db must have size 9
+- **`qa::Vector{Float64}`** -> A vector of variable size. `qa` should be a vector, not a matrix. `qa` must have size 4. Constant.
+- **`qb::Vector{Float64}`** -> A vector of variable size. `qb` should be a vector, not a matrix. `qb` must have size 4. Constant.
+- **`Da::Matrix{Float64}`** -> An **optional** matrix of variable size. `Da` must have size 9. Can set to `nothing` if not required.
+- **`Db::Matrix{Float64}`** -> An **optional** matrix of variable size. `Db` must have size 9. Can set to `nothing` if not required.
 
 """
 function mjd_subQuat(
