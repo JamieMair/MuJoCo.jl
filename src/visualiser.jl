@@ -41,7 +41,7 @@ end
 function test_visualiser end
 
 """
-    visualise!(m::Model, d::Data; controller=nothing, trajectories=nothing)
+    visualise!(m::Model, d::Data; controller=nothing, trajectories=nothing, resolution=nothing)
 
 Starts an interactive visualization of a MuJoCo model specified by an instance of `Model` and `Data`.
 
@@ -58,6 +58,8 @@ Press `F1` for help after running the visualiser to print the available mouse/bu
 - `controller`: a callback function with the signature `controller(m, d)`, called at each timestep, that applies a control input to the system (or does any other operation you like).
 
 - `trajectories`: a single trajectory or `Vector` of trajectories, where each trajectory is an `AbstractMatrix` of states with size `(nx, T)` where `nx = model.nq + model.nv + model.na` and `T` is the length of the trajectory. Note that each trajectory can have a different length.
+
+- `resolution`: a specific initial window resolution, useful for recording videos. Set this to nothing to use default value of 2/3s of the screen size.
 
 # Examples
 
