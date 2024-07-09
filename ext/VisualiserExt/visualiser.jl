@@ -3,14 +3,23 @@
 function MuJoCo.Visualiser.visualise!(
     m::Model, d::Data; 
     controller = nothing, 
-    trajectories = nothing
+    trajectories = nothing,
+    resolution::Union{Tuple{Integer, Integer}, Nothing} = nothing
 )
     modes = EngineMode[]
     !isnothing(controller) && push!(modes, Controller(controller))
     !isnothing(trajectories) && push!(modes, Trajectory(trajectories))
     push!(modes, PassiveDynamics())
 
-    run!(Engine(default_windowsize(), m, d, Tuple(modes)))
+    window_size = if isnothing(resolution)
+        default_windowsize()
+    else
+        @assert resolution[1] > 0 "Width of resolution should be greater than 0."
+        @assert resolution[2] > 0 "Height of resolution should be greater than 0."
+        resolution
+    end
+
+    run!(Engine(window_size, m, d, Tuple(modes)))
     return nothing
 end
 

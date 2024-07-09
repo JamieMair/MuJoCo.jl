@@ -398,50 +398,103 @@ function convert_argument_from_info(info, pre_body_buffer::IOBuffer)
     return info.identifier
 end
 
-function extract_constraints(fn_body)
+
+function get_argument_constraints(fn_body, arg_infos)
     type_error = r"""throw\(ArgumentError\(\n?"(.*)"\)\)"""
 
-    return map(eachmatch(type_error, fn_body)) do m
-        m.captures[begin]
+    pure_constraints = unique(map(eachmatch(type_error, fn_body)) do m
+        strip(m.captures[begin], Set(('.', ' ')))
+    end)
+
+    parameter_constraints = map(arg_infos) do i
+        _regex = Regex("\\s$(i.identifier)[\\s.]")
+        constraints = map(pure_constraints) do c
+            c_with_space = " " * c
+            m = match(_regex, c_with_space)
+            isnothing(m) && return nothing
+            return strip(replace(c_with_space, _regex => " `$(i.identifier)` "))
+        end
+
+        return (i.identifier) => [c for c in constraints if !isnothing(c)]
     end
+
+    constraint_info = Dict(parameter_constraints...)
+
+    return constraint_info
 end
 
-function argument_doc_description(arg_info)
-    if arg_info.type == :basic
-        return "- **`$(arg_info.identifier)::$(arg_info.datatype)`**"
-    elseif arg_info.type == :string
-        return "- **`$(arg_info.identifier)::String`**" * (arg_info.is_const ? " -> Constant." : "")
-    elseif arg_info.type == :mjModel
-        return "- **`$(arg_info.identifier)::Model`**" * (arg_info.is_const ? " -> Constant." : "")
-    elseif arg_info.type == :mjData
-        return "- **`$(arg_info.identifier)::Data`**" * (arg_info.is_const ? " -> Constant." : "")
-    elseif arg_info.type == :anomalous_vector
-        opt = arg_info.is_optional ? "An optional" : "A"
-        if arg_info.is_dynamic_size
-            return "- **`$(arg_info.identifier)::Vector{$(arg_info.datatype)}`** -> $opt vector of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
-        else
-            return "- **`$(arg_info.identifier)::Vector{$(arg_info.datatype)}`** -> $opt vector of size $(arg_info.size_vector)." * (arg_info.is_inner_const ? " Constant." : "")
+function argument_doc_description(arg_info, constraints)
+
+    constrain_text = join(constraints, ". ")
+    if length(constrain_text) > 0
+        constrain_text = " $constrain_text." # Add a space to the front and full stop at end
+    end
+
+    function construct_argdoc(identifier, type, is_const = false, description = "", pre_const_extra = "")
+        x = "- **`$(identifier)::$(type)`**"
+        if is_const || length(constrain_text) > 0 || length(description) > 0 || length(pre_const_extra) > 0
+            x *= " ->"
         end
-    elseif arg_info.type == :variable_vector
-        opt = arg_info.is_optional ? "An optional" : "A"
-        return "- **`$(arg_info.identifier)::Vector{$(arg_info.datatype)}`** -> $opt vector of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+
+        if length(description) > 0
+            x *= " " * description
+        end
+        if length(constrain_text) > 0
+            x *= constrain_text
+        end
+        if length(pre_const_extra) > 0
+            x *= pre_const_extra
+        end
+        if is_const
+            x *= " Constant."
+        end
+
+        return x
+    end
+
+    if arg_info.type == :basic
+        return construct_argdoc(arg_info.identifier, arg_info.datatype)
+    elseif arg_info.type == :string
+        return construct_argdoc(arg_info.identifier, "String", arg_info.is_const)
+    elseif arg_info.type == :mjModel
+        return construct_argdoc(arg_info.identifier, "Model", arg_info.is_const)
+    elseif arg_info.type == :mjData
+        return construct_argdoc(arg_info.identifier, "Data", arg_info.is_const)
     elseif arg_info.type == :static_array
-        return "- **`$(arg_info.identifier)::Vector{$(arg_info.datatype)}`** -> A vector of size $(arg_info.array_size)." * (arg_info.is_const ? " Constant." : "")
+        desc = "A vector of size $(arg_info.array_size)."
+        return construct_argdoc(arg_info.identifier, "Vector{$(arg_info.datatype)}", arg_info.is_const, desc)
+    end
+    
+    opt = arg_info.is_optional ? "An **optional**" : "A"
+    opt_end = arg_info.is_optional ? " Can set to `nothing` if not required." : ""
+
+    if arg_info.type == :anomalous_vector
+        desc = if arg_info.is_dynamic_size
+            "$opt vector of variable size."
+        else
+            "$opt vector of size $(arg_info.size_vector)."
+        end
+        return construct_argdoc(arg_info.identifier, "Vector{$(arg_info.datatype)}", arg_info.is_inner_const, desc, opt_end)
+    elseif arg_info.type == :variable_vector
+        desc = "$opt vector of variable size."
+        return construct_argdoc(arg_info.identifier, "Vector{$(arg_info.datatype)}", arg_info.is_inner_const, desc, opt_end)
     elseif arg_info.type == :matrix
-        return "- **`$(arg_info.identifier)::Matrix{$(arg_info.datatype)}`** -> A matrix of variable size. Check additional info for sizes." * (arg_info.is_inner_const ? " Constant." : "")
+        desc = "$opt matrix of variable size."
+        return construct_argdoc(arg_info.identifier, "Matrix{$(arg_info.datatype)}", arg_info.is_inner_const, desc, opt_end)
     else
         error("Unrecognised argument info for variable $(arg_info)")
     end
 end
 
-function write_argument_doc_description!(io, argument_infos)
+function write_argument_doc_description!(io, argument_infos, constraint_infos)
     if length(argument_infos) == 0
         return
     end
 
     println(io, "# Arguments")
     for arg_info in argument_infos
-        println(io, argument_doc_description(arg_info))
+        constraints = constraint_infos[arg_info.identifier]
+        println(io, argument_doc_description(arg_info, constraints))
     end
     nothing
 end
@@ -465,18 +518,11 @@ function create_wrapped_docstring(fn_name, fn_body, argument_infos)
         println(io, line)
     end
 
-    write_argument_doc_description!(io, argument_infos)
+    constraint_info = get_argument_constraints(fn_body, argument_infos)
 
-    constraints = extract_constraints(fn_body)
-    if length(constraints) > 0
-        write(io, "\n# Additional Info\n")
-        for constraint in constraints
-            write(io, "- ")
-            write(io, constraint)
-            write(io, "\n")
-        end
-        write(io, "\n")
-    end
+    write_argument_doc_description!(io, argument_infos, constraint_info)
+    
+    write(io, "\n")
 
     write(io, "\"\"\"\n")
 
