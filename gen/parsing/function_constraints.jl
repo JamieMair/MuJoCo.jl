@@ -423,14 +423,6 @@ function get_argument_constraints(fn_body, arg_infos)
     return constraint_info
 end
 
-function extract_constraints(fn_body)
-    type_error = r"""throw\(ArgumentError\(\n?"(.*)"\)\)"""
-
-    return map(eachmatch(type_error, fn_body)) do m
-        m.captures[begin]
-    end
-end
-
 function argument_doc_description(arg_info, constraints)
 
     constrain_text = join(constraints, ". ")
@@ -531,17 +523,6 @@ function create_wrapped_docstring(fn_name, fn_body, argument_infos)
     write_argument_doc_description!(io, argument_infos, constraint_info)
     
     write(io, "\n")
-
-    # constraints = extract_constraints(fn_body)
-    # if length(constraints) > 0
-    #     write(io, "\n# Additional Info\n")
-    #     for constraint in constraints
-    #         write(io, "- ")
-    #         write(io, constraint)
-    #         write(io, "\n")
-    #     end
-    #     write(io, "\n")
-    # end
 
     write(io, "\"\"\"\n")
 
