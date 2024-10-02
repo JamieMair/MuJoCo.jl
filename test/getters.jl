@@ -96,3 +96,10 @@ end
         end
     end
 end
+
+@testitem "Manually setting time variable in data struct" begin
+    using MuJoCo
+    model, data = MuJoCo.sample_model_and_data()
+    data.time = 10.0
+    @test data.time == 10.0
+end

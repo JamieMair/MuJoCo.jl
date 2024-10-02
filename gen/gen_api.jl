@@ -184,7 +184,6 @@ end
 function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
     struct_to_new_symbol_mapping = Dict(Base.getglobal(LibMuJoCo, sn) => s for (sn, s) in all_wrappers)
     set_property_lines = Expr[]
-    offset = 0
 
     # Add a local variable for the internal pointer
     push!(set_property_lines, Expr(:(=), :internal_pointer, Expr(:call, :getfield, :x, QuoteNode(:internal_pointer))))
@@ -194,10 +193,12 @@ function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
     pointer_field_symbols = Symbol[]
     array_field_symbols = Symbol[]
 
-    for (fname, ftype) in zip(fieldnames(mj_struct), fieldtypes(mj_struct))
+    for (foffset, fname, ftype) in structinfo(mj_struct)
         @assert fname != :internal_pointer "Struct field cannot be accessed as it conflicts with an internal name."
         cmp_expr = Expr(:call, :(===), :f, QuoteNode(fname))
 
+        foffset = Int64(foffset) # convert to Int64 for readability
+        
         set_block = if ftype <: Ptr
             push!(pointer_field_symbols, fname)
             continue
@@ -205,7 +206,7 @@ function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
             push!(array_field_symbols, fname)
             continue
         else
-            ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, offset))
+            ptr_expr = Expr(:call, Expr(:curly, :Ptr, ftype), Expr(:call, :+, :internal_pointer, foffset))
             convert_expr = Expr(:call, :convert, ftype, :value)
             local_var_expr = Expr(:(=), :cvalue, convert_expr)
             store_expr = Expr(:call, :unsafe_store!, ptr_expr, :cvalue)
@@ -213,8 +214,6 @@ function generate_setproperty_fn(mj_struct, new_name::Symbol, all_wrappers)
             Expr(:block, local_var_expr, store_expr, return_expr)
         end
         push!(set_property_lines, Expr(:if, cmp_expr, set_block))
-
-        offset += sizeof(ftype)
     end
 
     if length(array_field_symbols) > 0
