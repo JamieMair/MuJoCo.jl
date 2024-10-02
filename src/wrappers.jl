@@ -109,82 +109,82 @@ function Base.setproperty!(x::Options, f::Symbol, value)
     end
     if f === :density
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 56), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 128), cvalue)
         return cvalue
     end
     if f === :viscosity
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 64), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 136), cvalue)
         return cvalue
     end
     if f === :o_margin
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 72), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 144), cvalue)
         return cvalue
     end
     if f === :integrator
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 80), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 248), cvalue)
         return cvalue
     end
     if f === :cone
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 252), cvalue)
         return cvalue
     end
     if f === :jacobian
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 256), cvalue)
         return cvalue
     end
     if f === :solver
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 92), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 260), cvalue)
         return cvalue
     end
     if f === :iterations
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 96), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 264), cvalue)
         return cvalue
     end
     if f === :ls_iterations
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 100), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 268), cvalue)
         return cvalue
     end
     if f === :noslip_iterations
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 104), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 272), cvalue)
         return cvalue
     end
     if f === :mpr_iterations
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 108), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 276), cvalue)
         return cvalue
     end
     if f === :disableflags
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 112), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 280), cvalue)
         return cvalue
     end
     if f === :enableflags
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 116), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 284), cvalue)
         return cvalue
     end
     if f === :disableactuator
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 120), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 288), cvalue)
         return cvalue
     end
     if f === :sdf_initpoints
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 124), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 292), cvalue)
         return cvalue
     end
     if f === :sdf_iterations
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 128), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 296), cvalue)
         return cvalue
     end
     if f in (:gravity, :wind, :magnetic, :o_solref, :o_solimp, :o_friction)
@@ -6188,87 +6188,87 @@ function Base.setproperty!(x::Data, f::Symbol, value)
     end
     if f === :pstack
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 20), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 24), cvalue)
         return cvalue
     end
     if f === :pbase
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 28), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 32), cvalue)
         return cvalue
     end
     if f === :parena
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 36), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 40), cvalue)
         return cvalue
     end
     if f === :maxuse_stack
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 44), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 48), cvalue)
         return cvalue
     end
     if f === :maxuse_arena
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 52), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 1080), cvalue)
         return cvalue
     end
     if f === :maxuse_con
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 60), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 1088), cvalue)
         return cvalue
     end
     if f === :maxuse_efc
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 64), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 1092), cvalue)
         return cvalue
     end
     if f === :solver_nisland
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 68), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 161400), cvalue)
         return cvalue
     end
     if f === :ne
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 72), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 161584), cvalue)
         return cvalue
     end
     if f === :nf
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 76), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 161588), cvalue)
         return cvalue
     end
     if f === :nl
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 80), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 161592), cvalue)
         return cvalue
     end
     if f === :nefc
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 161596), cvalue)
         return cvalue
     end
     if f === :nnzJ
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 161600), cvalue)
         return cvalue
     end
     if f === :ncon
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 92), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 161604), cvalue)
         return cvalue
     end
     if f === :nisland
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 96), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 161608), cvalue)
         return cvalue
     end
     if f === :time
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 100), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 161616), cvalue)
         return cvalue
     end
     if f === :threadpool
         cvalue = convert(UInt64, value)
-        unsafe_store!(Ptr{UInt64}(internal_pointer + 108), cvalue)
+        unsafe_store!(Ptr{UInt64}(internal_pointer + 162704), cvalue)
         return cvalue
     end
     if f in (:maxuse_threadstack, :warning, :timer, :solver, :solver_niter, :solver_nnz, :solver_fwdinv, :energy)
@@ -6311,7 +6311,7 @@ function show_docs(::Type{Data}, property_name::Symbol)
     property_name === :time && return println("Data.time: simulation time")
     property_name === :energy && return println("Data.energy: potential, kinetic energy")
     property_name === :buffer && return println("Data.buffer: main buffer; all pointers point in it (nbuffer bytes)")
-    property_name === :arena && return println("Data.arena: arena+stack buffer (narena bytes)")
+    property_name === :arena && return println("Data.arena: arena+stack buffer (nstack*sizeof(mjtNum) bytes)")
     property_name === :qpos && return println("Data.qpos: position (nq x 1)")
     property_name === :qvel && return println("Data.qvel: velocity (nv x 1)")
     property_name === :act && return println("Data.act: actuator activation (na x 1)")

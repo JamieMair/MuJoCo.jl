@@ -165,187 +165,187 @@ function Base.setproperty!(x::RendererContext, f::Symbol, value)
     end
     if f === :shadowSize
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 20), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 36), cvalue)
         return cvalue
     end
     if f === :offWidth
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 24), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 40), cvalue)
         return cvalue
     end
     if f === :offHeight
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 28), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 44), cvalue)
         return cvalue
     end
     if f === :offSamples
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 32), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 48), cvalue)
         return cvalue
     end
     if f === :fontScale
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 36), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 52), cvalue)
         return cvalue
     end
     if f === :offFBO
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 40), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 176), cvalue)
         return cvalue
     end
     if f === :offFBO_r
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 44), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 180), cvalue)
         return cvalue
     end
     if f === :offColor
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 48), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 184), cvalue)
         return cvalue
     end
     if f === :offColor_r
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 52), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 188), cvalue)
         return cvalue
     end
     if f === :offDepthStencil
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 56), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 192), cvalue)
         return cvalue
     end
     if f === :offDepthStencil_r
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 60), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 196), cvalue)
         return cvalue
     end
     if f === :shadowFBO
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 64), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 200), cvalue)
         return cvalue
     end
     if f === :shadowTex
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 68), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 204), cvalue)
         return cvalue
     end
     if f === :ntexture
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 72), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 368), cvalue)
         return cvalue
     end
     if f === :basePlane
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 76), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 1172), cvalue)
         return cvalue
     end
     if f === :baseMesh
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 80), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 1176), cvalue)
         return cvalue
     end
     if f === :baseHField
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 84), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 1180), cvalue)
         return cvalue
     end
     if f === :baseBuiltin
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 88), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 1184), cvalue)
         return cvalue
     end
     if f === :baseFontNormal
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 92), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 1188), cvalue)
         return cvalue
     end
     if f === :baseFontShadow
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 96), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 1192), cvalue)
         return cvalue
     end
     if f === :baseFontBig
         cvalue = convert(UInt32, value)
-        unsafe_store!(Ptr{UInt32}(internal_pointer + 100), cvalue)
+        unsafe_store!(Ptr{UInt32}(internal_pointer + 1196), cvalue)
         return cvalue
     end
     if f === :rangePlane
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 104), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 1200), cvalue)
         return cvalue
     end
     if f === :rangeMesh
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 108), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 1204), cvalue)
         return cvalue
     end
     if f === :rangeHField
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 112), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 1208), cvalue)
         return cvalue
     end
     if f === :rangeBuiltin
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 116), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 1212), cvalue)
         return cvalue
     end
     if f === :rangeFont
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 120), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 1216), cvalue)
         return cvalue
     end
     if f === :nskin
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 124), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 1220), cvalue)
         return cvalue
     end
     if f === :charHeight
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 128), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2272), cvalue)
         return cvalue
     end
     if f === :charHeightBig
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 132), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2276), cvalue)
         return cvalue
     end
     if f === :glInitialized
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 136), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2280), cvalue)
         return cvalue
     end
     if f === :windowAvailable
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 140), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2284), cvalue)
         return cvalue
     end
     if f === :windowSamples
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 144), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2288), cvalue)
         return cvalue
     end
     if f === :windowStereo
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 148), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2292), cvalue)
         return cvalue
     end
     if f === :windowDoublebuffer
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 152), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2296), cvalue)
         return cvalue
     end
     if f === :currentBuffer
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 156), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2300), cvalue)
         return cvalue
     end
     if f === :readPixelFormat
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 160), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2304), cvalue)
         return cvalue
     end
     if f === :readDepthMap
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 164), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 2308), cvalue)
         return cvalue
     end
     if f in (:fogRGBA, :auxWidth, :auxHeight, :auxSamples, :auxFBO, :auxFBO_r, :auxColor, :auxColor_r, :textureType, :texture, :charWidth, :charWidthBig)
@@ -394,12 +394,12 @@ function Base.setproperty!(x::VisualiserOption, f::Symbol, value)
     end
     if f === :bvh_depth
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 84), cvalue)
         return cvalue
     end
     if f === :flex_layer
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 12), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 88), cvalue)
         return cvalue
     end
     if f in (:geomgroup, :sitegroup, :jointgroup, :tendongroup, :actuatorgroup, :flexgroup, :skingroup, :flags)
@@ -445,17 +445,17 @@ function Base.setproperty!(x::VisualiserCamera, f::Symbol, value)
     end
     if f === :distance
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 12), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 40), cvalue)
         return cvalue
     end
     if f === :azimuth
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 20), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 48), cvalue)
         return cvalue
     end
     if f === :elevation
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 28), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 56), cvalue)
         return cvalue
     end
     if f in (:lookat,)
@@ -517,52 +517,52 @@ function Base.setproperty!(x::VisualiserFigure, f::Symbol, value)
     end
     if f === :flg_extend
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 4), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 12), cvalue)
         return cvalue
     end
     if f === :flg_barplot
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 16), cvalue)
         return cvalue
     end
     if f === :flg_selection
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 12), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 20), cvalue)
         return cvalue
     end
     if f === :flg_symmetric
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 16), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 24), cvalue)
         return cvalue
     end
     if f === :linewidth
         cvalue = convert(Float32, value)
-        unsafe_store!(Ptr{Float32}(internal_pointer + 20), cvalue)
+        unsafe_store!(Ptr{Float32}(internal_pointer + 28), cvalue)
         return cvalue
     end
     if f === :gridwidth
         cvalue = convert(Float32, value)
-        unsafe_store!(Ptr{Float32}(internal_pointer + 24), cvalue)
+        unsafe_store!(Ptr{Float32}(internal_pointer + 32), cvalue)
         return cvalue
     end
     if f === :legendoffset
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 28), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 12492), cvalue)
         return cvalue
     end
     if f === :subplot
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 32), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 12496), cvalue)
         return cvalue
     end
     if f === :highlightid
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 36), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 12508), cvalue)
         return cvalue
     end
     if f === :selection
         cvalue = convert(Float32, value)
-        unsafe_store!(Ptr{Float32}(internal_pointer + 40), cvalue)
+        unsafe_store!(Ptr{Float32}(internal_pointer + 12512), cvalue)
         return cvalue
     end
     if f in (:flg_ticklabel, :gridsize, :gridrgb, :figurergba, :panergba, :legendrgba, :textrgb, :linergb, :range, :xformat, :yformat, :minwidth, :title, :xlabel, :linename, :highlight, :linepnt, :linedata, :xaxispixel, :yaxispixel, :xaxisdata, :yaxisdata)
@@ -622,12 +622,12 @@ function Base.setproperty!(x::VisualiserPerturb, f::Symbol, value)
     end
     if f === :localmass
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 20), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 128), cvalue)
         return cvalue
     end
     if f === :scale
         cvalue = convert(Float64, value)
-        unsafe_store!(Ptr{Float64}(internal_pointer + 28), cvalue)
+        unsafe_store!(Ptr{Float64}(internal_pointer + 136), cvalue)
         return cvalue
     end
     if f in (:refpos, :refquat, :refselpos, :localpos)
@@ -699,57 +699,57 @@ function Base.setproperty!(x::VisualiserScene, f::Symbol, value)
     end
     if f === :nflex
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 8), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 24), cvalue)
         return cvalue
     end
     if f === :flexvertopt
         cvalue = convert(UInt8, value)
-        unsafe_store!(Ptr{UInt8}(internal_pointer + 12), cvalue)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 128), cvalue)
         return cvalue
     end
     if f === :flexedgeopt
         cvalue = convert(UInt8, value)
-        unsafe_store!(Ptr{UInt8}(internal_pointer + 13), cvalue)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 129), cvalue)
         return cvalue
     end
     if f === :flexfaceopt
         cvalue = convert(UInt8, value)
-        unsafe_store!(Ptr{UInt8}(internal_pointer + 14), cvalue)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 130), cvalue)
         return cvalue
     end
     if f === :flexskinopt
         cvalue = convert(UInt8, value)
-        unsafe_store!(Ptr{UInt8}(internal_pointer + 15), cvalue)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 131), cvalue)
         return cvalue
     end
     if f === :nskin
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 16), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 132), cvalue)
         return cvalue
     end
     if f === :nlight
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 20), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 176), cvalue)
         return cvalue
     end
     if f === :enabletransform
         cvalue = convert(UInt8, value)
-        unsafe_store!(Ptr{UInt8}(internal_pointer + 24), cvalue)
+        unsafe_store!(Ptr{UInt8}(internal_pointer + 9100), cvalue)
         return cvalue
     end
     if f === :scale
         cvalue = convert(Float32, value)
-        unsafe_store!(Ptr{Float32}(internal_pointer + 25), cvalue)
+        unsafe_store!(Ptr{Float32}(internal_pointer + 9132), cvalue)
         return cvalue
     end
     if f === :stereo
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 29), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 9136), cvalue)
         return cvalue
     end
     if f === :framewidth
         cvalue = convert(Int32, value)
-        unsafe_store!(Ptr{Int32}(internal_pointer + 33), cvalue)
+        unsafe_store!(Ptr{Int32}(internal_pointer + 9152), cvalue)
         return cvalue
     end
     if f in (:lights, :camera, :translate, :rotate, :flags, :framergb)
