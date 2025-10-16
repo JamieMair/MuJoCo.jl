@@ -27,6 +27,9 @@ module Wrappers
     include("visualiser_wrappers.jl")
     include("named_access.jl")    
     using .NamedAccess
+
+    # Fix for https://github.com/JamieMair/MuJoCo.jl/issues/120
+    Base.transpose(x::LibMuJoCo.mjContact_) = x
 end
 using .Wrappers
 using .Wrappers.NamedAccess
