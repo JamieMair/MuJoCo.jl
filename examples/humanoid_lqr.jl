@@ -42,7 +42,7 @@ height = heights[argmin(abs.(u_vert))]
 # Plot the relationship just to see - compare force to weight of humanoid
 weight = sum(model.body_mass) * norm(model.opt.gravity)
 
-fig = Figure(resolution=(600,400))
+fig = Figure(size=(600,400))
 ax = Axis(fig[1,1], xlabel="Vertical offsets (mm)", ylabel="Vertical force (N)")
 lines!(ax, heights*1000, u_vert)
 lines!(ax, heights*1000, weight*ones(length(heights)), linestyle=:dash)

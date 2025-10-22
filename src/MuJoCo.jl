@@ -9,7 +9,7 @@ using .LibMuJoCo
 # Re-export non polluting symbols of LibMuJoCo
 begin
     exported_prefixes = ["mj_", "mju_", "mjv_", "mjr_", "mjui_", "mjd_", "mjp_", "mjr", "mjt"]
-    for name in names(LibMuJoCo; all = true)
+    for name in names(LibMuJoCo; all=true)
         name_str = string(name)
         if any(startswith(name_str, prefix) for prefix in exported_prefixes) && !endswith(name_str, "_")
             @eval export $name
@@ -21,15 +21,15 @@ include("carray.jl")
 export mj_array, mj_zeros
 
 module Wrappers
-    using ..LibMuJoCo
-    import ..Utils
-    include("wrappers.jl")
-    include("visualiser_wrappers.jl")
-    include("named_access.jl")    
-    using .NamedAccess
+using ..LibMuJoCo
+import ..Utils
+include("wrappers.jl")
+include("visualiser_wrappers.jl")
+include("named_access.jl")
+using .NamedAccess
 
-    # Fix for https://github.com/JamieMair/MuJoCo.jl/issues/120
-    Base.transpose(x::LibMuJoCo.mjContact_) = x
+# Fix for https://github.com/JamieMair/MuJoCo.jl/issues/120
+Base.transpose(x::LibMuJoCo.mjContact_) = x
 end
 using .Wrappers
 using .Wrappers.NamedAccess
@@ -78,8 +78,8 @@ export Model, Data
 
 include("visualiser.jl")
 
-const MODEL_TYPES = Union{Model, NamedAccess.NamedModel}
-const DATA_TYPES = Union{Data, NamedAccess.NamedData}
+const MODEL_TYPES = Union{Model,NamedAccess.NamedModel}
+const DATA_TYPES = Union{Data,NamedAccess.NamedData}
 
 import .Visualiser: visualise!
 
@@ -160,7 +160,7 @@ Resets the data struct to values in the supplied keyframe.
     
 If no keyframe is specified, the first keyframe is used. The keyframe is a 1-based index into the list supplied by the model's specification.
 """
-resetkey!(m::Model, d::Data, keyframe::Integer) = mj_resetDataKeyframe(m, d, keyframe-1)
+resetkey!(m::Model, d::Data, keyframe::Integer) = mj_resetDataKeyframe(m, d, keyframe - 1)
 
 """
     timestep(model::MODEL_TYPES)
@@ -180,7 +180,7 @@ The state vector is [joint positions, joint velocities, actuator states] with di
 See also [`mj_getState`](@ref) and [`set_physics_state!`](@ref).
 """
 function get_physics_state(m::Model, d::Data)
-    x = mj_zeros(m.nq+m.nv+m.na)
+    x = mj_zeros(m.nq + m.nv + m.na)
     mj_getState(m, d, x, Int(LibMuJoCo.mjSTATE_PHYSICS))
     return transpose(x)
 end
@@ -217,12 +217,11 @@ the visualisation features, or run "install_visualiser()".
 - FFMPEG
 - GLFW
 - Observables
-- PrettyTables
 - Printf
 - StaticArrays
 """
 function init_visualiser()
-    @eval Main using BangBang, FFMPEG, GLFW, Observables, PrettyTables, Printf, StaticArrays
+    @eval Main using BangBang, FFMPEG, GLFW, Observables, Printf, StaticArrays
     if isdefined(Base, :get_extension)
         @eval Main Base.retry_load_extensions()
     end
@@ -239,27 +238,26 @@ into the current running environment.
 - FFMPEG
 - GLFW
 - Observables
-- PrettyTables
 - Printf
 - StaticArrays
 """
 function install_visualiser()
     @eval Main import Pkg
-    @eval Main Pkg.add(["BangBang", "FFMPEG", "GLFW", "Observables", "PrettyTables", "Printf", "StaticArrays"])
+    @eval Main Pkg.add(["BangBang", "FFMPEG", "GLFW", "Observables", "Printf", "StaticArrays"])
 end
 
 @static if !isdefined(Base, :get_extension)
-function __init__()
-    @static if !isdefined(Base, :get_extension)
-        @require BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66" begin 
-            @require FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a" begin
-                @require GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98" begin
-                    @require Observables = "510215fc-4207-5dde-b226-833fc4488ee2" begin
-                        @require PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d" begin
+    function __init__()
+        @static if !isdefined(Base, :get_extension)
+            @require BangBang = "198e06fe-97b7-11e9-32a5-e1d131e6ad66" begin
+                @require FFMPEG = "c87230d0-a227-11e9-1b43-d7ebe4e7570a" begin
+                    @require GLFW = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98" begin
+                        @require Observables = "510215fc-4207-5dde-b226-833fc4488ee2" begin
                             @require Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7" begin
                                 @require StaticArrays = "90137ffa-7385-5640-81b9-e52037218182" begin
                                     include("../ext/VisualiserExt/VisualiserExt.jl")
                                 end
+
                             end
                         end
                     end
@@ -267,7 +265,6 @@ function __init__()
             end
         end
     end
-end
 end
 
 end

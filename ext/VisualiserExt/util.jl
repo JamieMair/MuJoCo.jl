@@ -43,9 +43,9 @@ function startffmpeg(w::Integer, h::Integer, rout::Integer; squashoutput::Bool =
     FFMPEG.@ffmpeg_env begin
         indata = Base.PipeEndpoint()
         if squashoutput
-            p = Base._spawn(`$(FFMPEG.ffmpeg) $arg`, Base.SpawnIO[indata, devnull, devnull])
+            p = Base._spawn(`$(FFMPEG.ffmpeg) $arg`, Base.Redirectable[indata, devnull, devnull])
         else
-            p = Base._spawn(`$(FFMPEG.ffmpeg) $arg`, Base.SpawnIO[indata, stdout, stderr])
+            p = Base._spawn(`$(FFMPEG.ffmpeg) $arg`, Base.Redirectable[indata, stdout, stderr])
         end
         p.in = indata
         return p, dst

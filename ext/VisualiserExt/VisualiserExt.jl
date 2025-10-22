@@ -17,7 +17,6 @@ if isdefined(Base, :get_extension)
     using FFMPEG
     using GLFW: GLFW, Window, Key, Action, MouseButton, GetKey, RELEASE, PRESS, REPEAT
     using Observables: Observable, on, off
-    using PrettyTables: pretty_table
     using Printf: @printf
     using StaticArrays
     using UnsafeArrays: UnsafeArray
@@ -33,7 +32,6 @@ else
     using ..FFMPEG
     using ..GLFW: GLFW, Window, Key, Action, MouseButton, GetKey, RELEASE, PRESS, REPEAT
     using ..Observables: Observable, on, off
-    using ..PrettyTables: pretty_table
     using ..Printf: @printf
     using ..StaticArrays
     using ..UnsafeArrays: UnsafeArray
