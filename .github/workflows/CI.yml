@@ -19,7 +19,7 @@ jobs:
       matrix:
         version:
           - '1.10'
-          - 'nightly'
+          - '1.12'
         os:
           - macos-13 # only for x86_64
           - macos-latest # only for aarch64
@@ -50,8 +50,7 @@ jobs:
       fail-fast: true
       matrix:
         version:
-          - '1.6'
-          - 'nightly'
+          - '1.10'
         os:
           - ubuntu-latest
         arch:
