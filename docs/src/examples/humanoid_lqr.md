@@ -74,7 +74,7 @@ heights_mm = heights .* 1000
 # Compare force to weight of humanoid
 weight = sum(model.body_mass) * norm(model.opt.gravity)
 
-fig = Figure(resolution=(500,300))
+fig = Figure(size=(500,300))
 ax = Axis(fig[1,1], xlabel="Vertical offset (mm)", ylabel="Vertical force (N)")
 lines!(ax, heights_mm, u_vert, label="Vertical force")
 lines!(ax, heights_mm, weight*ones(length(heights)), linestyle=:dash, label="Weight")
