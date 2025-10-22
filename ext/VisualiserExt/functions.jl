@@ -97,8 +97,8 @@ function writedescription!(io, hs::Union{Vector{EventHandler},Vector{<:NamedTupl
         
         w1 = min(w1max, div(ncols, 2))
         w2 = min(w2max, ncols - w1 - 4 * length(header)) # each column is padded by 4 spaces
-        pretty_table(
-            io, hcat(whens, whats); 
+        custom_pretty_table(
+            io, whens, whats,
             header=["Command", "Description"],
             alignment = [:c, :l],
             linebreaks = true, 
@@ -211,4 +211,131 @@ function setpause!(ui::UIState, p::PhysicsState, status::Bool)
     status ? stop!(p.timer) : start!(p.timer)
     ui.paused = status
     return ui
+end
+
+"""
+    custom_pretty_table(io, col1, col2; header=nothing, alignment=nothing, columns_width=nothing, kwargs...)
+
+Custom implementation of pretty_table for backwards compatibility.
+This function handles two-column tables with proper alignment and truncation.
+Takes two vectors as input for the columns.
+"""
+function custom_pretty_table(io::IO, col1::AbstractVector, col2::AbstractVector; 
+                            header=nothing, 
+                            alignment=nothing, 
+                            columns_width=nothing, 
+                            linebreaks=false, 
+                            autowrap=false, 
+                            kwargs...)
+    
+    # Ensure both columns have the same length
+    if length(col1) != length(col2)
+        error("custom_pretty_table requires both column vectors to have the same length")
+    end
+    
+    nrows = length(col1)
+    
+    # Set default column widths if not provided
+    if columns_width === nothing
+        _, terminal_cols = get_terminalsize()
+        # Reserve space for separators and padding: " | " = 3 chars
+        available_width = terminal_cols - 3
+        columns_width = [div(available_width, 2), div(available_width, 2)]
+    end
+    
+    w1, w2 = columns_width
+    
+    # Set default alignment if not provided
+    if alignment === nothing
+        alignment = [:l, :l]  # left align both columns by default
+    end
+    
+    # Helper function to truncate text to fit width
+    function truncate_text(text::AbstractString, width::Int)
+        if length(text) <= width
+            return text
+        else
+            return text[1:max(1, width-3)] * "..."
+        end
+    end
+    
+    # Helper function to wrap text
+    function wrap_text(text::AbstractString, width::Int)
+        if !autowrap || length(text) <= width
+            return [truncate_text(text, width)]
+        end
+        
+        lines = String[]
+        remaining = string(text)
+        while length(remaining) > width
+            # Find a good break point (space or punctuation)
+            break_point = width
+            for i in min(width, length(remaining)):-1:max(1, width÷2)
+                if remaining[i] in [' ', '\t', '-', ',', '.', ';', ':', '!', '?']
+                    break_point = i
+                    break
+                end
+            end
+            
+            push!(lines, truncate_text(remaining[1:break_point], width))
+            remaining = lstrip(remaining[break_point+1:end])
+        end
+        if !isempty(remaining)
+            push!(lines, truncate_text(remaining, width))
+        end
+        return lines
+    end
+    
+    # Helper function to align text within a given width
+    function align_text(text::AbstractString, width::Int, align::Symbol)
+        text = truncate_text(text, width)
+        if align == :c || align == :center
+            padding = width - length(text)
+            left_pad = div(padding, 2)
+            right_pad = padding - left_pad
+            return " "^left_pad * text * " "^right_pad
+        elseif align == :r || align == :right
+            return lpad(text, width)
+        else  # :l or :left (default)
+            return rpad(text, width)
+        end
+    end
+    
+    # Print header if provided
+    if header !== nothing && length(header) >= 2
+        col1_header = align_text(string(header[1]), w1, alignment[1])
+        col2_header = align_text(string(header[2]), w2, alignment[2])
+        println(io, col1_header * " | " * col2_header)
+        
+        # Print separator line
+        sep1 = "-"^w1
+        sep2 = "-"^w2
+        println(io, sep1 * "-+-" * sep2)
+    end
+    
+    # Print data rows
+    for i in 1:nrows
+        col1_text = string(col1[i])
+        col2_text = string(col2[i])
+        
+        # Handle text wrapping
+        col1_lines = wrap_text(col1_text, w1)
+        col2_lines = wrap_text(col2_text, w2)
+        
+        # Determine the number of lines needed for this row
+        max_lines = max(length(col1_lines), length(col2_lines))
+        
+        # Print each line of the row
+        for line_idx in 1:max_lines
+            col1_line = line_idx <= length(col1_lines) ? col1_lines[line_idx] : ""
+            col2_line = line_idx <= length(col2_lines) ? col2_lines[line_idx] : ""
+            
+            col1_aligned = align_text(col1_line, w1, alignment[1])
+            col2_aligned = align_text(col2_line, w2, alignment[2])
+            
+            println(io, col1_aligned * " | " * col2_aligned)
+        end
+    end
+    
+    return nothing
 end
